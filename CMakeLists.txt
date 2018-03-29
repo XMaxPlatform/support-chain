@@ -108,6 +108,7 @@ ENDIF( WIN32 )
 
 add_subdirectory( foundation )
 add_subdirectory( libraries )
+add_subdirectory( virtualmachine )
 
 
 
