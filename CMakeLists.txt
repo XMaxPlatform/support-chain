@@ -1,10 +1,25 @@
 # Defines XMAX library target.
 project( Xmax )
-cmake_minimum_required( VERSION 3.11.0 )
-
+IF( WIN32 )
+    cmake_minimum_required( VERSION 3.11.0 )
+ELSE( WIN32)
+    cmake_minimum_required( VERSION 2.8.12 )
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
+            message(FATAL_ERROR "GCC version must be at least 4.8!")
+        endif()
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.3)
+            message(FATAL_ERROR "Clang version must be at least 3.3!")
+        endif()
+    endif()
+ENDIF(WIN32)
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)
 set(VERSION_PATCH 0)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libraries/fc/CMakeModules")
 
 set( BLOCKCHAIN_NAME "XMax" )
 set( CMAKE_CXX_STANDARD 14 )
@@ -42,11 +57,57 @@ IF( WIN32 )
 
 ELSE( WIN32 ) # Apple AND Linux
 
-	message( STATUS "TODO" )
+    find_library(READLINE_LIBRARIES NAMES readline)
+    find_path(READLINE_INCLUDE_DIR readline/readline.h)
+    #if(NOT READLINE_INCLUDE_DIR OR NOT READLINE_LIBRARIES)
+    #  MESSAGE(FATAL_ERROR "Could not find lib readline.")
+    #endif()
+
+    if( APPLE )
+        # Apple Specific Options Here
+        message( STATUS "Configuring XMax on OS X" )
+        #set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++14 -Wall -Wno-invalid-partial-specialization -Wno-deprecated-declarations" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++14 -Wall -Wno-deprecated-declarations" )
+    else( APPLE )
+        # Linux Specific Options Here
+        message( STATUS "Configuring XMax on Linux" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wall" )
+        set( rt_library rt )
+        set( pthread_library pthread)
+        if ( NOT DEFINED crypto_library )
+            # I'm not sure why this is here, I guess someone has openssl and can't detect it with find_package()?
+            # if you have a normal install, you can define crypto_library to the empty string to avoid a build error
+            set( crypto_library crypto)
+        endif ()
+        if ( FULL_STATIC_BUILD )
+            set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+        endif ( FULL_STATIC_BUILD )
+
+        if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+            if( CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.0.0 OR CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.0.0 )
+                set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-partial-specialization" )
+            endif()
+        endif()
+    endif( APPLE )
+
+    if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-builtin-memcmp" )
+    endif()
+
+    if( "${CMAKE_GENERATOR}" STREQUAL "Ninja" )
+        if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+            set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcolor-diagnostics" )
+        endif()
+    endif()
+
+    # based on http://www.delorie.com/gnu/docs/gdb/gdb_70.html
+    # uncomment this line to tell GDB about macros (slows compile times)
+    # set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -gdwarf-2 -g3" )
 
 ENDIF( WIN32 )
 
 add_subdirectory( foundation )
+add_subdirectory( libraries )
 
 
 
