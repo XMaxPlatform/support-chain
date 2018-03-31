@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in xmax/LICENSE.txt
+ *  @copyright defined in xmax/LICENSE
  */
 #include <publickey.hpp>
 #include <fc/crypto/base58.hpp>

@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in xmax/LICENSE.txt
+ *  @copyright defined in xmax/LICENSE
  */
 #include <fc/network/udp_socket.hpp>
 #include <fc/network/ip.hpp>

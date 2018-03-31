@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in xmax/LICENSE.txt
+ *  @copyright defined in xmax/LICENSE
  */
 #ifndef RAND_HPP
 #define RAND_HPP 1

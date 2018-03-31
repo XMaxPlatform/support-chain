@@ -6,6 +6,8 @@
 #include <application.hpp>
 #include <plugin.hpp>
 #include <boost/container/flat_set.hpp>
+#include <chain_xmax.hpp>
+#include <chaindata_plugin.hpp>
 using namespace Baseapp;
 namespace Xmaxplatform {
 
@@ -14,7 +16,7 @@ namespace Xmaxplatform {
 class blockchain_plugin : public plugin<blockchain_plugin> {
 public:
 
-    BASEAPP_DEPEND_PLUGINS()
+    BASEAPP_DEPEND_PLUGINS((chaindata_plugin))
     blockchain_plugin();
    virtual ~blockchain_plugin();
 

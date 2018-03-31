@@ -34,6 +34,7 @@ int main(int argc, char** argv)
 {
    try {
 
+       app().register_plugin<Xmaxplatform::chaindata_plugin>();
        app().register_plugin<Xmaxplatform::blockchain_plugin>();
 
        if(!app().init<Xmaxplatform::blockchain_plugin>(argc, argv))

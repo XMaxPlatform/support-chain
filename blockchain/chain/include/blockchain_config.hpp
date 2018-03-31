@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in xmax/LICENSE.txt
+ *  @copyright defined in xmax/LICENSE
  */
 #pragma once
 #include <include/xmaxtypes.hpp>
@@ -17,8 +17,3 @@ using Basetypes::permission_name;
 
 const static char key_prefix[] = "XMX";
 } } // namespace Xmaxplatform::Config
-
-template<typename Number>
-Number xmax_percent(Number value, int percentage) {
-   return value * percentage / Xmaxplatform::Config::percent100;
-}

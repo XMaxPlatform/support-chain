@@ -1,7 +1,8 @@
 /**
  *  @file
- *  @copyright defined in xmax/LICENSE.txt
+ *  @copyright defined in xmax/LICENSE
  */
+#include <chaindata_plugin.hpp>
 #include <blockchain_plugin.hpp>
 
 #include <fc/io/json.hpp>
@@ -13,7 +14,8 @@ namespace Xmaxplatform {
 
 class chain_plugin_impl {
 public:
-   bfs::path                        genesis_file;
+    Baseapp::bfs::path                   genesis_file;
+    std::unique_ptr<Chain::chain_xmax>   chain;
 };
 
 
@@ -34,6 +36,8 @@ void blockchain_plugin::plugin_initialize(const variables_map& options) {
 
 void blockchain_plugin::plugin_startup() {
     ilog("blockchain_plugin::plugin_startup");
+    auto& data = app().get_plugin<chaindata_plugin>().data();
+    my->chain.reset(new Chain::chain_xmax(data));
 }
 
 void blockchain_plugin::plugin_shutdown() {

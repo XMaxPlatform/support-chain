@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in xmax/LICENSE.txt
+ *  @copyright defined in xmax/LICENSE
  */
 #define XMAX_ASSERT( expr, exc_type, FORMAT, ... )                \
    FC_MULTILINE_MACRO_BEGIN                                           \

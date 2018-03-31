@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in xmax/LICENSE.txt
+ *  @copyright defined in xmax/LICENSE
  */
 #include <stdint.h>
 #include <words.hpp>
@@ -37994,7 +37994,7 @@ const const_char_ptr word_list[] = {
 "signary",
 "signate",
 "signee",
-"signer",
+"get_signer_key",
 "signet",
 "signify",
 "signior",
