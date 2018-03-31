@@ -106,9 +106,15 @@ ELSE( WIN32 ) # Apple AND Linux
 
 ENDIF( WIN32 )
 
+include(installer)
+
 add_subdirectory( foundation )
 add_subdirectory( libraries )
 add_subdirectory( virtualmachine )
+add_subdirectory( blockchain )
+add_subdirectory( plugins )
+add_subdirectory( launch )
+
 
 
 

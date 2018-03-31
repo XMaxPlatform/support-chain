@@ -1,0 +1,14 @@
+#include <stdint.h>
+#include <git_revision.hpp>
+
+#define XMAX_GIT_REVISION_SHA "@XMAX_GIT_REVISION_SHA@"
+#define XMAX_GIT_REVISION_UNIX_TIMESTAMP @XMAX_GIT_REVISION_UNIX_TIMESTAMP@
+#define XMAX_GIT_REVISION_DESCRIPTION "@XMAX_GIT_REVISION_DESCRIPTION@"
+
+namespace Xmaxplatform { namespace utilities {
+
+const char* const git_revision_sha = XMAX_GIT_REVISION_SHA;
+const uint32_t git_revision_unix_timestamp = XMAX_GIT_REVISION_UNIX_TIMESTAMP;
+const char* const git_revision_description = XMAX_GIT_REVISION_DESCRIPTION;
+
+} } // end namespace Xmaxplatform::utilities
