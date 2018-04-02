@@ -85,9 +85,10 @@ namespace Xmaxplatform { namespace Chain {
                 const account_name& builder
         )
         { try {
+                _data.start_undo_session(true);
                 auto b = _data.with_write_lock( [&](){
                     return _generate_block( when, builder );
-                },0);
+                });
                 push_block(b);
                 return b;
             } FC_CAPTURE_AND_RETHROW( (when) ) }

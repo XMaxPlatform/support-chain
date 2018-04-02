@@ -38,6 +38,7 @@ void chaindata_plugin::wipe_database() {
 }
 
 void chaindata_plugin::plugin_initialize(const variables_map& options) {
+   ilog("chaindata_plugin::plugin_initialize");
    my->shared_memory_dir = app().data_dir() / "blockchain";
    if(options.count("shared-file-dir")) {
       auto sfd = options.at("shared-file-dir").as<Basechain::bfs::path>();
@@ -51,6 +52,7 @@ void chaindata_plugin::plugin_initialize(const variables_map& options) {
 }
 
 void chaindata_plugin::plugin_startup() {
+   ilog("chaindata_plugin::plugin_startup");
    using Basechain::database;
    my->data = Basechain::database(my->shared_memory_dir,
                                 my->open_flag? database::read_only : database::read_write,

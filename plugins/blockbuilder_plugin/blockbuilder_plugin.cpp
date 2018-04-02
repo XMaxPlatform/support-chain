@@ -85,7 +85,7 @@ void blockbuilder_plugin::plugin_shutdown() {
             case block_build_condition::generated:
             {
                 const auto& data = app().get_plugin<blockchain_plugin>().getchain();
-
+                ilog("block_build_condition::generated");
 
                 break;
             }
