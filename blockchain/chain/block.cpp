@@ -28,12 +28,12 @@ namespace Xmaxplatform { namespace Chain {
 
    fc::ecc::public_key signed_block_header::get_signer_key()const
    {
-      return fc::ecc::public_key(producer_signature, digest(), true/*enforce canonical*/);
+      return fc::ecc::public_key(builder_signature, digest(), true/*enforce canonical*/);
    }
 
    void signed_block_header::sign(const fc::ecc::private_key& signer)
    {
-      producer_signature = signer.sign_compact(digest());
+      builder_signature = signer.sign_compact(digest());
    }
 
    bool signed_block_header::is_signer_valid(const fc::ecc::public_key &signer_key)const

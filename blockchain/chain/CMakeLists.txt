@@ -1,4 +1,4 @@
-file(GLOB HEADERS "include/*.hpp")
+file(GLOB HEADERS "include/*.hpp" "include/objects*.hpp")
 file (GLOB SOURCE_FILES "*.cpp")
 add_library( xmaxchain ${SOURCE_FILES} ${HEADERS} )
 target_link_libraries( xmaxchain fc basetypes basechain ${Boost_LIBRARIES} ${PLATFORM_LIBRARIES} )

@@ -29,6 +29,21 @@
 #include <deque>
 #include <cstdint>
 
+#define OBJECT_CCTOR1(NAME) \
+    NAME() = delete; \
+    public: \
+    template<typename Constructor, typename Allocator> \
+    NAME(Constructor&& c, Basechain::allocator<Allocator>) \
+    { c(*this); }
+#define OBJECT_CCTOR2_MACRO(x, y, field) ,field(a)
+#define OBJECT_CCTOR2(NAME, FIELDS) \
+    NAME() = delete; \
+    public: \
+    template<typename Constructor, typename Allocator> \
+    NAME(Constructor&& c, Basechain::allocator<Allocator> a) \
+    : id(0) BOOST_PP_SEQ_FOR_EACH(OBJECT_CTOR2_MACRO, _, FIELDS) \
+    { c(*this); }
+#define OBJECT_CCTOR(...) BOOST_PP_OVERLOAD(OBJECT_CCTOR, __VA_ARGS__)(__VA_ARGS__)
 
 
 namespace Xmaxplatform { namespace Chain {
@@ -113,8 +128,17 @@ namespace Xmaxplatform { namespace Chain {
    using bytes = Basetypes::bytes;
 
    using public_key_type = Xmaxplatform::Basetypes::public_key;
+
+
+        enum object_type
+        {
+            null_object_type,
+            static_config_object_type,
+            dynamic_states_object_type,
+            OBJECT_TYPE_COUNT ///< Sentry value which contains the number of different object types
+        };
    
-} }  // Xmaxplatform::chain
+} }  // Xmaxplatform::Chain
 
 namespace fc {
   void to_variant(const Xmaxplatform::Chain::shared_vector<Xmaxplatform::Basetypes::field>& c, fc::variant& v);

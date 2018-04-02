@@ -15,5 +15,7 @@ using Basetypes::asset;
 using Basetypes::account_name;
 using Basetypes::permission_name;
 
-const static char key_prefix[] = "XMX";
+        const static char key_prefix[] = "XMX";
+        const static int blocks_per_round = 1;
+        const static account_name xmax_contract_name = STN(xmax);
 } } // namespace Xmaxplatform::Config

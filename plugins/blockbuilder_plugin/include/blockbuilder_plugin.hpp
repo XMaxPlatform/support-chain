@@ -11,14 +11,18 @@
 using namespace Baseapp;
 namespace Xmaxplatform {
 
+    enum block_build_condition
+    {
+        generated = 0,
+        exception = 1
+    };
 
-
-class blockchain_plugin : public plugin<blockchain_plugin> {
+class blockbuilder_plugin : public plugin<blockbuilder_plugin> {
 public:
 
     BASEAPP_DEPEND_PLUGINS((chaindata_plugin))
-    blockchain_plugin();
-   virtual ~blockchain_plugin();
+    blockbuilder_plugin();
+   virtual ~blockbuilder_plugin();
 
    virtual void set_program_options(options_description& cli, options_description& cfg) override;
 
@@ -26,11 +30,10 @@ public:
    void plugin_startup();
    void plugin_shutdown();
 
-    Chain::chain_xmax& getchain();
-    const Chain::chain_xmax& getchain() const;
+public:
 
 private:
-    std::unique_ptr<class chain_plugin_impl> my;
+    std::unique_ptr<class blockbuilder_plugin_impl> my;
 };
 
 }

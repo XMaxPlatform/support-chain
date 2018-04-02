@@ -44,4 +44,6 @@ void blockchain_plugin::plugin_shutdown() {
     ilog("blockchain_plugin::plugin_startup");
 }
 
+    Chain::chain_xmax& blockchain_plugin::getchain() { return *my->chain; }
+    const Chain::chain_xmax& blockchain_plugin::getchain() const { return *my->chain; }
 } // namespace Xmaxplatform

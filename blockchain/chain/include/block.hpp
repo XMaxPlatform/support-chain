@@ -17,7 +17,7 @@ namespace Xmaxplatform { namespace Chain {
             xmax_type_block_id            previous;
             fc::time_point_sec            timestamp;
             xmax_type_merkle_root         transaction_merkle_root;
-            account_name                  producer;
+            account_name                  builder;
         };
 
         struct signed_block_header : public block_header
@@ -27,7 +27,7 @@ namespace Xmaxplatform { namespace Chain {
             void                       sign(const fc::ecc::private_key& signer);
             bool                       is_signer_valid(const fc::ecc::public_key &signer_key) const;
 
-            xmax_type_signature        producer_signature;
+            xmax_type_signature        builder_signature;
         };
 
         struct thread {
@@ -43,5 +43,7 @@ namespace Xmaxplatform { namespace Chain {
 
     } } // Xmaxplatform::Chain
 
-FC_REFLECT(Xmaxplatform::Chain::block_header, (previous)(timestamp)(transaction_merkle_root)(producer))
-FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block_header, (Xmaxplatform::Chain::block_header), (producer_signature))
+FC_REFLECT(Xmaxplatform::Chain::block_header, (previous)(timestamp)(transaction_merkle_root)(builder))
+FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block_header, (Xmaxplatform::Chain::block_header), (builder_signature))
+FC_REFLECT(Xmaxplatform::Chain::thread, )
+FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block, (Xmaxplatform::Chain::signed_block_header), (cycles))
