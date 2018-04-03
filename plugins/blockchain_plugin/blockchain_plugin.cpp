@@ -4,7 +4,7 @@
  */
 #include <chaindata_plugin.hpp>
 #include <blockchain_plugin.hpp>
-
+#include <genesis_state.hpp>
 #include <fc/io/json.hpp>
 #include <fc/variant.hpp>
 #include <fc/log/logger.hpp>
@@ -27,11 +27,17 @@ public:
 
 void blockchain_plugin::set_program_options(options_description& cli, options_description& cfg)
 {
-
+    ilog("blockchain_plugin::set_program_options");
+    cfg.add_options()
+            ("genesis-json", bpo::value<boost::filesystem::path>(), "File to read Genesis State from");
 }
 
 void blockchain_plugin::plugin_initialize(const variables_map& options) {
     ilog("blockchain_plugin::plugin_initialize");
+    if(options.count("genesis-json")) {
+        my->genesis_file = options.at("genesis-json").as<Baseapp::bfs::path>();
+    }
+    auto genesis = fc::json::from_file(my->genesis_file).as<Native_contract::genesis_state_type>();
 }
 
 void blockchain_plugin::plugin_startup() {

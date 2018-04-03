@@ -1,0 +1,21 @@
+file(GLOB HEADERS "include/*.hpp")
+
+## SORT .cpp by most likely to change / break compile
+add_library( xmax_native_contract
+        genesis_state.cpp
+
+        ${HEADERS}
+        )
+
+target_link_libraries( xmax_native_contract xmaxchain fc )
+target_include_directories( xmax_native_contract
+        PUBLIC "include" "${CMAKE_CURRENT_BINARY_DIR}/include" )
+
+INSTALL( TARGETS
+        xmax_native_contract
+
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        )
+INSTALL( FILES ${HEADERS} DESTINATION "include" )
