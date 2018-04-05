@@ -25,12 +25,14 @@
 #include <iostream>
 #include <chrono>
 
+
 namespace Xmaxplatform { namespace Chain {
 
 
         void chain_xmax::setup_data_indexes() {
             _data.add_index<static_config_multi_index>();
             _data.add_index<dynamic_states_multi_index>();
+            _data.add_index<xmx_token_multi_index>();
 
         }
 
@@ -58,7 +60,7 @@ namespace Xmaxplatform { namespace Chain {
 
         }
 
-        chain_xmax::chain_xmax(database& database) : _data(database){
+        chain_xmax::chain_xmax(database& database,Native_contract::genesis_state_type& genesis_config) : _data(database),_genesis_config(genesis_config){
 
             setup_data_indexes();
                     with_applying_block([&] {

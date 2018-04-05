@@ -37,13 +37,14 @@ void blockchain_plugin::plugin_initialize(const variables_map& options) {
     if(options.count("genesis-json")) {
         my->genesis_file = options.at("genesis-json").as<Baseapp::bfs::path>();
     }
-    auto genesis = fc::json::from_file(my->genesis_file).as<Native_contract::genesis_state_type>();
+
 }
 
 void blockchain_plugin::plugin_startup() {
     ilog("blockchain_plugin::plugin_startup");
     auto& data = app().get_plugin<chaindata_plugin>().data();
-    my->chain.reset(new Chain::chain_xmax(data));
+    auto genesis = fc::json::from_file(my->genesis_file).as<Native_contract::genesis_state_type>();
+    my->chain.reset(new Chain::chain_xmax(data,genesis));
 }
 
 void blockchain_plugin::plugin_shutdown() {

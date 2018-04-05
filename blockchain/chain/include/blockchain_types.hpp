@@ -135,6 +135,7 @@ namespace Xmaxplatform { namespace Chain {
             null_object_type,
             static_config_object_type,
             dynamic_states_object_type,
+            xmx_token_object_type,
             OBJECT_TYPE_COUNT ///< Sentry value which contains the number of different object types
         };
    

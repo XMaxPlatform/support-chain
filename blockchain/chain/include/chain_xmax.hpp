@@ -17,6 +17,8 @@
 #include <block.hpp>
 #include <objects/static_config_object.hpp>
 #include <objects/dynamic_states_object.hpp>
+#include <objects/xmx_token_object.hpp>
+#include <genesis_state.hpp>
 
 namespace Xmaxplatform { namespace Chain {
    using database = Basechain::database;
@@ -24,7 +26,7 @@ namespace Xmaxplatform { namespace Chain {
    class chain_xmax {
       public:
 
-         chain_xmax(database& database);
+         chain_xmax(database& database,Native_contract::genesis_state_type& genesis_config);
          chain_xmax(const chain_xmax&) = delete;
          chain_xmax(chain_xmax&&) = delete;
          chain_xmax& operator=(const chain_xmax&) = delete;
@@ -35,6 +37,7 @@ namespace Xmaxplatform { namespace Chain {
        const dynamic_states_object&         get_dynamic_states()const;
 
    private:
+       Native_contract::genesis_state_type               _genesis_config;
        database&                        _data;
        bool                             _currently_applying_block = false;
 
