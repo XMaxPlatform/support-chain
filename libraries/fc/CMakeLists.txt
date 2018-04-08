@@ -105,6 +105,7 @@ set( fc_sources
      src/network/url.cpp
      src/compress/smaz.cpp
      src/compress/zlib.cpp
+
      )
 
 file( GLOB_RECURSE fc_headers ${CMAKE_CURRENT_SOURCE_DIR} *.hpp *.h )
@@ -182,3 +183,5 @@ IF(DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 ELSE()
   SET (OPENSSL_CONF_TARGET ${CMAKE_CURRENT_BINARY_DIR})
 ENDIF()
+
+set_target_properties( fc PROPERTIES FOLDER "2.Libraries")
