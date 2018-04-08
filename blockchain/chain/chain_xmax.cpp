@@ -60,7 +60,7 @@ namespace Xmaxplatform { namespace Chain {
 
         }
 
-        chain_xmax::chain_xmax(database& database,Native_contract::genesis_state_type& genesis_config) : _data(database),_genesis_config(genesis_config){
+        chain_xmax::chain_xmax(database& database,chain_init& init) : _data(database){
 
             setup_data_indexes();
                     with_applying_block([&] {
@@ -186,5 +186,8 @@ namespace Xmaxplatform { namespace Chain {
             });
 
         }
+
+
+        chain_init::~chain_init() {}
 
 } }

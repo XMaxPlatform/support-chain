@@ -3,7 +3,7 @@ file(GLOB HEADERS "include/*.hpp")
 ## SORT .cpp by most likely to change / break compile
 add_library( xmax_native_contract
         genesis_state.cpp
-
+        native_contract_chain_init.cpp
         ${HEADERS}
         )
 

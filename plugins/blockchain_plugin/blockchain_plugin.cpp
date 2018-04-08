@@ -9,6 +9,8 @@
 #include <fc/variant.hpp>
 #include <fc/log/logger.hpp>
 
+#include <native_contract_chain_init.hpp>
+
 namespace Xmaxplatform {
 
 
@@ -44,7 +46,8 @@ void blockchain_plugin::plugin_startup() {
     ilog("blockchain_plugin::plugin_startup");
     auto& data = app().get_plugin<chaindata_plugin>().data();
     auto genesis = fc::json::from_file(my->genesis_file).as<Native_contract::genesis_state_type>();
-    my->chain.reset(new Chain::chain_xmax(data,genesis));
+    Native_contract::native_contract_chain_init chainsetup(genesis);
+    my->chain.reset(new Chain::chain_xmax(data,chainsetup));
 }
 
 void blockchain_plugin::plugin_shutdown() {

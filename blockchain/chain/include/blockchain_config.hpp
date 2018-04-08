@@ -32,4 +32,6 @@ using Basetypes::permission_name;
         const static uint32 default_max_inline_msg_size = 4 * 1024;
         const static uint32 default_max_gen_trx_size = 64 * 1024;
 
+        const static share_type initial_token_supply = asset::from_string("1000000000.0000 XMX").amount;
+
 } } // namespace Xmaxplatform::Config
