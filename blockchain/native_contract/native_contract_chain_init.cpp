@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in xmax/LICENSE.txt
+ *  @copyright defined in xmax/LICENSE
  */
 #include <native_contract_chain_init.hpp>
 
@@ -36,9 +36,9 @@ void native_contract_chain_init::register_types(chain_xmax& chain, Basechain::da
    return xmax_abi;
 }
 
-std::vector<message> native_contract_chain_init::prepare_database(chain_xmax& chain,
+std::vector<message_xmax> native_contract_chain_init::prepare_database(chain_xmax& chain,
                                                                                 Basechain::database& db) {
-   std::vector<message> messages_to_process;
+   std::vector<message_xmax> messages_to_process;
 
    /// Create the native contract accounts manually; sadly, we can't run their contracts to make them create themselves
    auto CreateNativeAccount = [this, &db](name name, auto liquidBalance) {
@@ -55,7 +55,7 @@ std::vector<message> native_contract_chain_init::prepare_database(chain_xmax& ch
       return Basetypes::authority(1, {{k, 1}}, {});
    };
    for (const auto& acct : genesis.initial_accounts) {
-      message msg(Config::xmax_contract_name,
+      message_xmax msg(Config::xmax_contract_name,
                              vector<Basetypes::account_permission>{{Config::xmax_contract_name, "active"}},
                              "newaccount", Basetypes::newaccount(Config::xmax_contract_name, acct.name,
                                                              KeyAuthority(acct.owner_key),
@@ -64,7 +64,7 @@ std::vector<message> native_contract_chain_init::prepare_database(chain_xmax& ch
                                                              acct.staking_balance));
       messages_to_process.emplace_back(std::move(msg));
       if (acct.liquid_balance > 0) {
-         msg = message(Config::xmax_contract_name,
+         msg = message_xmax(Config::xmax_contract_name,
                                   vector<Basetypes::account_permission>{{Config::xmax_contract_name, "active"}},
                                   "transfer", Basetypes::transfer(Config::xmax_contract_name, acct.name,
                                                               acct.liquid_balance.amount, "Genesis Allocation"));

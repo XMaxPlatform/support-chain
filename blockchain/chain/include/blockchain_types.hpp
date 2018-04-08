@@ -41,7 +41,7 @@
     public: \
     template<typename Constructor, typename Allocator> \
     NAME(Constructor&& c, Basechain::allocator<Allocator> a) \
-    : id(0) BOOST_PP_SEQ_FOR_EACH(OBJECT_CTOR2_MACRO, _, FIELDS) \
+    : id(0) BOOST_PP_SEQ_FOR_EACH(OBJECT_CCTOR2_MACRO, _, FIELDS) \
     { c(*this); }
 #define OBJECT_CCTOR(...) BOOST_PP_OVERLOAD(OBJECT_CCTOR, __VA_ARGS__)(__VA_ARGS__)
 
@@ -136,6 +136,10 @@ namespace Xmaxplatform { namespace Chain {
             static_config_object_type,
             dynamic_states_object_type,
             xmx_token_object_type,
+            key_value_object_type,
+            keystr_value_object_type,
+            key64x64x64_value_object_type,
+            key128x128_value_object_type,
             OBJECT_TYPE_COUNT ///< Sentry value which contains the number of different object types
         };
    

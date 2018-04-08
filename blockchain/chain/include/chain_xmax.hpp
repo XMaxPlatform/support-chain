@@ -19,10 +19,13 @@
 #include <objects/static_config_object.hpp>
 #include <objects/dynamic_states_object.hpp>
 #include <objects/xmx_token_object.hpp>
+#include <transaction.hpp>
+#include <message_handling_contexts.hpp>
 
 namespace Xmaxplatform { namespace Chain {
    using database = Basechain::database;
         class chain_init;
+        class message_xmax;
    class chain_xmax {
       public:
 
@@ -40,9 +43,13 @@ namespace Xmaxplatform { namespace Chain {
 
        database&                        _data;
        bool                             _currently_applying_block = false;
+       uint64_t                         _skip_flags = 0;
+       typedef pair<account_name,Basetypes::name> handler_key;
+
+       map< account_name, map<handler_key, apply_handler> >                   apply_handlers;
 
        void setup_data_indexes();
-       void initialize_chain();
+       void initialize_chain(chain_init& initer);
 
        signed_block _generate_block(
                fc::time_point_sec when,
@@ -51,6 +58,11 @@ namespace Xmaxplatform { namespace Chain {
 
        bool _push_block(const signed_block& new_block);
        void _apply_block(const signed_block& next_block);
+
+       void process_message(const transaction& trx, account_name code, const message_xmax& message,
+                            message_output& output, apply_context* parent_context = nullptr,
+                            int depth = 0, const fc::time_point& start_time = fc::time_point::now());
+       void apply_message(apply_context& c);
 
    public:
        signed_block generate_block(
@@ -74,11 +86,20 @@ namespace Xmaxplatform { namespace Chain {
            return f();
        }
 
+       template<typename Function>
+       auto with_skip_flags( uint64_t flags, Function&& f ) -> decltype((*((Function*)nullptr))())
+       {
+           auto old_flags = _skip_flags;
+           auto on_exit   = fc::make_scoped_exit( [&](){ _skip_flags = old_flags; } );
+           _skip_flags = flags;
+           return f();
+       }
+
 
        void update_dynamic_states(const signed_block& b);
    };
 
-    class message;
+    class message_xmax;
         class chain_init {
         public:
             virtual ~chain_init();
@@ -92,7 +113,7 @@ namespace Xmaxplatform { namespace Chain {
 
             virtual void register_types(chain_xmax& chain, database& db) = 0;
 
-            virtual vector<message> prepare_database(chain_xmax& chain, database& db) = 0;
+            virtual vector<message_xmax> prepare_database(chain_xmax& chain, database& db) = 0;
         };
 
 } }

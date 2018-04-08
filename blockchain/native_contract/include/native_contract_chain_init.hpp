@@ -1,12 +1,12 @@
 /**
  *  @file
- *  @copyright defined in xmax/LICENSE.txt
+ *  @copyright defined in xmax/LICENSE
  */
 #pragma once
 
 #include <genesis_state.hpp>
 
-#include <message.hpp>
+#include <chain_xmax.hpp>
 
 
 namespace Xmaxplatform { namespace Native_contract {
@@ -22,7 +22,7 @@ public:
    virtual std::array<Basetypes::account_name, Config::blocks_per_round> get_chain_start_producers() override;
 
    virtual void register_types(Chain::chain_xmax& chain, Basechain::database& db) override;
-   virtual std::vector<Chain::message> prepare_database(Chain::chain_xmax& chain,
+   virtual std::vector<Chain::message_xmax> prepare_database(Chain::chain_xmax& chain,
                                                         Basechain::database& db) override;
 
    static Basetypes::abi xmax_contract_abi();

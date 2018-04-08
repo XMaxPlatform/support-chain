@@ -25,6 +25,8 @@
 #include <iostream>
 #include <chrono>
 
+#include <transaction.hpp>
+
 
 namespace Xmaxplatform { namespace Chain {
 
@@ -36,10 +38,10 @@ namespace Xmaxplatform { namespace Chain {
 
         }
 
-        void chain_xmax::initialize_chain()
+        void chain_xmax::initialize_chain(chain_init& initer)
         { try {
                 if (!_data.find<static_config_object>()) {
-                    _data.with_write_lock([&]() {
+                    _data.with_write_lock([this,&initer] {
 
                         // Create global properties
                         _data.create<static_config_object>([&](static_config_object &p) {
@@ -51,8 +53,20 @@ namespace Xmaxplatform { namespace Chain {
 
                         signed_block block{};
                         block.builder = Config::xmax_contract_name;
-                        block.cycles.emplace_back();
-                        block.cycles[0].emplace_back();
+                        block.threads.emplace_back();
+                        block.threads[0].emplace_back();
+
+                        auto messages = initer.prepare_database(*this, _data);
+                        std::for_each(messages.begin(), messages.end(), [&](const message_xmax& m) {
+                            message_output output;
+                            processed_transaction trx; /// dummy transaction required for scope validation
+                            std::sort(trx.scope.begin(), trx.scope.end() );
+                            with_skip_flags(0,[&](){
+                                process_message(trx,m.code,m,output);
+                            });
+
+                            trx.messages.push_back(m);
+                        });
                     });
                 }
 
@@ -64,7 +78,7 @@ namespace Xmaxplatform { namespace Chain {
 
             setup_data_indexes();
                     with_applying_block([&] {
-                        initialize_chain();
+                        initialize_chain(init);
                     });
 
         }
@@ -186,6 +200,53 @@ namespace Xmaxplatform { namespace Chain {
             });
 
         }
+
+        void chain_xmax::process_message(const transaction& trx, account_name code,
+                                         const message_xmax& message, message_output& output,
+                                         apply_context* parent_context, int depth,
+                                         const fc::time_point& start_time ) {
+
+            auto us_duration = (fc::time_point::now() - start_time).count();
+
+            apply_context apply_ctx(*this, _data, trx, message, code);
+            apply_message(apply_ctx);
+
+            output.notify.reserve( apply_ctx.notified.size() );
+
+            for( uint32_t i = 0; i < apply_ctx.notified.size(); ++i ) {
+                try {
+                    auto notify_code = apply_ctx.notified[i];
+                    output.notify.push_back( {notify_code} );
+                    process_message(trx, notify_code, message, output.notify.back().output, &apply_ctx, depth + 1, start_time );
+                } FC_CAPTURE_AND_RETHROW((apply_ctx.notified[i]))
+            }
+
+            // combine inline messages and process
+            if (apply_ctx.inline_messages.size() > 0) {
+                output.inline_trx = inline_transaction(trx);
+                (*output.inline_trx).messages = std::move(apply_ctx.inline_messages);
+            }
+
+
+        }
+
+
+        void chain_xmax::apply_message(apply_context& context)
+        { try {
+                /// context.code => the execution namespace
+                /// message.code / message.type => Event
+                const auto& m = context.msg;
+                auto contract_handlers_itr = apply_handlers.find(context.code);
+                if (contract_handlers_itr != apply_handlers.end()) {
+                    auto message_handler_itr = contract_handlers_itr->second.find({m.code, m.type});
+                    if (message_handler_itr != contract_handlers_itr->second.end()) {
+                        message_handler_itr->second(context);
+                        return;
+                    }
+                }
+                //TODO
+
+            } FC_CAPTURE_AND_RETHROW((context.msg)) }
 
 
         chain_init::~chain_init() {}
