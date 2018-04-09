@@ -57,6 +57,7 @@ namespace Xmaxplatform { namespace Chain {
                         });
                         _data.create<dynamic_states_object>([&](dynamic_states_object &p) {
                             p.time = initer.get_chain_init_time();
+                            p.current_builder = initer.get_chain_init_builders().at(0);
                         });
 
                         signed_block block{};
@@ -165,6 +166,14 @@ namespace Xmaxplatform { namespace Chain {
                     auto session = _data.start_undo_session(true);
                     auto exec_start = std::chrono::high_resolution_clock::now();
                     apply_block(new_block);
+                    auto exec_stop = std::chrono::high_resolution_clock::now();
+                    auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_stop - exec_start);
+                    ilog( "${builder} generate block #${num}  at ${time}, exectime_ms=${extm}",
+                          ("builder", new_block.builder)
+                                  ("time", new_block.timestamp)
+                                  ("num", new_block.block_num())
+                                  ("extm", exec_ms.count())
+                    );
 
                     session.push();
                 } catch ( const fc::exception& e ) {
