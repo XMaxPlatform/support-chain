@@ -19,3 +19,5 @@ INSTALL( TARGETS
         ARCHIVE DESTINATION lib
         )
 INSTALL( FILES ${HEADERS} DESTINATION "include" )
+
+set_target_properties( xmax_native_contract PROPERTIES PUBLIC_HEADER "${HEADERS}" FOLDER "4.BlockChain")

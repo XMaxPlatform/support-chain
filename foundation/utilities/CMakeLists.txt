@@ -39,3 +39,4 @@ install( TARGETS
    ARCHIVE DESTINATION lib
 )
 install( FILES ${HEADERS} DESTINATION "include" )
+set_target_properties( xmaxutilities PROPERTIES PUBLIC_HEADER "${HEADERS}" FOLDER "1.Foundation")
