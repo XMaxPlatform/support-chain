@@ -19,6 +19,7 @@ namespace Xmaxplatform { namespace Chain {
       OBJECT_CCTOR(static_config_object)
 
       id_type id;
+       blockchain_setup setup;
       std::array<account_name, Config::blocks_per_round> active_builders;
    };
 

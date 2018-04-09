@@ -27,11 +27,18 @@
 
 #include <transaction.hpp>
 
+#include <vm_xmax.hpp>
 
 namespace Xmaxplatform { namespace Chain {
 
 
         void chain_xmax::setup_data_indexes() {
+            _data.add_index<account_index>();
+            _data.add_index<key_value_index>();
+            _data.add_index<keystr_value_index>();
+            _data.add_index<key128x128_value_index>();
+            _data.add_index<key64x64x64_value_index>();
+
             _data.add_index<static_config_multi_index>();
             _data.add_index<dynamic_states_multi_index>();
             _data.add_index<xmx_token_multi_index>();
@@ -45,10 +52,11 @@ namespace Xmaxplatform { namespace Chain {
 
                         // Create global properties
                         _data.create<static_config_object>([&](static_config_object &p) {
-
+                            p.setup = initer.get_blockchain_setup();
+                            p.active_builders = initer.get_chain_init_builders();
                         });
                         _data.create<dynamic_states_object>([&](dynamic_states_object &p) {
-
+                            p.time = initer.get_chain_init_time();
                         });
 
                         signed_block block{};
@@ -203,35 +211,35 @@ namespace Xmaxplatform { namespace Chain {
 
         void chain_xmax::process_message(const transaction& trx, account_name code,
                                          const message_xmax& message, message_output& output,
-                                         apply_context* parent_context, int depth,
+                                         message_context_xmax* parent_context, int depth,
                                          const fc::time_point& start_time ) {
 
             auto us_duration = (fc::time_point::now() - start_time).count();
 
-            apply_context apply_ctx(*this, _data, trx, message, code);
-            apply_message(apply_ctx);
+            message_context_xmax xmax_ctx(*this, _data, trx, message, code);
+            apply_message(xmax_ctx);
 
-            output.notify.reserve( apply_ctx.notified.size() );
+            output.notify.reserve( xmax_ctx.notified.size() );
 
-            for( uint32_t i = 0; i < apply_ctx.notified.size(); ++i ) {
+            for( uint32_t i = 0; i < xmax_ctx.notified.size(); ++i ) {
                 try {
-                    auto notify_code = apply_ctx.notified[i];
+                    auto notify_code = xmax_ctx.notified[i];
                     output.notify.push_back( {notify_code} );
-                    process_message(trx, notify_code, message, output.notify.back().output, &apply_ctx, depth + 1, start_time );
-                } FC_CAPTURE_AND_RETHROW((apply_ctx.notified[i]))
+                    process_message(trx, notify_code, message, output.notify.back().output, &xmax_ctx, depth + 1, start_time );
+                } FC_CAPTURE_AND_RETHROW((xmax_ctx.notified[i]))
             }
 
             // combine inline messages and process
-            if (apply_ctx.inline_messages.size() > 0) {
+            if (xmax_ctx.inline_messages.size() > 0) {
                 output.inline_trx = inline_transaction(trx);
-                (*output.inline_trx).messages = std::move(apply_ctx.inline_messages);
+                (*output.inline_trx).messages = std::move(xmax_ctx.inline_messages);
             }
 
 
         }
 
 
-        void chain_xmax::apply_message(apply_context& context)
+        void chain_xmax::apply_message(message_context_xmax& context)
         { try {
                 /// context.code => the execution namespace
                 /// message.code / message.type => Event
@@ -244,7 +252,16 @@ namespace Xmaxplatform { namespace Chain {
                         return;
                     }
                 }
-                //TODO
+                const auto& recipient = _data.get<account_object,by_name>(context.code);
+                if (recipient.code.size()) {
+                    idump((context.code)(context.msg.type));
+                    const uint32_t execution_time = 10000;//TODO
+                    try {
+                        vm_xmax::get().apply(context, execution_time, true );
+                    } catch (const fc::exception &ex) {
+
+                    }
+                }
 
             } FC_CAPTURE_AND_RETHROW((context.msg)) }
 

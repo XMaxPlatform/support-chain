@@ -1,5 +1,5 @@
 {
-  "initial_timestamp": "2017-03-30T12:00:00",
+  "initial_timestamp": "2018-04-09T9:00:00",
   "initial_parameters": {
     "maintenance_interval": 86400,
     "maintenance_skip_slots": 3,
@@ -15,107 +15,107 @@
     "name": "inita",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initb",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initc",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initd",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "inite",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initf",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initg",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "inith",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initi",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initj",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initk",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initl",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initm",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initn",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "inito",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initp",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initq",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initr",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "inits",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initt",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   },{
     "name": "initu",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-    "liquid_balance": "1000000.0000 XMX"
+    "xmx_token": "1000000.0000 XMX"
   }],
   "initial_producers": [{
     "owner_name": "inita",

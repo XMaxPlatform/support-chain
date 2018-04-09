@@ -16,7 +16,7 @@ using Basetypes::account_name;
 using Basetypes::permission_name;
 
         const static char key_prefix[] = "XMX";
-        const static int blocks_per_round = 1;
+        const static int blocks_per_round = 21;
         const static account_name xmax_contract_name = STN(xmax);
 
         const static uint32 default_max_block_size = 5 * 1024 * 1024;
@@ -33,5 +33,9 @@ using Basetypes::permission_name;
         const static uint32 default_max_gen_trx_size = 64 * 1024;
 
         const static share_type initial_token_supply = asset::from_string("1000000000.0000 XMX").amount;
+
+        const static int default_per_code_account_max_db_limit_mbytes = 5;
+        const static int default_row_overhead_db_limit_bytes = 8 + 8 + 8 + 8; // storage for scope/code/table + 8 extra
+
 
 } } // namespace Xmaxplatform::Config

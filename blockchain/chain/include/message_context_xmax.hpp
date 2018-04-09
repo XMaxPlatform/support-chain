@@ -15,14 +15,14 @@ namespace Xmaxplatform { namespace Chain {
 
 class chain_xmax;
 
-class apply_context {
+class message_context_xmax {
 public:
-   apply_context(chain_xmax& con,
+   message_context_xmax(chain_xmax& con,
                  Basechain::database& db,
                  const Chain::transaction& t,
                  const Chain::message_xmax& m,
                  const Basetypes::account_name& code)
-      : controller(con), db(db), trx(t), msg(m), code(code), mutable_controller(con),
+      : _chain_xmax(con), db(db), trx(t), msg(m), code(code), mutable_controller(con),
         mutable_db(db), used_authorizations(msg.authorization.size(), false),
         next_pending_transaction_serial(0), next_pending_message_serial(0){}
 
@@ -305,7 +305,7 @@ public:
 
    void get_active_producers(Basetypes::account_name* producers, uint32_t len);
 
-   const chain_xmax&      controller;
+   const chain_xmax&      _chain_xmax;
    const Basechain::database&   db;  ///< database where state is stored
    const Chain::transaction&    trx; ///< used to gather the valid read/write scopes
    const Chain::message_xmax&        msg; ///< message being applied
@@ -326,14 +326,14 @@ public:
    struct pending_transaction : public Basetypes::transaction {
       typedef uint32_t handle_type;
       
-      pending_transaction(const handle_type& _handle, const apply_context& _context, const uint16& block_num, const uint32& block_ref, const time& expiration )
+      pending_transaction(const handle_type& _handle, const message_context_xmax& _context, const uint16& block_num, const uint32& block_ref, const time& expiration )
          : Basetypes::transaction(block_num, block_ref, expiration, vector<Basetypes::account_name>(),  vector<Basetypes::account_name>(), vector<Basetypes::message>())
          , handle(_handle)
          , context(_context) {}
       
       
       handle_type handle;
-      const apply_context& context;
+      const message_context_xmax& context;
 
       void check_size() const;
    };
@@ -365,6 +365,6 @@ public:
    void release_pending_message(pending_message::handle_type handle);
 };
 
-using apply_handler = std::function<void(apply_context&)>;
+using apply_handler = std::function<void(message_context_xmax&)>;
 
 } } // namespace Xmaxplatform::chain

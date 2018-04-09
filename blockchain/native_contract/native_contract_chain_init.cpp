@@ -10,15 +10,15 @@
 namespace Xmaxplatform { namespace Native_contract {
 using namespace Xmaxplatform::Chain;
 
-        Basetypes::time native_contract_chain_init::get_chain_start_time() {
+        Basetypes::time native_contract_chain_init::get_chain_init_time() {
    return genesis.initial_timestamp;
 }
 
-blockchain_setup native_contract_chain_init::get_chain_start_configuration() {
+blockchain_setup native_contract_chain_init::get_blockchain_setup() {
    return genesis.initial_configuration;
 }
 
-std::array<Basetypes::account_name, Config::blocks_per_round> native_contract_chain_init::get_chain_start_producers() {
+std::array<Basetypes::account_name, Config::blocks_per_round> native_contract_chain_init::get_chain_init_builders() {
    std::array<Basetypes::account_name, Config::blocks_per_round> result;
    std::transform(genesis.initial_producers.begin(), genesis.initial_producers.end(), result.begin(),
                   [](const auto& p) { return p.owner_name; });
@@ -40,12 +40,21 @@ std::vector<message_xmax> native_contract_chain_init::prepare_database(chain_xma
                                                                                 Basechain::database& db) {
    std::vector<message_xmax> messages_to_process;
 
-   /// Create the native contract accounts manually; sadly, we can't run their contracts to make them create themselves
-   auto CreateNativeAccount = [this, &db](name name, auto liquidBalance) {
 
-      db.create<Xmaxplatform::Chain::xmx_token_object>([&name, liquidBalance]( auto& b) {
+   auto CreateNativeAccount = [this, &db](name name, auto xmxtoken) {
+
+       db.create<account_object>([this, &name](account_object& a) {
+           a.name = name;
+           a.creation_date = genesis.initial_timestamp;
+
+           if( name == Config::xmax_contract_name ) {
+              a.set_abi(xmax_contract_abi());
+           }
+       });
+
+      db.create<Xmaxplatform::Chain::xmx_token_object>([&name, xmxtoken]( auto& b) {
          b.owner_name = name;
-         b.xmx_token = liquidBalance;
+         b.xmx_token = xmxtoken;
       });
    };
    CreateNativeAccount(Config::xmax_contract_name, Config::initial_token_supply);
@@ -63,11 +72,11 @@ std::vector<message_xmax> native_contract_chain_init::prepare_database(chain_xma
                                                              KeyAuthority(acct.owner_key),
                                                              acct.staking_balance));
       messages_to_process.emplace_back(std::move(msg));
-      if (acct.liquid_balance > 0) {
+      if (acct.xmx_token > 0) {
          msg = message_xmax(Config::xmax_contract_name,
                                   vector<Basetypes::account_permission>{{Config::xmax_contract_name, "active"}},
                                   "transfer", Basetypes::transfer(Config::xmax_contract_name, acct.name,
-                                                              acct.liquid_balance.amount, "Genesis Allocation"));
+                                                              acct.xmx_token.amount, "Genesis Allocation"));
          messages_to_process.emplace_back(std::move(msg));
       }
    }

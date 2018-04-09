@@ -19,8 +19,9 @@
 #include <objects/static_config_object.hpp>
 #include <objects/dynamic_states_object.hpp>
 #include <objects/xmx_token_object.hpp>
+#include <objects/account_object.hpp>
 #include <transaction.hpp>
-#include <message_handling_contexts.hpp>
+#include <message_context_xmax.hpp>
 
 namespace Xmaxplatform { namespace Chain {
    using database = Basechain::database;
@@ -60,9 +61,9 @@ namespace Xmaxplatform { namespace Chain {
        void _apply_block(const signed_block& next_block);
 
        void process_message(const transaction& trx, account_name code, const message_xmax& message,
-                            message_output& output, apply_context* parent_context = nullptr,
+                            message_output& output, message_context_xmax* parent_context = nullptr,
                             int depth = 0, const fc::time_point& start_time = fc::time_point::now());
-       void apply_message(apply_context& c);
+       void apply_message(message_context_xmax& c);
 
    public:
        signed_block generate_block(
@@ -105,11 +106,11 @@ namespace Xmaxplatform { namespace Chain {
             virtual ~chain_init();
 
 
-            virtual Basetypes::time get_chain_start_time() = 0;
+            virtual Basetypes::time get_chain_init_time() = 0;
 
-            virtual Chain::blockchain_setup get_chain_start_configuration() = 0;
+            virtual Chain::blockchain_setup get_blockchain_setup() = 0;
 
-            virtual std::array<account_name, Config::blocks_per_round> get_chain_start_producers() = 0;
+            virtual std::array<account_name, Config::blocks_per_round> get_chain_init_builders() = 0;
 
             virtual void register_types(chain_xmax& chain, database& db) = 0;
 

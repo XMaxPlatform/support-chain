@@ -24,8 +24,7 @@ add_library( xmaxutilities
              ${HEADERS} )
 target_link_libraries( xmaxutilities fc WAST WASM )
 target_include_directories( xmaxutilities
-                            PUBLIC "include"
-                                   "${CMAKE_CURRENT_SOURCE_DIR}/../wasm-jit/Include" )
+                            PUBLIC "include")
 if (USE_PCH)
   set_target_properties(xmaxutilities PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
   cotire(xmaxutilities)

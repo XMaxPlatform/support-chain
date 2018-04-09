@@ -17,9 +17,9 @@ public:
     native_contract_chain_init(const genesis_state_type& genesis) : genesis(genesis) {}
    virtual ~native_contract_chain_init() {}
 
-   virtual Basetypes::time get_chain_start_time() override;
-   virtual Chain::blockchain_setup get_chain_start_configuration() override;
-   virtual std::array<Basetypes::account_name, Config::blocks_per_round> get_chain_start_producers() override;
+   virtual Basetypes::time get_chain_init_time() override;
+   virtual Chain::blockchain_setup get_blockchain_setup() override;
+   virtual std::array<Basetypes::account_name, Config::blocks_per_round> get_chain_init_builders() override;
 
    virtual void register_types(Chain::chain_xmax& chain, Basechain::database& db) override;
    virtual std::vector<Chain::message_xmax> prepare_database(Chain::chain_xmax& chain,
