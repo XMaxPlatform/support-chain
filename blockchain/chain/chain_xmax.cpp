@@ -244,8 +244,8 @@ namespace Xmaxplatform { namespace Chain {
                 /// context.code => the execution namespace
                 /// message.code / message.type => Event
                 const auto& m = context.msg;
-                auto contract_handlers_itr = apply_handlers.find(context.code);
-                if (contract_handlers_itr != apply_handlers.end()) {
+                auto contract_handlers_itr = message_handlers.find(context.code);
+                if (contract_handlers_itr != message_handlers.end()) {
                     auto message_handler_itr = contract_handlers_itr->second.find({m.code, m.type});
                     if (message_handler_itr != contract_handlers_itr->second.end()) {
                         message_handler_itr->second(context);

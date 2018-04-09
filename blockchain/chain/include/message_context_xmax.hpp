@@ -365,6 +365,6 @@ public:
    void release_pending_message(pending_message::handle_type handle);
 };
 
-using apply_handler = std::function<void(message_context_xmax&)>;
+using msg_handler = std::function<void(message_context_xmax&)>;
 
 } } // namespace Xmaxplatform::chain

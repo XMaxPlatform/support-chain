@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in xmax/LICENSE.txt
+ *  @copyright defined in xmax/LICENSE
  */
 #pragma once
 
@@ -37,8 +37,8 @@ struct genesis_state_type {
       public_key owner_key;
       public_key active_key;
    };
-   struct initial_producer_type {
-      initial_producer_type(const string& name = string(),
+   struct initial_builder_type {
+       initial_builder_type(const string& name = string(),
                             const public_key& signing_key = public_key())
          : owner_name(name), block_signing_key(signing_key)
       {}
@@ -63,7 +63,7 @@ struct genesis_state_type {
            Config::default_max_gen_trx_size
    };
    vector<initial_account_type>             initial_accounts;
-   vector<initial_producer_type>            initial_producers;
+   vector<initial_builder_type>            initial_builders;
 
    /**
     * Temporary, will be moved elsewhere.
@@ -83,8 +83,8 @@ struct genesis_state_type {
 FC_REFLECT(Xmaxplatform::Native_contract::genesis_state_type::initial_account_type,
            (name)(staking_balance)(xmx_token)(owner_key)(active_key))
 
-FC_REFLECT(Xmaxplatform::Native_contract::genesis_state_type::initial_producer_type, (owner_name)(block_signing_key))
+FC_REFLECT(Xmaxplatform::Native_contract::genesis_state_type::initial_builder_type, (owner_name)(block_signing_key))
 
 FC_REFLECT(Xmaxplatform::Native_contract::genesis_state_type,
            (initial_timestamp)(initial_configuration)(initial_accounts)
-           (initial_producers)(initial_chain_id))
+           (initial_builders)(initial_chain_id))

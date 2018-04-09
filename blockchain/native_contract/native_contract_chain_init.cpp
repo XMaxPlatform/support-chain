@@ -20,7 +20,7 @@ blockchain_setup native_contract_chain_init::get_blockchain_setup() {
 
 std::array<Basetypes::account_name, Config::blocks_per_round> native_contract_chain_init::get_chain_init_builders() {
    std::array<Basetypes::account_name, Config::blocks_per_round> result;
-   std::transform(genesis.initial_producers.begin(), genesis.initial_producers.end(), result.begin(),
+   std::transform(genesis.initial_builders.begin(), genesis.initial_builders.end(), result.begin(),
                   [](const auto& p) { return p.owner_name; });
    return result;
 }

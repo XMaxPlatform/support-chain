@@ -12,173 +12,173 @@
     "min_producer_count": 21
   },
   "initial_accounts": [{
-    "name": "inita",
+    "name": "testera",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initb",
+    "name": "testerb",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initc",
+    "name": "testerc",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initd",
+    "name": "testerd",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "inite",
+    "name": "testere",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initf",
+    "name": "testerf",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initg",
+    "name": "testerg",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "inith",
+    "name": "testerh",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initi",
+    "name": "testeri",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initj",
+    "name": "testerj",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initk",
+    "name": "testerk",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initl",
+    "name": "testerl",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initm",
+    "name": "testerm",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initn",
+    "name": "testern",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "inito",
+    "name": "testero",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initp",
+    "name": "testerp",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initq",
+    "name": "testerq",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initr",
+    "name": "testerr",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "inits",
+    "name": "testers",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initt",
+    "name": "testert",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   },{
-    "name": "initu",
+    "name": "testeru",
     "owner_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "active_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
     "xmx_token": "1000000.0000 XMX"
   }],
-  "initial_producers": [{
-    "owner_name": "inita",
+  "initial_builders": [{
+    "owner_name": "testera",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initb",
+    "owner_name": "testerb",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initc",
+    "owner_name": "testerc",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initd",
+    "owner_name": "testerd",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "inite",
+    "owner_name": "testere",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initf",
+    "owner_name": "testerf",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initg",
+    "owner_name": "testerg",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "inith",
+    "owner_name": "testerh",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initi",
+    "owner_name": "testeri",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initj",
+    "owner_name": "testerj",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initk",
+    "owner_name": "testerk",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initl",
+    "owner_name": "testerl",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initm",
+    "owner_name": "testerm",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initn",
+    "owner_name": "testern",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "inito",
+    "owner_name": "testero",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initp",
+    "owner_name": "testerp",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initq",
+    "owner_name": "testerq",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initr",
+    "owner_name": "testerr",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "inits",
+    "owner_name": "testers",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initt",
+    "owner_name": "testert",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   },{
-    "owner_name": "initu",
+    "owner_name": "testeru",
     "block_signing_key": "XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
   }],
   "initial_chain_id": "0000000000000000000000000000000000000000000000000000000000000000"

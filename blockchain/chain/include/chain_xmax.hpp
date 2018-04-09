@@ -47,7 +47,7 @@ namespace Xmaxplatform { namespace Chain {
        uint64_t                         _skip_flags = 0;
        typedef pair<account_name,Basetypes::name> handler_key;
 
-       map< account_name, map<handler_key, apply_handler> >                   apply_handlers;
+       map< account_name, map<handler_key, msg_handler> >                   message_handlers;
 
        void setup_data_indexes();
        void initialize_chain(chain_init& initer);
