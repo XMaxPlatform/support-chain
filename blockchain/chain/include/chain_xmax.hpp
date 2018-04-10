@@ -60,7 +60,9 @@ namespace Xmaxplatform { namespace Chain {
        bool _push_block(const signed_block& new_block);
        void _apply_block(const signed_block& next_block);
 
-       void process_message(const transaction& trx, account_name code, const message_xmax& message,
+
+
+           void process_message(const transaction& trx, account_name code, const message_xmax& message,
                             message_output& output, message_context_xmax* parent_context = nullptr,
                             int depth = 0, const fc::time_point& start_time = fc::time_point::now());
        void apply_message(message_context_xmax& c);
@@ -96,6 +98,8 @@ namespace Xmaxplatform { namespace Chain {
            return f();
        }
 
+       void set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v );
+
 
        void update_dynamic_states(const signed_block& b);
        const Basechain::database& get_data() const { return _data; }
@@ -113,9 +117,9 @@ namespace Xmaxplatform { namespace Chain {
 
             virtual std::array<account_name, Config::blocks_per_round> get_chain_init_builders() = 0;
 
-            virtual void register_types(chain_xmax& chain, database& db) = 0;
+            virtual void register_handlers(chain_xmax &chain, database &db) = 0;
 
-            virtual vector<message_xmax> prepare_database(chain_xmax& chain, database& db) = 0;
+            virtual vector<message_xmax> prepare_data(chain_xmax &chain, database &db) = 0;
         };
 
 } }

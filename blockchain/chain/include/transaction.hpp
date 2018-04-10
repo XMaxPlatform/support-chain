@@ -3,11 +3,11 @@
  *  @copyright defined in xmax/LICENSE
  */
 #pragma once
-#include <xmaxtypes.hpp>
+#include <blockchain_types.hpp>
 #include <message_xmax.hpp>
 
 #include <numeric>
-
+using namespace Xmaxplatform::Basetypes;
 namespace Xmaxplatform { namespace Chain {
    struct processed_transaction;
    struct inline_transaction;

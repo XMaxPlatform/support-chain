@@ -12,13 +12,13 @@ namespace Xmaxplatform { namespace Chain {
 struct message_xmax : public Basetypes::message {
    message_xmax() = default;
    template<typename T>
-   message_xmax(const account_name& code, const vector<Basetypes::account_permission>& authorization, const Basetypes::func_name& type, T&& value)
-      :Basetypes::message(code, type, authorization, bytes()) {
+   message_xmax(const Basetypes::account_name& code, const Basetypes::vector<Basetypes::account_permission>& authorization, const Basetypes::func_name& type, T&& value)
+      :Basetypes::message(code, type, authorization, Basetypes::bytes()) {
       set<T>(type, std::forward<T>(value));
    }
 
-   message_xmax(const account_name& code, const vector<Basetypes::account_permission>& authorization, const Basetypes::func_name& type)
-      :Basetypes::message(code, type, authorization, bytes()) {}
+   message_xmax(const Basetypes::account_name& code, const Basetypes::vector<Basetypes::account_permission>& authorization, const Basetypes::func_name& type)
+      :Basetypes::message(code, type, authorization, Basetypes::bytes()) {}
 
    message_xmax(const Basetypes::message& m) : Basetypes::message(m) {}
 

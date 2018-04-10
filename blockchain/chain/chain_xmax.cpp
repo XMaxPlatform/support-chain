@@ -65,7 +65,7 @@ namespace Xmaxplatform { namespace Chain {
                         block.threads.emplace_back();
                         block.threads[0].emplace_back();
 
-                        auto messages = initer.prepare_database(*this, _data);
+                        auto messages = initer.prepare_data(*this, _data);
                         std::for_each(messages.begin(), messages.end(), [&](const message_xmax& m) {
                             message_output output;
                             processed_transaction trx; /// dummy transaction required for scope validation
@@ -86,6 +86,7 @@ namespace Xmaxplatform { namespace Chain {
         chain_xmax::chain_xmax(database& database,chain_init& init) : _data(database){
 
             setup_data_indexes();
+            init.register_handlers(*this, _data);
                     with_applying_block([&] {
                         initialize_chain(init);
                     });
@@ -216,6 +217,11 @@ namespace Xmaxplatform { namespace Chain {
                 dgp.current_builder = b.builder;
             });
 
+        }
+
+
+        void chain_xmax::set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v ) {
+            message_handlers[contract][std::make_pair(scope,action)] = v;
         }
 
         void chain_xmax::process_message(const transaction& trx, account_name code,
