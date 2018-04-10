@@ -3,7 +3,7 @@
  *  @copyright defined in xmax/LICENSE
  */
 #include <native_contract_chain_init.hpp>
-
+#include <xmax_contract.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/algorithm/copy.hpp>
 
@@ -25,19 +25,27 @@ std::array<Basetypes::account_name, Config::blocks_per_round> native_contract_ch
    return result;
 }
 
-void native_contract_chain_init::register_types(chain_xmax& chain, Basechain::database& db) {
+void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain::database &db) {
 
+#define SET_APP_HANDLER( contract, scope, action, nspace ) \
+   chain.set_message_handler( #contract, #scope, #action, &BOOST_PP_CAT(nspace::Native_contract::handle_, BOOST_PP_CAT(contract, BOOST_PP_CAT(_,action) ) ) )
+    SET_APP_HANDLER( xmax, xmax, newaccount, Xmaxplatform );
+    SET_APP_HANDLER( xmax, xmax, transfer, Xmaxplatform );
 }
+
         Basetypes::abi native_contract_chain_init::xmax_contract_abi()
 {
    Basetypes::abi xmax_abi;
-
-
+    xmax_abi.types.push_back( Types::type_def{"share_type","int64"} );
+    xmax_abi.actions.push_back( Types::action{name("transfer"), "transfer"} );
+    xmax_abi.actions.push_back( Types::action{name("newaccount"), "newaccount"} );
+    xmax_abi.structs.push_back( Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transfer>::type() );
+    xmax_abi.structs.push_back( Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::newaccount>::type() );
    return xmax_abi;
 }
 
-std::vector<message_xmax> native_contract_chain_init::prepare_database(chain_xmax& chain,
-                                                                                Basechain::database& db) {
+std::vector<message_xmax> native_contract_chain_init::prepare_data(chain_xmax &chain,
+                                                                   Basechain::database &db) {
    std::vector<message_xmax> messages_to_process;
 
 

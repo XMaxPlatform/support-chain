@@ -367,4 +367,4 @@ public:
 
 using msg_handler = std::function<void(message_context_xmax&)>;
 
-} } // namespace Xmaxplatform::chain
+} } // namespace Xmaxplatform::Chain

@@ -68,7 +68,7 @@ namespace Xmaxplatform {
           } \
        }}
 
-#define CHAIN_RO_CALL(call_name, http_response_code) CALL(chain, ro_api, Chain_APIs::read_only, call_name, http_response_code)
+#define CHAIN_RO_CALL(call_name, http_response_code) CALL(xmaxchain, ro_api, Chain_APIs::read_only, call_name, http_response_code)
 
     void blockchain_plugin::plugin_startup() {
         ilog("blockchain_plugin::plugin_startup");

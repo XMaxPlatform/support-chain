@@ -4,10 +4,11 @@ file(GLOB HEADERS "include/*.hpp")
 add_library( xmax_native_contract
         genesis_state.cpp
         native_contract_chain_init.cpp
+        xmax_contract.cpp
         ${HEADERS}
         )
 
-target_link_libraries( xmax_native_contract xmaxchain fc )
+target_link_libraries( xmax_native_contract basetypes xmaxchain fc )
 target_include_directories( xmax_native_contract
         PUBLIC "include" "${CMAKE_CURRENT_BINARY_DIR}/include" )
 
