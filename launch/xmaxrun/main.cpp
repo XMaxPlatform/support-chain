@@ -15,6 +15,7 @@
 #include <boost/exception/diagnostic_information.hpp>
 #include <blockchain_plugin.hpp>
 #include <blockbuilder_plugin.hpp>
+#include <chainhttp_plugin.hpp>
 
 using namespace Baseapp;
 
@@ -34,6 +35,7 @@ void initialize_logging()
 void regist_plugins()
 {
     app().register_plugin<Xmaxplatform::chaindata_plugin>();
+    app().register_plugin<Xmaxplatform::chainhttp_plugin>();
     app().register_plugin<Xmaxplatform::blockchain_plugin>();
     app().register_plugin<Xmaxplatform::blockbuilder_plugin>();
 }

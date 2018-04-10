@@ -98,6 +98,7 @@ namespace Xmaxplatform { namespace Chain {
 
 
        void update_dynamic_states(const signed_block& b);
+       const Basechain::database& get_data() const { return _data; }
    };
 
     class message_xmax;
