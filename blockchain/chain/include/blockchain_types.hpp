@@ -141,6 +141,8 @@ namespace Xmaxplatform { namespace Chain {
             key64x64x64_value_object_type,
             key128x128_value_object_type,
             account_object_type,
+            vote_info_object_type,
+            producer_info_object_type,
             OBJECT_TYPE_COUNT ///< Sentry value which contains the number of different object types
         };
    
