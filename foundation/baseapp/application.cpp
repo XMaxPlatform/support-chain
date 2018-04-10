@@ -161,8 +161,15 @@ bool application::init_impl(int argc, char** argv, vector<abstract_plugin*> auto
       {
          vector<string> names;
          boost::split(names, arg, boost::is_any_of(" \t,"));
-         for(const std::string& name : names)
-            get_plugin(name).init(options);
+		 for (const std::string& name : names)
+		 {
+			 std::string pluginName = name;
+#if WIN32
+			 pluginName = std::string("class ") + pluginName;
+#endif
+			 get_plugin(pluginName).init(options);
+		 }
+            
       }
    }
    for (auto plugin : autostart_plugins)

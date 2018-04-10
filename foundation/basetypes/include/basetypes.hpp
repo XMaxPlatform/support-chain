@@ -20,10 +20,12 @@
 #include <fc/time.hpp>
 #include <fc/fixed_string.hpp>
 #include <fc/string.hpp>
+#include <fc/int128.hpp>
 
 #include <fc/reflect/reflect.hpp>
 
 #define STN(X) Xmaxplatform::Basetypes::string_to_name(#X)
+
 
 namespace Xmaxplatform { namespace Basetypes {
         using namespace boost::multiprecision;
@@ -61,9 +63,9 @@ namespace Xmaxplatform { namespace Basetypes {
         using int64     = int64_t; //int_t<64>;
         using int128    = boost::multiprecision::int128_t;
         using int256    = boost::multiprecision::int256_t;
-        using uint128_t = unsigned __int128; /// native clang/gcc 128 intrinisic
+        using uint128_t =  _int128; /// native clang/gcc 128 intrinisic
 
-        static constexpr char char_to_symbol( char c ) {
+        static  char char_to_symbol( char c ) {
             if( c >= 'a' && c <= 'z' )
                 return (c - 'a') + 6;
             if( c >= '1' && c <= '5' )
@@ -71,7 +73,7 @@ namespace Xmaxplatform { namespace Basetypes {
             return 0;
         }
 
-        static constexpr uint64_t string_to_name( const char* str ) {
+        static  uint64_t string_to_name( const char* str ) {
 
             uint32_t len = 0;
             while( str[len] ) ++len;
