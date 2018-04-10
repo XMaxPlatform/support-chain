@@ -6,6 +6,11 @@
 #include <fc/exception/exception.hpp>
 #include <fc/crypto/city.hpp>
 
+#if WIN32
+#include <fc/int128.hpp>
+#endif
+
+
 #ifdef _MSC_VER
   #pragma warning (push)
   #pragma warning (disable : 4244)
@@ -32,13 +37,29 @@ namespace fc
       uint128( uint64_t _h, uint64_t _l )
       :hi(_h),lo(_l){}
       uint128( const fc::bigint& bi );
-      explicit uint128( unsigned __int128 i ):hi( i >> 64 ), lo(i){ }
+#if WIN32
+	  explicit uint128(_int128 i) :hi(i >> 64), lo(i) { }
+#else
+	  explicit uint128(unsigned __int128 i) :hi(i >> 64), lo(i) { }
+#endif
+      
 
       operator std::string()const;
       operator fc::bigint()const;
 
-      explicit operator unsigned __int128()const {
-         unsigned __int128 result(hi);
+#if WIN32
+	  explicit operator _int128()const
+#else
+	  explicit operator unsigned __int128()const
+#endif
+      
+	  {
+#if WIN32
+		  _int128 result(hi);
+#else
+		  unsigned __int128 result(hi);
+#endif
+          
          result <<= 64;
          return result | lo;
       }
@@ -129,8 +150,14 @@ namespace fc
 
   void to_variant( const uint128& var,  variant& vo );
   void from_variant( const variant& var,  uint128& vo );
-  void to_variant( const unsigned __int128& var,  variant& vo );
-  void from_variant( const variant& var,  unsigned __int128& vo );
+#if WIN32
+  void to_variant(const  _int128& var, variant& vo);
+  void from_variant(const variant& var, _int128& vo);
+#else
+  void to_variant(const unsigned __int128& var, variant& vo);
+  void from_variant(const variant& var, unsigned __int128& vo);
+#endif
+  
 
   namespace raw
   {

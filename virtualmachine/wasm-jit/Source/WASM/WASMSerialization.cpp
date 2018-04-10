@@ -218,7 +218,12 @@ public:
    void addImport(Module& module)
    {
       const U32 functionTypeIndex = typeSlot;
-      module.functions.imports.push_back({{functionTypeIndex},std::move(u8"env"),std::move(u8"checktime")});
+#if WIN32
+	  module.functions.imports.push_back({ { functionTypeIndex },(u8"env"), (u8"checktime") });
+#else
+	  module.functions.imports.push_back({ { functionTypeIndex },std::move(u8"env"),std::move(u8"checktime") });
+#endif
+      
    }
 
    void conditionallyAddCall(Opcode opcode, const ControlStructureImm& imm, const Module& module, Serialization::OutputStream& inByteStream)

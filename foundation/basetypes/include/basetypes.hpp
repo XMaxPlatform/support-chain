@@ -20,7 +20,10 @@
 #include <fc/time.hpp>
 #include <fc/fixed_string.hpp>
 #include <fc/string.hpp>
+#if WIN32
 #include <fc/int128.hpp>
+#endif
+
 
 #include <fc/reflect/reflect.hpp>
 
@@ -63,9 +66,19 @@ namespace Xmaxplatform { namespace Basetypes {
         using int64     = int64_t; //int_t<64>;
         using int128    = boost::multiprecision::int128_t;
         using int256    = boost::multiprecision::int256_t;
-        using uint128_t =  _int128; /// native clang/gcc 128 intrinisic
-
-        static  char char_to_symbol( char c ) {
+#if WIN32
+		using uint128_t = _int128; /// native clang/gcc 128 intrinisic
+#else
+		using uint128_t = unsigned __int128;
+#endif
+        
+#if WIN32
+		static  char char_to_symbol(char c)
+#else
+		static constexpr char char_to_symbol(char c)
+#endif
+        
+		{
             if( c >= 'a' && c <= 'z' )
                 return (c - 'a') + 6;
             if( c >= '1' && c <= '5' )
@@ -73,7 +86,13 @@ namespace Xmaxplatform { namespace Basetypes {
             return 0;
         }
 
-        static  uint64_t string_to_name( const char* str ) {
+#if WIN32
+		static  uint64_t string_to_name(const char* str)
+#else
+		static constexpr uint64_t string_to_name(const char* str)
+#endif
+         
+		{
 
             uint32_t len = 0;
             while( str[len] ) ++len;

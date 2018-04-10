@@ -251,7 +251,25 @@ namespace fc {
 
     // std::vector<char>
     template<typename Stream> inline void pack( Stream& s, const std::vector<char>& value ) {
-      fc::raw::pack( s, unsigned_int((uint32_t)value.size()) );
+      
+
+#if WIN32
+		unsigned_int v = unsigned_int((uint32_t)value.size());
+
+		uint64_t val = v.value;
+		do {
+			uint8_t b = uint8_t(val) & 0x7f;
+			val >>= 7;
+			b |= ((val > 0) << 7);
+			s.write((char*)&b, 1);//.put(b);
+		} while (val);
+#else
+		fc::raw::pack(s, unsigned_int((uint32_t)value.size()));
+#endif 
+
+	 
+
+
       if( value.size() )
         s.write( &value.front(), (uint32_t)value.size() );
     }
@@ -265,7 +283,25 @@ namespace fc {
 
     // fc::string
     template<typename Stream> inline void pack( Stream& s, const fc::string& v )  {
-      fc::raw::pack( s, unsigned_int((uint32_t)v.size()));
+      
+
+#if WIN32
+		unsigned_int vi = unsigned_int((uint32_t)v.size());
+
+		uint64_t val = vi.value;
+		do {
+			uint8_t b = uint8_t(val) & 0x7f;
+			val >>= 7;
+			b |= ((val > 0) << 7);
+			s.write((char*)&b, 1);//.put(b);
+		} while (val);
+#else
+		fc::raw::pack( s, unsigned_int((uint32_t)v.size()));
+#endif
+
+	  
+
+
       if( v.size() ) s.write( v.c_str(), v.size() );
     }
 
@@ -511,7 +547,22 @@ namespace fc {
 
     template<typename Stream, typename T>
     inline void pack( Stream& s, const std::vector<T>& value ) {
-      fc::raw::pack( s, unsigned_int((uint32_t)value.size()) );
+      
+
+#if WIN32
+		unsigned_int v = (uint32_t)value.size();
+
+		uint64_t val = v.value;
+		do {
+			uint8_t b = uint8_t(val) & 0x7f;
+			val >>= 7;
+			b |= ((val > 0) << 7);
+			s.write((char*)&b, 1);//.put(b);
+		} while (val);
+#else
+		fc::raw::pack( s, unsigned_int((uint32_t)value.size()) );
+#endif
+	  
       auto itr = value.begin();
       auto end = value.end();
       while( itr != end ) {
