@@ -5,6 +5,7 @@ add_library( xmax_native_contract
         genesis_state.cpp
         native_contract_chain_init.cpp
         xmax_contract.cpp
+        xmax_voting.cpp
         ${HEADERS}
         )
 

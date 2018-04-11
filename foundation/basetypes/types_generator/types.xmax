@@ -113,22 +113,6 @@ struct setcode
    code_abi        abi          # the interface description of the code
 
 
-struct setproducer
-   name           account_name
-   key            public_key
-   configuration  blockchain_configuration
-
-# implies message.sender account
-struct okproducer
-   voter     account_name # The account casting a vote
-   producer  account_name # The producer being voted on
-   approve   int8  # 1 to approve, or 0 to disapprove
-
-struct setproxy
-   stakeholder    account_name # The account with stake to be proxied
-   proxy          account_name # The account to cast votes with stakeholder's stake weight
-
-
 struct updateauth
    account     account_name
    permission  permission_name
@@ -149,3 +133,24 @@ struct unlinkauth
    account     account_name # The account to require permissions for
    code        account_name # The contract to require permissions to invoke
    type        func_name
+
+
+struct voteproducer
+   voter       account_name
+   proxy       account_name
+   producers   account_name[]
+
+struct regproducer
+   producer         account_name
+   producer_key     public_key
+   #prefs            blockchain_configuration
+
+struct unregprod
+   producer         account_name
+
+
+struct regproxy
+   proxy            account_name
+
+struct unregproxy
+   proxy            account_name

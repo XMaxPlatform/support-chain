@@ -21,6 +21,10 @@ void message_context_xmax::get_active_producers(Basetypes::account_name* produce
    memcpy(producers, gsc.active_builders.data(), std::min(sizeof(account_name)*gsc.active_builders.size(),(size_t)datalen));
 }
 
+fc::time_point_sec message_context_xmax::current_time() const {
+   return mutable_controller.head_block_time();
+}
+
 void message_context_xmax::require_scope(const Basetypes::account_name& account)const {
    auto itr = boost::find_if(trx.scope, [&account](const auto& scope) {
       return scope == account;

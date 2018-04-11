@@ -445,70 +445,6 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
-    struct setproducer { 
-        setproducer() = default;
-        setproducer(const account_name& name, const public_key& key, const blockchain_configuration& configuration)
-           : name(name), key(key), configuration(configuration) {}
-
-        account_name                     name;
-        public_key                       key;
-        blockchain_configuration         configuration;
-    };
-
-    template<> struct get_struct<setproducer> { 
-        static const struct_t& type() { 
-           static struct_t result = { "setproducer", "", {
-                {"name", "account_name"},
-                {"key", "public_key"},
-                {"configuration", "blockchain_configuration"},
-              }
-           };
-           return result;
-         }
-    };
-
-    struct okproducer { 
-        okproducer() = default;
-        okproducer(const account_name& voter, const account_name& producer, const int8& approve)
-           : voter(voter), producer(producer), approve(approve) {}
-
-        account_name                     voter;
-        account_name                     producer;
-        int8                             approve;
-    };
-
-    template<> struct get_struct<okproducer> { 
-        static const struct_t& type() { 
-           static struct_t result = { "okproducer", "", {
-                {"voter", "account_name"},
-                {"producer", "account_name"},
-                {"approve", "int8"},
-              }
-           };
-           return result;
-         }
-    };
-
-    struct setproxy { 
-        setproxy() = default;
-        setproxy(const account_name& stakeholder, const account_name& proxy)
-           : stakeholder(stakeholder), proxy(proxy) {}
-
-        account_name                     stakeholder;
-        account_name                     proxy;
-    };
-
-    template<> struct get_struct<setproxy> { 
-        static const struct_t& type() { 
-           static struct_t result = { "setproxy", "", {
-                {"stakeholder", "account_name"},
-                {"proxy", "account_name"},
-              }
-           };
-           return result;
-         }
-    };
-
     struct updateauth { 
         updateauth() = default;
         updateauth(const account_name& account, const permission_name& permission, const permission_name& parent, const authority& new_authority)
@@ -599,6 +535,102 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
+    struct voteproducer { 
+        voteproducer() = default;
+        voteproducer(const account_name& voter, const account_name& proxy, const vector<account_name>& producers)
+           : voter(voter), proxy(proxy), producers(producers) {}
+
+        account_name                     voter;
+        account_name                     proxy;
+        vector<account_name>             producers;
+    };
+
+    template<> struct get_struct<voteproducer> { 
+        static const struct_t& type() { 
+           static struct_t result = { "voteproducer", "", {
+                {"voter", "account_name"},
+                {"proxy", "account_name"},
+                {"producers", "account_name[]"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct regproducer { 
+        regproducer() = default;
+        regproducer(const account_name& producer, const public_key& producer_key)
+           : producer(producer), producer_key(producer_key) {}
+
+        account_name                     producer;
+        public_key                       producer_key;
+    };
+
+    template<> struct get_struct<regproducer> { 
+        static const struct_t& type() { 
+           static struct_t result = { "regproducer", "", {
+                {"producer", "account_name"},
+                {"producer_key", "public_key"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct unregprod { 
+        unregprod() = default;
+        unregprod(const account_name& producer)
+           : producer(producer) {}
+
+        account_name                     producer;
+    };
+
+    template<> struct get_struct<unregprod> { 
+        static const struct_t& type() { 
+           static struct_t result = { "unregprod", "", {
+                {"producer", "account_name"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct regproxy { 
+        regproxy() = default;
+        regproxy(const account_name& proxy)
+           : proxy(proxy) {}
+
+        account_name                     proxy;
+    };
+
+    template<> struct get_struct<regproxy> { 
+        static const struct_t& type() { 
+           static struct_t result = { "regproxy", "", {
+                {"proxy", "account_name"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct unregproxy { 
+        unregproxy() = default;
+        unregproxy(const account_name& proxy)
+           : proxy(proxy) {}
+
+        account_name                     proxy;
+    };
+
+    template<> struct get_struct<unregproxy> { 
+        static const struct_t& type() { 
+           static struct_t result = { "unregproxy", "", {
+                {"proxy", "account_name"},
+              }
+           };
+           return result;
+         }
+    };
+
 }} // namespace Xmaxplatform::Basetypes
 FC_REFLECT( Xmaxplatform::Basetypes::account_permission               , (account)(permission) )
 FC_REFLECT( Xmaxplatform::Basetypes::message                          , (code)(type)(authorization)(data) )
@@ -619,10 +651,12 @@ FC_REFLECT( Xmaxplatform::Basetypes::unlock                           , (account
 FC_REFLECT( Xmaxplatform::Basetypes::claim                            , (account)(amount) )
 FC_REFLECT( Xmaxplatform::Basetypes::newaccount                       , (creator)(name)(owner)(active)(recovery)(deposit) )
 FC_REFLECT( Xmaxplatform::Basetypes::setcode                          , (account)(vm_type)(vm_version)(code)(code_abi) )
-FC_REFLECT( Xmaxplatform::Basetypes::setproducer                      , (name)(key)(configuration) )
-FC_REFLECT( Xmaxplatform::Basetypes::okproducer                       , (voter)(producer)(approve) )
-FC_REFLECT( Xmaxplatform::Basetypes::setproxy                         , (stakeholder)(proxy) )
 FC_REFLECT( Xmaxplatform::Basetypes::updateauth                       , (account)(permission)(parent)(new_authority) )
 FC_REFLECT( Xmaxplatform::Basetypes::deleteauth                       , (account)(permission) )
 FC_REFLECT( Xmaxplatform::Basetypes::linkauth                         , (account)(code)(type)(requirement) )
 FC_REFLECT( Xmaxplatform::Basetypes::unlinkauth                       , (account)(code)(type) )
+FC_REFLECT( Xmaxplatform::Basetypes::voteproducer                     , (voter)(proxy)(producers) )
+FC_REFLECT( Xmaxplatform::Basetypes::regproducer                      , (producer)(producer_key) )
+FC_REFLECT( Xmaxplatform::Basetypes::unregprod                        , (producer) )
+FC_REFLECT( Xmaxplatform::Basetypes::regproxy                         , (proxy) )
+FC_REFLECT( Xmaxplatform::Basetypes::unregproxy                       , (proxy) )
