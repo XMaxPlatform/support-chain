@@ -9,7 +9,7 @@
 namespace Xmaxplatform {
 
 
-    const Basetypes::name basemisc::empty_name;
-    const Basetypes::public_key basemisc::empty_public_key;
+    const Basetypes::name basemisc::empty_name_type;
+    const Basetypes::public_key basemisc::empty_public_key_type;
 
 }

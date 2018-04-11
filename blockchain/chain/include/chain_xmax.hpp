@@ -40,6 +40,9 @@ namespace Xmaxplatform { namespace Chain {
        const static_config_object&          get_static_config()const;
        const dynamic_states_object&         get_dynamic_states()const;
 
+
+       time_point           head_block_time() const;
+
    private:
 
        database&                        _data;

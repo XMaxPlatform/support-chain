@@ -4,10 +4,11 @@
  */
 #pragma once
 
-#include <message_context_xmax.hpp>
-
 #include <xmaxtypes.hpp>
 
+namespace Xmaxplatform {namespace Chain{
+        class message_context_xmax;
+}}
 
 namespace Xmaxplatform { ///< xmax native xmx token contract
 namespace Native_contract {

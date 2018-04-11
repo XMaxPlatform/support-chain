@@ -305,6 +305,8 @@ public:
 
    void get_active_producers(Basetypes::account_name* producers, uint32_t len);
 
+   fc::time_point_sec current_time() const;
+
    const chain_xmax&      _chain_xmax;
    const Basechain::database&   db;  ///< database where state is stored
    const Chain::transaction&    trx; ///< used to gather the valid read/write scopes

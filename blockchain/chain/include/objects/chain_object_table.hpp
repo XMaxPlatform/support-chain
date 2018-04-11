@@ -4,10 +4,7 @@
  */
 #pragma once
 
-#include <types_xmax.hpp>
-#include <multi_index_includes.hpp>
-
-#include <types.hpp>
+#include <objects/multi_index_includes.hpp>
 
 #include <basechain.hpp>
 

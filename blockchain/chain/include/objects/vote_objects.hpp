@@ -51,7 +51,7 @@ namespace Xmaxplatform { namespace Chain {
         time                last_produced_block_time;
 
     public:
-        bool active() const { return producer_key != basemisc::empty_public_key; }
+        bool active() const { return producer_key != empty_public_key; }
 
         std::pair<uint128, id_type> get_vote_order() const    { return {total_votes, id}; }
         share_type  get_votes() const { return (share_type)total_votes; }

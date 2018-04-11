@@ -106,6 +106,10 @@ namespace Xmaxplatform { namespace Chain {
             return _data.get<dynamic_states_object>();
         }
 
+        time_point chain_xmax::head_block_time() const {
+            return get_dynamic_states().time;
+        }
+
         signed_block chain_xmax::generate_block(
                 fc::time_point_sec when,
                 const account_name& builder
