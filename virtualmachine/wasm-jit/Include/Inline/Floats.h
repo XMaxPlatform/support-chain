@@ -88,7 +88,7 @@ namespace Floats
 	
 		auto sign = std::string(components.bits.sign ? "-" : "+");
 
-		if(components.bits.exponent == FloatComponents<Float>::maxExponentBits)
+		if((int64_t)components.bits.exponent == (int64_t)FloatComponents<Float>::maxExponentBits)
 		{
 			// Handle infinity.
 			if(components.bits.significand == 0) { return sign + "infinity"; }
@@ -96,7 +96,7 @@ namespace Floats
 			{
 				// Handle NaN.
 				char significandString[FloatComponents<Float>::numSignificandHexits + 1];
-				for(Uptr hexitIndex = 0;hexitIndex < FloatComponents<Float>::numSignificandHexits;++hexitIndex)
+				for(Uptr hexitIndex = 0; (int64_t)hexitIndex < (int64_t)FloatComponents<Float>::numSignificandHexits;++hexitIndex)
 				{
 					auto hexitValue = char((components.bits.significand >> ((FloatComponents<Float>::numSignificandHexits - hexitIndex - 1) * 4)) & 0xf);
 					significandString[hexitIndex] = hexitValue >= 10 ? ('a' + hexitValue - 10) : ('0' + hexitValue);

@@ -16,7 +16,7 @@ namespace Xmaxplatform {
     *
     * Arguments: response_code, response_body
     */
-   using url_response_callback = std::function<void(int,string)>;
+   using url_response_callback = std::function<void(int,std::string)>;
 
    /**
     * @brief Callback type for a URL handler
@@ -28,7 +28,7 @@ namespace Xmaxplatform {
     *
     * Arguments: url, request_body, response_callback
     **/
-   using url_handler = std::function<void(string,string,url_response_callback)>;
+   using url_handler = std::function<void(std::string,std::string,url_response_callback)>;
 
    /**
     * @brief An API, containing URLs and handlers
@@ -37,7 +37,7 @@ namespace Xmaxplatform {
     * a handler. The URL is the path on the web server that triggers the
     * call, and the handler is the function which implements the API call
     */
-   using api_description = std::map<string, url_handler>;
+   using api_description = std::map<std::string, url_handler>;
 
    /**
     *  This plugin starts an HTTP server and dispatches queries to
@@ -66,7 +66,7 @@ namespace Xmaxplatform {
         void plugin_startup();
         void plugin_shutdown();
 
-        void add_handler(const string& url, const url_handler&);
+        void add_handler(const std::string& url, const url_handler&);
         void add_api(const api_description& api) {
            for (const auto& call : api) 
               add_handler(call.first, call.second);
@@ -81,8 +81,8 @@ namespace Xmaxplatform {
     */
    struct error_results {
      uint16_t code;
-     string message;
-     string details;
+     std::string message;
+	 std::string details;
    };
 }
 

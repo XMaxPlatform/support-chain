@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef WEBASSEMBLY_API
-	#define WEBASSEMBLY_API DLL_IMPORT
+	#define WEBASSEMBLY_API
 #endif
 
 #include "Inline/BasicTypes.h"

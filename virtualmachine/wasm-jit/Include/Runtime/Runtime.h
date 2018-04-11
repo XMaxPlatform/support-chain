@@ -5,7 +5,7 @@
 #include "IR/Types.h"
 
 #ifndef RUNTIME_API
-	#define RUNTIME_API DLL_IMPORT
+	#define RUNTIME_API
 #endif
 
 // Declare IR::Module to avoid including the definition.

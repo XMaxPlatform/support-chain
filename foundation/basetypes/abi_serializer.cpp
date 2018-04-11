@@ -30,10 +30,14 @@ namespace Xmaxplatform { namespace Basetypes {
             return variant_from_stream<T>(stream);
          },
          []( const fc::variant& var, fc::datastream<char*>& ds, bool is_array ){
-            if( is_array )
-               fc::raw::pack( ds, var.as<vector<T>>() );
+			 if (is_array)
+			 {
+				 fc::raw::pack(ds, var.as<vector<T>>()); 
+			 }
             else
-               fc::raw::pack( ds,  var.as<T>());
+			{  
+				fc::raw::pack( ds,  var.as<T>()); 
+			}
          }
       );
    }
@@ -264,7 +268,22 @@ namespace Xmaxplatform { namespace Basetypes {
          btype->second.second(var, ds, is_array(rtype));
       } else if ( is_array(rtype) ) {
          vector<fc::variant> vars = var.get_array();
-         fc::raw::pack(ds, (fc::unsigned_int)vars.size());
+
+#if WIN32
+		 fc::unsigned_int v = (uint32_t)vars.size();
+
+		 uint64_t val = v.value;
+		 do {
+			 uint8_t b = uint8_t(val) & 0x7f;
+			 val >>= 7;
+			 b |= ((val > 0) << 7);
+			 ds.write((char*)&b, 1);//.put(b);
+		 } while (val);
+#else
+		 fc::raw::pack(ds, (fc::unsigned_int)vars.size());
+#endif
+
+         
          for (const auto& var : vars) {
            variant_to_binary(array_type(rtype), var, ds);
          }

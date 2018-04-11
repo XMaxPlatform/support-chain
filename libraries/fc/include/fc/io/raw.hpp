@@ -741,11 +741,16 @@ namespace fc {
 
 
     template<typename Stream, typename T> void pack( Stream& s, const boost::multiprecision::number<T>& n ) {
-      static_assert( sizeof( n ) == (std::numeric_limits<boost::multiprecision::number<T>>::digits+1)/8, "unexpected padding" );
+#ifndef WIN32
+		static_assert(sizeof(n) == (std::numeric_limits<boost::multiprecision::number<T>>::digits + 1) / 8, "unexpected padding");
+#endif
+      
       s.write( (const char*)&n, sizeof(n) );
     }
     template<typename Stream, typename T> void unpack( Stream& s,  boost::multiprecision::number<T>& n ) {
-      static_assert( sizeof( n ) == (std::numeric_limits<boost::multiprecision::number<T>>::digits+1)/8, "unexpected padding" );
+#ifndef WIN32
+		static_assert(sizeof(n) == (std::numeric_limits<boost::multiprecision::number<T>>::digits + 1) / 8, "unexpected padding");
+#endif     
       s.read( (char*)&n, sizeof(n) );
     }
 

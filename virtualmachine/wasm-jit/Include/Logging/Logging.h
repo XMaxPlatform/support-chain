@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef LOGGING_API
-	#define LOGGING_API DLL_IMPORT
+	#define LOGGING_API 
 #endif
 
 #include "Inline/BasicTypes.h"

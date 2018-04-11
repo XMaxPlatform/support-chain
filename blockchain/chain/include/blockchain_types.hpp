@@ -43,7 +43,14 @@
     NAME(Constructor&& c, Basechain::allocator<Allocator> a) \
     : id(0) BOOST_PP_SEQ_FOR_EACH(OBJECT_CCTOR2_MACRO, _, FIELDS) \
     { c(*this); }
+
+#if WIN32
+#define OBJECT_CCTOR(...)  BOOST_PP_CAT( BOOST_PP_OVERLOAD(OBJECT_CCTOR, __VA_ARGS__)(__VA_ARGS__), BOOST_PP_EMPTY() )
+#else
 #define OBJECT_CCTOR(...) BOOST_PP_OVERLOAD(OBJECT_CCTOR, __VA_ARGS__)(__VA_ARGS__)
+#endif
+
+
 
 
 namespace Xmaxplatform { namespace Chain {

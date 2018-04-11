@@ -218,7 +218,7 @@ namespace Xmaxplatform {
              my->server.stop_listening();
    }
 
-   void chainhttp_plugin::add_handler(const string& url, const url_handler& handler) {
+   void chainhttp_plugin::add_handler(const std::string& url, const url_handler& handler) {
       ilog( "add api url: ${c}", ("c",url) );
       app().get_io_service().post([=](){
         my->url_handlers.insert(std::make_pair(url,handler));

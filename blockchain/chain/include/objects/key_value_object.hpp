@@ -14,7 +14,7 @@ namespace Xmaxplatform { namespace Chain {
    struct by_scope_tertiary;
 
    struct key_value_object : public Basechain::object<key_value_object_type, key_value_object> {
-      OBJECT_CCTOR(key_value_object, (value))
+	   OBJECT_CCTOR(key_value_object, (value))
       
       typedef uint64_t key_type;
       static const int number_of_keys = 1;

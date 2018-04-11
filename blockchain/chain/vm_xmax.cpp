@@ -21,6 +21,9 @@
 #include <chrono>
 #include <boost/lexical_cast.hpp>
 #include <fc/utf8.hpp>
+#if WIN32
+#include <fc/int128.hpp>
+#endif
 
 namespace Xmaxplatform { namespace Chain {
    using namespace IR;
@@ -398,16 +401,28 @@ DEFINE_INTRINSIC_FUNCTION3(env,sha256,sha256,none,i32,dataptr,i32,datalen,i32,ha
 DEFINE_INTRINSIC_FUNCTION2(env,multeq_i128,multeq_i128,none,i32,self,i32,other) {
    auto& wasm  = vm_xmax::get();
    auto  mem   = wasm.current_memory;
-   auto& v = memoryRef<unsigned __int128>( mem, self );
-   const auto& o = memoryRef<const unsigned __int128>( mem, other );
+#if WIN32
+   auto& v = memoryRef<_int128>(mem, self);
+   const auto& o = memoryRef<const  _int128>(mem, other);
+#else
+   auto& v = memoryRef<unsigned __int128>(mem, self);
+   const auto& o = memoryRef<const unsigned __int128>(mem, other);
+#endif
+   
    v *= o;
 }
 
 DEFINE_INTRINSIC_FUNCTION2(env,diveq_i128,diveq_i128,none,i32,self,i32,other) {
    auto& wasm  = vm_xmax::get();
    auto  mem          = wasm.current_memory;
-   auto& v = memoryRef<unsigned __int128>( mem, self );
-   const auto& o = memoryRef<const unsigned __int128>( mem, other );
+#if WIN32
+   auto& v = memoryRef< _int128>(mem, self);
+   const auto& o = memoryRef<const  _int128>(mem, other);
+#else
+   auto& v = memoryRef<unsigned __int128>(mem, self);
+   const auto& o = memoryRef<const unsigned __int128>(mem, other);
+#endif
+  
    FC_ASSERT( o != 0, "divide by zero" );
    v /= o;
 }
@@ -557,7 +572,12 @@ DEFINE_INTRINSIC_FUNCTION1(env,printd,printd,none,i64,val) {
 DEFINE_INTRINSIC_FUNCTION1(env,printi128,printi128,none,i32,val) {
   auto& wasm  = vm_xmax::get();
   auto  mem   = wasm.current_memory;
-  auto& value = memoryRef<unsigned __int128>( mem, val );
+#if WIN32
+  auto& value = memoryRef< _int128>(mem, val);
+#else
+  auto& value = memoryRef<unsigned __int128>(mem, val);
+#endif
+  
   fc::uint128_t v(value>>64, uint64_t(value) );
   std::cerr << fc::variant(v).get_string();
 }
@@ -777,7 +797,7 @@ DEFINE_INTRINSIC_FUNCTION1(env,free,free,none,i32,ptr) {
       if( state.code_version != recipient.code_version ) {
         if( state.instance ) {
            /// TODO: free existing instance and module
-#warning TODO: free existing module if the code has been updated, currently leak memory
+//#warning TODO: free existing module if the code has been updated, currently leak memory
            state.instance     = nullptr;
            state.module       = nullptr;
            state.code_version = fc::sha256();

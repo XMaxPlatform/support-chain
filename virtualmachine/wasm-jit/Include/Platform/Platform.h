@@ -8,8 +8,8 @@
 
 #ifdef _WIN32
 	#define THREAD_LOCAL thread_local
-	#define DLL_EXPORT __declspec(dllexport)
-	#define DLL_IMPORT __declspec(dllimport)
+	#define DLL_EXPORT 
+	#define DLL_IMPORT 
 	#define FORCEINLINE __forceinline
 	#define SUPPRESS_UNUSED(variable) (void)(variable);
 	#include <intrin.h>
@@ -25,7 +25,7 @@
 #endif
 
 #ifndef PLATFORM_API
-	#define PLATFORM_API DLL_IMPORT
+	#define PLATFORM_API
 #endif
 
 namespace Platform

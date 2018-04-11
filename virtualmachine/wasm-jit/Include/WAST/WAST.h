@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef WAST_API
-	#define WAST_API DLL_IMPORT
+	#define WAST_API 
 #endif
 
 #include "Inline/BasicTypes.h"

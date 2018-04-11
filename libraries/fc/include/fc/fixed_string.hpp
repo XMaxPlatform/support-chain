@@ -110,7 +110,18 @@ namespace fc {
     template<typename Stream, typename Storage>
     inline void pack( Stream& s, const fc::fixed_string<Storage>& u ) {
        unsigned_int size = u.size();
-       pack( s, size );
+#if WIN32   
+	   uint64_t val = size.value;
+	   do {
+		   uint8_t b = uint8_t(val) & 0x7f;
+		   val >>= 7;
+		   b |= ((val > 0) << 7);
+		   s.write((char*)&b, 1);//.put(b);
+	   } while (val);
+#else
+	   pack(s, size);
+#endif
+       
        s.write( (const char*)&u.data, size );
     }
 
