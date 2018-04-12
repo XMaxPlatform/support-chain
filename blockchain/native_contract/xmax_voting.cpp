@@ -22,17 +22,17 @@ namespace Native_contract {
 
     using namespace Xmaxplatform::Chain;
 
-    typedef db_object_table <voter_info_object, by_owner> voters_table;
+    typedef mutable_db_table <voter_info_object, by_owner> voters_table;
 
-    typedef db_object_table <producer_info_object, by_owner> producers_table;
+    typedef mutable_db_table <builder_info_object, by_owner> builders_table;
 
 
-    void voting::increase_voting_power(message_context_xmax &context, account_name acnt, share_type amount)
+    void xmax_voting::increase_votes(message_context_xmax &context, account_name acnt, share_type amount)
     {
 
         voters_table voters_tbl(context.mutable_db);
 
-        auto voter = voters_tbl.find(acnt);
+        const voter_info_object* voter = voters_tbl.find(acnt);
 
         if (voter == nullptr) {
             voter = voters_tbl.emplace([&](voter_info_object &a) {
@@ -47,34 +47,34 @@ namespace Native_contract {
             });
         }
 
-        const std::vector<account_name> *producers = nullptr;
+        const std::vector<account_name> *builders = nullptr;
         if (voter->proxy) {
             auto proxy = voters_tbl.find(voter->proxy);
             XMAX_ASSERT(proxy != nullptr, message_validate_exception, "selected proxy not found"); //data corruption
             voters_tbl.modify(proxy, [&](voter_info_object &a) {
                 a.proxied_votes += amount;
             });
-            if (proxy->is_proxy) { //only if proxy is still active. if proxy has been unregistered, we update proxied_votes, but don't propagate to producers
-                producers = &proxy->producers;
+            if (proxy->is_proxy) { //only if proxy is still active. if proxy has been unregistered, we update proxied_votes, but don't propagate to builders
+                builders = &proxy->builders;
             }
         } else {
-            producers = &voter->producers;
+            builders = &voter->builders;
         }
 
-        if (producers) {
-            producers_table producers_tbl(context.mutable_db);
-            for (auto p : *producers) {
-                auto prod = producers_tbl.find(p);
+        if (builders) {
+            builders_table builders_tbl(context.mutable_db);
+            for (auto p : *builders) {
+                auto prod = builders_tbl.find(p);
                 XMAX_ASSERT(prod != nullptr, message_validate_exception,
-                            "never existed producer"); //data corruption
-                producers_tbl.modify(prod, [&](auto &v) {
+                            "never existed builder"); //data corruption
+                builders_tbl.modify(prod, [&](auto &v) {
                     v.total_votes += amount;
                 });
             }
         }
     }
 
-    void voting::decrease_voting_power(message_context_xmax &context, account_name acnt, share_type amount)
+    void xmax_voting::decrease_votes(message_context_xmax &context, account_name acnt, share_type amount)
     {
 
         context.require_authorization(acnt);
@@ -91,26 +91,26 @@ namespace Native_contract {
                 a.last_update = context.current_time();
             });
 
-            const std::vector<account_name> *producers = nullptr;
+            const std::vector<account_name> *builders = nullptr;
             if (voter->proxy) {
                 auto proxy = voters_tbl.find(voter->proxy);
                 voters_tbl.modify(proxy, [&](voter_info_object &a) {
                     a.proxied_votes -= (uint128) amount;
                 });
-                if (proxy->is_proxy) { //only if proxy is still active. if proxy has been unregistered, we update proxied_votes, but don't propagate to producers
-                    producers = &proxy->producers;
+                if (proxy->is_proxy) { //only if proxy is still active. if proxy has been unregistered, we update proxied_votes, but don't propagate to builders
+                    builders = &proxy->builders;
                 }
             } else {
-                producers = &voter->producers;
+                builders = &voter->builders;
             }
 
-            if (producers) {
-                producers_table producers_tbl(context.mutable_db);
-                for (auto p : *producers) {
-                    auto prod = producers_tbl.find(p);
+            if (builders) {
+                builders_table builders_tbl(context.mutable_db);
+                for (auto p : *builders) {
+                    auto prod = builders_tbl.find(p);
                     XMAX_ASSERT(prod != nullptr, message_validate_exception,
-                                "never existed producer"); //data corruption
-                    producers_tbl.modify(prod, [&](auto &v) {
+                                "never existed builder"); //data corruption
+                    builders_tbl.modify(prod, [&](auto &v) {
                         v.total_votes -= amount;
                     });
                 }
@@ -129,22 +129,22 @@ namespace Native_contract {
         }
     }
 
-    void voting::vote_producer(message_context_xmax &context)
+    void xmax_voting::vote_builder(message_context_xmax &context)
     {
-        auto vp = context.msg.as<voteproducer>();
+        auto vp = context.msg.as<votebuilder>();
 
         context.require_authorization(vp.voter);
 
         if (vp.proxy.good()) {
-            XMAX_ASSERT(vp.producers.size() == 0, message_validate_exception,
-                        "cannot vote for producers and proxy at same time");
+            XMAX_ASSERT(vp.builders.size() == 0, message_validate_exception,
+                        "cannot vote for builders and proxy at same time");
             context.require_recipient(vp.proxy);
         } else {
-            XMAX_ASSERT(vp.producers.size() <= 30, message_validate_exception,
-                        "attempt to vote for too many producers");
-            for (size_t i = 1; i < vp.producers.size(); ++i) {
-                XMAX_ASSERT(vp.producers[i - 1] < vp.producers[i], message_validate_exception,
-                            "producer votes must be unique and sorted");
+            XMAX_ASSERT(vp.builders.size() <= 30, message_validate_exception,
+                        "attempt to vote for too many builders");
+            for (size_t i = 1; i < vp.builders.size(); ++i) {
+                XMAX_ASSERT(vp.builders[i - 1] < vp.builders[i], message_validate_exception,
+                            "builder votes must be unique and sorted");
             }
         }
 
@@ -162,8 +162,8 @@ namespace Native_contract {
         }
 
 
-        //find old producers, update old proxy if needed
-        const std::vector<account_name> *old_producers = nullptr;
+        //find old builders, update old proxy if needed
+        const std::vector<account_name> *old_builders = nullptr;
         if (voter->proxy.good()) {
             if (voter->proxy == vp.proxy) {
                 return; // nothing changed
@@ -176,16 +176,16 @@ namespace Native_contract {
             });
 
             if (old_proxy->is_proxy !=
-                0) { //if proxy stoped being proxy, the votes were already taken back from producers by on( const unregister_proxy& )
-                old_producers = &old_proxy->producers;
+                0) { //if proxy stoped being proxy, the votes were already taken back from builders by on( const unregister_proxy& )
+                old_builders = &old_proxy->builders;
             }
         } else {
-            old_producers = &voter->producers;
+            old_builders = &voter->builders;
         }
 
 
-        //find new producers, update new proxy if needed
-        const std::vector<account_name> *new_producers = nullptr;
+        //find new builders, update new proxy if needed
+        const std::vector<account_name> *new_builders = nullptr;
         if (vp.proxy) {
             auto new_proxy = voters_tbl.find(vp.proxy);
             XMAX_ASSERT(new_proxy != nullptr && new_proxy->is_proxy != 0, message_validate_exception,
@@ -193,50 +193,50 @@ namespace Native_contract {
             voters_tbl.modify(new_proxy, [&](auto &a) {
                 a.proxied_votes += voter->staked;
             });
-            new_producers = &new_proxy->producers;
+            new_builders = &new_proxy->builders;
         } else {
-            new_producers = &vp.producers;
+            new_builders = &vp.builders;
         }
 
 
-        producers_table producers_tbl(db);
+        builders_table builders_tbl(db);
 
         uint128 votes = (uint128) voter->staked;
         if (voter->is_proxy) {
             votes += voter->proxied_votes;
         }
 
-        if (old_producers) { //old_producers == nullptr if proxy has stopped being a proxy and votes were taken back from the producers at that moment
+        if (old_builders) { //old_builders == nullptr if proxy has stopped being a proxy and votes were taken back from the builders at that moment
             //revoke votes only from no longer elected
-            std::vector<account_name> revoked(old_producers->size());
-            auto end_it = std::set_difference(old_producers->begin(), old_producers->end(), new_producers->begin(),
-                                              new_producers->end(), revoked.begin());
+            std::vector<account_name> revoked(old_builders->size());
+            auto end_it = std::set_difference(old_builders->begin(), old_builders->end(), new_builders->begin(),
+                                              new_builders->end(), revoked.begin());
             for (auto it = revoked.begin(); it != end_it; ++it) {
-                auto prod = producers_tbl.find(*it);
+                auto prod = builders_tbl.find(*it);
                 XMAX_ASSERT(prod != nullptr, message_validate_exception,
-                            "never existed producer"); //data corruption
-                producers_tbl.modify(prod, [&](auto &pi) {
+                            "never existed builder"); //data corruption
+                builders_tbl.modify(prod, [&](auto &pi) {
                     pi.total_votes -= votes;
                 });
             }
         }
 
         //update newly elected
-        std::vector<account_name> elected(new_producers->size());
+        std::vector<account_name> elected(new_builders->size());
         auto end_it = elected.begin();
-        if (old_producers) {
-            end_it = std::set_difference(new_producers->begin(), new_producers->end(), old_producers->begin(),
-                                         old_producers->end(), elected.begin());
+        if (old_builders) {
+            end_it = std::set_difference(new_builders->begin(), new_builders->end(), old_builders->begin(),
+                                         old_builders->end(), elected.begin());
         } else {
-            end_it = std::copy(new_producers->begin(), new_producers->end(), elected.begin());
+            end_it = std::copy(new_builders->begin(), new_builders->end(), elected.begin());
         }
         for (auto it = elected.begin(); it != end_it; ++it) {
-            auto prod = producers_tbl.find(*it);
-            XMAX_ASSERT(prod != nullptr, message_validate_exception, "producer is not registered");
-            if (vp.proxy.empty()) { //direct voting, in case of proxy voting update total_votes even for inactive producers
-                XMAX_ASSERT(prod->active(), message_validate_exception, "producer is not currently registered");
+            auto prod = builders_tbl.find(*it);
+            XMAX_ASSERT(prod != nullptr, message_validate_exception, "builder is not registered");
+            if (vp.proxy.empty()) { //direct xmax_voting, in case of proxy xmax_voting update total_votes even for inactive builders
+                XMAX_ASSERT(prod->active(), message_validate_exception, "builder is not currently registered");
             }
-            producers_tbl.modify(prod, [&](auto &pi) {
+            builders_tbl.modify(prod, [&](auto &pi) {
                 pi.total_votes += votes;
             });
         }
@@ -245,51 +245,51 @@ namespace Native_contract {
         voters_tbl.modify(voter, [&](voter_info_object &a) {
             a.proxy = vp.proxy;
             a.last_update = context.current_time();
-            a.producers = vp.producers;
+            a.builders = vp.builders;
         });
 
     }
 
-    void voting::reg_producer(message_context_xmax &context)
+    void xmax_voting::reg_builder(message_context_xmax &context)
     {
-        auto reg = context.msg.as<regproducer>();
+        auto reg = context.msg.as<regbuilder>();
 
-        context.require_authorization(reg.producer);
+        context.require_authorization(reg.builder);
 
-        producers_table producers_tbl(context.mutable_db);
-        auto prod = producers_tbl.find(reg.producer);
+        builders_table builders_tbl(context.mutable_db);
+        auto prod = builders_tbl.find(reg.builder);
 
         if (prod != nullptr) {
-            producers_tbl.modify(prod, [&](producer_info_object &info) {
+            builders_tbl.modify(prod, [&](builder_info_object &info) {
                 //info.prefs = reg.prefs;
-                info.producer_key = reg.producer_key;
+                info.builder_key = reg.builder_key;
             });
         } else {
-            producers_tbl.emplace([&](producer_info_object &info) {
-                info.owner = reg.producer;
+            builders_tbl.emplace([&](builder_info_object &info) {
+                info.owner = reg.builder;
                 info.total_votes = 0;
                 //info.prefs = reg.prefs;
-                info.producer_key = reg.producer_key;
+                info.builder_key = reg.builder_key;
             });
         }
     }
 
-    void voting::unreg_prod(message_context_xmax &context)
+    void xmax_voting::unreg_builder(message_context_xmax &context)
     {
-        auto unreg = context.msg.as<unregprod>();
+        auto unreg = context.msg.as<unregbuilder>();
 
-        context.require_authorization(unreg.producer);
+        context.require_authorization(unreg.builder);
 
-        producers_table producers_tbl(context.mutable_db);
-        auto prod = producers_tbl.find(unreg.producer);
-        XMAX_ASSERT(prod != nullptr, message_validate_exception, "producer not found");
+        builders_table builders_tbl(context.mutable_db);
+        auto prod = builders_tbl.find(unreg.builder);
+        XMAX_ASSERT(prod != nullptr, message_validate_exception, "builder not found");
 
-        producers_tbl.modify(prod, [&](producer_info_object &info) {
-            info.producer_key = empty_public_key;
+        builders_tbl.modify(prod, [&](builder_info_object &info) {
+            info.builder_key = empty_public_key;
         });
     }
 
-    void voting::reg_proxy(message_context_xmax &context)
+    void xmax_voting::reg_proxy(message_context_xmax &context)
     {
 
         auto reg = context.msg.as<regproxy>();
@@ -308,12 +308,12 @@ namespace Native_contract {
                 //a.proxied_votes may be > 0, if the proxy has been unregistered, so we had to keep the value
             });
             if (0 < proxy->proxied_votes) {
-                producers_table producers_tbl(context.mutable_db);
-                for (auto p : proxy->producers) {
-                    auto prod = producers_tbl.find(p);
+                builders_table builders_tbl(context.mutable_db);
+                for (auto p : proxy->builders) {
+                    auto prod = builders_tbl.find(p);
                     XMAX_ASSERT(prod != nullptr, message_validate_exception,
-                                "never existed producer"); //data corruption
-                    producers_tbl.modify(prod, [&](auto &pi) { pi.total_votes += proxy->proxied_votes; });
+                                "never existed builder"); //data corruption
+                    builders_tbl.modify(prod, [&](auto &pi) { pi.total_votes += proxy->proxied_votes; });
                 }
             }
         } else {
@@ -328,7 +328,7 @@ namespace Native_contract {
         }
     }
 
-    void voting::unreg_proxy(message_context_xmax &context)
+    void xmax_voting::unreg_proxy(message_context_xmax &context)
     {
         auto reg = context.msg.as<unregproxy>();
 
@@ -346,12 +346,12 @@ namespace Native_contract {
         });
 
         if (0 < proxy->proxied_votes) {
-            producers_table producers_tbl(context.mutable_db);
-            for (auto p : proxy->producers) {
-                auto prod = producers_tbl.find(p);
+            builders_table builders_tbl(context.mutable_db);
+            for (auto p : proxy->builders) {
+                auto prod = builders_tbl.find(p);
                 XMAX_ASSERT(prod != nullptr, message_validate_exception,
-                            "never existed producer"); //data corruption
-                producers_tbl.modify(prod, [&](auto &pi) { pi.total_votes -= proxy->proxied_votes; });
+                            "never existed builder"); //data corruption
+                builders_tbl.modify(prod, [&](auto &pi) { pi.total_votes -= proxy->proxied_votes; });
             }
         }
     }

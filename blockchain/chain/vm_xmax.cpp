@@ -475,7 +475,7 @@ DEFINE_INTRINSIC_FUNCTION1(env,i64_to_double,i64_to_double,i64,i64,a) {
    return *reinterpret_cast<uint64_t *>(&res);
 }
 DEFINE_INTRINSIC_FUNCTION0(env,now,now,i32) {
-   return vm_xmax::get().current_validate_context->_chain_xmax.get_dynamic_states().time.sec_since_epoch();
+   return vm_xmax::get().current_validate_context->_chain_xmax.get_dynamic_states().state_time.sec_since_epoch();
 }
 
 

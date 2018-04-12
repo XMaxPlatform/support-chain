@@ -12,30 +12,22 @@ namespace Xmaxplatform {
 namespace Chain {
 
 template<typename ObjectType, typename IndexedByType>
-class db_object_table
+class const_db_table
 {
 public:
-    typedef ObjectType object_type;
-    typedef IndexedByType index_by_type;
+    typedef ObjectType table_object_type;
+    typedef IndexedByType table_indexed_by_type;
     typedef typename Basechain::get_index_type< ObjectType >::type multi_index_type;
 
     template<typename CompatibleKey >
-    const object_type* find(CompatibleKey& key)
+    const table_object_type* find(CompatibleKey& key)
     {
-        return _database.find<object_type, index_by_type>(key);
+        return _database.find<table_object_type, table_indexed_by_type>(key);
     }
-
-    template<typename Modifier>
-    void modify( const object_type* obj, Modifier&& m )
+    template<typename CompatibleKey >
+    const table_object_type& get(CompatibleKey& key)
     {
-        if(obj)
-            _database.modify(*obj, m);
-    }
-
-    template<typename Constructor>
-    const object_type* emplace( Constructor&& c )
-    {
-        return &_database.create<object_type>(c);
+        return _database.get<table_object_type, table_indexed_by_type>(key);
     }
 
     template<typename ByIndex>
@@ -43,13 +35,53 @@ public:
     {
         return _database.get_index<multi_index_type, ByIndex>();
     }
-    db_object_table(Basechain::database& database)
-            : _database(database)
+
+    const_db_table(const Basechain::database& database)
+    : _database(database)
+     {
+
+     }
+
+protected:
+    const Basechain::database& _database;
+};
+
+template<typename ObjectType, typename IndexedByType>
+class mutable_db_table : public const_db_table<ObjectType, IndexedByType>
+{
+public:
+    typedef const_db_table<ObjectType, IndexedByType> super;
+    typedef typename super::table_object_type table_object_type;
+    typedef typename super::table_indexed_by_type table_indexed_by_type;
+    typedef typename super::multi_index_type multi_index_type;
+
+    template<typename Modifier>
+    void modify( const table_object_type* obj, Modifier&& m )
+    {
+        if(obj)
+            _db.modify(*obj, m);
+    }
+    template<typename Modifier>
+    void modify( const table_object_type& obj, Modifier&& m )
+    {
+        _db.modify(obj, m);
+    }
+
+    template<typename Constructor>
+    const table_object_type* emplace( Constructor&& c )
+    {
+        return &_db.create< table_object_type >(c);
+    }
+
+    mutable_db_table(Basechain::database& database)
+            : super(database)
+            , _db(database)
+
     {
     }
 
 private:
-    Basechain::database& _database;
+    Basechain::database& _db;
 };
 
 

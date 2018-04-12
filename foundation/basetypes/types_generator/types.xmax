@@ -135,19 +135,18 @@ struct unlinkauth
    type        func_name
 
 
-struct voteproducer
+struct votebuilder
    voter       account_name
    proxy       account_name
-   producers   account_name[]
+   builders   account_name[]
 
-struct regproducer
-   producer         account_name
-   producer_key     public_key
-   #prefs            blockchain_configuration
+struct regbuilder
+   builder          account_name
+   builder_key      public_key
+   #prefs           blockchain_configuration
 
-struct unregprod
-   producer         account_name
-
+struct unregbuilder
+   builder          account_name
 
 struct regproxy
    proxy            account_name

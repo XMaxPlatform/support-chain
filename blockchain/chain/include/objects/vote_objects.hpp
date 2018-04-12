@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in xmax/LICENSE.txt
+ *  @copyright defined in xmax/LICENSE
  */
 #pragma once
 
@@ -15,7 +15,7 @@ namespace Xmaxplatform { namespace Chain {
     class voter_info_object : public Basechain::object<vote_info_object_type, voter_info_object> {
         OBJECT_CCTOR(voter_info_object)
 
-        typedef std::vector<account_name> producer_list;
+        typedef std::vector<account_name> builder_list;
 
         id_type         id;
         account_name	owner;
@@ -23,7 +23,7 @@ namespace Xmaxplatform { namespace Chain {
         uint32	        is_proxy;
 
         uint128	        proxied_votes;
-        producer_list	producers;
+        builder_list	builders;
 
         share_type	    staked;
         share_type	    unstaking;
@@ -36,22 +36,22 @@ namespace Xmaxplatform { namespace Chain {
     };
 
 
-    class producer_info_object : public Basechain::object<producer_info_object_type, producer_info_object> {
-        OBJECT_CCTOR(producer_info_object)
+    class builder_info_object : public Basechain::object<builder_info_object_type, builder_info_object> {
+        OBJECT_CCTOR(builder_info_object)
 
         id_type             id;
         account_name        owner;
         uint128             total_votes;
         //blockchain_configuration prefs;
 
-        public_key_type     producer_key;
-        share_type          per_block_payments;
-        time                last_rewards_claim;
-        time                time_became_active;
-        time                last_produced_block_time;
+        public_key_type     builder_key;
+        //share_type          per_block_payments;
+        //time                last_rewards_claim;
+        //time                active_time;
+        time                last_build_time;
 
     public:
-        bool active() const { return producer_key != empty_public_key; }
+        bool active() const { return builder_key != empty_public_key; }
 
         std::pair<uint128, id_type> get_vote_order() const    { return {total_votes, id}; }
         share_type  get_votes() const { return (share_type)total_votes; }
@@ -70,20 +70,20 @@ namespace Xmaxplatform { namespace Chain {
             >
     >;
 
-    using producer_info_id_type = producer_info_object::id_type;
+    using builder_info_id_type = builder_info_object::id_type;
 
-    using producer_info_index = Basechain::shared_multi_index_container<
-            producer_info_object,
+    using builder_info_index = Basechain::shared_multi_index_container<
+            builder_info_object,
             indexed_by<
                     ordered_unique<tag<by_id>,
-                            member<producer_info_object, producer_info_object::id_type, &producer_info_object::id>
+                            member<builder_info_object, builder_info_object::id_type, &builder_info_object::id>
                     >,
                     ordered_unique<tag<by_owner>,
-                            member<producer_info_object, account_name, &producer_info_object::owner>
+                            member<builder_info_object, account_name, &builder_info_object::owner>
                     >,
                     ordered_non_unique<tag<by_votes>,
-                            const_mem_fun<producer_info_object, std::pair<uint128, producer_info_object::id_type>, &producer_info_object::get_vote_order>,
-                            std::greater< std::pair<uint128, producer_info_object::id_type> >
+                            const_mem_fun<builder_info_object, std::pair<uint128, builder_info_object::id_type>, &builder_info_object::get_vote_order>,
+                            std::greater< std::pair<uint128, builder_info_object::id_type> >
                     >
             >
     >;
@@ -93,15 +93,15 @@ namespace Xmaxplatform { namespace Chain {
 
 BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::voter_info_object, Xmaxplatform::Chain::voter_info_index)
 
-BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::producer_info_object, Xmaxplatform::Chain::producer_info_index)
+BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::builder_info_object, Xmaxplatform::Chain::builder_info_index)
 
 FC_REFLECT(Basechain::oid<Xmaxplatform::Chain::voter_info_object>, (_id))
 
-FC_REFLECT(Xmaxplatform::Chain::voter_info_object, (id)(owner)(proxy)(is_proxy)(proxied_votes)(producers)(staked)(unstaking)(unstake_per_week)(deferred_trx_id)(last_update)(last_unstake_time))
+FC_REFLECT(Xmaxplatform::Chain::voter_info_object, (id)(owner)(proxy)(is_proxy)(proxied_votes)(builders)(staked)(unstaking)(unstake_per_week)(deferred_trx_id)(last_update)(last_unstake_time))
 
-FC_REFLECT(Basechain::oid<Xmaxplatform::Chain::producer_info_object>, (_id))
+FC_REFLECT(Basechain::oid<Xmaxplatform::Chain::builder_info_object>, (_id))
 
-FC_REFLECT(Xmaxplatform::Chain::producer_info_object, (owner)(total_votes)(producer_key)(per_block_payments)(last_rewards_claim)(time_became_active)(last_produced_block_time))
-
+FC_REFLECT(Xmaxplatform::Chain::builder_info_object, (owner)(total_votes)(builder_key)(last_build_time))
+                                                                                    //(per_block_payments)(last_rewards_claim)(time_became_active)
 
 

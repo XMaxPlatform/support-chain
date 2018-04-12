@@ -41,7 +41,7 @@ namespace Xmaxplatform { namespace Chain {
        const dynamic_states_object&         get_dynamic_states()const;
 
 
-       time_point           head_block_time() const;
+       time           head_block_time() const;
 
    private:
 

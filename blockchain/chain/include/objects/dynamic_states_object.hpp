@@ -19,11 +19,11 @@ namespace Xmaxplatform { namespace Chain {
    {
         OBJECT_CCTOR(dynamic_states_object)
 
-        id_type           id;
-        uint32_t          head_block_number = 0;
-        xmax_type_block_id     head_block_id;
-        time_point_sec    time;
-        account_name      current_builder;
+        id_type                 id;
+        uint32_t                head_block_number = 0;
+        xmax_type_block_id      head_block_id;
+        time                    state_time;
+        account_name            current_builder;
 
    };
 
@@ -45,6 +45,6 @@ BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::dynamic_states_object,
 FC_REFLECT(Xmaxplatform::Chain::dynamic_states_object,
            (head_block_number)
            (head_block_id)
-           (time)
+           (state_time)
            (current_builder)
           )

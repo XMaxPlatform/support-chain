@@ -9,17 +9,17 @@
 
 namespace Xmaxplatform { namespace Chain {
 
-    struct producer_key
+    struct builder_key
     {
-        account_name        producer_name;
+        account_name        builder_name;
         public_key_type     block_signing_key;
     };
 
-    struct producer_schedule
+    struct builder_schedule
     {
     public:
         uint32_t                     version;   ///< sequentially incrementing version number
-        std::vector<producer_key>    producers;
+        std::vector<builder_key>     builders;
     };
 
 

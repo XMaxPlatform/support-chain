@@ -303,9 +303,9 @@ public:
    bool all_authorizations_used() const;
    vector<Basetypes::account_permission> unused_authorizations() const;
 
-   void get_active_producers(Basetypes::account_name* producers, uint32_t len);
+   void get_active_builders(Basetypes::account_name *builders, uint32_t len);
 
-   fc::time_point_sec current_time() const;
+   time current_time() const;
 
    const chain_xmax&      _chain_xmax;
    const Basechain::database&   db;  ///< database where state is stored

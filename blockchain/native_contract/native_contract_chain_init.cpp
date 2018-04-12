@@ -31,6 +31,14 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
    chain.set_message_handler( #contract, #scope, #action, &BOOST_PP_CAT(nspace::Native_contract::handle_, BOOST_PP_CAT(contract, BOOST_PP_CAT(_,action) ) ) )
     SET_APP_HANDLER( xmax, xmax, newaccount, Xmaxplatform );
     SET_APP_HANDLER( xmax, xmax, transfer, Xmaxplatform );
+
+    SET_APP_HANDLER( xmax, xmax, lock, Xmaxplatform );
+    SET_APP_HANDLER( xmax, xmax, unlock, Xmaxplatform );
+    SET_APP_HANDLER( xmax, xmax, votebuilder, Xmaxplatform );
+    SET_APP_HANDLER( xmax, xmax, regbuilder, Xmaxplatform );
+    SET_APP_HANDLER( xmax, xmax, unregbuilder, Xmaxplatform );
+    SET_APP_HANDLER( xmax, xmax, regproxy, Xmaxplatform );
+    SET_APP_HANDLER( xmax, xmax, unregproxy, Xmaxplatform );
 }
 
         Basetypes::abi native_contract_chain_init::xmax_contract_abi()

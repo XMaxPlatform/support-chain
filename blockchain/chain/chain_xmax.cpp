@@ -56,7 +56,7 @@ namespace Xmaxplatform { namespace Chain {
                             p.active_builders = initer.get_chain_init_builders();
                         });
                         _data.create<dynamic_states_object>([&](dynamic_states_object &p) {
-                            p.time = initer.get_chain_init_time();
+                            p.state_time = initer.get_chain_init_time();
                             p.current_builder = initer.get_chain_init_builders().at(0);
                         });
 
@@ -106,8 +106,8 @@ namespace Xmaxplatform { namespace Chain {
             return _data.get<dynamic_states_object>();
         }
 
-        time_point chain_xmax::head_block_time() const {
-            return get_dynamic_states().time;
+        time chain_xmax::head_block_time() const {
+            return get_dynamic_states().state_time;
         }
 
         signed_block chain_xmax::generate_block(
@@ -217,7 +217,7 @@ namespace Xmaxplatform { namespace Chain {
             _data.modify( _dgp, [&]( dynamic_states_object& dgp ){
                 dgp.head_block_number = b.block_num();
                 dgp.head_block_id = b.id();
-                dgp.time = b.timestamp;
+                dgp.state_time = b.timestamp;
                 dgp.current_builder = b.builder;
             });
 

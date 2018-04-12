@@ -16,13 +16,26 @@
 
 namespace Xmaxplatform { namespace Chain {
 
-void message_context_xmax::get_active_producers(Basetypes::account_name* producers, uint32_t datalen) {
+void message_context_xmax::get_active_builders(Basetypes::account_name *builders, uint32_t datalen) {
    const auto& gsc = _chain_xmax.get_static_config();
-   memcpy(producers, gsc.active_builders.data(), std::min(sizeof(account_name)*gsc.active_builders.size(),(size_t)datalen));
+   memcpy(builders, gsc.active_builders.data(), std::min(sizeof(account_name)*gsc.active_builders.size(),(size_t)datalen));
 }
 
-fc::time_point_sec message_context_xmax::current_time() const {
+time message_context_xmax::current_time() const {
    return mutable_controller.head_block_time();
+}
+void message_context_xmax::require_authorization(const Basetypes::account_name& account) {
+    auto itr = boost::find_if(msg.authorization, [&account](const auto& auth) { return auth.account == account; });
+    XMAX_ASSERT(itr != msg.authorization.end(), tx_missing_auth,
+                "Transaction is missing required authorization from ${acct}", ("acct", account));
+    used_authorizations[itr - msg.authorization.begin()] = true;
+}
+
+void message_context_xmax::require_authorization(const Basetypes::account_name& account,const Basetypes::permission_name& permission) {
+    auto itr = boost::find_if(msg.authorization, [&account, &permission](const auto& auth) { return auth.account == account && auth.permission == permission; });
+    XMAX_ASSERT(itr != msg.authorization.end(), tx_missing_auth,
+                "Transaction is missing required authorization from ${acct} with permission ${permission}", ("acct", account)("permission", permission));
+    used_authorizations[itr - msg.authorization.begin()] = true;
 }
 
 void message_context_xmax::require_scope(const Basetypes::account_name& account)const {

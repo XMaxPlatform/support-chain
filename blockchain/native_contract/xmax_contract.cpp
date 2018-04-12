@@ -11,8 +11,10 @@
 
 #include <objects/account_object.hpp>
 #include <objects/xmx_token_object.hpp>
+#include <objects/resource_token_object.hpp>
+#include <objects/chain_object_table.hpp>
 #include <objects/static_config_object.hpp>
-
+#include <xmax_voting.hpp>
 //#include <wasm_interface.hpp>
 #include <abi_serializer.hpp>
 
@@ -24,6 +26,8 @@ namespace config = ::Xmaxplatform::Config;
 namespace Chain = ::Xmaxplatform::Chain;
 using namespace ::Xmaxplatform::Basetypes;
 
+typedef mutable_db_table <xmx_token_object, by_owner_name> xmax_token_table;
+typedef mutable_db_table <resource_token_object, by_owner_name> resource_token_table;
 
 void handle_xmax_newaccount(message_context_xmax& context) {
    auto create = context.msg.as<Types::newaccount>();
@@ -35,9 +39,9 @@ void handle_xmax_newaccount(message_context_xmax& context) {
               "Cannot create account named ${name}, as that name is already taken",
               ("name", create.name));
 
-   const auto& new_account = db.create<account_object>([&create, &db](account_object& a) {
+   const auto& new_account = db.create<account_object>([&create, &context](account_object& a) {
       a.name = create.name;
-      a.creation_date = db.get(dynamic_states_object::id_type()).time;
+      a.creation_date = context.current_time();
    });
 
    const auto& creatorToken = context.mutable_db.get<xmx_token_object, by_owner_name>(create.creator);
@@ -85,6 +89,83 @@ void handle_xmax_transfer(message_context_xmax& context) {
          a.xmx_token += share_type(transfer.amount);
       });
    } FC_CAPTURE_AND_RETHROW( (transfer) ) 
+}
+
+void handle_xmax_lock(message_context_xmax& context) {
+    auto lock = context.msg.as<Types::lock>();
+
+    XMAX_ASSERT(lock.amount > 0, message_validate_exception, "Locked amount must be positive");
+
+    context.require_scope(lock.to);
+    context.require_scope(lock.from);
+    context.require_scope(config::xmax_contract_name);
+
+    context.require_authorization(lock.from);
+
+    context.require_recipient(lock.to);
+    context.require_recipient(lock.from);
+
+    xmax_token_table xmax_token_tbl(context.mutable_db);
+    resource_token_table resource_token_tbl(context.mutable_db);
+
+    const xmx_token_object& locker = xmax_token_tbl.get(lock.from);
+
+    XMAX_ASSERT( locker.xmx_token >= lock.amount, message_precondition_exception,
+                 "Account ${a} lacks sufficient funds to lock ${amt} XMX", ("a", lock.from)("amt", lock.amount)("available",locker.xmx_token) );
+
+    const auto& resource_token = resource_token_tbl.get(lock.to);
+
+    xmax_token_tbl.modify(locker, [&lock](xmx_token_object& a) {
+        a.xmx_token -= share_type(lock.amount);
+    });
+
+    resource_token_tbl.modify(resource_token, [&lock](resource_token_object& a){
+       a.locked_token += share_type(lock.amount);
+    });
+
+
+    xmax_voting::increase_votes(context, lock.to, share_type(lock.amount));
+}
+
+void handle_xmax_unlock(message_context_xmax& context)      {
+    auto unlock = context.msg.as<Types::unlock>();
+
+    context.require_authorization(unlock.account);
+
+    XMAX_ASSERT(unlock.amount >= 0, message_validate_exception, "Unlock amount cannot be negative");
+
+    resource_token_table resource_token_tbl(context.mutable_db);
+
+    const auto& unlocker = resource_token_tbl.get(unlock.account);
+
+    XMAX_ASSERT(unlocker.locked_token  >= unlock.amount, message_precondition_exception,
+                "Insufficient locked funds to unlock ${a}", ("a", unlock.amount));
+
+    resource_token_tbl.modify(unlocker, [&unlock, &context](resource_token_object& a) {
+        a.locked_token -= share_type(unlock.amount);
+        a.unlocked_token += share_type(unlock.amount);
+        a.last_unlocked_time = context.current_time();
+    });
+
+
+    xmax_voting::decrease_votes(context, unlock.account, share_type(unlock.amount));
+}
+
+
+void handle_xmax_votebuilder(message_context_xmax& context)    {
+    xmax_voting::vote_builder(context);
+}
+void handle_xmax_regbuilder(message_context_xmax& context)    {
+    xmax_voting::reg_builder(context);
+}
+void handle_xmax_unregbuilder(message_context_xmax& context)    {
+    xmax_voting::unreg_builder(context);
+}
+void handle_xmax_regproxy(message_context_xmax& context)    {
+    xmax_voting::reg_proxy(context);
+}
+void handle_xmax_unregproxy(message_context_xmax& context)    {
+    xmax_voting::unreg_proxy(context);
 }
     } // namespace Native
 } // namespace Xmaxplatform

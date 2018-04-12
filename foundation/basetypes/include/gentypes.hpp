@@ -535,60 +535,60 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
-    struct voteproducer { 
-        voteproducer() = default;
-        voteproducer(const account_name& voter, const account_name& proxy, const vector<account_name>& producers)
-           : voter(voter), proxy(proxy), producers(producers) {}
+    struct votebuilder { 
+        votebuilder() = default;
+        votebuilder(const account_name& voter, const account_name& proxy, const vector<account_name>& builders)
+           : voter(voter), proxy(proxy), builders(builders) {}
 
         account_name                     voter;
         account_name                     proxy;
-        vector<account_name>             producers;
+        vector<account_name>             builders;
     };
 
-    template<> struct get_struct<voteproducer> { 
+    template<> struct get_struct<votebuilder> { 
         static const struct_t& type() { 
-           static struct_t result = { "voteproducer", "", {
+           static struct_t result = { "votebuilder", "", {
                 {"voter", "account_name"},
                 {"proxy", "account_name"},
-                {"producers", "account_name[]"},
+                {"builders", "account_name[]"},
               }
            };
            return result;
          }
     };
 
-    struct regproducer { 
-        regproducer() = default;
-        regproducer(const account_name& producer, const public_key& producer_key)
-           : producer(producer), producer_key(producer_key) {}
+    struct regbuilder { 
+        regbuilder() = default;
+        regbuilder(const account_name& builder, const public_key& builder_key)
+           : builder(builder), builder_key(builder_key) {}
 
-        account_name                     producer;
-        public_key                       producer_key;
+        account_name                     builder;
+        public_key                       builder_key;
     };
 
-    template<> struct get_struct<regproducer> { 
+    template<> struct get_struct<regbuilder> { 
         static const struct_t& type() { 
-           static struct_t result = { "regproducer", "", {
-                {"producer", "account_name"},
-                {"producer_key", "public_key"},
+           static struct_t result = { "regbuilder", "", {
+                {"builder", "account_name"},
+                {"builder_key", "public_key"},
               }
            };
            return result;
          }
     };
 
-    struct unregprod { 
-        unregprod() = default;
-        unregprod(const account_name& producer)
-           : producer(producer) {}
+    struct unregbuilder { 
+        unregbuilder() = default;
+        unregbuilder(const account_name& builder)
+           : builder(builder) {}
 
-        account_name                     producer;
+        account_name                     builder;
     };
 
-    template<> struct get_struct<unregprod> { 
+    template<> struct get_struct<unregbuilder> { 
         static const struct_t& type() { 
-           static struct_t result = { "unregprod", "", {
-                {"producer", "account_name"},
+           static struct_t result = { "unregbuilder", "", {
+                {"builder", "account_name"},
               }
            };
            return result;
@@ -655,8 +655,8 @@ FC_REFLECT( Xmaxplatform::Basetypes::updateauth                       , (account
 FC_REFLECT( Xmaxplatform::Basetypes::deleteauth                       , (account)(permission) )
 FC_REFLECT( Xmaxplatform::Basetypes::linkauth                         , (account)(code)(type)(requirement) )
 FC_REFLECT( Xmaxplatform::Basetypes::unlinkauth                       , (account)(code)(type) )
-FC_REFLECT( Xmaxplatform::Basetypes::voteproducer                     , (voter)(proxy)(producers) )
-FC_REFLECT( Xmaxplatform::Basetypes::regproducer                      , (producer)(producer_key) )
-FC_REFLECT( Xmaxplatform::Basetypes::unregprod                        , (producer) )
+FC_REFLECT( Xmaxplatform::Basetypes::votebuilder                      , (voter)(proxy)(builders) )
+FC_REFLECT( Xmaxplatform::Basetypes::regbuilder                       , (builder)(builder_key) )
+FC_REFLECT( Xmaxplatform::Basetypes::unregbuilder                     , (builder) )
 FC_REFLECT( Xmaxplatform::Basetypes::regproxy                         , (proxy) )
 FC_REFLECT( Xmaxplatform::Basetypes::unregproxy                       , (proxy) )
