@@ -100,12 +100,17 @@ void blockbuilder_plugin::plugin_shutdown() {
 
     block_build_condition blockbuilder_plugin_impl::build_block(
             fc::mutable_variant_object &capture) {
+
         Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
-        fc::time_point now_fine = fc::time_point::now();
-        fc::time_point_sec now = now_fine + fc::microseconds(500000);
+        fc::time_point now = fc::time_point::now();
+
+        Chain::chain_timestamp now_timestamp = Chain::chain_timestamp::from(now);
+
+
+
 
         auto block = chain.generate_block(
-                now,
+                now_timestamp,
                 chain.get_dynamic_states().current_builder
         );
 

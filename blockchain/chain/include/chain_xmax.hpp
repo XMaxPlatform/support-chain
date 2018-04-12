@@ -40,9 +40,10 @@ namespace Xmaxplatform { namespace Chain {
        const static_config_object&          get_static_config()const;
        const dynamic_states_object&         get_dynamic_states()const;
 
+       time             head_block_time() const;
 
-       time           head_block_time() const;
-
+       uint32_t         get_slot_at_time(chain_timestamp when) const;
+       chain_timestamp   get_slot_time(uint32_t slot) const;
    private:
 
        database&                        _data;
@@ -56,7 +57,7 @@ namespace Xmaxplatform { namespace Chain {
        void initialize_chain(chain_init& initer);
 
        signed_block _generate_block(
-               fc::time_point_sec when,
+               chain_timestamp when,
                const account_name& builder
        );
 
@@ -72,7 +73,7 @@ namespace Xmaxplatform { namespace Chain {
 
    public:
        signed_block generate_block(
-               fc::time_point_sec when,
+               chain_timestamp when,
                const account_name& builder
        );
 

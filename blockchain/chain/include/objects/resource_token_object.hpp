@@ -13,7 +13,7 @@ namespace Xmaxplatform {
 
 
 /**
- * @brief The balance_object class tracks the XMX balance for accounts
+ * @brief The resource_token_object class
  */
 class resource_token_object : public Basechain::object<resource_token_object_type, resource_token_object> {
     OBJECT_CCTOR(resource_token_object)

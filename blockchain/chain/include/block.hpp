@@ -4,6 +4,7 @@
  */
 #pragma once
 #include <blockchain_types.hpp>
+#include <chain_time.hpp>
 
 namespace Xmaxplatform { namespace Chain {
 
@@ -15,7 +16,7 @@ namespace Xmaxplatform { namespace Chain {
 
 
             xmax_type_block_id            previous;
-            fc::time_point_sec            timestamp;
+            chain_timestamp               timestamp;
             xmax_type_merkle_root         transaction_merkle_root;
             account_name                  builder;
         };
