@@ -1,7 +1,7 @@
 if(WIN32)
 	message(STATUS "-------------- Window config --------------")
-
-	set(LLVM_DIR "${XMAX_ROOT_DIR}/wasm-compiler/llvm/lib/cmake/llvm")
+	
+	set(LLVM_DIR "${XMAX_ROOT_DIR}/wasm-compiler/llvm/build/lib/cmake/llvm")
 	message(STATUS "LLVM_DIR: ${LLVM_DIR}")
 
 	set(OPENSSL_ROOT_DIR "${XMAX_ROOT_DIR}/libraries/OpenSSL-Win64")
@@ -14,6 +14,14 @@ if(WIN32)
 	set(Secp256k1_INCLUDE_DIR "${Secp256k1_ROOT_DIR}/include")
 	message(STATUS "Secp256k1_ROOT_DIR: ${Secp256k1_ROOT_DIR}")
 
+
+	ENABLE_LANGUAGE(ASM_MASM)
+	message(STATUS "CMAKE_ASM_MASM_COMPILER: ${CMAKE_ASM_MASM_COMPILER}")
+	if(CMAKE_ASM_MASM_COMPILER)
+		set(MASM_FOUND true)
+	endif(CMAKE_ASM_MASM_COMPILER)
+
 	message(STATUS "-------------- Window config end -----------")
+	
 	
 endif(WIN32)

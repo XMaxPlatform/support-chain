@@ -35,7 +35,11 @@ endif()
 
 SET( Boost_USE_STATIC_LIBS ON CACHE STRING "ON or OFF" )
 IF( WIN32 )
+
   SET(BOOST_ROOT $ENV{BOOST_ROOT})
+
+  message( STATUS "BOOST_ROOT:${BOOST_ROOT}")
+
   set(Boost_USE_MULTITHREADED ON)
   set(BOOST_ALL_DYN_LINK OFF) # force dynamic linking for all libraries
   SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
