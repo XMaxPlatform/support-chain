@@ -42,6 +42,14 @@ IF(NOT APPLE)
  ENDIF(NOT WIN32)
 ENDIF(NOT APPLE)
 
+IF(MASM_FOUND)
+	ADD_CUSTOM_COMMAND(OUTPUT Int128x64.obj
+	COMMAND ${CMAKE_ASM_MASM_COMPILER} -c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Int128x64.asm
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/Int128x64.asm
+	COMMENT "generate Int128x64.obj") 
+ENDIF(MASM_FOUND)
+
 
 IF(NOT "$ENV{OPENSSL_ROOT_DIR}" STREQUAL "")
   set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR} )
@@ -118,7 +126,18 @@ set( sources
 #list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp")
 list(APPEND sources ${fc_headers})
 
-add_library( fc ${sources} ${fc_headers} )
+
+IF(MASM_FOUND)
+	add_library( fc ${sources} ${fc_headers} Int128x64.obj)	
+ELSE(MASM_FOUND)
+	add_library( fc ${sources} ${fc_headers})
+ENDIF(MASM_FOUND)
+
+
+
+
+
+
 #setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC )
 
 INSTALL( TARGETS fc
