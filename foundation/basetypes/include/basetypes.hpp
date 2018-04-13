@@ -40,7 +40,7 @@ namespace Xmaxplatform { namespace Basetypes {
         using array          = std::array<T...>;
 
         using string         = std::string;
-        using time           = fc::time_point_sec;
+        using time           = fc::time_point;
         using signature      = fc::ecc::compact_signature;
         using checksum       = fc::sha256;
         using field_name     = fc::fixed_string<>;

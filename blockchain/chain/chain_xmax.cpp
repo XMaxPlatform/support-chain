@@ -53,12 +53,14 @@ namespace Xmaxplatform { namespace Chain {
                         // Create global properties
                         _data.create<static_config_object>([&](static_config_object &p) {
                             p.setup = initer.get_blockchain_setup();
-                            p.active_builders = initer.get_chain_init_builders();
+                            p.pending_schedule.set_builders(initer.get_chain_init_builders());
+                            p.buid_schedule = p.pending_schedule;
                         });
                         _data.create<dynamic_states_object>([&](dynamic_states_object &p) {
                             p.state_time = initer.get_chain_init_time();
                             p.current_builder = initer.get_chain_init_builders().at(0);
                         });
+
 
                         signed_block block{};
                         block.builder = Config::xmax_contract_name;
@@ -110,8 +112,16 @@ namespace Xmaxplatform { namespace Chain {
             return get_dynamic_states().state_time;
         }
 
+        uint32_t chain_xmax::get_slot_at_time(chain_timestamp when) const
+        {
+            return 0;
+        }
+        chain_timestamp chain_xmax::get_slot_time(uint32_t slot) const
+        {
+            return chain_timestamp();
+        }
         signed_block chain_xmax::generate_block(
-                fc::time_point_sec when,
+                chain_timestamp when,
                 const account_name& builder
         )
         { try {
@@ -124,7 +134,7 @@ namespace Xmaxplatform { namespace Chain {
             } FC_CAPTURE_AND_RETHROW( (when) ) }
 
         signed_block chain_xmax::_generate_block(
-                fc::time_point_sec when,
+                chain_timestamp when,
                 const account_name& builder
         )
         {
@@ -217,7 +227,7 @@ namespace Xmaxplatform { namespace Chain {
             _data.modify( _dgp, [&]( dynamic_states_object& dgp ){
                 dgp.head_block_number = b.block_num();
                 dgp.head_block_id = b.id();
-                dgp.state_time = b.timestamp;
+                dgp.state_time = b.timestamp.time_point();
                 dgp.current_builder = b.builder;
             });
 

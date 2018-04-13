@@ -13,7 +13,7 @@ namespace Chain {
 
 
 /**
- * @brief The balance_object class tracks the XMX balance for accounts
+ * @brief The xmx_token_object class tracks the XMX token for accounts
  */
 class xmx_token_object : public Basechain::object<xmx_token_object_type, xmx_token_object> {
    OBJECT_CCTOR(xmx_token_object)
