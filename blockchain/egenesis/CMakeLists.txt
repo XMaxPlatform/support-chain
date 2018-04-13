@@ -21,7 +21,17 @@ if(WIN32)
 		${OPENSSL_LIBRARY_DIR}/libcrypto.lib
 		${OPENSSL_LIBRARY_DIR}/openssl.lib
 		Userenv.lib
-	)
+        )
+        
+
+        if(OPENSSL_ROOT_DIR)
+               
+                add_custom_command(TARGET embed_genesis 
+                                 POST_BUILD
+                                 COMMAND  ${CMAKE_COMMAND} -E copy_if_different "${OPENSSL_ROOT_DIR}/bin/libcrypto-1_1-x64.dll"  "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>/"      
+                                 )
+               
+        endif(OPENSSL_ROOT_DIR)
 endif()
 
 
@@ -39,6 +49,9 @@ if( XMAX_EGENESIS_JSON )
 endif( XMAX_EGENESIS_JSON )
 
 MESSAGE( STATUS "embed_genesis_args: " ${embed_genesis_args} )
+
+
+
 
 add_custom_command(
    OUTPUT
