@@ -23,7 +23,17 @@ include_directories(${WAVM_INCLUDE_DIR}/Runtime)
 add_library(Runtime STATIC ${Sources} ${PublicHeaders})
 
 # Find an installed build of LLVM
+
+if(WIN32)
+	set(LLVM_DIR "${XMAX_ROOT_DIR}/wasm-compiler/llvm/lib/cmake/llvm")
+	message(STATUS "LLVM_DIR: ${LLVM_DIR}")
+endif(WIN32)
+
 find_package(LLVM 4.0 REQUIRED CONFIG)
+#find_package(LLVM REQUIRED CONFIG)
+
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 # Include the LLVM headers
 include_directories(${LLVM_INCLUDE_DIRS})
