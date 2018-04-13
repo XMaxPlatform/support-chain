@@ -40,7 +40,7 @@ IF( WIN32 )
   set(BOOST_ALL_DYN_LINK OFF) # force dynamic linking for all libraries
   SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 ENDIF(WIN32)
-FIND_PACKAGE(Boost 1.64 REQUIRED COMPONENTS
+FIND_PACKAGE(Boost 1.66 REQUIRED COMPONENTS
     thread
     date_time
     system
