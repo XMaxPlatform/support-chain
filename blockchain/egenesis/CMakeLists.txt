@@ -12,7 +12,20 @@ add_executable( embed_genesis
         embed_genesis.cpp
    )
 
-target_link_libraries( embed_genesis xmaxchain xmax_egenesis_none fc xmax_native_contract)
+set(SPECIFIC_LIBS "")
+
+if(WIN32)
+	list(APPEND SPECIFIC_LIBS 
+		${Secp256k1_LIBRARY}/gmp.lib
+		${Secp256k1_LIBRARY}/secp256k1.lib
+		${OPENSSL_LIBRARY_DIR}/libcrypto.lib
+		${OPENSSL_LIBRARY_DIR}/openssl.lib
+		Userenv.lib
+	)
+endif()
+
+
+target_link_libraries( embed_genesis xmaxchain xmax_egenesis_none fc xmax_native_contract ${SPECIFIC_LIBS})
 
 set( embed_genesis_args
    -t "${CMAKE_CURRENT_SOURCE_DIR}/egenesis_brief.cpp.tmpl---${CMAKE_CURRENT_BINARY_DIR}/egenesis_brief.cpp"

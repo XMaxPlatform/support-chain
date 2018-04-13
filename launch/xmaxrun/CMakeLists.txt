@@ -12,7 +12,7 @@ if(WIN32)
 		${Secp256k1_LIBRARY}/secp256k1.lib
 		${OPENSSL_LIBRARY_DIR}/libcrypto.lib
 		${OPENSSL_LIBRARY_DIR}/openssl.lib
-		Userenv.lib
+		Userenv
 	)
 endif()
 
