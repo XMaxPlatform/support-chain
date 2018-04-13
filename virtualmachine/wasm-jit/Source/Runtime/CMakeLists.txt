@@ -25,6 +25,9 @@ add_library(Runtime STATIC ${Sources} ${PublicHeaders})
 # Find an installed build of LLVM
 find_package(LLVM 4.0 REQUIRED CONFIG)
 
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
 # Include the LLVM headers
 include_directories(${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
