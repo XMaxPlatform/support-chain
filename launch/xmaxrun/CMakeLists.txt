@@ -5,6 +5,18 @@ endif()
 
 target_include_directories(xmaxrun PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
+
+if(WIN32)
+	list(APPEND PLATFORM_SPECIFIC_LIBS 
+		${Secp256k1_LIBRARY}/gmp.lib
+		${Secp256k1_LIBRARY}/secp256k1.lib
+		${OPENSSL_LIBRARY_DIR}/libcrypto.lib
+		${OPENSSL_LIBRARY_DIR}/openssl.lib
+		Userenv.lib
+	)
+endif()
+
+
 target_link_libraries( xmaxrun
         PRIVATE baseapp
         PRIVATE blockchain_plugin blockbuilder_plugin chainhttp_plugin

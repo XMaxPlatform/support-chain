@@ -48,10 +48,15 @@ FIND_PACKAGE(Boost 1.64 REQUIRED COMPONENTS
     program_options
     signals
     serialization
-    chrono
+    chrono	
     unit_test_framework
     context
-    locale)
+    locale
+
+	regex
+	random
+	
+	)
 
 IF( WIN32 )
 
