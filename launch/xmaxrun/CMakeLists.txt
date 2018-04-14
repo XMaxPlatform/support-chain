@@ -23,3 +23,11 @@ target_link_libraries( xmaxrun
         PRIVATE xmaxchain fc ${CMAKE_DL_LIBS} ${PLATFORM_SPECIFIC_LIBS} )
 
 set_target_properties( xmaxrun PROPERTIES PUBLIC_HEADER "${HEADERS}" FOLDER "8.Launch")
+
+install( TARGETS 
+xmaxrun
+
+RUNTIME DESTINATION bin 
+LIBRARY DESTINATION lib 
+ARCHIVE DESTINATION lib 
+)

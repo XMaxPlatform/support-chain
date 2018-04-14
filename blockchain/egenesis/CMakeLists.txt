@@ -83,6 +83,9 @@ INSTALL( TARGETS
    LIBRARY DESTINATION lib
    ARCHIVE DESTINATION lib
 )
+
+
+
 set_target_properties( embed_genesis PROPERTIES PUBLIC_HEADER "${HEADERS}" FOLDER "4.BlockChain")
 set_target_properties( xmax_egenesis_none PROPERTIES PUBLIC_HEADER "${HEADERS}" FOLDER "4.BlockChain")
 set_target_properties( xmax_egenesis_brief PROPERTIES PUBLIC_HEADER "${HEADERS}" FOLDER "4.BlockChain")
