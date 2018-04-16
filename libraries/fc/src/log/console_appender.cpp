@@ -14,6 +14,21 @@
 #include <sstream>
 
 
+#if WIN32
+#include <Windows.h>
+#define  _DEBUG_OUTPUTA(x) OutputDebugStringA(x)
+#define  _DEBUG_OUTPUTW(x) OutputDebugStringW(x)
+static const char line_code_a[] = "\n";
+
+
+void _DebugOutputLine(const char* ouput)
+{
+	_DEBUG_OUTPUTA(ouput);
+	_DEBUG_OUTPUTA(line_code_a);
+}
+
+#endif
+
 namespace fc {
 
    class console_appender::impl {
@@ -135,8 +150,15 @@ namespace fc {
          if(isatty(fileno(out))) fprintf( out, "\r%s", get_console_color( text_color ) );
       #endif
 
-      if( text.size() )
-         fprintf( out, "%s", text.c_str() ); //fmt_str.c_str() );
+	  if (text.size())
+	  {
+		 fprintf(out, "%s", text.c_str()); //fmt_str.c_str() );
+
+#ifdef WIN32
+		 _DebugOutputLine(text.c_str());
+#endif
+	  }
+
 
       #ifdef WIN32
       if (my->console_handle != INVALID_HANDLE_VALUE)
