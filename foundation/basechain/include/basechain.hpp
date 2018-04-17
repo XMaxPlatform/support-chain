@@ -786,6 +786,7 @@ namespace  Basechain {
             BASECHAIN_REQUIRE_READ_LOCK("get_index", typename MultiIndexType::value_type);
             typedef generic_index<MultiIndexType> index_type;
             typedef index_type*                   index_type_ptr;
+			int test = index_type::value_type::type_id;
             assert( _index_map.size() > index_type::value_type::type_id );
             assert( _index_map[index_type::value_type::type_id] );
             return *index_type_ptr( _index_map[index_type::value_type::type_id]->get() );

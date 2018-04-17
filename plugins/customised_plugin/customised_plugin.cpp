@@ -29,7 +29,7 @@ namespace Xmaxplatform {
 	using Chain::public_key_type;
 
 #define CALL(api_name, api_handle, call_name, INVOKE, http_response_code) \
-{std::string("/v1/" #api_name "/" #call_name), \
+{std::string("/v0/" #api_name "/" #call_name), \
    [this](std::string, std::string body, url_response_callback cb) mutable { \
           try { \
              if (body.empty()) body = "{}"; \

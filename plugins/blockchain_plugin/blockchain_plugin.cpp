@@ -90,8 +90,8 @@ namespace Xmaxplatform {
         auto ro_api = get_read_only_api();
 
         app().get_plugin<chainhttp_plugin>().add_api({
-                                                        CHAIN_RO_CALL(get_account, 200)
-
+                                                        CHAIN_RO_CALL(get_account, 200),
+														CHAIN_RO_CALL(get_table_rows, 200),
                                                 });
     }
 

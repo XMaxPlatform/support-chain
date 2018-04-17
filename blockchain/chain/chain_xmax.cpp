@@ -40,10 +40,15 @@ namespace Xmaxplatform { namespace Chain {
 
         void chain_xmax::setup_data_indexes() {
             _data.add_index<account_index>();
+
             _data.add_index<key_value_index>();
             _data.add_index<keystr_value_index>();
             _data.add_index<key128x128_value_index>();
             _data.add_index<key64x64x64_value_index>();
+
+			_data.add_index<transaction_multi_index>();
+			_data.add_index<generated_transaction_multi_index>();
+			_data.add_index<block_summary_multi_index>();
 
             _data.add_index<static_config_multi_index>();
             _data.add_index<dynamic_states_multi_index>();
