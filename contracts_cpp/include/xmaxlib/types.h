@@ -5,7 +5,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <wchar.h>
+//#include <wchar.h>
 
 #ifdef __cplusplus
 extern "C" {
