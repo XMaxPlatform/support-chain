@@ -7,11 +7,20 @@ if(WIN32)
 	endif()
 	message(STATUS "XMAX_ROOT_DIR: ${XMAX_ROOT_DIR}")
 	
-	if(NOT DEFINED LLVM_DIR)
+	if("${LLVM_DIR}" STREQUAL "LLVM_DIR-NOTFOUND")
+		if(NOT "$ENV{LLVM_DIR}" STREQUAL "")
+			set(LLVM_DIR "$ENV{LLVM_DIR}")
+		endif()
+	endif()
+
+	if(EXISTS ${LLVM_DIR})
+	else()
 		message(STATUS "Not defined LLVM_DIR")
 		set(LLVM_DIR "${XMAX_ROOT_DIR}/wasm-compiler/llvm/build/lib/cmake/llvm")
 	endif()
 	message(STATUS "LLVM_DIR: ${LLVM_DIR}")
+
+
 
 
 	if(NOT DEFINED OPENSSL_ROOT_DIR)

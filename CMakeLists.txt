@@ -124,6 +124,22 @@ ELSE( WIN32 ) # Apple AND Linux
 
 ENDIF( WIN32 )
 
+
+include(wasm)
+
+message(STATUS "---------------------------- wasm info ----------------------------")
+message(STATUS "LLVM_DIR: ${LLVM_DIR}")
+message(STATUS "BINARYEN_BIN: ${BINARYEN_BIN}")
+message(STATUS "Using WASM clang: " ${WASM_CLANG})
+message(STATUS "Using WASM llc: " ${WASM_LLC})
+message(STATUS "Using WASM llvm-link: " ${WASM_LLVM_LINK})
+message(STATUS "---------------------------- wasm info end ------------------------")
+if(NOT WASM_TOOLCHAIN)
+    message(STATUS "--------------------------------------------------------------------")
+    message(STATUS "No WASM compiler could be found ... (skipping building of contracts)")
+    message(STATUS "--------------------------------------------------------------------")
+endif()
+
 include(installer)
 
 add_subdirectory( foundation )
