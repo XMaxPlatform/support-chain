@@ -150,7 +150,9 @@ add_subdirectory( plugins )
 add_subdirectory( launch )
 
 
-if(WIN32 AND DEFINED OPENSSL_ROOT_DIR)
+if(WIN32 AND NOT ("${OPENSSL_ROOT_DIR}" STREQUAL ""))
                 install(DIRECTORY ${OPENSSL_ROOT_DIR}/bin/ DESTINATION bin
         FILES_MATCHING PATTERN "libcrypto-1_1-x64.dll")      
 endif()
+
+

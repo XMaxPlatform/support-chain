@@ -24,14 +24,14 @@ if(WIN32)
         )
         
 
-        if(OPENSSL_ROOT_DIR)
+        # if(NOT ("${OPENSSL_ROOT_DIR}" STREQUAL ""))
                
-                add_custom_command(TARGET embed_genesis 
-                                 POST_BUILD
-                                 COMMAND  ${CMAKE_COMMAND} -E copy_if_different "${OPENSSL_ROOT_DIR}/bin/libcrypto-1_1-x64.dll"  "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>/"      
-                                 )
+        #         add_custom_command(TARGET embed_genesis 
+        #                          POST_BUILD
+        #                          COMMAND  ${CMAKE_COMMAND} -E copy_if_different "${OPENSSL_ROOT_DIR}/bin/libcrypto-1_1-x64.dll"  "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>/"      
+        #                          )
                
-        endif(OPENSSL_ROOT_DIR)
+        # endif()
 endif()
 
 

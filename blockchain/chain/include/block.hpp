@@ -5,6 +5,7 @@
 #pragma once
 #include <blockchain_types.hpp>
 #include <chain_time.hpp>
+#include <transaction.hpp>
 
 namespace Xmaxplatform { namespace Chain {
 
@@ -32,6 +33,9 @@ namespace Xmaxplatform { namespace Chain {
         };
 
         struct thread {
+
+			vector<processed_generated_transaction> generated_intput;
+			vector<processed_transaction> user_input;
 
             xmax_type_summary merkle_digest() const;
         };

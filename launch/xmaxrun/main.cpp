@@ -17,6 +17,7 @@
 #include <blockbuilder_plugin.hpp>
 #include <chainhttp_plugin.hpp>
 #include <customised_plugin.hpp>
+#include <mongodb_plugin.hpp>
 
 using namespace Baseapp;
 
@@ -40,6 +41,7 @@ void regist_plugins()
     app().register_plugin<Xmaxplatform::blockchain_plugin>();
     app().register_plugin<Xmaxplatform::blockbuilder_plugin>();
 	app().register_plugin<Xmaxplatform::customised_plugin>();
+	app().register_plugin<Xmaxplatform::mongodb_plugin>();
 }
 
 int main(int argc, char** argv)
