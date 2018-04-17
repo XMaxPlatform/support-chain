@@ -169,7 +169,7 @@ void mongodb_plugin_impl::consum_blocks() {
             break;
          }
       }
-      ilog("db_plugin consum thread shutdown gracefully");
+      ilog("mongodb_plugin consum thread shutdown gracefully");
    } catch (fc::exception& e) {
       elog("FC Exception while consuming block ${e}", ("e", e.to_string()));
    } catch (std::exception& e) {
@@ -596,7 +596,7 @@ mongodb_plugin_impl::~mongodb_plugin_impl() {
 
       consum_thread.join();
    } catch (std::exception& e) {
-      elog("Exception on db_plugin shutdown of consum thread: ${e}", ("e", e.what()));
+      elog("Exception on mongodb_plugin shutdown of consum thread: ${e}", ("e", e.what()));
    }
 }
 
@@ -659,7 +659,7 @@ void mongodb_plugin_impl::init() {
 
 #endif /* MONGODB */
 ////////////
-// db_plugin
+// mongodb_plugin
 ////////////
 
 mongodb_plugin::mongodb_plugin()
@@ -689,7 +689,7 @@ void mongodb_plugin::set_program_options(options_description& cli, options_descr
 void mongodb_plugin::wipe_database() {
 #ifdef MONGODB
    if (!my->startup) {
-      elog("ERROR: db_plugin::wipe_database() called before configuration or after startup. Ignoring.");
+      elog("ERROR: mongodb_plugin::wipe_database() called before configuration or after startup. Ignoring.");
    } else {
       my->wipe_database_on_startup = true;
    }
@@ -731,8 +731,8 @@ void mongodb_plugin::plugin_initialize(const variables_map& options)
       }
       my->init();
    } else {
-      wlog("Xmaxplatform::db_plugin configured, but no --mongodb-uri specified.");
-      wlog("db_plugin disabled.");
+      wlog("Xmaxplatform::mongodb_plugin configured, but no --mongodb-uri specified.");
+      wlog("mongodb_plugin disabled.");
    }
 #endif
 }
@@ -741,7 +741,7 @@ void mongodb_plugin::plugin_startup()
 {
 #ifdef MONGODB
    if (my->configured) {
-      ilog("starting db plugin");
+      ilog("starting mongodb plugin");
 
       my->consum_thread = boost::thread([this] { my->consum_blocks(); });
 

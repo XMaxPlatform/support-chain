@@ -67,3 +67,13 @@ Then find a custom data location and start the service, for example:
 ```bash
 "D:\Program Files\MongoDB\Server\3.6\bin\mongod.exe" --dbpath d:\mongo_db\data
 ```
+
+Add plugin config to `config.ini`
+```bash
+plugin = Xmaxplatform::mongodb_plugin
+mongodb-uri = mongodb://localhost:27017
+```
+
+After success compilation,  make sure to build `INSTALL` project in solution.  It will install dependent mongodb dynamic libraries.
+
+Then you can run `xmaxrun` with MongoDB in install directory.
