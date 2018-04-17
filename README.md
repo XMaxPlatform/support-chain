@@ -59,6 +59,16 @@ msbuild.exe ALL_BUILD.vcxproj
 msbuild.exe INSTALL.vcxproj
 ```
 
+### Set CMake variables for MongoDB
+In order to enable mongodb in XMax, you may set following CMake variables. For example:
+```bash
+-DMONGO_DB_C_ROOT=c:/mongo-c-driver
+-DMONGO_DB_CXX_ROOT=c:/mongo-cxx-driver
+```
+If you use the same paths as above, you can ignore this step. These are default paths. 
+But if you want to use other directories you `MUST` set these variables yourself.
+
+
 ### Run MongoDB:
 
 Download and install MongoDB server for Windows which could be found at it's offcial website: `https://www.mongodb.com/download-center`.

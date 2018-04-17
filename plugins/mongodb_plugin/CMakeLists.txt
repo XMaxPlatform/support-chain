@@ -69,7 +69,7 @@ if (libmongoc-1.0_FOUND)
   
     message(STATUS "Found mongocxx library: ${XMAX_LIBMONGOCXX}")
 
-    add_definitions(-DMONGODB)
+    add_definitions(-DMONGODB=1)
 
 
 else()
@@ -91,7 +91,7 @@ target_include_directories( mongodb_plugin
                              )
 
 target_compile_definitions(mongodb_plugin
-                             PRIVATE ${LIBMONGOCXX_DEFINITIONS} ${LIBBSONCXX_DEFINITIONS} MONGODB=1
+                             PRIVATE ${LIBMONGOCXX_DEFINITIONS} ${LIBBSONCXX_DEFINITIONS}
                              )                             
 
 
