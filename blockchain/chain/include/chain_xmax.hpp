@@ -135,7 +135,7 @@ namespace Xmaxplatform { namespace Chain {
 
 
 	   void check_transaction_authorization(const signed_transaction& trx, bool allow_unused_signatures = false)const;
-
+	   void create_block_summary(const signed_block& next_block);
 	   template<typename T>
 	   void validate_transaction(const T& trx) const {
 		   try {

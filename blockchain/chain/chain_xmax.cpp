@@ -71,6 +71,8 @@ namespace Xmaxplatform { namespace Chain {
                             p.state_time = initer.get_chain_init_time();
                             p.current_builder = initer.get_chain_init_builders().at(0);
                         });
+						for (int i = 0; i < 0x10000; i++)
+							_data.create<block_summary_object>([&](block_summary_object&) {});
 
 
                         signed_block block{};
@@ -287,7 +289,7 @@ namespace Xmaxplatform { namespace Chain {
 
                 update_dynamic_states(next_block);
 
-
+				create_block_summary(next_block);
 
             } FC_CAPTURE_AND_RETHROW( (next_block.block_num()) )  }
 
@@ -449,6 +451,14 @@ namespace Xmaxplatform { namespace Chain {
 		void chain_xmax::check_transaction_authorization(const signed_transaction& trx, bool allow_unused_signatures /*= false*/) const
 		{
 
+		}
+
+		void chain_xmax::create_block_summary(const signed_block& next_block)
+		{
+			auto sid = next_block.block_num() & 0xffff;
+			_data.modify(_data.get<block_summary_object, by_id>(sid), [&](block_summary_object& p) {
+				p.block_id = next_block.id();
+			});
 		}
 
 		template<typename T>
