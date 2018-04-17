@@ -9,6 +9,7 @@
 #include <chain_xmax.hpp>
 #include <chaindata_plugin.hpp>
 #include <chainhttp_plugin.hpp>
+#include <abi_serializer.hpp>
 
 using namespace Baseapp;
 namespace Xmaxplatform {
@@ -42,8 +43,91 @@ namespace Xmaxplatform {
             struct get_account_params {
                 Basetypes::name account_name;
             };
-            get_account_results get_account( const get_account_params& params )const;
+			get_account_results get_account(const get_account_params& params)const;
 
+			struct get_table_rows_params {
+				bool        json = false;
+				name        scope;
+				name        code;
+				name        table;
+				string      table_key;
+				string      lower_bound;
+				string      upper_bound;
+				uint32_t    limit = 10;
+			};
+
+			struct get_table_rows_result {
+				vector<fc::variant> rows; 
+				bool                more;
+			};
+			get_table_rows_result get_table_rows( const get_table_rows_params& params )const;
+
+			void copy_row(const Chain::key_value_object& obj, vector<char>& data)const {
+				data.resize(sizeof(uint64_t) + obj.value.size());
+				memcpy(data.data(), &obj.primary_key, sizeof(uint64_t));
+				memcpy(data.data() + sizeof(uint64_t), obj.value.data(), obj.value.size());
+			}
+
+			void copy_row(const Chain::keystr_value_object& obj, vector<char>& data)const {
+				data.resize(obj.primary_key.size() + obj.value.size() + 8);
+				fc::datastream<char*> ds(data.data(), data.size());
+				fc::raw::pack(ds, obj.primary_key);
+				ds.write(obj.value.data(), obj.value.size());
+				data.resize(ds.tellp());
+			}
+
+			void copy_row(const Chain::key128x128_value_object& obj, vector<char>& data)const {
+				data.resize(2 * sizeof(uint128_t) + obj.value.size());
+				memcpy(data.data(), &obj.primary_key, sizeof(uint128_t));
+				memcpy(data.data() + sizeof(uint128_t), &obj.secondary_key, sizeof(uint128_t));
+				memcpy(data.data() + 2 * sizeof(uint128_t), obj.value.data(), obj.value.size());
+			}
+
+			void copy_row(const Chain::key64x64x64_value_object& obj, vector<char>& data)const {
+				data.resize(3 * sizeof(uint64_t) + obj.value.size());
+				memcpy(data.data(), &obj.primary_key, sizeof(uint64_t));
+				memcpy(data.data() + sizeof(uint64_t), &obj.secondary_key, sizeof(uint64_t));
+				memcpy(data.data() + 2 * sizeof(uint64_t), &obj.tertiary_key, sizeof(uint64_t));
+				memcpy(data.data() + 3 * sizeof(uint64_t), obj.value.data(), obj.value.size());
+			}
+
+			template <typename IndexType, typename Scope>
+			read_only::get_table_rows_result get_table_rows_ex(const read_only::get_table_rows_params& p, const Basetypes::abi& abi)const {
+				read_only::get_table_rows_result result;
+				const auto& d = _chain.get_database();
+
+				Basetypes::abi_serializer abis;
+				abis.set_abi(abi);
+
+				const auto& idx = d.get_index<IndexType, Scope>();
+				auto lower = idx.lower_bound(boost::make_tuple(p.scope, p.code, p.table));
+				auto upper = idx.upper_bound(boost::make_tuple(p.scope, p.code, name(uint64_t(p.table) + 1)));
+
+				if (p.lower_bound.size())
+					lower = idx.lower_bound(boost::make_tuple(p.scope, p.code, p.table, fc::variant(p.lower_bound).as<typename IndexType::value_type::key_type>()));
+				if (p.upper_bound.size())
+					upper = idx.lower_bound(boost::make_tuple(p.scope, p.code, p.table, fc::variant(p.upper_bound).as<typename IndexType::value_type::key_type>()));
+
+				vector<char> data;
+
+				auto end = fc::time_point::now() + fc::microseconds(1000 * 10); /// 10ms max time
+
+				unsigned int count = 0;
+				auto itr = lower;
+				for (itr = lower; itr != upper && itr->table == p.table; ++itr) {
+					copy_row(*itr, data);
+
+					if (p.json)
+						result.rows.emplace_back(abis.binary_to_variant(abis.get_table_type(p.table), data));
+					else
+						result.rows.emplace_back(fc::variant(data));
+					if (++count == p.limit || fc::time_point::now() > end)
+						break;
+				}
+				if (itr != upper)
+					result.more = true;
+				return result;
+			}
         };
 
     } // namespace Chain_APIs
@@ -65,6 +149,8 @@ public:
     Chain::chain_xmax& getchain();
     const Chain::chain_xmax& getchain() const;
 
+	void get_chain_id(Chain::chain_id_type &cid) const;
+
     Chain_APIs::read_only get_read_only_api() const { return Chain_APIs::read_only(getchain()); }
 private:
     std::unique_ptr<class chain_plugin_impl> my;
@@ -76,3 +162,7 @@ private:
 FC_REFLECT( Xmaxplatform::Chain_APIs::read_only::get_account_results, (account_name)(xmx_token) )
 
 FC_REFLECT( Xmaxplatform::Chain_APIs::read_only::get_account_params, (account_name) )
+
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_table_rows_params, (json)(table_key)(scope)(code)(table)(lower_bound)(upper_bound)(limit))
+
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_table_rows_result, (rows)(more));

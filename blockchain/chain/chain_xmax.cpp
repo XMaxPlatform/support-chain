@@ -26,8 +26,14 @@
 #include <chrono>
 
 #include <transaction.hpp>
+#include <objects/transaction_object.hpp>
+#include <objects/generated_transaction_object.hpp>
+#include <objects/block_summary_object.hpp>
+#include <objects/account_object.hpp>
 
 #include <vm_xmax.hpp>
+
+#include <abi_serializer.hpp>
 
 namespace Xmaxplatform { namespace Chain {
 
@@ -85,7 +91,7 @@ namespace Xmaxplatform { namespace Chain {
 
         }
 
-        chain_xmax::chain_xmax(database& database,chain_init& init) : _data(database){
+        chain_xmax::chain_xmax(database& database,chain_init& init) : _data(database), _pending_txn_depth_limit(1000){
 
             setup_data_indexes();
             init.register_handlers(*this, _data);
@@ -112,7 +118,12 @@ namespace Xmaxplatform { namespace Chain {
             return get_dynamic_states().state_time;
         }
 
-        uint32_t chain_xmax::get_slot_at_time(chain_timestamp when) const
+		Xmaxplatform::Chain::xmax_type_block_id chain_xmax::head_block_id() const
+		{
+			return get_dynamic_states().head_block_id;
+		}
+
+		uint32_t chain_xmax::get_slot_at_time(chain_timestamp when) const
         {
             return 0;
         }
@@ -120,7 +131,63 @@ namespace Xmaxplatform { namespace Chain {
         {
             return chain_timestamp();
         }
-        signed_block chain_xmax::generate_block(
+
+		vector<char> chain_xmax::message_to_binary(name code, name type, const fc::variant& obj)const
+		{
+			try {
+				const auto& code_account = _data.get<account_object, by_name>(code);
+				Xmaxplatform::Basetypes::abi abi;
+				if (Basetypes::abi_serializer::to_abi(code_account.abi, abi)) {
+					Basetypes::abi_serializer abis(abi);
+					return abis.variant_to_binary(abis.get_action_type(type), obj);
+				}
+				return vector<char>();
+			} FC_CAPTURE_AND_RETHROW((code)(type)(obj))
+		}
+
+		fc::variant chain_xmax::message_from_binary(name code, name type, const vector<char>& bin) const
+		{
+			const auto& code_account = _data.get<account_object, by_name>(code);
+			Xmaxplatform::Basetypes::abi abi;
+			if (Basetypes::abi_serializer::to_abi(code_account.abi, abi)) {
+				Basetypes::abi_serializer abis(abi);
+				return abis.binary_to_variant(abis.get_action_type(type), bin);
+			}
+			return fc::variant();
+		}
+
+		Xmaxplatform::Chain::processed_transaction chain_xmax::push_transaction(const signed_transaction& trx, uint32_t skip /*= skip_nothing*/)
+		{
+			try {
+				return with_skip_flags(skip | pushed_transaction, [&]() {
+					return _data.with_write_lock([&]() {
+						return _push_transaction(trx);
+					});
+				});
+			} FC_CAPTURE_AND_RETHROW((trx))
+		}
+
+		Xmaxplatform::Chain::processed_transaction chain_xmax::_push_transaction(const signed_transaction& trx)
+		{
+			if (!_pending_tx_session.valid())
+				_pending_tx_session = _data.start_undo_session(true);
+
+			FC_ASSERT(_pending_transactions.size() < 1000, "too many pending transactions, try again later");
+
+			auto temp_session = _data.start_undo_session(true);
+			validate_referenced_accounts(trx);
+			check_transaction_authorization(trx);
+			auto pt = apply_transaction(trx);
+			_pending_transactions.push_back(trx);
+
+			temp_session.squash();
+
+			on_pending_transaction(trx); 
+
+			return pt;
+		}
+
+		signed_block chain_xmax::generate_block(
                 chain_timestamp when,
                 const account_name& builder
         )
@@ -220,7 +287,7 @@ namespace Xmaxplatform { namespace Chain {
             } FC_CAPTURE_AND_RETHROW( (next_block.block_num()) )  }
 
 
-        void chain_xmax::update_dynamic_states(const signed_block& b) {
+		void chain_xmax::update_dynamic_states(const signed_block& b) {
             const dynamic_states_object& _dgp = _data.get<dynamic_states_object>();
 
             // update dynamic states
@@ -291,10 +358,139 @@ namespace Xmaxplatform { namespace Chain {
 
                     }
                 }
-
             } FC_CAPTURE_AND_RETHROW((context.msg)) }
 
+		void chain_xmax::validate_uniqueness(const Chain::signed_transaction& trx)const {
+			if (!should_check_for_duplicate_transactions()) return;
 
-        chain_init::~chain_init() {}
+			auto transaction = _data.find<transaction_object, by_trx_id>(trx.id());
+			XMAX_ASSERT(transaction == nullptr, tx_duplicate, "Transaction is not unique");
+		}
+
+		void chain_xmax::validate_uniqueness(const generated_transaction& trx)const {
+			if (!should_check_for_duplicate_transactions()) return;
+		}
+
+		void chain_xmax::record_transaction(const Chain::signed_transaction& trx) {
+			//Insert transaction into unique transactions database.
+			_data.create<transaction_object>([&](transaction_object& transaction) {
+				transaction.trx_id = trx.id(); /// TODO: consider caching ID
+				transaction.expiration = trx.expiration;
+			});
+		}
+
+		void chain_xmax::record_transaction(const generated_transaction& trx) {
+			_data.modify(_data.get<generated_transaction_object, generated_transaction_object::by_trx_id>(trx.id), [&](generated_transaction_object& transaction) {
+				transaction.status = generated_transaction_object::PROCESSED;
+			});
+		}
+
+
+
+
+		void chain_xmax::validate_tapos(const transaction& trx)const {
+			if (!should_check_tapos()) return;
+
+			const auto& tapos_block_summary = _data.get<block_summary_object>((uint16_t)trx.ref_block_num);
+
+			//Verify TaPoS block summary has correct ID prefix, and that this block's time is not past the expiration
+			XMAX_ASSERT(transaction_verify_reference_block(trx, tapos_block_summary.block_id), transaction_exception,
+				"Transaction's reference block did not match. Is this transaction from a different fork?",
+				("tapos_summary", tapos_block_summary));
+		}
+
+		void chain_xmax::validate_referenced_accounts(const transaction& trx) const
+		{
+			for (const auto& scope : trx.scope)
+				require_account(scope);
+			for (const auto& msg : trx.messages) {
+				require_account(msg.code);
+				for (const auto& auth : msg.authorization)
+					require_account(auth.account);
+			}
+		}
+
+
+		void chain_xmax::validate_expiration(const transaction& trx) const
+		{
+			try {
+				fc::time_point_sec now = head_block_time();
+				const blockchain_configuration& chain_configuration = get_static_config().setup;
+
+// 				XMAX_ASSERT(trx.expiration <= now + int32_t(chain_configuration.max_trx_lifetime),
+// 					transaction_exception, "Transaction expiration is too far in the future",
+// 					("trx.expiration", trx.expiration)("now", now)
+// 					("max_til_exp", chain_configuration.max_trx_lifetime));
+// 				XMAX_ASSERT(now <= trx.expiration, transaction_exception, "Transaction is expired",
+// 					("now", now)("trx.exp", trx.expiration));
+			} FC_CAPTURE_AND_RETHROW((trx))
+		}
+
+		void chain_xmax::validate_scope(const transaction& trx) const
+		{
+			XMAX_ASSERT(trx.scope.size() + trx.read_scope.size() > 0, transaction_exception, "No scope specified by transaction");
+			for (uint32_t i = 1; i < trx.scope.size(); ++i)
+				XMAX_ASSERT(trx.scope[i - 1] < trx.scope[i], transaction_exception, "Scopes must be sorted and unique");
+			for (uint32_t i = 1; i < trx.read_scope.size(); ++i)
+				XMAX_ASSERT(trx.read_scope[i - 1] < trx.read_scope[i], transaction_exception, "Scopes must be sorted and unique");
+
+			vector<Basetypes::account_name> intersection;
+			std::set_intersection(trx.scope.begin(), trx.scope.end(),
+				trx.read_scope.begin(), trx.read_scope.end(),
+				std::back_inserter(intersection));
+			FC_ASSERT(intersection.size() == 0, "a transaction may not redeclare scope in read_scope");
+		}
+
+		void chain_xmax::check_transaction_authorization(const signed_transaction& trx, bool allow_unused_signatures /*= false*/) const
+		{
+
+		}
+
+		template<typename T>
+		typename T::processed chain_xmax::apply_transaction(const T& trx)
+		{
+			try {
+				validate_transaction(trx);
+				record_transaction(trx);
+				return process_transaction(trx, 0, fc::time_point::now());
+
+			} FC_CAPTURE_AND_RETHROW((trx))
+		}
+
+		template<typename T>
+		typename T::processed chain_xmax::process_transaction(const T& trx, int depth, const fc::time_point& start_time)
+		{
+			try {
+				const blockchain_configuration& chain_configuration = get_static_config().setup;
+				XMAX_ASSERT((fc::time_point::now() - start_time).count() < chain_configuration.max_trx_runtime, checktime_exceeded,
+					"Transaction exceeded maximum total transaction time of ${limit}ms", ("limit", chain_configuration.max_trx_runtime / 1000));
+
+				XMAX_ASSERT(depth < chain_configuration.in_depth_limit, tx_resource_exhausted,
+					"Transaction exceeded maximum inline recursion depth of ${limit}", ("limit", chain_configuration.in_depth_limit));
+
+				typename T::processed ptrx(trx);
+				ptrx.output.resize(trx.messages.size());
+
+				for (uint32_t i = 0; i < trx.messages.size(); ++i) {
+					auto& output = ptrx.output[i];
+					//rate_limit_message(trx.messages[i]); no limit for now
+					process_message(trx, trx.messages[i].code, trx.messages[i], output, nullptr, 0, start_time);
+					if (output.inline_trx.valid()) {
+						const transaction& trx = *output.inline_trx;
+						output.inline_trx = process_transaction(pending_inline_transaction(trx), depth + 1, start_time);
+					}
+				}
+
+				return ptrx;
+			} FC_CAPTURE_AND_RETHROW((trx))
+		}
+
+		void chain_xmax::require_account(const account_name& name) const
+		{
+			auto account = _data.find<account_object, by_name>(name);
+			FC_ASSERT(account != nullptr, "Account not found: ${name}", ("name", name));
+		}
+
+		chain_init::~chain_init() {}
 
 } }

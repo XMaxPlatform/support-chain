@@ -151,6 +151,10 @@ namespace Xmaxplatform { namespace Chain {
             vote_info_object_type,
             builder_info_object_type,
             resource_token_object_type,
+			transaction_object_type,
+			generated_transaction_object_type,
+			block_summary_object_type,
+			rate_limiting_object_type,
             OBJECT_TYPE_COUNT ///< Sentry value which contains the number of different object types
         };
    

@@ -10,6 +10,7 @@
 #include <blockchain_exceptions.hpp>
 
 #include <native_contract_chain_init.hpp>
+#include <chain_xmax.hpp>
 
 namespace Xmaxplatform {
 
@@ -18,6 +19,7 @@ namespace Xmaxplatform {
     public:
         Baseapp::bfs::path genesis_file;
         std::unique_ptr<Chain::chain_xmax> chain;
+		Chain::chain_id_type      chain_id;
     };
 
 
@@ -75,6 +77,7 @@ namespace Xmaxplatform {
         auto &data = app().get_plugin<chaindata_plugin>().data();
         auto genesis = fc::json::from_file(my->genesis_file).as<Native_contract::genesis_state_type>();
         Native_contract::native_contract_chain_init chainsetup(genesis);
+		my->chain_id = genesis.compute_chain_id();
         my->chain.reset(new Chain::chain_xmax(data, chainsetup));
 
         register_chain_api();
@@ -100,7 +103,22 @@ namespace Xmaxplatform {
 
     const Chain::chain_xmax &blockchain_plugin::getchain() const { return *my->chain; }
 
+	void blockchain_plugin::get_chain_id(Chain::chain_id_type &cid)const {
+		memcpy(cid.data(), my->chain_id.data(), cid.data_size());
+	}
+
+
 namespace Chain_APIs{
+
+
+	const string read_only::KEYi64 = "i64";
+	const string read_only::KEYstr = "str";
+	const string read_only::KEYi128i128 = "i128i128";
+	const string read_only::KEYi64i64i64 = "i64i64i64";
+	const string read_only::PRIMARY = "primary";
+	const string read_only::SECONDARY = "secondary";
+	const string read_only::TERTIARY = "tertiary";
+
     read_only::get_account_results read_only::get_account(const get_account_params &params) const {
         using namespace Xmaxplatform::Chain;
 
@@ -114,5 +132,52 @@ namespace Chain_APIs{
 
         return result;
     }
+
+	Basetypes::abi getAbi(const Chain::chain_xmax& db, const name& account) {
+		const auto& d = db.get_database();
+		const auto& code_accnt = d.get<Chain::account_object, Chain::by_name>(account);
+
+		Xmaxplatform::Basetypes::abi abi;
+		Basetypes::abi_serializer::to_abi(code_accnt.abi, abi);
+		return abi;
+	}
+
+	string getTableType(const Basetypes::abi& abi, const name& tablename) {
+		for (const auto& t : abi.tables) {
+			if (t.table_name == tablename) {
+				return t.index_type;
+			}
+		}
+		FC_ASSERT(!"ABI does not define table", "Table ${table} not specified in ABI", ("table", tablename));
+	}
+
+	read_only::get_table_rows_result read_only::get_table_rows(const read_only::get_table_rows_params& p)const {
+		const Basetypes::abi abi = getAbi(_chain, p.code);
+		auto table_type = getTableType(abi, p.table);
+		auto table_key = PRIMARY;
+
+		if (table_type == KEYi64) {
+			return get_table_rows_ex<Chain::key_value_index, Chain::by_scope_primary>(p, abi);
+		}
+		else if (table_type == KEYstr) {
+			return get_table_rows_ex<Chain::keystr_value_index, Chain::by_scope_primary>(p, abi);
+		}
+		else if (table_type == KEYi128i128) {
+			if (table_key == PRIMARY)
+				return get_table_rows_ex<Chain::key128x128_value_index, Chain::by_scope_primary>(p, abi);
+			if (table_key == SECONDARY)
+				return get_table_rows_ex<Chain::key128x128_value_index, Chain::by_scope_secondary>(p, abi);
+		}
+		else if (table_type == KEYi64i64i64) {
+			if (table_key == PRIMARY)
+				return get_table_rows_ex<Chain::key64x64x64_value_index, Chain::by_scope_primary>(p, abi);
+			if (table_key == SECONDARY)
+				return get_table_rows_ex<Chain::key64x64x64_value_index, Chain::by_scope_secondary>(p, abi);
+			if (table_key == TERTIARY)
+				return get_table_rows_ex<Chain::key64x64x64_value_index, Chain::by_scope_tertiary>(p, abi);
+		}
+		FC_ASSERT(false, "invalid table type/key ${type}/${key}", ("type", table_type)("key", table_key)("code_abi", abi));
+	}
+
 }// namespace Chain_APIs
 } // namespace Xmaxplatform

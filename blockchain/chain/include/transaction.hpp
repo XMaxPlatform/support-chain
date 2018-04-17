@@ -12,7 +12,7 @@ namespace Xmaxplatform { namespace Chain {
    struct processed_transaction;
    struct inline_transaction;
    struct processed_generated_transaction;
-   xmax_type_summary transaction_digest(const transaction& t);
+  // xmax_type_summary transaction_digest(const transaction& t);
 
    void transaction_set_reference_block(transaction& t, const xmax_type_block_id& reference_block);
 

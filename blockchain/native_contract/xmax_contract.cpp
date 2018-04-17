@@ -15,7 +15,7 @@
 #include <objects/chain_object_table.hpp>
 #include <objects/static_config_object.hpp>
 #include <xmax_voting.hpp>
-//#include <wasm_interface.hpp>
+#include <vm_xmax.hpp>
 #include <abi_serializer.hpp>
 
 
@@ -149,6 +149,40 @@ void handle_xmax_unlock(message_context_xmax& context)      {
 
 
     xmax_voting::decrease_votes(context, unlock.account, share_type(unlock.amount));
+}
+
+
+
+void handle_xmax_setcode(message_context_xmax& context) {
+	auto& db = context.mutable_db;
+	auto  msg = context.msg.as<Types::setcode>();
+
+	context.require_authorization(msg.account);
+
+	FC_ASSERT(msg.vm_type == 0);
+	FC_ASSERT(msg.vm_version == 0);
+
+	/// if an ABI is specified make sure it is well formed and doesn't
+	/// reference any undefined types
+	abi_serializer(msg.code_abi).validate();
+
+
+	const auto& account = db.get<account_object, by_name>(msg.account);
+	//   wlog( "set code: ${size}", ("size",msg.code.size()));
+	db.modify(account, [&](auto& a) {
+		/** TODO: consider whether a microsecond level local timestamp is sufficient to detect code version changes*/
+		//warning TODO : update setcode message to include the hash, then validate it in validate
+		a.code_version = fc::sha256::hash(msg.code.data(), msg.code.size());
+		// Added resize(0) here to avoid bug in boost vector container
+		a.code.resize(0);
+		a.code.resize(msg.code.size());
+		memcpy(a.code.data(), msg.code.data(), msg.code.size());
+
+		a.set_abi(msg.code_abi);
+	});
+
+	message_context_xmax init_context(context.mutable_controller, context.mutable_db, context.trx, context.msg, msg.account);
+	vm_xmax::get().init(init_context);
 }
 
 

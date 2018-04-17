@@ -21,6 +21,7 @@ void handle_xmax_transfer(Chain::message_context_xmax& context);
 void handle_xmax_lock(Chain::message_context_xmax& context);
 void handle_xmax_unlock(Chain::message_context_xmax& context);
 
+void handle_xmax_setcode(Chain::message_context_xmax& context);
 
 void handle_xmax_votebuilder(Chain::message_context_xmax& context);
 void handle_xmax_regbuilder(Chain::message_context_xmax& context);
