@@ -28,6 +28,8 @@ void handle_xmax_regbuilder(Chain::message_context_xmax& context);
 void handle_xmax_unregbuilder(Chain::message_context_xmax& context);
 void handle_xmax_regproxy(Chain::message_context_xmax& context);
 void handle_xmax_unregproxy(Chain::message_context_xmax& context);
+
+void handle_xmax_unregproxy(Chain::message_context_xmax& context);
 } // namespace Native_contract
 } // namespace Xmaxplatform
 
