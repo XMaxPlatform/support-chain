@@ -46,7 +46,7 @@ void regist_plugins()
 
 int main(int argc, char** argv)
 {
-   try {
+   //try {
 
 
        regist_plugins();
@@ -57,14 +57,14 @@ int main(int argc, char** argv)
        ilog("xmaxrun init success!");
       app().startup();
       app().exec();
-   } catch (const fc::exception& e) {
-      elog("${e}", ("e",e.to_detail_string()));
-   } catch (const boost::exception& e) {
-      elog("${e}", ("e",boost::diagnostic_information(e)));
-   } catch (const std::exception& e) {
-      elog("${e}", ("e",e.what()));
-   } catch (...) {
-      elog("unknown exception");
-   }
+   //} catch (const fc::exception& e) {
+   //   elog("${e}", ("e",e.to_detail_string()));
+   //} catch (const boost::exception& e) {
+   //   elog("${e}", ("e",boost::diagnostic_information(e)));
+   //} catch (const std::exception& e) {
+   //   elog("${e}", ("e",e.what()));
+   //} catch (...) {
+   //   elog("unknown exception");
+   //}
    return 0;
 }

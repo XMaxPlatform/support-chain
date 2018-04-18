@@ -16,7 +16,7 @@ rem file %%a
 rem filePath %%~dpa
 rem fileName %%~nxa
 
-%WASM_BIN%\clang.exe -emit-llvm -O3 --std=c++14 --target=wasm32 -ffreestanding -nostdlib -fno-threadsafe-statics -fno-rtti -fno-exceptions -I "%xmax_install_dir%\include" -I %%~dpa -c %%a -o %workfulldir%\built\%%~nxa
+%WASM_BIN%\clang.exe -emit-llvm -O3 --std=c++14 --target=wasm32 -ffreestanding -nostdlib -fno-threadsafe-statics -fno-rtti -fno-exceptions -I "%xmax_install_dir%\contract" -I %%~dpa -c %%a -o %workfulldir%\built\%%~nxa
 
 )
 
