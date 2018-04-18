@@ -170,7 +170,7 @@ namespace Xmaxplatform {namespace Chain {
 #define BIND_VM_NATIVE_FUCTION_VOID_R(nativ_func, vm_func) \
 	void f_vm_void##vm_func##r_type(); \
 	static Intrinsics::Function s_vm_void##vm_func##r_type	\
-	("env" "." "prints", \
+	("env" "." #vm_func, \
 		IR::FunctionType::get(IR::ResultType::none), \
 	(void*)&f_vm_void##vm_func##r_type);\
 	void f_vm_void##vm_func##r_type() { \
@@ -180,7 +180,7 @@ namespace Xmaxplatform {namespace Chain {
 #define BIND_VM_NATIVE_FUCTION_VOID_R(nativ_func, vm_func, arg_ds1) \
 	void f_vm_void##vm_func##r_type(arg_ds1::vm_type); \
 	static Intrinsics::Function s_vm_void##vm_func##r_type	\
-	("env" "." "prints", \
+	("env" "." #vm_func, \
 		IR::FunctionType::get(IR::ResultType::none, { arg_ds1::get_ir() }), \
 	(void*)&f_vm_void##vm_func##r_type);\
 	void f_vm_void##vm_func##r_type(arg_ds1::vm_type val1) { \
@@ -192,7 +192,7 @@ namespace Xmaxplatform {namespace Chain {
 #define BIND_VM_NATIVE_FUCTION_VOID_R2(nativ_func, vm_func, arg_ds1, arg_ds2) \
 	void f_vm_void##vm_func##r_type(arg_ds1::vm_type, arg_ds2::vm_type); \
 	static Intrinsics::Function s_vm_void##vm_func##r_type	\
-	("env" "." "prints", \
+	("env" "." #vm_func, \
 		IR::FunctionType::get(IR::ResultType::none, { arg_ds1::get_ir(), arg_ds2::get_ir() }), \
 	(void*)&f_vm_void##vm_func##r_type);\
 	void f_vm_void##vm_func##r_type(arg_ds1::vm_type val1, arg_ds2::vm_type val2) { \
@@ -205,7 +205,7 @@ namespace Xmaxplatform {namespace Chain {
 #define BIND_VM_NATIVE_FUCTION_RT_VIOD(nativ_func, vm_func, rt) \
 	rt::vm_type f_vm_rt##vm_func##r_type(); \
 	static Intrinsics::Function s_vm_void##vm_func##r_type	\
-	("env" "." "prints", \
+	("env" "." #vm_func, \
 		IR::FunctionType::get(IR::ResultType::none), \
 	(void*)&f_vm_rt##vm_func##r_type);\
 	rt::vm_type f_vm_rt##vm_func##r_type() { \
@@ -217,7 +217,7 @@ namespace Xmaxplatform {namespace Chain {
 #define BIND_VM_NATIVE_FUCTION_RT_R(nativ_func, vm_func, rt, arg_ds) \
 	rt::vm_type f_vm_rt##vm_func##r_type(arg_ds::vm_type); \
 	static Intrinsics::Function s_vm_void##vm_func##r_type	\
-	("env" "." "prints", \
+	("env" "." #vm_func, \
 		IR::FunctionType::get(IR::ResultType::none, { arg_ds::get_ir() }), \
 	(void*)&f_vm_void##vm_func##r_type);\
 	rt::vm_type f_vm_void##vm_func##r_type(arg_ds::vm_type val1) { \
