@@ -9,11 +9,16 @@
 
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
+#include <fc/io/fstream.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/reflect/variant.hpp>
 
 #include <boost/asio/high_resolution_timer.hpp>
 #include <boost/algorithm/clamp.hpp>
+
+#include <WAST/WAST.h>
+#include <Inline/Serialization.h>
+#include <IR/Module.h>
 
 namespace Xmaxplatform {
 	namespace detail {
@@ -76,8 +81,68 @@ namespace Xmaxplatform {
 		names.erase(itr, names.end());
 		return names;
 	}
+	FC_DECLARE_EXCEPTION(explained_exception, 9000000, "explained exception, see error log");
+
+	Basetypes::vector<uint8_t> assemble_wast(const std::string& wast) {
+		IR::Module module;
+		std::vector<WAST::Error> parseErrors;
+		WAST::parseModule(wast.c_str(), wast.size(), module, parseErrors);
+		if (parseErrors.size())
+		{
+			std::cerr << "Error parsing WebAssembly text file:" << std::endl;
+			for (auto& error : parseErrors)
+			{
+				std::cerr << ":" << error.locus.describe() << ": " << error.message.c_str() << std::endl;
+				std::cerr << error.locus.sourceLine << std::endl;
+				std::cerr << std::setw(error.locus.column(8)) << "^" << std::endl;
+			}
+			FC_THROW_EXCEPTION(explained_exception, "wast parse error");
+		}
+
+		try
+		{
+			// Serialize the WebAssembly module.
+			Serialization::ArrayOutputStream stream;
+			WASM::serialize(stream, module);
+			return stream.getBytes();
+		}
+		catch (Serialization::FatalSerializationException exception)
+		{
+			std::cerr << "Error serializing WebAssembly binary file:"<< std::endl;
+			std::cerr << exception.message << std::endl;
+			FC_THROW_EXCEPTION(explained_exception, "wasm serialize error");
+		}
+	}
 
 	struct customised_plugin_impl {
+
+		void set_code(const std::string& callername, const std::string& wastPath, const std::string& abiPath)
+		{
+			std::string wast;
+			std::cout << "Reading WAST..." << std::endl;
+			fc::read_file_contents(wastPath, wast);
+			std::cout << "Assembling WASM..." << std::endl;
+			auto wasm = assemble_wast(wast);
+
+			Basetypes::setcode handler;
+			handler.account = callername;
+			handler.code.assign(wasm.begin(), wasm.end());
+			
+			handler.code_abi = fc::json::from_file(abiPath).as<Basetypes::abi>();
+
+			Chain::signed_transaction trx;
+			trx.scope = sort_names({ Config::xmax_contract_name, callername });
+			transaction_emplace_message(trx, Config::xmax_contract_name, Basetypes::vector<Basetypes::account_permission>{ {callername, "active"}},
+				"setcode", handler);
+
+			std::cout << "Publishing contract..."<< std::endl;
+			Chain::chain_xmax& cc = app().get_plugin<blockchain_plugin>().getchain();
+			trx.expiration = cc.head_block_time() + fc::seconds(30);
+			transaction_set_reference_block(trx, cc.head_block_id());
+			cc.push_transaction(trx);
+		
+		}
+
 
 		void push_transaction(const std::string& callerPK, const std::string& callername, const fc::variant& vscope, const fc::variant& v)
 		{
@@ -348,7 +413,10 @@ namespace Xmaxplatform {
 			CALL(customised_plugin, my, stop_generation, INVOKE_V_V(my, stop_generation), 200),
 			CALL(customised_plugin, my, start_generation, INVOKE_V_R_R(my, start_generation, std::string, uint64_t), 200),
 			CALL(customised_plugin, my, create_account, INVOKE_V_R_R_R_R_R(my, create_account, std::string, std::string, std::string, public_key_type, public_key_type), 200),
-			CALL(customised_plugin, my, push_transaction, INVOKE_V_R_R_R_R(my, push_transaction, std::string, std::string, fc::variant , fc::variant), 200)
+			CALL(customised_plugin, my, push_transaction, INVOKE_V_R_R_R_R(my, push_transaction, std::string, std::string, fc::variant , fc::variant), 200),
+			CALL(customised_plugin, my, set_code, INVOKE_V_R_R_R(my, set_code, std::string, std::string,  std::string), 200)
+
+			
 		});
 		my.reset(new customised_plugin_impl);
 	}

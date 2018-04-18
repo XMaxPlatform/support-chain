@@ -3,7 +3,7 @@ add_library( customised_plugin
         customised_plugin.cpp
              ${HEADERS} )
 
-target_link_libraries( customised_plugin baseapp fc basetypes xmaxutilities xmaxchain chaindata_plugin chainhttp_plugin xmax_native_contract)
+target_link_libraries( customised_plugin baseapp fc basetypes xmaxutilities xmaxchain chaindata_plugin chainhttp_plugin xmax_native_contract WAST)
 target_include_directories( customised_plugin PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" )
 target_include_directories( customised_plugin PUBLIC "../../blockchain/chain/" )
 target_include_directories( customised_plugin PUBLIC "../../foundation/basetypes/" )
