@@ -1,0 +1,4 @@
+[submodule "libraries/mongo-c-driver-1.9.4/src/libbson"]
+	path = libraries/mongo-c-driver-1.9.4/src/libbson
+	url = https://github.com/mongodb/libbson.git
+	branch = debian
