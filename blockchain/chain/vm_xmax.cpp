@@ -126,6 +126,7 @@ namespace Xmaxplatform { namespace Chain {
       if( !wasm )
       {
          wlog( "Runtime::init" );
+		 vm_native_log();
          Runtime::init();
          wasm = new vm_xmax();
       }

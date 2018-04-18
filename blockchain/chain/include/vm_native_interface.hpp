@@ -18,6 +18,8 @@ namespace Xmaxplatform {namespace Chain {
 	using namespace IR;
 	using namespace Runtime;
 
+	void vm_native_log();
+
 	namespace vm_arg
 	{
 		typedef Runtime::MemoryInstance meminst;
