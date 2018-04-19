@@ -20,11 +20,11 @@ namespace Xmaxplatform { namespace Chain {
 
     fc::time_point chain_timestamp::to_time_point(const chain_timestamp& val)
     {
-        int64_t msec = ((int64_t)val._stamp) * (int64_t)Config::chain_timestamp_unit_us;
+        int64_t us = ((int64_t)val._stamp) * (int64_t)Config::chain_timestamp_unit_us;
 
-        msec += Config::chain_timestamp_epoch_us;
+		us += Config::chain_timestamp_epoch_us;
 
-        return fc::time_point(fc::milliseconds(msec));
+        return fc::time_point(fc::microseconds(us));
     }
 
 
