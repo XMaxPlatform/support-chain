@@ -14,7 +14,7 @@ target_include_directories(
 )
 
 
-set_target_properties( ${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS_HPP} ${HEADERS_H}" FOLDER ${TARGET_FILTER_NAME})
+#set_target_properties( ${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS_HPP} ${HEADERS_H}" FOLDER ${TARGET_FILTER_NAME})
 
 
 
