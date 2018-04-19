@@ -51,6 +51,8 @@ class vm_xmax {
 
       int64_t current_execution_time();
 
+	  void checktime();
+
       static key_type to_key_type(const Basetypes::type_name& type_name);
       static std::string to_type_name(key_type key_type);
 

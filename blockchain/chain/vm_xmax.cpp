@@ -113,6 +113,15 @@ namespace Xmaxplatform { namespace Chain {
    const int CHECKTIME_LIMIT = 18000;
 #endif
 
+   void vm_xmax::checktime()
+   {
+	   int64_t duration = current_execution_time();
+
+      if (duration > checktime_limit) {
+         wlog("checktime called ${d}", ("d", duration));
+         throw checktime_exceeded();
+      }
+   }
 
 
    vm_xmax& vm_xmax::get() {
@@ -196,7 +205,7 @@ namespace Xmaxplatform { namespace Chain {
 
          Runtime::invokeFunction(call,args);
          wasm_memory_mgmt.reset();
-         checktime(current_execution_time(), checktime_limit);
+         checktime();
       } catch( const Runtime::Exception& e ) {
           edump((std::string(describeExceptionCause(e.cause))));
           edump((e.callStack));
