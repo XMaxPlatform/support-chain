@@ -19,7 +19,7 @@ namespace Xmaxplatform {namespace Chain {
 	using namespace Runtime;
 
 	void vm_native_log();
-
+	void checktime(int64_t duration, uint32_t checktime_limit);
 	namespace vm_arg
 	{
 		typedef Runtime::MemoryInstance meminst;
@@ -168,6 +168,10 @@ namespace Xmaxplatform {namespace Chain {
 	}
 
 }}
+
+
+
+
 
 #define BIND_VM_NATIVE_FUCTION_VOID_R(nativ_func, vm_func) \
 	void f_vm_void##vm_func##r_type(); \

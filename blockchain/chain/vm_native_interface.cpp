@@ -30,4 +30,16 @@ namespace Xmaxplatform {namespace Chain {
 	{ 
 		return 0; 
 	}
+
+	void checktime(int64_t duration, uint32_t checktime_limit)
+	{
+		if (duration > checktime_limit) {
+			wlog("checktime called ${d}", ("d", duration));
+			throw checktime_exceeded();
+		}
+	}
+
+	DEFINE_INTRINSIC_FUNCTION0(env, checktime, checktime, none) {
+		checktime(vm_xmax::get().current_execution_time(), vm_xmax::get().checktime_limit);
+	}
 }}

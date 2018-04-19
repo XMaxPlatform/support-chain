@@ -113,13 +113,7 @@ namespace Xmaxplatform { namespace Chain {
    const int CHECKTIME_LIMIT = 18000;
 #endif
 
-   void checktime(int64_t duration, uint32_t checktime_limit)
-   {
-      if (duration > checktime_limit) {
-         wlog("checktime called ${d}", ("d", duration));
-         throw checktime_exceeded();
-      }
-   }
+
 
    vm_xmax& vm_xmax::get() {
       static vm_xmax*  wasm = nullptr;
