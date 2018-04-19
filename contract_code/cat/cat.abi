@@ -1,0 +1,120 @@
+{
+  "types": [{
+      "new_type_name": "account_name",
+      "type": "name"
+    }
+  ],
+  "structs": [{
+      "name": "sellmsg",
+      "base": "",
+      "fields": {
+        "name": "account_name",
+        "id": "uint64"
+      }
+    },{
+      "name": "buymsg",
+      "base": "",
+      "fields": {
+        "name": "account_name",
+        "id": "uint64"
+      }
+    },{
+      "name": "bearmsg",
+      "base": "",
+      "fields": {
+        "name": "account_name",
+        "id": "uint64",
+        "to": "uint64"
+      }
+    },{
+      "name": "coolmsg",
+      "base": "",
+      "fields": {
+        "name": "account_name",
+        "id": "uint64",
+        "amount": "uint64"
+      }
+    },{
+      "name": "cat",
+      "base": "",
+      "fields": {
+        "id": "uint64",
+        "name": "account_name",
+        "price": "uint64",
+        "sell": "uint64",
+        "growth": "uint64",
+        "bear": "uint64",
+        "smart": "uint64",
+        "charm": "uint64",
+        "generation": "uint64",
+        "feedvalue": "uint64",
+        "bearcount": "uint64",
+        "canbear": "uint64",
+        "cooltime": "uint64"
+        "gene": "uint64"
+      }
+    },{
+      "name": "account",
+      "base": "",
+      "fields": {
+        "key": "uint64",
+        "feedcount": "uint64",
+        "reward": "uint64"
+      }
+    },{
+      "name": "catown",
+      "base": "",
+      "fields": {
+        "id": "uint64",
+        "sell": "uint64"
+      }
+    },{
+      "name": "catsell",
+      "base": "",
+      "fields": {
+        "id": "uint64",
+        "price": "uint64"
+      }
+    }
+  ],
+  "actions": [{
+      "action_name": "sell",
+      "type": "sellmsg"
+    },{
+      "action_name": "buy",
+      "type": "buymsg"
+    },{
+      "action_name": "bear",
+      "type": "bearmsg"
+    },{
+      "action_name": "cooltime",
+      "type": "coolmsg"
+    }
+  ],
+  "tables": [{
+      "table_name": "account",
+      "type": "account",
+      "index_type": "i64",
+      "key_names" : ["feedcount"],
+      "key_types" : ["uint64"]
+    },{
+      "table_name": "cat",
+      "type": "cat",
+      "index_type": "i64",
+      "key_names" : ["id"],
+      "key_types" : ["uint64"]
+    },{
+      "table_name": "catown",
+      "type": "catown",
+      "index_type": "i64",
+      "key_names" : ["id"],
+      "key_types" : ["uint64"]
+    },{
+      "table_name": "catsell",
+      "type": "catsell",
+      "index_type": "i64",
+      "key_names" : ["id"],
+      "key_types" : ["uint64"]
+    }
+  ]
+}
