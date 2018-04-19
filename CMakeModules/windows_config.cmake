@@ -36,7 +36,7 @@ if(WIN32)
 	if("${Secp256k1_ROOT_DIR}" STREQUAL "")
 		set(Secp256k1_ROOT_DIR "${XMAX_ROOT_DIR}/libraries/secp256k1-zkp")
 	endif()	
-	set(Secp256k1_LIBRARY "${Secp256k1_ROOT_DIR}/lib")
+	set(Secp256k1_LIBRARY_DIR "${Secp256k1_ROOT_DIR}/lib")
 	set(Secp256k1_INCLUDE_DIR "${Secp256k1_ROOT_DIR}/include")
 	message(STATUS "Secp256k1_ROOT_DIR: ${Secp256k1_ROOT_DIR}")
 

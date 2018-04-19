@@ -30,6 +30,8 @@ set( CMAKE_CXX_STANDARD 14 )
 
 if(WIN32)
   include(windows_config)
+
+
 endif()
 
 
@@ -65,6 +67,14 @@ FIND_PACKAGE(Boost 1.66 REQUIRED COMPONENTS
 IF( WIN32 )
 
     message( STATUS "Configuring XMax on WIN32")
+
+    
+    set(RUNTIME_BUILD_PATH "${CMAKE_BINARY_DIR}/$<CONFIGURATION>/bin")
+    set(LIB_BUILD_PATH "${CMAKE_BINARY_DIR}/$<CONFIGURATION>/lib")
+
+    set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${RUNTIME_BUILD_PATH} )
+    set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIB_BUILD_PATH} )
+
 
     #looks like this flag can have different default on some machines.
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
@@ -150,9 +160,12 @@ add_subdirectory( plugins )
 add_subdirectory( launch )
 add_subdirectory( contracts_cpp )
 
-if(WIN32 AND NOT ("${OPENSSL_ROOT_DIR}" STREQUAL ""))
-                install(DIRECTORY ${OPENSSL_ROOT_DIR}/bin/ DESTINATION bin
-        FILES_MATCHING PATTERN "libcrypto-1_1-x64.dll")      
-endif()
+if(WIN32 AND NOT ("${OPENSSL_ROOT_DIR}" STREQUAL ""))    
 
+    install(DIRECTORY ${OPENSSL_ROOT_DIR}/bin/ DESTINATION bin
+        FILES_MATCHING PATTERN "libcrypto-1_1-x64.dll") 
+        
+    install(DIRECTORY ${OPENSSL_ROOT_DIR}/bin/ DESTINATION ${RUNTIME_BUILD_PATH}
+        FILES_MATCHING PATTERN "libcrypto-1_1-x64.dll")        
+endif()
 

@@ -8,8 +8,8 @@ target_include_directories(xmaxrun PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 if(WIN32)
 	list(APPEND PLATFORM_SPECIFIC_LIBS 
-		${Secp256k1_LIBRARY}/gmp.lib
-		${Secp256k1_LIBRARY}/secp256k1.lib
+		${Secp256k1_LIBRARY_DIR}/gmp.lib
+		${Secp256k1_LIBRARY_DIR}/secp256k1.lib
 		${OPENSSL_LIBRARY_DIR}/libcrypto.lib
 		${OPENSSL_LIBRARY_DIR}/openssl.lib
 		Userenv

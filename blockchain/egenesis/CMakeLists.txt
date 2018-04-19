@@ -14,24 +14,30 @@ add_executable( embed_genesis
 
 set(SPECIFIC_LIBS "")
 
+get_property(EMBED_GENESIS_BIN_DIR TARGET embed_genesis PROPERTY RUNTIME_OUTPUT_DIRECTORY)
+message(STATUS "EMBED_GENESIS_BIN_DIR:" ${EMBED_GENESIS_BIN_DIR})
+
+
+
+
 if(WIN32)
 	list(APPEND SPECIFIC_LIBS 
-		${Secp256k1_LIBRARY}/gmp.lib
-		${Secp256k1_LIBRARY}/secp256k1.lib
+		${Secp256k1_LIBRARY_DIR}/gmp.lib
+		${Secp256k1_LIBRARY_DIR}/secp256k1.lib
 		${OPENSSL_LIBRARY_DIR}/libcrypto.lib
 		${OPENSSL_LIBRARY_DIR}/openssl.lib
 		Userenv.lib
         )
         
 
-        # if(NOT ("${OPENSSL_ROOT_DIR}" STREQUAL ""))
+        if(NOT ("${OPENSSL_ROOT_DIR}" STREQUAL ""))
                
-        #         add_custom_command(TARGET embed_genesis 
-        #                          POST_BUILD
-        #                          COMMAND  ${CMAKE_COMMAND} -E copy_if_different "${OPENSSL_ROOT_DIR}/bin/libcrypto-1_1-x64.dll"  "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>/"      
-        #                          )
+                add_custom_command(TARGET embed_genesis 
+                                 POST_BUILD
+                                 COMMAND  ${CMAKE_COMMAND} -E copy_if_different "${OPENSSL_ROOT_DIR}/bin/libcrypto-1_1-x64.dll"  "${EMBED_GENESIS_BIN_DIR}/"      
+                                 )
                
-        # endif()
+        endif()
 endif()
 
 
@@ -58,7 +64,7 @@ add_custom_command(
       "${CMAKE_CURRENT_BINARY_DIR}/egenesis_brief.cpp"
       "${CMAKE_CURRENT_BINARY_DIR}/egenesis_full.cpp"
    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-   COMMAND embed_genesis ${embed_genesis_args}
+   COMMAND ${EMBED_GENESIS_BIN_DIR}/embed_genesis ${embed_genesis_args}
    DEPENDS
       "${XMAX_EGENESIS_JSON}"
       "egenesis_brief.cpp.tmpl"

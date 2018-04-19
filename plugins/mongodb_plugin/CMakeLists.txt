@@ -104,6 +104,19 @@ set_target_properties( mongodb_plugin PROPERTIES
                         FOLDER "5.Plugins")
 
 
+if(WIN32 AND libmongoc-1.0_FOUND)
+
+    string(REGEX REPLACE "/" "\\\\" MONGO_C_DLLS ${MONGO_DB_C_ROOT}/bin/*.dll)
+    string(REGEX REPLACE "/" "\\\\" MONGO_CXX_DLLS ${MONGO_DB_CXX_ROOT}/bin/*.dll)
+    string(REGEX REPLACE "/" "\\\\" RUNTIME_OUTPUT_DIR_WIN ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+    add_custom_command(TARGET mongodb_plugin
+                        POST_BUILD
+                        COMMAND  copy "/y" "${MONGO_C_DLLS}" "${RUNTIME_OUTPUT_DIR_WIN}"
+                        COMMAND  copy "/y" "${MONGO_CXX_DLLS}" "${RUNTIME_OUTPUT_DIR_WIN}"                        
+                        )
+endif()                        
+
 install( TARGETS
    mongodb_plugin
 
@@ -116,7 +129,11 @@ install( TARGETS
 if(WIN32 AND  NOT ("${MONGO_DB_CXX_ROOT}" STREQUAL ""))
 #    message("Found db cxx root and install.")       
                 install(DIRECTORY ${MONGO_DB_CXX_ROOT}/bin/ DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-        FILES_MATCHING PATTERN "*.dll")  
+        FILES_MATCHING PATTERN "*.dll") 
+        
+        install(DIRECTORY ${MONGO_DB_CXX_ROOT}/bin/ DESTINATION ${RUNTIME_BUILD_PATH}
+        FILES_MATCHING PATTERN "*.dll") 
+
 else()
     message("Cannot find MONGO_DB_CXX_ROOT root and install.")        
 endif()
@@ -125,6 +142,9 @@ if(WIN32 AND  NOT ("${MONGO_DB_C_ROOT}" STREQUAL ""))
 #    message("Found db cxx root and install.")       
                 install(DIRECTORY ${MONGO_DB_C_ROOT}/bin/ DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
         FILES_MATCHING PATTERN "*.dll")  
+
+             install(DIRECTORY ${MONGO_DB_C_ROOT}/bin/ DESTINATION ${RUNTIME_BUILD_PATH}
+        FILES_MATCHING PATTERN "*.dll") 
 else()
     message("Cannot find MONGO_DB_C_ROOT and install.")        
 endif()
