@@ -1,6 +1,7 @@
 file(GLOB HEADERS "include/*.hpp" "include/objects/*.hpp")
 file (GLOB SOURCE_FILES "*.cpp" "objects/*.cpp")
 
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj") 
 add_library( xmaxchain ${SOURCE_FILES} ${HEADERS} )
 target_link_libraries(

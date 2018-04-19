@@ -110,7 +110,7 @@ namespace Xmaxplatform { namespace Chain {
 #ifdef NDEBUG
    const int CHECKTIME_LIMIT = 3000;
 #else
-   const int CHECKTIME_LIMIT = 18000;
+   const int CHECKTIME_LIMIT = 36000;
 #endif
 
    void vm_xmax::checktime()

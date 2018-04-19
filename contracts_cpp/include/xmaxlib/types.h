@@ -18,7 +18,7 @@ extern "C" {
 	*
 	*  @{
 	*/
-
+	typedef unsigned __int128    uint128_t;
 	typedef uint64_t xmax_name;
 	typedef uint32_t xmax_time;
 
