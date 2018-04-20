@@ -15,7 +15,7 @@ namespace Native_contract {
 namespace Chain = ::Xmaxplatform::Chain;
 namespace Types = ::Xmaxplatform::Basetypes;
 
-void handle_xmax_newaccount(Chain::message_context_xmax& context);
+void handle_xmax_addaccount(Chain::message_context_xmax& context);
 void handle_xmax_transfer(Chain::message_context_xmax& context);
 
 void handle_xmax_lock(Chain::message_context_xmax& context);

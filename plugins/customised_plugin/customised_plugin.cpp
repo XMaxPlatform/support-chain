@@ -222,8 +222,8 @@ namespace Xmaxplatform {
 				auto recovery_auth = Xmaxplatform::Chain::authority{ 1,{},{ { { creator, "active" }, 1 } } };
 
 				trx.scope = sort_names({ creator,Config::xmax_contract_name });
-				transaction_emplace_message(trx, Config::xmax_contract_name, Xmaxplatform::Basetypes::vector<Basetypes::account_permission>{ {creator, "active"}}, "newaccount",
-					Basetypes::newaccount{ creator, accountName, owner_auth,
+				transaction_emplace_message(trx, Config::xmax_contract_name, Xmaxplatform::Basetypes::vector<Basetypes::account_permission>{ {creator, "active"}}, "addaccount",
+					Basetypes::addaccount{ creator, accountName, owner_auth,
 					active_auth, recovery_auth, stake });
 			}
 
@@ -233,168 +233,8 @@ namespace Xmaxplatform {
 
 			cc.push_transaction(trx);
 		}
+	
 
-		void create_test_accounts(const std::string& init_name, const std::string& init_priv_key) {
-			name newaccountA("txn.test.a");
-			name newaccountB("txn.test.b");
-			name creator(init_name);
-
-			chain_xmax& cc = app().get_plugin<blockchain_plugin>().getchain();
-			Chain::chain_id_type chainid;
-			app().get_plugin<blockchain_plugin>().get_chain_id(chainid);
-			uint64_t stake = 10000;
-
-			fc::ecc::private_key txn_test_receiver_A_priv_key = fc::ecc::private_key::regenerate(fc::sha256(std::string(64, 'a')));
-			fc::ecc::private_key txn_test_receiver_B_priv_key = fc::ecc::private_key::regenerate(fc::sha256(std::string(64, 'b')));
-			fc::ecc::public_key  txn_text_receiver_A_pub_key = txn_test_receiver_A_priv_key.get_public_key();
-			fc::ecc::public_key  txn_text_receiver_B_pub_key = txn_test_receiver_B_priv_key.get_public_key();
-			fc::ecc::private_key creator_priv_key = *Utilities::wif_to_key(init_priv_key);
-
-			Chain::signed_transaction trx;
-			auto memo = fc::variant(fc::time_point::now()).as_string() + " " + fc::variant(fc::time_point::now().time_since_epoch()).as_string();
-
-			//create "A" account
-			{
-				auto owner_auth = Xmaxplatform::Chain::authority{ 1,{ { txn_text_receiver_A_pub_key, 1 } },{} };
-				auto active_auth = Xmaxplatform::Chain::authority{ 1,{ { txn_text_receiver_A_pub_key, 1 } },{} };
-				auto recovery_auth = Xmaxplatform::Chain::authority{ 1,{},{ { { creator, "active" }, 1 } } };
-
-				trx.scope = sort_names({ creator,Config::xmax_contract_name });
-				transaction_emplace_message(trx, Config::xmax_contract_name,Xmaxplatform::Basetypes::vector<Basetypes::account_permission>{ {creator, "active"}}, "newaccount",
-					Basetypes::newaccount{ creator, newaccountA, owner_auth,
-					active_auth, recovery_auth, stake });
-			}
-			//create "B" account
-			{
-				auto owner_auth = Xmaxplatform::Chain::authority{ 1,{ { txn_text_receiver_B_pub_key, 1 } },{} };
-				auto active_auth = Xmaxplatform::Chain::authority{ 1,{ { txn_text_receiver_B_pub_key, 1 } },{} };
-				auto recovery_auth = Xmaxplatform::Chain::authority{ 1,{},{ { { creator, "active" }, 1 } } };
-
-				trx.scope = sort_names({ creator,Config::xmax_contract_name });
-				transaction_emplace_message(trx, Config::xmax_contract_name, Xmaxplatform::Basetypes::vector<Basetypes::account_permission>{ {creator, "active"}}, "newaccount",
-					Basetypes::newaccount{ creator, newaccountB, owner_auth,
-					active_auth, recovery_auth, stake });
-			}
-
-			trx.expiration = cc.head_block_time() + fc::seconds(30);
-			transaction_set_reference_block(trx, cc.head_block_id());
-			trx.sign(creator_priv_key, chainid);
-
-			cc.push_transaction(trx);
-		}
-
-		void fund_accounts(const std::string& fund_name, const std::string& fund_priv_key) {
-			name newaccountA("txn.test.a");
-			name newaccountB("txn.test.b");
-			name fundor(fund_name);
-
-			fc::ecc::private_key fundor_priv_key = *Utilities::wif_to_key(fund_priv_key);
-
-			chain_xmax& cc = app().get_plugin<blockchain_plugin>().getchain();
-			Chain::chain_id_type chainid;
-			app().get_plugin<blockchain_plugin>().get_chain_id(chainid);
-			uint64_t balance = 10000;
-
-			auto memo = fc::variant(fc::time_point::now()).as_string() + " " + fc::variant(fc::time_point::now().time_since_epoch()).as_string();
-
-			Chain::signed_transaction trx;
-			trx.scope = sort_names({ fundor,newaccountA,newaccountB });
-			transaction_emplace_message(trx, Config::xmax_contract_name,
-				Basetypes::vector<Basetypes::account_permission>{ {fundor, "active"}},
-				"transfer", Basetypes::transfer{ fundor, newaccountA, balance, memo });
-			transaction_emplace_message(trx, Config::xmax_contract_name,
-				Basetypes::vector<Basetypes::account_permission>{ {fundor, "active"}},
-				"transfer", Basetypes::transfer{ fundor, newaccountB, balance, memo });
-			trx.expiration = cc.head_block_time() + fc::seconds(30);
-			transaction_set_reference_block(trx, cc.head_block_id());
-			trx.sign(fundor_priv_key, chainid);
-
-			cc.push_transaction(trx);
-		}
-
-		void start_generation(const std::string& salt, const uint64_t& persecond) {
-			if (running)
-				throw fc::exception(fc::invalid_operation_exception_code);
-			running = true;
-			memo_salt = salt;
-
-			timer_timeout = 1000 / boost::algorithm::clamp(persecond / 2, 1, 200);
-
-			ilog("Started transaction test plugin; performing ${p} transactions/second", ("p", 1000 / timer_timeout * 2));
-
-			arm_timer(boost::asio::high_resolution_timer::clock_type::now());
-		}
-
-		void arm_timer(boost::asio::high_resolution_timer::time_point s) {
-			timer.expires_at(s + std::chrono::milliseconds(timer_timeout));
-			timer.async_wait([this](auto ec) {
-				if (ec)
-					return;
-				try {
-					this->send_transaction();
-				}
-				catch (fc::exception e) {
-					elog("pushing transaction failed: ${e}", ("e", e.to_detail_string()));
-					this->stop_generation();
-					return;
-				}
-				this->arm_timer(timer.expires_at());
-			});
-		}
-
-		void send_transaction() {
-			Chain::signed_transaction trx;
-
-			chain_xmax& cc = app().get_plugin<blockchain_plugin>().getchain();
-			Chain::chain_id_type chainid;
-			app().get_plugin<blockchain_plugin>().get_chain_id(chainid);
-
-			name sender("txn.test.a");
-			name recipient("txn.test.b");
-
-			//make transaction a->b
-			std::string memo = memo_salt + fc::variant(fc::time_point::now()).as_string() + " " + fc::variant(fc::time_point::now().time_since_epoch()).as_string();
-			trx.scope = sort_names({ sender,recipient });
-			transaction_emplace_message(trx, Config::xmax_contract_name,
-				Basetypes::vector<Basetypes::account_permission>{ {sender, "active"}},
-				"transfer", Basetypes::transfer{ sender, recipient, 1, memo });
-
-			trx.expiration = cc.head_block_time() + fc::seconds(30);
-			transaction_set_reference_block(trx, cc.head_block_id());
-
-			fc::ecc::private_key creator_priv_key = fc::ecc::private_key::regenerate(fc::sha256(std::string(64, 'a')));
-			trx.sign(creator_priv_key, chainid);
-			cc.push_transaction(trx);
-
-			//make transaction b->a
-			trx.clear();
-			trx.scope = sort_names({ sender,recipient });
-			transaction_emplace_message(trx, Config::xmax_contract_name,
-				Basetypes::vector<Basetypes::account_permission>{ {recipient, "active"}},
-				"transfer", Basetypes::transfer{ recipient, sender, 1, memo });
-
-			trx.expiration = cc.head_block_time() + fc::seconds(30);
-			transaction_set_reference_block(trx, cc.head_block_id());
-
-			fc::ecc::private_key b_priv_key = fc::ecc::private_key::regenerate(fc::sha256(std::string(64, 'b')));
-			trx.sign(b_priv_key, chainid);
-			cc.push_transaction(trx);
-		}
-
-		void stop_generation() {
-			if (!running)
-				throw fc::exception(fc::invalid_operation_exception_code);
-			timer.cancel();
-			running = false;
-			ilog("Stopping transaction generation test");
-		}
-
-		boost::asio::high_resolution_timer timer{ app().get_io_service() };
-		bool running{ false };
-
-		unsigned timer_timeout;
-
-		std::string memo_salt;
 	};
 
 	customised_plugin::customised_plugin() {}
@@ -408,10 +248,6 @@ namespace Xmaxplatform {
 
 	void customised_plugin::plugin_startup() {
 		app().get_plugin<chainhttp_plugin>().add_api({
-			CALL(customised_plugin, my, create_test_accounts, INVOKE_V_R_R(my, create_test_accounts, std::string, std::string), 200),
-			CALL(customised_plugin, my, fund_accounts, INVOKE_V_R_R(my, fund_accounts, std::string, std::string), 200),
-			CALL(customised_plugin, my, stop_generation, INVOKE_V_V(my, stop_generation), 200),
-			CALL(customised_plugin, my, start_generation, INVOKE_V_R_R(my, start_generation, std::string, uint64_t), 200),
 			CALL(customised_plugin, my, create_account, INVOKE_V_R_R_R_R_R(my, create_account, std::string, std::string, std::string, public_key_type, public_key_type), 200),
 			CALL(customised_plugin, my, push_transaction, INVOKE_V_R_R_R_R(my, push_transaction, std::string, std::string, fc::variant , fc::variant), 200),
 			CALL(customised_plugin, my, set_code, INVOKE_V_R_R_R(my, set_code, std::string, std::string,  std::string), 200)
@@ -422,11 +258,7 @@ namespace Xmaxplatform {
 	}
 
 	void customised_plugin::plugin_shutdown() {
-		try {
-			my->stop_generation();
-		}
-		catch (fc::exception e) {
-		}
+	
 	}
 
 }

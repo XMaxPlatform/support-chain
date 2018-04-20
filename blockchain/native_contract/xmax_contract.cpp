@@ -29,8 +29,8 @@ using namespace ::Xmaxplatform::Basetypes;
 typedef mutable_db_table <xmx_token_object, by_owner_name> xmax_token_table;
 typedef mutable_db_table <resource_token_object, by_owner_name> resource_token_table;
 
-void handle_xmax_newaccount(message_context_xmax& context) {
-   auto create = context.msg.as<Types::newaccount>();
+void handle_xmax_addaccount(message_context_xmax& context) {
+   auto create = context.msg.as<Types::addaccount>();
 
    auto& db = context.mutable_db;
 

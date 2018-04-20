@@ -391,9 +391,9 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
-    struct newaccount { 
-        newaccount() = default;
-        newaccount(const account_name& creator, const account_name& name, const authority& owner, const authority& active, const authority& recovery, const asset& deposit)
+    struct addaccount { 
+        addaccount() = default;
+        addaccount(const account_name& creator, const account_name& name, const authority& owner, const authority& active, const authority& recovery, const asset& deposit)
            : creator(creator), name(name), owner(owner), active(active), recovery(recovery), deposit(deposit) {}
 
         account_name                     creator;
@@ -404,9 +404,9 @@ namespace Xmaxplatform { namespace Basetypes {
         asset                            deposit;
     };
 
-    template<> struct get_struct<newaccount> { 
+    template<> struct get_struct<addaccount> { 
         static const struct_t& type() { 
-           static struct_t result = { "newaccount", "", {
+           static struct_t result = { "addaccount", "", {
                 {"creator", "account_name"},
                 {"name", "account_name"},
                 {"owner", "authority"},
@@ -649,7 +649,7 @@ FC_REFLECT( Xmaxplatform::Basetypes::nonce                            , (value) 
 FC_REFLECT( Xmaxplatform::Basetypes::lock                             , (from)(to)(amount) )
 FC_REFLECT( Xmaxplatform::Basetypes::unlock                           , (account)(amount) )
 FC_REFLECT( Xmaxplatform::Basetypes::claim                            , (account)(amount) )
-FC_REFLECT( Xmaxplatform::Basetypes::newaccount                       , (creator)(name)(owner)(active)(recovery)(deposit) )
+FC_REFLECT( Xmaxplatform::Basetypes::addaccount                       , (creator)(name)(owner)(active)(recovery)(deposit) )
 FC_REFLECT( Xmaxplatform::Basetypes::setcode                          , (account)(vm_type)(vm_version)(code)(code_abi) )
 FC_REFLECT( Xmaxplatform::Basetypes::updateauth                       , (account)(permission)(parent)(new_authority) )
 FC_REFLECT( Xmaxplatform::Basetypes::deleteauth                       , (account)(permission) )

@@ -29,7 +29,7 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 
 #define SET_APP_HANDLER( contract, scope, action, nspace ) \
    chain.set_message_handler( #contract, #scope, #action, &BOOST_PP_CAT(nspace::Native_contract::handle_, BOOST_PP_CAT(contract, BOOST_PP_CAT(_,action) ) ) )
-    SET_APP_HANDLER( xmax, xmax, newaccount, Xmaxplatform );
+    SET_APP_HANDLER( xmax, xmax, addaccount, Xmaxplatform );
     SET_APP_HANDLER( xmax, xmax, transfer, Xmaxplatform );
 	
     SET_APP_HANDLER( xmax, xmax, lock, Xmaxplatform );
@@ -47,10 +47,10 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
    Basetypes::abi xmax_abi;
     xmax_abi.types.push_back( Types::type_def{"share_type","int64"} );
     xmax_abi.actions.push_back( Types::action{name("transfer"), "transfer"} );
-    xmax_abi.actions.push_back( Types::action{name("newaccount"), "newaccount"} );
+    xmax_abi.actions.push_back( Types::action{name("addaccount"), "addaccount"} );
 	xmax_abi.actions.push_back( Types::action{name("setcode"), "setcode" });
     xmax_abi.structs.push_back( Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transfer>::type() );
-    xmax_abi.structs.push_back( Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::newaccount>::type() );
+    xmax_abi.structs.push_back( Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::addaccount>::type() );
 	xmax_abi.structs.push_back( Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::setcode>::type());
    return xmax_abi;
 }
@@ -85,7 +85,7 @@ std::vector<message_xmax> native_contract_chain_init::prepare_data(chain_xmax &c
    for (const auto& acct : genesis.initial_accounts) {
       message_xmax msg(Config::xmax_contract_name,
                              vector<Basetypes::account_permission>{{Config::xmax_contract_name, "active"}},
-                             "newaccount", Basetypes::newaccount(Config::xmax_contract_name, acct.name,
+                             "addaccount", Basetypes::addaccount(Config::xmax_contract_name, acct.name,
                                                              KeyAuthority(acct.owner_key),
                                                              KeyAuthority(acct.active_key),
                                                              KeyAuthority(acct.owner_key),

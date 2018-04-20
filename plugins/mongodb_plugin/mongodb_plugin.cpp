@@ -95,7 +95,7 @@ public:
    bool is_scope_relevant(const Xmaxplatform::Basetypes::vector<account_name>& scope);
    void update_account(const Chain::message_xmax& msg);
 
-   static const func_name newaccount;
+   static const func_name addaccount;
    static const func_name transfer;
    static const func_name lock;
    static const func_name unlock;
@@ -110,7 +110,7 @@ public:
 
     Basetypes::abi mongodb_plugin_impl::xmax_abi;
 
-const func_name mongodb_plugin_impl::newaccount = "newaccount";
+const func_name mongodb_plugin_impl::addaccount = "addaccount";
 const func_name mongodb_plugin_impl::transfer = "transfer";
 const func_name mongodb_plugin_impl::lock = "lock";
 const func_name mongodb_plugin_impl::unlock = "unlock";
@@ -458,13 +458,13 @@ void mongodb_plugin_impl::update_account(const Chain::message_xmax& msg) {
       accounts.update_one(document{} << "_id" << from_account.view()["_id"].get_oid() << finalize, update_from.view());
       accounts.update_one(document{} << "_id" << to_account.view()["_id"].get_oid() << finalize, update_to.view());
 
-   } else if (msg.type == newaccount) {
+   } else if (msg.type == addaccount) {
       auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::microseconds{fc::time_point::now().time_since_epoch().count()});
-      auto newaccount = msg.as<Basetypes::newaccount>();
+      auto addaccount = msg.as<Basetypes::addaccount>();
 
       // find creator to update its balance
-      auto from_name = newaccount.creator.to_string();
+      auto from_name = addaccount.creator.to_string();
       document find_from{};
       find_from << "name" << from_name;
       auto from_account = accounts.find_one(find_from.view());
@@ -475,21 +475,21 @@ void mongodb_plugin_impl::update_account(const Chain::message_xmax& msg) {
       // decrease creator by deposit amount
       auto from_view = from_account->view();
       asset from_balance = asset::from_string(from_view["xmx_balance"].get_utf8().value.to_string());
-      from_balance -= newaccount.deposit;
+      from_balance -= addaccount.deposit;
       document update_from{};
       update_from << "$set" << open_document << "xmx_balance" << from_balance.to_string() << close_document;
       accounts.update_one(find_from.view(), update_from.view());
 
       // create new account with staked deposit amount
       bsoncxx::builder::stream::document doc{};
-      doc << "name" << newaccount.name.to_string()
+      doc << "name" << addaccount.name.to_string()
           << "xmx_balance" << asset().to_string()
-          << "staked_balance" << newaccount.deposit.to_string()
+          << "staked_balance" << addaccount.deposit.to_string()
           << "unstaking_balance" << asset().to_string()
           << "createdAt" << b_date{now}
           << "updatedAt" << b_date{now};
       if (!accounts.insert_one(doc.view())) {
-         elog("Failed to insert account ${n}", ("n", newaccount.name));
+         elog("Failed to insert account ${n}", ("n", addaccount.name));
       }
 
    } else if (msg.type == lock) {
