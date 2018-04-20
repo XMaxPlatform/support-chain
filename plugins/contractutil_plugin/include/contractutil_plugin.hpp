@@ -9,10 +9,10 @@
 using namespace Baseapp;
 namespace Xmaxplatform {
 
-	class customised_plugin : public plugin<customised_plugin> {
+	class contractutil_plugin : public plugin<contractutil_plugin> {
 	public:
-		customised_plugin();
-		~customised_plugin();
+		contractutil_plugin();
+		~contractutil_plugin();
 
 		BASEAPP_DEPEND_PLUGINS((chainhttp_plugin))
 			virtual void set_program_options(options_description&, options_description& cfg) override;

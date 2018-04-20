@@ -2,7 +2,7 @@
 *  @file
 *  @copyright defined in xmax/LICENSE.txt
 */
-#include <customised_plugin.hpp>
+#include <contractutil_plugin.hpp>
 #include <../../blockchain_plugin/include/blockchain_plugin.hpp>
 #include<../../../foundation/utilities/include/key_conversion.hpp>
 #include<../../../blockchain/chain/include/blockchain_types.hpp>
@@ -237,27 +237,27 @@ namespace Xmaxplatform {
 
 	};
 
-	customised_plugin::customised_plugin() {}
-	customised_plugin::~customised_plugin() {}
+	contractutil_plugin::contractutil_plugin() {}
+	contractutil_plugin::~contractutil_plugin() {}
 
-	void customised_plugin::set_program_options(options_description&, options_description& cfg) {
+	void contractutil_plugin::set_program_options(options_description&, options_description& cfg) {
 	}
 
-	void customised_plugin::plugin_initialize(const variables_map& options) {
+	void contractutil_plugin::plugin_initialize(const variables_map& options) {
 	}
 
-	void customised_plugin::plugin_startup() {
+	void contractutil_plugin::plugin_startup() {
 		app().get_plugin<chainhttp_plugin>().add_api({
-			CALL(customised_plugin, my, create_account, INVOKE_V_R_R_R_R_R(my, create_account, std::string, std::string, std::string, public_key_type, public_key_type), 200),
-			CALL(customised_plugin, my, push_transaction, INVOKE_V_R_R_R_R(my, push_transaction, std::string, std::string, fc::variant , fc::variant), 200),
-			CALL(customised_plugin, my, set_code, INVOKE_V_R_R_R(my, set_code, std::string, std::string,  std::string), 200)
+			CALL(contractutil_plugin, my, create_account, INVOKE_V_R_R_R_R_R(my, create_account, std::string, std::string, std::string, public_key_type, public_key_type), 200),
+			CALL(contractutil_plugin, my, push_transaction, INVOKE_V_R_R_R_R(my, push_transaction, std::string, std::string, fc::variant , fc::variant), 200),
+			CALL(contractutil_plugin, my, set_code, INVOKE_V_R_R_R(my, set_code, std::string, std::string,  std::string), 200)
 
 			
 		});
 		my.reset(new customised_plugin_impl);
 	}
 
-	void customised_plugin::plugin_shutdown() {
+	void contractutil_plugin::plugin_shutdown() {
 	
 	}
 
