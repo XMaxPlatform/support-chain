@@ -8,7 +8,7 @@
 #include <blockchain_exceptions.hpp>
 
 namespace Xmaxplatform {namespace Chain {
-
+	using namespace vm_ds;
 	
 	void vm_message_log()
 	{
@@ -16,25 +16,34 @@ namespace Xmaxplatform {namespace Chain {
 	}
 
 	//--------------------------------message------------------------------------------//
-	DEFINE_INTRINSIC_FUNCTION0(env, current_code, current_code, i64) {
+
+	int64 vm_xmax_current_code()
+	{
 		auto& wasm = vm_xmax::get();
 		return wasm.current_validate_context->code.value;
 	}
+	BIND_VM_NATIVE_FUCTION(vm_xmax_current_code, ds_i64, current_code)
 
-	DEFINE_INTRINSIC_FUNCTION1(env, require_auth, require_auth, none, i64, account) {
+	void vm_xmax_require_auth(const std::string& account)
+	{
 		vm_xmax::get().current_validate_context->require_authorization(name(account));
 	}
+	BIND_VM_NATIVE_FUCTION_R1(vm_xmax_require_auth, ds_void, require_auth,ds_string)
 
-	DEFINE_INTRINSIC_FUNCTION1(env, require_notice, require_notice, none, i64, account) {
-		vm_xmax::get().current_message_context->require_recipient(account);
+	void vm_xmax_require_notice(const std::string& account)
+	{
+		vm_xmax::get().current_message_context->require_recipient(name(account));
 	}
+	BIND_VM_NATIVE_FUCTION_R1(vm_xmax_require_notice, ds_void, require_notice, ds_string)
 
-
-	DEFINE_INTRINSIC_FUNCTION0(env, message_size, message_size, i32) {
-		return vm_xmax::get().current_validate_context->msg.data.size();
+	int32 vm_xmax_message_size()
+	{
+		return  vm_xmax::get().current_validate_context->msg.data.size();
 	}
+	BIND_VM_NATIVE_FUCTION(vm_xmax_message_size, ds_int, message_size)
 
-	DEFINE_INTRINSIC_FUNCTION2(env, read_message, read_message, i32, i32, destptr, i32, destsize) {
+	int vm_xmax_read_message(int destptr,int destsize)
+	{
 		FC_ASSERT(destsize > 0);
 
 		vm_xmax& wasm = vm_xmax::get();
@@ -46,6 +55,5 @@ namespace Xmaxplatform {namespace Chain {
 		memcpy(begin, wasm.current_validate_context->msg.data.data(), minlen);
 		return minlen;
 	}
-
-
+	BIND_VM_NATIVE_FUCTION_R2(vm_xmax_read_message, ds_int, read_message, ds_int,ds_int)
 }}
