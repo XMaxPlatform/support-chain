@@ -23,39 +23,66 @@ namespace Xmaxplatform {namespace Chain {
 	namespace vm_arg
 	{
 		typedef Runtime::MemoryInstance meminst;
-		typedef NativeTypes::i32 int_t;
+		typedef NativeTypes::i32 vm_int_t;
 		typedef uint32 time_t;
-		typedef int_t ptr_t;
+		typedef vm_int_t ptr_t;
 
-		typedef int_t value_t;
+		typedef vm_int_t value_t;
 
-		static const IR::ValueType ir_int_t = ValueType::i32;
-		static const IR::ValueType ir_ptr_t = ir_int_t;
+		static const IR::ValueType vm_value_t = ValueType::i32;
+		static const IR::ResultType vm_result_t = IR::ResultType::i32;
 
-		template<typename _Type, typename _VM_Type, IR::ValueType _IR_Type>
+		static const IR::ValueType vm_ptr_t = vm_value_t;
+
+
+		template<typename _Type, typename _VM_Type, IR::ValueType _VM_V_Type, IR::ResultType _VM_Result_Type>
 		class ds
 		{
 		public:
 			typedef _Type value_type;
 			typedef _VM_Type vm_type;
-			typedef IR::ValueType ir_type;
+			typedef IR::ValueType vm_value_type;
+			typedef IR::ResultType vm_result_type;
 
-			static ir_type get_ir()
+			static inline vm_value_type get_vm_value_type()
 			{
-				return _IR_Type;
+				return _VM_V_Type;
+			}
+			static inline vm_result_type get_vm_result_type()
+			{
+				return _VM_Result_Type;
 			}
 
 		};
 
-		template<typename _Type>
-		class ds_ptr_base : public ds<_Type, ptr_t, ir_ptr_t>
+		class ds_void
 		{
 		public:
-			typedef ds<_Type, ptr_t, ir_ptr_t> super;
+			typedef void value_type;
+			typedef NativeTypes::none vm_type;
+			typedef IR::ValueType vm_value_type;
+			typedef IR::ResultType vm_result_type;
+
+			static inline vm_value_type get_vm_value_type()
+			{
+				return IR::ValueType::any;
+			}
+			static inline vm_result_type get_vm_result_type()
+			{
+				return IR::ResultType::none;
+			}
+		};
+
+		template<typename _Type>
+		class ds_ptr_base : public ds<_Type, ptr_t, vm_ptr_t, vm_result_t>
+		{
+		public:
+			typedef ds<_Type, ptr_t, vm_ptr_t, vm_result_t> super;
 
 			typedef typename super::value_type value_type;
 			typedef typename super::vm_type vm_type;
-			typedef typename super::ir_type ir_type;
+			typedef typename super::vm_value_type vm_value_type;
+			typedef typename super::vm_result_type vm_result_type;
 		};
 
 		template<typename _Type>
@@ -63,10 +90,10 @@ namespace Xmaxplatform {namespace Chain {
 		{
 		public:
 			typedef ds_ptr_base<_Type> super;
-
 			typedef typename super::value_type value_type;
 			typedef typename super::vm_type vm_type;
-			typedef typename super::ir_type ir_type;
+			typedef typename super::vm_value_type vm_value_type;
+			typedef typename super::vm_result_type vm_result_type;
 
 			typedef value_type* ptr_type;
 
@@ -75,7 +102,7 @@ namespace Xmaxplatform {namespace Chain {
 				ptr = &memoryRef<value_type>(mem, val);
 			}
 
-			const ptr_type& get() const
+			inline const ptr_type& get() const
 			{
 				return ptr;
 			}
@@ -89,17 +116,17 @@ namespace Xmaxplatform {namespace Chain {
 		{
 		public:
 			typedef ds_ptr_base<std::string> super;
-
 			typedef typename super::value_type value_type;
 			typedef typename super::vm_type vm_type;
-			typedef typename super::ir_type ir_type;
+			typedef typename super::vm_value_type vm_value_type;
+			typedef typename super::vm_result_type vm_result_type;
 
 			ds_char_string(meminst* mem, vm_type val)
 			{
 				str = &Runtime::memoryRef<const char>(mem, val);
 			}
 
-			const value_type& get() const
+			inline const value_type& get() const
 			{
 				return str;
 			}
@@ -109,15 +136,16 @@ namespace Xmaxplatform {namespace Chain {
 
 		};
 
-		template<typename _Type, typename _VM_Type, IR::ValueType _IR_Type>
-		class ds_val : public ds<_Type, _VM_Type, _IR_Type>
+		template<typename _Type, typename _VM_Type, IR::ValueType _VM_V_Type, IR::ResultType _VM_Result_Type>
+		class ds_val : public ds<_Type, _VM_Type, _VM_V_Type, _VM_Result_Type>
 		{
 		public:
-			typedef ds<_Type, ptr_t, _IR_Type> super;
+			typedef ds<_Type, ptr_t, _VM_V_Type, _VM_Result_Type> super;
 
 			typedef typename super::value_type value_type;
 			typedef typename super::vm_type vm_type;
-			typedef typename super::ir_type ir_type;
+			typedef typename super::vm_value_type vm_value_type;
+			typedef typename super::vm_result_type vm_result_type;
 
 			ds_val(meminst* mem, vm_type _val)
 			{
@@ -127,24 +155,21 @@ namespace Xmaxplatform {namespace Chain {
 			{
 				val = (value_type)_val;
 			}		
-			ds_val(value_type _val)
-			{
-				val = _val;
-			}
+
 			ds_val()
 			{
 				val = value_type(0);
 			}
-			const value_type& get() const
+			inline const value_type& get() const
 			{
 				return val;
 			}
-			const vm_type& get_vm() const
+			inline const vm_type& get_vm() const
 			{
 				return (vm_type)val;
 			}
 
-			static vm_type to_vm(value_type _val)
+			static inline vm_type to_vm(value_type _val)
 			{
 				return (vm_type)_val;
 			}
@@ -152,92 +177,99 @@ namespace Xmaxplatform {namespace Chain {
 			value_type val;
 		};
 
-		typedef ds_val<size_t, int_t, ir_int_t> ds_int; // ds for size_t
-		typedef ds_val<int32, NativeTypes::i32, ValueType::i32> ds_i32; // ds for int32
-		typedef ds_val<int64, NativeTypes::i64, ValueType::i64> ds_i64; // ds for int64
 
-		typedef ds_val<float, NativeTypes::f32, ValueType::f32> ds_f32; // ds for float
-		typedef ds_val<double, NativeTypes::f64, ValueType::f64> ds_f64; // ds for double
-
-		typedef ds_val<bool, int_t, ir_int_t> ds_bool; // ds for bool
-		typedef ds_val<uint32, uint32, ValueType::i32> ds_time; // ds for bool
-
-		typedef ds_ptr<const char> ds_cp_char; // ds for const char *
-		typedef ds_char_string ds_string; // ds for string
 	}
+	namespace vm_ds
+	{
+
+		typedef vm_arg::ds_val<int32, vm_arg::vm_int_t, vm_arg::vm_value_t, vm_arg::vm_result_t> ds_int; // ds for size_t
+		typedef vm_arg::ds_val<int32, NativeTypes::i32, ValueType::i32, ResultType::i32> ds_i32; // ds for int32
+		typedef vm_arg::ds_val<int64, NativeTypes::i64, ValueType::i64, ResultType::i64> ds_i64; // ds for int64
+
+		typedef vm_arg::ds_val<float, NativeTypes::f32, ValueType::f32, ResultType::f32> ds_f32; // ds for float
+		typedef vm_arg::ds_val<double, NativeTypes::f64, ValueType::f64, ResultType::f64> ds_f64; // ds for double
+
+		typedef vm_arg::ds_val<bool, vm_arg::vm_int_t, vm_arg::vm_value_t, vm_arg::vm_result_t> ds_bool; // ds for bool
+		typedef vm_arg::ds_val<uint32, uint32, ValueType::i32, ResultType::i32> ds_time; // ds for bool
+
+		typedef vm_arg::ds_ptr<const char> ds_cp_char; // ds for const char *
+		typedef vm_arg::ds_char_string ds_string; // ds for string	
+		typedef vm_arg::ds_void	ds_void;
+	}
+
+
 
 }}
 
-
 #define VM_NATIVE_FUCTION_NAME(vm_func) f_vm_##vm_func
 
-#define BIND_VM_NATIVE_FUCTION_VOID(nativ_func, vm_func) \
-	void VM_NATIVE_FUCTION_NAME(vm_func)(); \
+#define BIND_VM_NATIVE_FUCTION(nativ_func, vm_rt, vm_func) \
+	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(); \
 	static Intrinsics::Function s_vm_void##vm_func	\
 	("env" "." #vm_func, \
-		IR::FunctionType::get(IR::ResultType::none), \
+		IR::FunctionType::get(vm_rt::get_vm_result_type()), \
 	(void*)&VM_NATIVE_FUCTION_NAME(vm_func));\
-	void VM_NATIVE_FUCTION_NAME(vm_func)() { \
-		##nativ_func();\
+	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)() { \
+	 return ( ##nativ_func() );\
 	}
 
-#define BIND_VM_NATIVE_FUCTION_VOID_R(nativ_func, vm_func, arg_ds1) \
-	void VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type); \
+#define BIND_VM_NATIVE_FUCTION_R1(nativ_func, vm_rt, vm_func, arg_ds) \
+	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds::vm_type); \
 	static Intrinsics::Function s_vm_void##vm_func	\
 	("env" "." #vm_func, \
-		IR::FunctionType::get(IR::ResultType::none, { arg_ds1::get_ir() }), \
+		IR::FunctionType::get(vm_rt::get_vm_result_type(), { arg_ds::get_vm_value_type() }), \
 	(void*)&VM_NATIVE_FUCTION_NAME(vm_func));\
-	void VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type val1) { \
+	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds::vm_type val1) { \
 		vm_xmax& wasm = vm_xmax::get();								\
 		Runtime::MemoryInstance*   mem = wasm.current_memory;		\
-		##nativ_func(arg_ds1(mem, val1).get());\
+		return ( ##nativ_func(arg_ds(mem, val1).get()) );\
 	}
 
-#define BIND_VM_NATIVE_FUCTION_VOID_R2(nativ_func, vm_func, arg_ds1, arg_ds2) \
-	void VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type, arg_ds2::vm_type); \
+#define BIND_VM_NATIVE_FUCTION_R2(nativ_func, vm_rt, vm_func, arg_ds1, arg_ds2) \
+	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type, arg_ds2::vm_type); \
 	static Intrinsics::Function s_vm_void##vm_func	\
 	("env" "." #vm_func, \
-		IR::FunctionType::get(IR::ResultType::none, { arg_ds1::get_ir(), arg_ds2::get_ir() }), \
+		IR::FunctionType::get(vm_rt::get_vm_result_type(), { arg_ds1::get_vm_value_type(), arg_ds2::get_vm_value_type() }), \
 	(void*)&VM_NATIVE_FUCTION_NAME(vm_func));\
-	void VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type val1, arg_ds2::vm_type val2) { \
+	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type val1, arg_ds2::vm_type val2) { \
 		vm_xmax& wasm = vm_xmax::get();								\
 		Runtime::MemoryInstance*   mem = wasm.current_memory;		\
-		##nativ_func(arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get());\
+		return ( ##nativ_func(arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get()) );\
 	}
 
-
-#define BIND_VM_NATIVE_FUCTION_RT_VIOD(nativ_func, vm_func, rt) \
-	rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(); \
+#define BIND_VM_NATIVE_FUCTION_R3(nativ_func, vm_rt, vm_func, arg_ds1, arg_ds2, arg_ds3) \
+	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type, arg_ds2::vm_type, arg_ds3::vm_type); \
 	static Intrinsics::Function s_vm_void##vm_func	\
 	("env" "." #vm_func, \
-		IR::FunctionType::get(IR::ResultType::none), \
+		IR::FunctionType::get(vm_rt::get_vm_result_type(), { arg_ds1::get_vm_value_type(), arg_ds2::get_vm_value_type(), arg_ds3::get_vm_value_type() }), \
 	(void*)&VM_NATIVE_FUCTION_NAME(vm_func));\
-	rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)() { \
+	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type val1, arg_ds2::vm_type val2, arg_ds3::vm_type val3) { \
 		vm_xmax& wasm = vm_xmax::get();								\
 		Runtime::MemoryInstance*   mem = wasm.current_memory;		\
-		return rt::to_vm( ##nativ_func() );\
+		return ( ##nativ_func( arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get(), arg_ds3(mem, val3).get() ) );\
 	}
 
-#define BIND_VM_NATIVE_FUCTION_RT_R(nativ_func, vm_func, rt, arg_ds) \
-	rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds::vm_type); \
+#define BIND_VM_NATIVE_FUCTION_R4(nativ_func, vm_rt, vm_func, arg_ds1, arg_ds2, arg_ds3, arg_ds4) \
+	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type, arg_ds2::vm_type, arg_ds3::vm_type, arg_ds4::vm_type); \
 	static Intrinsics::Function s_vm_void##vm_func	\
 	("env" "." #vm_func, \
-		IR::FunctionType::get(IR::ResultType::none, { arg_ds::get_ir() }), \
+		IR::FunctionType::get(vm_rt::get_vm_result_type(), { arg_ds1::get_vm_value_type(), arg_ds2::get_vm_value_type(), arg_ds3::get_vm_value_type(), arg_ds4::get_vm_value_type() }), \
 	(void*)&VM_NATIVE_FUCTION_NAME(vm_func));\
-	rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds::vm_type val1) { \
+	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type val1, arg_ds2::vm_type val2, arg_ds3::vm_type val3, arg_ds4::vm_type val4) { \
 		vm_xmax& wasm = vm_xmax::get();								\
 		Runtime::MemoryInstance*   mem = wasm.current_memory;		\
-		return rt::to_vm( ##nativ_func(arg_ds(mem, val1).get()) );\
+		return ( ##nativ_func( arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get(), arg_ds3(mem, val3).get(), arg_ds4(mem, val4).get() ) );\
 	}
 
-#define BIND_VM_NATIVE_FUCTION_RT_R2(nativ_func, vm_func, rt, arg_ds1, arg_ds2) \
-	rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type, arg_ds2::vm_type); \
+#define BIND_VM_NATIVE_FUCTION_R4(nativ_func, vm_rt, vm_func, arg_ds1, arg_ds2, arg_ds3, arg_ds4, arg_ds5) \
+	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type, arg_ds2::vm_type, arg_ds3::vm_type, arg_ds4::vm_type, arg_ds5::vm_type); \
 	static Intrinsics::Function s_vm_void##vm_func	\
 	("env" "." #vm_func, \
-		IR::FunctionType::get(IR::ResultType::none, { arg_ds1::get_ir(), arg_ds2::get_ir() }), \
+		IR::FunctionType::get(vm_rt::get_vm_result_type(), { arg_ds1::get_vm_value_type(), arg_ds2::get_vm_value_type(), arg_ds3::get_vm_value_type(), arg_ds4::get_vm_value_type(), arg_ds5::get_vm_value_type() }), \
 	(void*)&VM_NATIVE_FUCTION_NAME(vm_func));\
-	rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type val1, arg_ds2::vm_type val2) { \
+	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type val1, arg_ds2::vm_type val2, arg_ds3::vm_type val3, arg_ds4::vm_type val4, arg_ds5::vm_type val5) { \
 		vm_xmax& wasm = vm_xmax::get();								\
 		Runtime::MemoryInstance*   mem = wasm.current_memory;		\
-		return rt::to_vm( ##nativ_func(arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get()) );\
+		return ( ##nativ_func( arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get(), arg_ds3(mem, val3).get(), arg_ds4(mem, val4).get(), arg_ds5(mem, val5).get() ) );\
 	}
+
