@@ -6,6 +6,8 @@
 
 #include <stdint.h>
 //#include <wchar.h>
+#include "uint128.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,7 +20,12 @@ extern "C" {
 	*
 	*  @{
 	*/
+#ifdef WIN32
+	typedef _uint128_win    uint128_t;
+#else
 	typedef unsigned __int128    uint128_t;
+#endif
+
 	typedef uint64_t xmax_name;
 	typedef uint32_t xmax_time;
 
