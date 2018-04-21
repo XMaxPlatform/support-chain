@@ -14,7 +14,8 @@ namespace Xmaxplatform {
     enum block_build_condition
     {
         generated = 0,
-        exception = 1
+        exception = 1,
+		not_time_yet,
     };
 
 class blockbuilder_plugin : public plugin<blockbuilder_plugin> {

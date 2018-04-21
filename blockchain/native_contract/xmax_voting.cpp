@@ -17,6 +17,10 @@
 
 #include <abi_serializer.hpp>
 
+#include <boost/range/adaptors.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/range/algorithm_ext.hpp>
+
 namespace Xmaxplatform {
 namespace Native_contract {
 
@@ -356,5 +360,36 @@ namespace Native_contract {
         }
     }
 
+	builder_schedule xmax_voting::next_round(Basechain::database& db)
+	{
+		builder_schedule round;
+
+		builders_table builders_tbl(db);
+
+		const auto& AllProducersByVotes = builders_tbl.get_index<by_votes>();
+
+
+		auto FilterRetiredProducers = boost::adaptors::filtered([&db](const builder_info_object& info) {
+			return info.builder_key != empty_public_key;
+		});
+
+		auto ProducerObjectToName = boost::adaptors::transformed([](const builder_info_object& p) { return p.owner; });
+
+
+		auto ActiveProducersByVotes = AllProducersByVotes | FilterRetiredProducers;
+
+		// Copy the top voted active producer's names into the round
+		auto runnerUpStorage =
+			//boost::copy_n(ActiveProducersByVotes | ProducerObjectToName, Config::voted_producers_per_round, round.begin());
+			boost::copy_n(ActiveProducersByVotes | ProducerObjectToName, Config::blocks_per_round, round.builders.begin());
+
+
+		std::sort(round.builders.begin(), round.builders.end(), [](const account_name& r, const account_name& l) -> bool
+		{
+			return r < l;
+		});
+
+		return round;
+	}
 
 }}

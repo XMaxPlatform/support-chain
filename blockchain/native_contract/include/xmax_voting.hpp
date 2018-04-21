@@ -5,10 +5,16 @@
 #pragma once
 
 #include <xmaxtypes.hpp>
+#include <builder_schedule.hpp>
 
 namespace Xmaxplatform {namespace Chain{
         class message_context_xmax;
 }}
+
+namespace Basechain{
+	class database;
+}
+
 
 namespace Xmaxplatform { ///< xmax native xmx token contract
 namespace Native_contract {
@@ -30,6 +36,8 @@ namespace Native_contract {
         static void unreg_builder(Chain::message_context_xmax& context);
         static void reg_proxy(Chain::message_context_xmax& context);
         static void unreg_proxy(Chain::message_context_xmax& context);
+
+		static Chain::builder_schedule next_round(Basechain::database& db);
 
     };
 

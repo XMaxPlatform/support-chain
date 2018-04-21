@@ -130,13 +130,33 @@ namespace Xmaxplatform { namespace Chain {
 			return get_dynamic_states().head_block_id;
 		}
 
-		uint32_t chain_xmax::get_slot_at_time(chain_timestamp when) const
+		uint32_t chain_xmax::get_slot_at_chain_time(chain_timestamp when) const
+		{
+			chain_timestamp first_slot_time = get_slot_chain_time(1);
+			if (when < first_slot_time)
+				return 0;
+
+			chain_timestamp sub = when - first_slot_time;
+			return sub.get_data() + 1;
+		}
+        chain_timestamp chain_xmax::get_slot_chain_time(uint32_t slot) const
         {
-            return 0;
-        }
-        chain_timestamp chain_xmax::get_slot_time(uint32_t slot) const
-        {
-            return chain_timestamp();
+            if (0 == slot)
+            {
+				return chain_timestamp();
+            } 
+			const dynamic_states_object& state = get_dynamic_states();
+			if (state.head_block_number == 0)
+			{      
+				// n.b. first block is at genesis_time plus one block interval
+				chain_timestamp genesis_time = chain_timestamp::from(state.state_time);
+				return genesis_time + chain_timestamp::from(slot);
+			}
+
+			chain_timestamp head_block_abs_slot = chain_timestamp::from(state.state_time);
+			head_block_abs_slot += chain_timestamp::from(slot);
+			return head_block_abs_slot;
+
         }
 
 		vector<char> chain_xmax::message_to_binary(name code, name type, const fc::variant& obj)const

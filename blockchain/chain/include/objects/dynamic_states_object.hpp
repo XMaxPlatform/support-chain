@@ -23,6 +23,7 @@ namespace Xmaxplatform { namespace Chain {
         uint32_t                head_block_number = 0;
         xmax_type_block_id      head_block_id;
         fc::time_point          state_time;
+		int32					current_builder_index;
         account_name            current_builder;
 
    };

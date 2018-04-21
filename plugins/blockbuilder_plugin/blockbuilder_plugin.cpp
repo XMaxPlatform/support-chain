@@ -5,6 +5,7 @@
 #include <chaindata_plugin.hpp>
 #include <blockbuilder_plugin.hpp>
 #include <blockchain_plugin.hpp>
+#include <block.hpp>
 
 #include <fc/io/json.hpp>
 #include <fc/variant.hpp>
@@ -86,12 +87,19 @@ void blockbuilder_plugin::plugin_shutdown() {
             {
                 const auto& data = app().get_plugin<blockchain_plugin>().getchain();
                 ilog("block_build_condition::generated");
-
                 break;
             }
             case block_build_condition::exception:
-                elog( "exception producing block" );
+                elog( "exception producing block." );
                 break;
+			case block_build_condition::not_time_yet:
+				ilog("not time for producing block.");
+				break;
+			default:
+			{
+				elog("unexpectedly block_build_condition.");
+				break;
+			}
         }
 
         build_block();
@@ -107,9 +115,16 @@ void blockbuilder_plugin::plugin_shutdown() {
         Chain::chain_timestamp now_timestamp = Chain::chain_timestamp::from(now);
 
 
+		uint32_t slot = chain.get_slot_at_chain_time(now_timestamp);
+		if (slot == 0)
+		{
+			capture("next_time", chain.get_slot_chain_time(1));
+			return block_build_condition::not_time_yet;
+		}
 
+		assert(now > chain.head_block_time());
 
-        auto block = chain.generate_block(
+		Chain::signed_block block = chain.generate_block(
                 now_timestamp,
                 chain.get_dynamic_states().current_builder
         );

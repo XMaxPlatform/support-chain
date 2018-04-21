@@ -19,16 +19,36 @@ namespace Xmaxplatform { namespace Chain {
         }
 
         static chain_timestamp from(fc::time_point val);
+		static chain_timestamp from(stamp_type val);
 
         static fc::time_point to_time_point(const chain_timestamp& val);
 
 
-        bool   operator > ( const chain_timestamp& t )const   { return _stamp >  t._stamp; }
-        bool   operator >=( const chain_timestamp& t )const   { return _stamp >= t._stamp; }
-        bool   operator < ( const chain_timestamp& t )const   { return _stamp <  t._stamp; }
-        bool   operator <=( const chain_timestamp& t )const   { return _stamp <= t._stamp; }
-        bool   operator ==( const chain_timestamp& t )const   { return _stamp == t._stamp; }
-        bool   operator !=( const chain_timestamp& t )const   { return _stamp != t._stamp; }
+        bool operator > ( const chain_timestamp& t )const   { return _stamp >  t._stamp; }
+        bool operator >=( const chain_timestamp& t )const   { return _stamp >= t._stamp; }
+        bool operator < ( const chain_timestamp& t )const   { return _stamp <  t._stamp; }
+        bool operator <=( const chain_timestamp& t )const   { return _stamp <= t._stamp; }
+        bool operator ==( const chain_timestamp& t )const   { return _stamp == t._stamp; }
+        bool operator !=( const chain_timestamp& t )const   { return _stamp != t._stamp; }
+
+		chain_timestamp operator +(const chain_timestamp& t)const { return chain_timestamp( _stamp + t._stamp); }
+		chain_timestamp operator -(const chain_timestamp& t)const { return chain_timestamp(_stamp - t._stamp); }
+
+		const chain_timestamp& operator +=(const chain_timestamp& t) 
+		{ 
+			this->_stamp += t._stamp;
+			return *this;
+		}
+		const chain_timestamp& operator -=(const chain_timestamp& t)
+		{ 
+			this->_stamp -= t._stamp;
+			return *this;
+		}
+		const chain_timestamp& operator =(const chain_timestamp& t)
+		{
+			this->_stamp = t._stamp;
+			return *this;
+		}
         
         inline void set_data(const stamp_type & val)
         {
@@ -44,6 +64,10 @@ namespace Xmaxplatform { namespace Chain {
         {
 
         }
+		chain_timestamp(const chain_timestamp& t)
+			: _stamp(t._stamp)
+		{
+		}
     public:
 
         stamp_type _stamp;

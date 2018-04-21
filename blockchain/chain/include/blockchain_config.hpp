@@ -37,6 +37,7 @@ using Basetypes::permission_name;
         const static int default_per_code_account_max_db_limit_mbytes = 5;
         const static int default_row_overhead_db_limit_bytes = 8 + 8 + 8 + 8; // storage for scope/code/table + 8 extra
 
+
         const static uint32_t chain_timestamp_unit_ms = 1000;
         const static uint32_t chain_timestamp_unit_us = chain_timestamp_unit_ms * 1000;
 

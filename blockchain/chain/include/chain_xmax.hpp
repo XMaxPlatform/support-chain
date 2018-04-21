@@ -69,8 +69,8 @@ namespace Xmaxplatform { namespace Chain {
        time             head_block_time() const;
 	   xmax_type_block_id    head_block_id()const;
 
-       uint32_t         get_slot_at_time(chain_timestamp when) const;
-       chain_timestamp   get_slot_time(uint32_t slot) const;
+	   uint32_t         get_slot_at_chain_time(chain_timestamp when) const;
+       chain_timestamp   get_slot_chain_time(uint32_t slot) const;
 
 	   const Basechain::database& get_database() const { return _data; }
 	   Basechain::database& get_mutable_database() { return _data; }

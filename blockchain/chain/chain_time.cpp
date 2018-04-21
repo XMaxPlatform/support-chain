@@ -18,6 +18,11 @@ namespace Xmaxplatform { namespace Chain {
         return chain_timestamp((chain_timestamp::stamp_type) stamp);
     }
 
+	chain_timestamp chain_timestamp::from(stamp_type val)
+	{
+		return chain_timestamp(val);
+	}
+
     fc::time_point chain_timestamp::to_time_point(const chain_timestamp& val)
     {
         int64_t us = ((int64_t)val._stamp) * (int64_t)Config::chain_timestamp_unit_us;
