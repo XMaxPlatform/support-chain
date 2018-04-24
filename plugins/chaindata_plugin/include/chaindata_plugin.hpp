@@ -10,10 +10,6 @@ using namespace Baseapp;
 using namespace Basechain;
 namespace Xmaxplatform {
 
-
-/**
- * This is a template plugin, intended to serve as a starting point for making new plugins
- */
 class chaindata_plugin : public plugin<chaindata_plugin> {
 public:
     chaindata_plugin();
