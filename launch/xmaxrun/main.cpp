@@ -16,6 +16,7 @@
 #include <blockchain_plugin.hpp>
 #include <blockbuilder_plugin.hpp>
 #include <chainhttp_plugin.hpp>
+#include <chainnet_plugin.hpp>
 #include <contractutil_plugin.hpp>
 #include <mongodb_plugin.hpp>
 
@@ -38,6 +39,7 @@ void regist_plugins()
 {
     app().register_plugin<Xmaxplatform::chaindata_plugin>();
     app().register_plugin<Xmaxplatform::chainhttp_plugin>();
+	app().register_plugin<Xmaxplatform::chainnet_plugin>();
     app().register_plugin<Xmaxplatform::blockchain_plugin>();
     app().register_plugin<Xmaxplatform::blockbuilder_plugin>();
 	app().register_plugin<Xmaxplatform::contractutil_plugin>();

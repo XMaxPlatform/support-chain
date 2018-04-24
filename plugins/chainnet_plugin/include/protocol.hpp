@@ -47,7 +47,7 @@ namespace Xmaxplatform {
   };
 
 #ifdef WIN32
-  auto reason_str( go_away_reason rsn ) {
+  auto inline reason_str( go_away_reason rsn ) {
 #else
   constexpr auto reason_str(go_away_reason rsn) {
 #endif//WIN32
@@ -93,7 +93,7 @@ namespace Xmaxplatform {
     normal
   };
 #ifdef WIN32
-  auto modes_str(id_list_modes m) {
+  auto inline modes_str(id_list_modes m) {
 #else
   constexpr auto modes_str( id_list_modes m ) {
 #endif//WIN32

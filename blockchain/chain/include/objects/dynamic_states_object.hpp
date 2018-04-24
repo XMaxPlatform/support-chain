@@ -24,7 +24,7 @@ namespace Xmaxplatform { namespace Chain {
         xmax_type_block_id      head_block_id;
         fc::time_point          state_time;
         account_name            current_builder;
-
+		uint32_t last_irreversible_block_num = 0;
    };
 
    using dynamic_states_multi_index = Basechain::shared_multi_index_container<

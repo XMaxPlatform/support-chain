@@ -113,15 +113,6 @@ namespace Xmaxplatform {
 		time_point    requested_time;
 	};
 
-	struct update_request_time {
-		void operator() (struct transaction_state &ts) {
-			ts.requested_time = time_point::now();
-		}
-		void operator () (struct block_state &bs) {
-			bs.requested_time = time_point::now();
-		}
-	} set_request_time;
-
 	typedef multi_index_container<
 		block_state,
 		indexed_by<
@@ -153,31 +144,7 @@ namespace Xmaxplatform {
 		handshake_message last_handshake;
 	};
 
-	struct update_known_by_peer {
-		void operator() (block_state& bs) {
-			bs.is_known = true;
-		}
-		void operator() (transaction_state& ts) {
-			ts.is_known_by_peer = true;
-		}
-	} set_is_known;
 
-	struct update_in_flight {
-		int32_t incr;
-		update_in_flight(int32_t delta) : incr(delta) {}
-		void operator() (node_transaction_state& nts) {
-			int32_t exp = nts.expires.sec_since_epoch();
-			nts.expires = fc::time_point_sec(exp + incr * 60);
-			if (nts.requests == 0) {
-				nts.true_block = nts.block_num;
-				nts.block_num = 0;
-			}
-			nts.requests += incr;
-			if (nts.requests == 0) {
-				nts.block_num = nts.true_block;
-			}
-		}
-	} incr_in_flight(1), decr_in_flight(-1);
 	
 
 	class connection_xmax : public std::enable_shared_from_this<connection_xmax> {
@@ -325,8 +292,7 @@ namespace Xmaxplatform {
 		static fc::logger logger;
 	};
 
-	const fc::string connection_xmax::logger_name("connection_xmax");
-	fc::logger connection_xmax::logger(connection_xmax::logger_name);
+	
 }
 
 FC_REFLECT(Xmaxplatform::connection_status, (peer)(connecting)(syncing)(last_handshake))

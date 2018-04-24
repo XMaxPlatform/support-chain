@@ -151,6 +151,10 @@ namespace Xmaxplatform { namespace Chain {
 	   }
 
    public:
+	   xmax_type_block_id               get_blockid_from_num(uint32_t block_num)const;
+	   optional<signed_block>			get_block_from_id(const xmax_type_block_id& id)const;
+	   optional<signed_block>      get_block_from_num(uint32_t num)const;
+
        signed_block generate_block(
                chain_timestamp when,
                const account_name& builder
@@ -186,6 +190,8 @@ namespace Xmaxplatform { namespace Chain {
 
        void update_dynamic_states(const signed_block& b);
        const Basechain::database& get_data() const { return _data; }
+
+
    };
 
     class message_xmax;

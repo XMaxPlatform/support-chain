@@ -5,8 +5,8 @@
 #pragma once
 #include <application.hpp>
 #include <blockchain_plugin.hpp>
-#include <protocol.hpp>
 #include <connection_xmax.hpp>
+#include<protocol.hpp>
 namespace Xmaxplatform {
    using namespace Baseapp;
    

@@ -6,7 +6,6 @@
 #include <chainnet_plugin.hpp>
 #include <blockbuilder_plugin.hpp>
 #include <message_buffer.hpp>
-#include <connection_xmax.hpp>
 #include <fc/network/ip.hpp>
 #include <fc/io/json.hpp>
 #include <fc/io/raw.hpp>
@@ -51,7 +50,22 @@ namespace Xmaxplatform {
 
    using net_message_ptr = std::shared_ptr<net_message>;
 
-   
+   struct update_in_flight {
+	   int32_t incr;
+	   update_in_flight(int32_t delta) : incr(delta) {}
+	   void operator() (node_transaction_state& nts) {
+		   int32_t exp = nts.expires.sec_since_epoch();
+		   nts.expires = fc::time_point_sec(exp + incr * 60);
+		   if (nts.requests == 0) {
+			   nts.true_block = nts.block_num;
+			   nts.block_num = 0;
+		   }
+		   nts.requests += incr;
+		   if (nts.requests == 0) {
+			   nts.block_num = nts.true_block;
+		   }
+	   }
+   } incr_in_flight(1), decr_in_flight(-1);
 
    struct update_entry {
       const Chain::signed_transaction &txn;
@@ -246,7 +260,8 @@ namespace Xmaxplatform {
 
    const fc::string chainnet_plugin_impl::logger_name("chainnet_plugin_impl");
    fc::logger chainnet_plugin_impl::logger(chainnet_plugin_impl::logger_name);
-   
+   const fc::string connection_xmax::logger_name("connection_xmax");
+   fc::logger connection_xmax::logger(connection_xmax::logger_name);
 
 
    void chainnet_plugin_impl::connect( connection_ptr c ) {
@@ -766,7 +781,12 @@ namespace Xmaxplatform {
 
    void chainnet_plugin::set_program_options( options_description& /*cli*/, options_description& cfg )
    {
-      
+	   cfg.add_options()
+		   ("p2p-listen-endpoint", bpo::value<Chain::string>()->default_value("0.0.0.0:19876"), "Host:port used to listen incoming p2p connections.")
+		   ("max-clients", bpo::value<int>()->default_value(def_max_clients), "Maximum clients from which connections are accepted, (0)zero means unlimit")
+		   ("connection-cleanup-period", bpo::value<int>()->default_value(def_conn_retry_wait), "Seconds to wait before cleaning up dead connections")
+		   ("network-version-match", bpo::value<bool>()->default_value(false),"If require exact match of peer network version.")
+			   ;
    }
 
    template<typename T>
@@ -775,7 +795,7 @@ namespace Xmaxplatform {
    }
 
    void chainnet_plugin::plugin_initialize( const variables_map& options ) {
-      ilog("Initialize net plugin");
+      ilog("chainnet_plugin::plugin_initialize");
 
       // Housekeeping so fc::logger::get() will work as expected
       fc::get_logger_map()[connection_xmax::logger_name] = connection_xmax::logger;
@@ -886,6 +906,7 @@ namespace Xmaxplatform {
    }
 
    void chainnet_plugin::plugin_startup() {
+	   ilog("chainnet_plugin::plugin_startup");
       if( my->acceptor ) {
          my->acceptor->open(my->listen_endpoint.protocol());
          my->acceptor->set_option(tcp::acceptor::reuse_address(true));
