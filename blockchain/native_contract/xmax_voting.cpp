@@ -360,9 +360,9 @@ namespace Native_contract {
         }
     }
 
-	xmax_builders xmax_voting::next_round(Basechain::database& db)
+	xmax_builder_infos xmax_voting::next_round(Basechain::database& db)
 	{
-		xmax_builders round;
+		xmax_builder_infos round;
 
 		builders_table builders_tbl(db);
 
@@ -373,15 +373,12 @@ namespace Native_contract {
 			return info.builder_key != empty_public_key;
 		});
 
-		auto ProducerObjectToName = boost::adaptors::transformed([](const builder_info_object& p) { return p.owner; });
-
-
 		auto ActiveProducersByVotes = AllProducersByVotes | FilterRetiredProducers;
 
 		int count = 0;
 		for (auto it : ActiveProducersByVotes)
 		{
-			round.push_back(it.owner);
+			round.push_back(builder_info(it.owner, it.builder_key));
 			++count;
 			if (count >= Config::blocks_per_round)
 			{
@@ -391,13 +388,13 @@ namespace Native_contract {
 
 		if (round.empty())
 		{
-			round.push_back(Config::xmax_contract_name);
+			round.push_back(builder_info(Config::xmax_contract_name, Config::xmax_builder_key));
 		}
 		else
 		{
-			std::sort(round.begin(), round.end(), [](const account_name& r, const account_name& l) -> bool
+			std::sort(round.begin(), round.end(), [](const builder_info& r, const builder_info& l) -> bool
 			{
-				return r < l;
+				return r.builder_name < l.builder_name;
 			});
 		}
 

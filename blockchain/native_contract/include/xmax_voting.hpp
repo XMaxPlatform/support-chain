@@ -37,7 +37,7 @@ namespace Native_contract {
         static void reg_proxy(Chain::message_context_xmax& context);
         static void unreg_proxy(Chain::message_context_xmax& context);
 
-		static Chain::xmax_builders next_round(Basechain::database& db);
+		static Chain::xmax_builder_infos next_round(Basechain::database& db);
 
     };
 

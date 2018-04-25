@@ -20,7 +20,7 @@ namespace Xmaxplatform { namespace Chain {
         return chain_timestamp((chain_timestamp::stamp_type) stamp);
     }
 
-	chain_timestamp chain_timestamp::from(stamp_type stamp_val)
+	chain_timestamp chain_timestamp::create(stamp_type stamp_val)
 	{
 		return chain_timestamp(stamp_val);
 	}

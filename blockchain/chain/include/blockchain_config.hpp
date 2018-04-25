@@ -20,7 +20,7 @@ using Basetypes::public_key;
         const static char key_prefix[] = "XMX";
         const static int blocks_per_round = 21;
         const static account_name xmax_contract_name = STN(xmax);
-		const static public_key xmax_contract_key = empty_public_key;
+		const static public_key xmax_builder_key = public_key("XMX7VX43svCQNJ5zp6uKV5EYGG9dUjgSUrm4m1w1FZAtNT2fCkMoQ");
 
         const static uint32 default_max_block_size = 5 * 1024 * 1024;
         const static uint32 default_target_block_size = 128 * 1024;
@@ -45,6 +45,8 @@ using Basetypes::public_key;
         const static uint32_t chain_timestamp_unit_us = chain_timestamp_unit_ms * 1000;
 		const static uint32_t mini_next_block_us = chain_timestamp_unit_us / 10;
 
-        const static uint64_t chain_timestamp_epoch_us = 946684800000ll; // year 2000 AD.
+		const static uint64_t chain_timestamp_epoch_s = 946684800; // year 2000 AD.
+
+        const static uint64_t chain_timestamp_epoch_us = chain_timestamp_epoch_s * 1000ll * 1000ll; 
 
 } } // namespace Xmaxplatform::Config

@@ -69,22 +69,26 @@ namespace Xmaxplatform { namespace Chain {
 
 						const fc::time_point init_point = initer.get_chain_init_time();;
 						const chain_timestamp init_stamp = chain_timestamp::from(init_point);
+						const chain_timestamp pre_stamp = init_stamp - chain_timestamp::create(1);
 
+						xmax_builder_infos list;
+						list.push_back(builder_info(Config::xmax_contract_name, Config::xmax_builder_key));
 
                         // Create global properties
                         _data.create<static_config_object>([&](static_config_object &p) {
                             p.setup = initer.get_blockchain_setup();
-                            p.current_builders.set_builders(initer.get_chain_init_builders(), 0);
+                            p.current_builders.set_builders(list, 0);
+							p.new_builders.set_builders(p.current_builders.builders, 1);
                         });
 
                         _data.create<dynamic_states_object>([&](dynamic_states_object &p) {
 							p.head_block_number = 0;
 							p.head_block_id = xmax_type_block_id();
-                            p.state_time = init_point;
+                            p.state_time = pre_stamp.time_point();
 							p.total_slot = 0;
-                            p.block_builder = initer.get_chain_init_builders().at(0);
-							p.round_begin_time = init_stamp;
-							p.round_slot = 0;
+                            p.block_builder = empty_name;
+							p.round_begin_time = chain_timestamp::zero_timestamp;
+							p.round_slot = Config::blocks_per_round;
 							p.builders_elect_state = elect_state::elect_new_builders;
                         });
 
@@ -162,20 +166,20 @@ namespace Xmaxplatform { namespace Chain {
 			if (slot < Config::blocks_per_round)
 			{
 				uint32_t index = slot % config.current_builders.number();
-				return config.current_builders.builders[index];
+				return config.current_builders.builders[index].builder_name;
 			}
 
 			if (config.next_builders.is_empty()) // no next list.
 			{
 				uint32_t index = slot % config.current_builders.number();
-				return config.current_builders.builders[index];
+				return config.current_builders.builders[index].builder_name;
 			}
 			// get builder in next list.
 			uint32_t deltaslot = slot - config.current_builders.number();
 
 			uint32_t bias = slot % config.next_builders.number();
 
-			return config.next_builders.builders[bias];
+			return config.next_builders.builders[bias].builder_name;
 		}
 
 		uint32_t chain_xmax::get_delta_slot_at_time(chain_timestamp when) const
@@ -195,7 +199,7 @@ namespace Xmaxplatform { namespace Chain {
             }
 
 			chain_timestamp head_block_abs_slot = chain_timestamp::from(head_block_time());
-			head_block_abs_slot += chain_timestamp::from(delta_slot);
+			head_block_abs_slot += chain_timestamp::create(delta_slot);
 			return head_block_abs_slot;
 
         }
@@ -401,7 +405,7 @@ namespace Xmaxplatform { namespace Chain {
 			}
 			if (elect_new_builders == builder_elect_state) // create new builder list.
 			{
-				xmax_builders new_builders = Native_contract::xmax_voting::next_round(_data);
+				xmax_builder_infos new_builders = Native_contract::xmax_voting::next_round(_data);
 				
 				const static_config_object& static_config = get_static_config();
 
@@ -411,6 +415,16 @@ namespace Xmaxplatform { namespace Chain {
 					obj.new_builders.set_builders(new_builders, new_version);
 				});		
 				builder_elect_state = builders_elected;
+
+				std::stringstream namestream;
+				for (const builder_info& it : new_builders)
+				{
+					namestream << it.builder_name.to_string() << ",";
+				}
+				fc::mutable_variant_object capcture;
+				capcture.set("builders", namestream.str());
+
+				ilog("next round: ${builders}", (capcture));
 			}
 
 			if (current_round_slot >= Config::blocks_per_round)
@@ -429,7 +443,7 @@ namespace Xmaxplatform { namespace Chain {
 					// new builders state
 
 					current_round_slot = current_round_slot % Config::blocks_per_round;
-					chain_timestamp delta_time = chain_timestamp::from(current_round_slot);
+					chain_timestamp delta_time = chain_timestamp::create(current_round_slot);
 					round_begin_time = current_block_time - delta_time;
 
 				}

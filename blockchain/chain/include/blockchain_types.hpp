@@ -158,8 +158,6 @@ namespace Xmaxplatform { namespace Chain {
             OBJECT_TYPE_COUNT ///< Sentry value which contains the number of different object types
         };
    
-
-		typedef std::vector<account_name> xmax_builders;
 } }  // Xmaxplatform::Chain
 
 namespace fc {

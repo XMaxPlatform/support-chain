@@ -18,11 +18,11 @@ Chain::blockchain_setup native_contract_chain_init::get_blockchain_setup() const
    return genesis.initial_configuration;
 }
 
-Chain::xmax_builders native_contract_chain_init::get_chain_init_builders() const {
-	Chain::xmax_builders result;
+xmax_builder_infos native_contract_chain_init::get_chain_init_builders() const {
+	xmax_builder_infos result;
 	for (auto it : genesis.initial_builders)
 	{
-		result.push_back(it.owner_name);
+		result.push_back(builder_info(it.owner_name, it.block_signing_key));
 	}
 	return result;
 }
@@ -104,7 +104,7 @@ std::vector<message_xmax> native_contract_chain_init::prepare_data(chain_xmax &c
       }
 	  msg = message_xmax(Config::xmax_contract_name,
 		  vector<Basetypes::account_permission>{ {Config::xmax_contract_name, "active"}},
-		  "regbuilder", Basetypes::regbuilder(Config::xmax_contract_name, Config::xmax_contract_key)
+		  "regbuilder", Basetypes::regbuilder(Config::xmax_contract_name, Config::xmax_builder_key)
 	  );
 
 	  messages_to_process.emplace_back(std::move(msg));

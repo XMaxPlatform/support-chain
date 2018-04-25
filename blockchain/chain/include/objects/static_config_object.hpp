@@ -17,15 +17,15 @@ namespace Xmaxplatform { namespace Chain {
 
    class static_config_object : public Basechain::object<static_config_object_type, static_config_object>
    {
-      OBJECT_CCTOR(static_config_object)
+      OBJECT_CCTOR(static_config_object, (current_builders)(next_builders)(new_builders))
 
        id_type id;
        blockchain_setup setup;
-       builder_rule current_builders;
+	   shared_builder_rule current_builders;
 
-	   builder_rule next_builders;
+	   shared_builder_rule next_builders;
 
-	   builder_rule new_builders;
+	   shared_builder_rule new_builders;
 
    };
 
@@ -43,6 +43,8 @@ namespace Xmaxplatform { namespace Chain {
 BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::static_config_object, Xmaxplatform::Chain::static_config_multi_index)
 
 FC_REFLECT(Xmaxplatform::Chain::static_config_object,
+			(setup)
 			(current_builders)
-			(pending_builders)
+			(next_builders)
+			(new_builders)
           )

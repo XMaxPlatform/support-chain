@@ -19,7 +19,7 @@ namespace Xmaxplatform { namespace Chain {
         }
 
         static chain_timestamp from(fc::time_point time_val);
-		static chain_timestamp from(stamp_type stamp_val);
+		static chain_timestamp create(stamp_type stamp_val);
 
         static fc::time_point to_time_point(const chain_timestamp& val);
 

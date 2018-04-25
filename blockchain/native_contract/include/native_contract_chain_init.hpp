@@ -19,7 +19,7 @@ public:
 
    virtual Basetypes::time get_chain_init_time() const override;
    virtual Chain::blockchain_setup get_blockchain_setup() const override;
-   virtual Chain::xmax_builders get_chain_init_builders() const override;
+   virtual Chain::xmax_builder_infos get_chain_init_builders() const override;
 
    virtual void register_handlers(Chain::chain_xmax &chain, Basechain::database &db) override;
    virtual std::vector<Chain::message_xmax> prepare_data(Chain::chain_xmax &chain,

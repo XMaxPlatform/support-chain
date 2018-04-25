@@ -65,6 +65,10 @@ struct genesis_state_type {
    vector<initial_account_type>             initial_accounts;
    vector<initial_builder_type>            initial_builders;
 
+   initial_account_type xmx_account;
+   initial_builder_type xmx_builder;
+
+
    /**
     * Temporary, will be moved elsewhere.
     */

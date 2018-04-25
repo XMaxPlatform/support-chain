@@ -200,7 +200,7 @@ namespace Xmaxplatform { namespace Chain {
 
             virtual Chain::blockchain_setup get_blockchain_setup() const = 0;
 
-            virtual Chain::xmax_builders get_chain_init_builders() const = 0;
+            virtual Chain::xmax_builder_infos get_chain_init_builders() const = 0;
 
             virtual void register_handlers(chain_xmax &chain, database &db) = 0;
 

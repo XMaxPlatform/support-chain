@@ -145,7 +145,7 @@ void blockbuilder_plugin::plugin_shutdown() {
 
 		const Chain::dynamic_states_object& states = chain.get_dynamic_states();
 
-		Chain::chain_timestamp now_timestamp = Chain::chain_timestamp::from(states.state_time);
+		Chain::chain_timestamp now_timestamp = Chain::chain_timestamp::from(states.state_time) + Chain::chain_timestamp::create(1);
 
 		const account_name current_builder = states.block_builder;
 
