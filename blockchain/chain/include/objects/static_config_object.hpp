@@ -7,7 +7,7 @@
 #include <fc/array.hpp>
 
 #include <blockchain_types.hpp>
-#include <builder_schedule.hpp>
+#include <builder_rule.hpp>
 
 #include <basechain.hpp>
 
@@ -21,9 +21,12 @@ namespace Xmaxplatform { namespace Chain {
 
        id_type id;
        blockchain_setup setup;
-       builder_schedule buid_schedule;
+       builder_rule current_builders;
 
-       builder_schedule pending_schedule;
+	   builder_rule next_builders;
+
+	   builder_rule new_builders;
+
    };
 
    using static_config_multi_index = Basechain::shared_multi_index_container<
@@ -40,5 +43,6 @@ namespace Xmaxplatform { namespace Chain {
 BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::static_config_object, Xmaxplatform::Chain::static_config_multi_index)
 
 FC_REFLECT(Xmaxplatform::Chain::static_config_object,
-           (buid_schedule)
+			(current_builders)
+			(pending_builders)
           )

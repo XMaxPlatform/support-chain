@@ -67,10 +67,12 @@ namespace Xmaxplatform { namespace Chain {
        const dynamic_states_object&         get_dynamic_states()const;
 
        time             head_block_time() const;
+	   uint32_t			head_block_num() const;
 	   xmax_type_block_id    head_block_id()const;
 
-	   uint32_t         get_slot_at_chain_time(chain_timestamp when) const;
-       chain_timestamp   get_slot_chain_time(uint32_t slot) const;
+	   account_name         get_block_builder(uint32_t delta_slot) const;
+	   uint32_t				get_delta_slot_at_time(chain_timestamp when) const;
+       chain_timestamp		get_delta_slot_time(uint32_t delta_slot) const;
 
 	   const Basechain::database& get_database() const { return _data; }
 	   Basechain::database& get_mutable_database() { return _data; }
@@ -100,11 +102,10 @@ namespace Xmaxplatform { namespace Chain {
                chain_timestamp when,
                const account_name& builder
        );
-
+	   bool push_block(const signed_block& b);
        bool _push_block(const signed_block& new_block);
        void _apply_block(const signed_block& next_block);
-
-
+	   void _finalize_block(const signed_block& b);
 	 // void rate_limit_message(const message& message);
       void process_message(const transaction& trx, account_name code, const message_xmax& message,
                             message_output& output, message_context_xmax* parent_context = nullptr,
@@ -150,41 +151,36 @@ namespace Xmaxplatform { namespace Chain {
 		   } FC_CAPTURE_AND_RETHROW((trx))
 	   }
 
+	   template<typename Function>
+	   auto with_applying_block(Function&& f) -> decltype((*((Function*)nullptr))()) {
+		   auto on_exit = fc::make_scoped_exit([this]() {
+			   _currently_applying_block = false;
+		   });
+		   _currently_applying_block = true;
+		   return f();
+	   }
+
+	   template<typename Function>
+	   auto with_skip_flags(uint64_t flags, Function&& f) -> decltype((*((Function*)nullptr))())
+	   {
+		   auto old_flags = _skip_flags;
+		   auto on_exit = fc::make_scoped_exit([&]() { _skip_flags = old_flags; });
+		   _skip_flags = flags;
+		   return f();
+	   }
+
+
    public:
        signed_block generate_block(
                chain_timestamp when,
                const account_name& builder
        );
 
-
-       bool push_block( const signed_block& b );
-
-
        void apply_block(const signed_block& next_block);
-
-
-       template<typename Function>
-       auto with_applying_block(Function&& f) -> decltype((*((Function*)nullptr))()) {
-           auto on_exit = fc::make_scoped_exit([this](){
-               _currently_applying_block = false;
-           });
-           _currently_applying_block = true;
-           return f();
-       }
-
-       template<typename Function>
-       auto with_skip_flags( uint64_t flags, Function&& f ) -> decltype((*((Function*)nullptr))())
-       {
-           auto old_flags = _skip_flags;
-           auto on_exit   = fc::make_scoped_exit( [&](){ _skip_flags = old_flags; } );
-           _skip_flags = flags;
-           return f();
-       }
 
        void set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v );
 
 
-       void update_dynamic_states(const signed_block& b);
        const Basechain::database& get_data() const { return _data; }
    };
 
@@ -194,11 +190,11 @@ namespace Xmaxplatform { namespace Chain {
             virtual ~chain_init();
 
 
-            virtual Basetypes::time get_chain_init_time() = 0;
+            virtual Basetypes::time get_chain_init_time() const = 0;
 
-            virtual Chain::blockchain_setup get_blockchain_setup() = 0;
+            virtual Chain::blockchain_setup get_blockchain_setup() const = 0;
 
-            virtual std::array<account_name, Config::blocks_per_round> get_chain_init_builders() = 0;
+            virtual Chain::xmax_builders get_chain_init_builders() const = 0;
 
             virtual void register_handlers(chain_xmax &chain, database &db) = 0;
 

@@ -6,7 +6,7 @@
 #include <blockchain_types.hpp>
 #include <block.hpp>
 #include <chain_xmax.hpp>
-
+#include <xmax_voting.hpp>
 
 #include <rand.hpp>
 
@@ -30,13 +30,15 @@
 #include <objects/generated_transaction_object.hpp>
 #include <objects/block_summary_object.hpp>
 #include <objects/account_object.hpp>
+#include <objects/vote_objects.hpp>
+#include <objects/resource_token_object.hpp>
+#include <objects/xmx_token_object.hpp>
 
 #include <vm_xmax.hpp>
 
 #include <abi_serializer.hpp>
 
 namespace Xmaxplatform { namespace Chain {
-
 
         void chain_xmax::setup_data_indexes() {
             _data.add_index<account_index>();
@@ -54,6 +56,10 @@ namespace Xmaxplatform { namespace Chain {
             _data.add_index<dynamic_states_multi_index>();
             _data.add_index<xmx_token_multi_index>();
 
+			_data.add_index<voter_info_index>();
+			_data.add_index<builder_info_index>();
+			_data.add_index<resource_token_multi_index>();
+
         }
 
         void chain_xmax::initialize_chain(chain_init& initer)
@@ -61,24 +67,35 @@ namespace Xmaxplatform { namespace Chain {
                 if (!_data.find<static_config_object>()) {
                     _data.with_write_lock([this,&initer] {
 
+						const fc::time_point init_point = initer.get_chain_init_time();;
+						const chain_timestamp init_stamp = chain_timestamp::from(init_point);
+
+
                         // Create global properties
                         _data.create<static_config_object>([&](static_config_object &p) {
                             p.setup = initer.get_blockchain_setup();
-                            p.pending_schedule.set_builders(initer.get_chain_init_builders());
-                            p.buid_schedule = p.pending_schedule;
+                            p.current_builders.set_builders(initer.get_chain_init_builders(), 0);
                         });
+
                         _data.create<dynamic_states_object>([&](dynamic_states_object &p) {
-                            p.state_time = initer.get_chain_init_time();
-                            p.current_builder = initer.get_chain_init_builders().at(0);
+							p.head_block_number = 0;
+							p.head_block_id = xmax_type_block_id();
+                            p.state_time = init_point;
+							p.total_slot = 0;
+                            p.block_builder = initer.get_chain_init_builders().at(0);
+							p.round_begin_time = init_stamp;
+							p.round_slot = 0;
+							p.builders_elect_state = elect_state::elect_new_builders;
                         });
+
 						for (int i = 0; i < 0x10000; i++)
 							_data.create<block_summary_object>([&](block_summary_object&) {});
 
 
-                        signed_block block{};
-                        block.builder = Config::xmax_contract_name;
-                        block.threads.emplace_back();
-                        block.threads[0].emplace_back();
+                        //signed_block block{};
+                        //block.builder = Config::xmax_contract_name;
+                        //block.threads.emplace_back();
+                        //block.threads[0].emplace_back();
 
                         auto messages = initer.prepare_data(*this, _data);
                         std::for_each(messages.begin(), messages.end(), [&](const message_xmax& m) {
@@ -125,36 +142,60 @@ namespace Xmaxplatform { namespace Chain {
             return get_dynamic_states().state_time;
         }
 
+		uint32_t chain_xmax::head_block_num() const
+		{
+			return get_dynamic_states().head_block_number;
+		}
+
 		Xmaxplatform::Chain::xmax_type_block_id chain_xmax::head_block_id() const
 		{
 			return get_dynamic_states().head_block_id;
 		}
 
-		uint32_t chain_xmax::get_slot_at_chain_time(chain_timestamp when) const
+		account_name chain_xmax::get_block_builder(uint32_t delta_slot) const
 		{
-			chain_timestamp first_slot_time = get_slot_chain_time(1);
+			const dynamic_states_object& states = get_dynamic_states();
+			const static_config_object& config = get_static_config();
+
+			uint32_t slot = states.round_slot + delta_slot;
+
+			if (slot < Config::blocks_per_round)
+			{
+				uint32_t index = slot % config.current_builders.number();
+				return config.current_builders.builders[index];
+			}
+
+			if (config.next_builders.is_empty()) // no next list.
+			{
+				uint32_t index = slot % config.current_builders.number();
+				return config.current_builders.builders[index];
+			}
+			// get builder in next list.
+			uint32_t deltaslot = slot - config.current_builders.number();
+
+			uint32_t bias = slot % config.next_builders.number();
+
+			return config.next_builders.builders[bias];
+		}
+
+		uint32_t chain_xmax::get_delta_slot_at_time(chain_timestamp when) const
+		{
+			chain_timestamp first_slot_time = get_delta_slot_time(1);
 			if (when < first_slot_time)
 				return 0;
 
 			chain_timestamp sub = when - first_slot_time;
-			return sub.get_data() + 1;
+			return sub.get_stamp() + 1;
 		}
-        chain_timestamp chain_xmax::get_slot_chain_time(uint32_t slot) const
+        chain_timestamp chain_xmax::get_delta_slot_time(uint32_t delta_slot) const
         {
-            if (0 == slot)
+            if (0 == delta_slot)
             {
-				return chain_timestamp();
-            } 
-			const dynamic_states_object& state = get_dynamic_states();
-			if (state.head_block_number == 0)
-			{      
-				// n.b. first block is at genesis_time plus one block interval
-				chain_timestamp genesis_time = chain_timestamp::from(state.state_time);
-				return genesis_time + chain_timestamp::from(slot);
-			}
+				return chain_timestamp::zero_timestamp;
+            }
 
-			chain_timestamp head_block_abs_slot = chain_timestamp::from(state.state_time);
-			head_block_abs_slot += chain_timestamp::from(slot);
+			chain_timestamp head_block_abs_slot = chain_timestamp::from(head_block_time());
+			head_block_abs_slot += chain_timestamp::from(delta_slot);
 			return head_block_abs_slot;
 
         }
@@ -233,19 +274,28 @@ namespace Xmaxplatform { namespace Chain {
         )
         {
             try {
+				FC_ASSERT(head_block_time() < when.time_point(), "block must be generated at a timestamp after the head block time");
 
-                auto start = fc::time_point::now();
+				const dynamic_states_object& dy_state = get_dynamic_states();
+
+				time_point start = fc::time_point::now();
 
                 signed_block pending_block;
-                const auto& gprops = get_static_config();
 
                 uint32_t pending_block_size = fc::raw::pack_size( pending_block );
 
-                pending_block.previous = get_dynamic_states().head_block_id;
+                pending_block.previous = dy_state.head_block_id;
                 pending_block.timestamp = when;
                 pending_block.transaction_merkle_root = pending_block.calculate_merkle_root();
 
+
+
                 pending_block.builder = builder;
+
+				if (builders_elected == dy_state.builders_elect_state)
+				{
+					pending_block.next_builders = get_static_config().new_builders;
+				}
 
                 const auto end = fc::time_point::now();
                 const auto gen_time = end - start;
@@ -253,6 +303,7 @@ namespace Xmaxplatform { namespace Chain {
                     ilog("generation took ${x} ms", ("x", gen_time.count() / 1000));
                     FC_ASSERT(gen_time < fc::milliseconds(250), "block took too long to build");
                 }
+
 
 
                 //pending_block.sign( block_signing_private_key );
@@ -304,26 +355,113 @@ namespace Xmaxplatform { namespace Chain {
         void chain_xmax::_apply_block(const signed_block& next_block)
         { try {
 
-                next_block.transaction_merkle_root == next_block.calculate_merkle_root();
+				FC_ASSERT(next_block.transaction_merkle_root == next_block.calculate_merkle_root(), "action merkle root does not match");
 
+				const dynamic_states_object& dy_state = get_dynamic_states();
+				if (builders_elected == dy_state.builders_elect_state)
+				{
+					const static_config_object& config = get_static_config();
+					FC_ASSERT(next_block.next_builders.valid() && (*next_block.next_builders == config.new_builders), "error builder list.");
+				}
 
-                update_dynamic_states(next_block);
+                _finalize_block(next_block);
 
 				create_block_summary(next_block);
 
             } FC_CAPTURE_AND_RETHROW( (next_block.block_num()) )  }
 
 
-		void chain_xmax::update_dynamic_states(const signed_block& b) {
-            const dynamic_states_object& _dgp = _data.get<dynamic_states_object>();
+		void chain_xmax::_finalize_block(const signed_block& b) 
+		{		
+			const dynamic_states_object& dy_state = get_dynamic_states();
+
+			chain_timestamp current_block_time = b.timestamp;
+
+			elect_state builder_elect_state = dy_state.builders_elect_state;
+
+			chain_timestamp round_begin_time = dy_state.round_begin_time;
+
+			uint32_t delta_slot = get_delta_slot_at_time(current_block_time);
+
+			uint32_t total_slot = dy_state.total_slot + delta_slot;
+
+			uint32_t current_round_slot = dy_state.round_slot + delta_slot;
+
+			// missed_block
+			//uint32_t missed_blocks = delta_slot - 1;
+
+
+			if (b.next_builders.valid()) // store next builder list.
+			{
+				const static_config_object& static_config = get_static_config();
+				_data.modify(static_config, [&](static_config_object& obj) {
+					obj.next_builders = *b.next_builders;
+				});
+				builder_elect_state = builders_confirmed;
+			}
+			if (elect_new_builders == builder_elect_state) // create new builder list.
+			{
+				xmax_builders new_builders = Native_contract::xmax_voting::next_round(_data);
+				
+				const static_config_object& static_config = get_static_config();
+
+				uint32_t new_version = static_config.current_builders.version + 1;
+
+				_data.modify(static_config, [&](static_config_object& obj) {
+					obj.new_builders.set_builders(new_builders, new_version);
+				});		
+				builder_elect_state = builders_elected;
+			}
+
+			if (current_round_slot >= Config::blocks_per_round)
+			{
+				const static_config_object& static_config = get_static_config();
+				if (!static_config.next_builders.is_empty())
+				{
+					builder_rule current_builders = static_config.next_builders;
+					_data.modify(static_config, [&](static_config_object& obj) {
+						obj.current_builders = current_builders;
+						obj.new_builders.reset();
+						obj.next_builders.reset();
+					});
+					builder_elect_state = elect_new_builders;
+
+					// new builders state
+
+					current_round_slot = current_round_slot % Config::blocks_per_round;
+					chain_timestamp delta_time = chain_timestamp::from(current_round_slot);
+					round_begin_time = current_block_time - delta_time;
+
+				}
+			}
+
+			//else if (builders_confirmed == builder_elect_state)
+			{
+				//const static_config_object& static_config = get_static_config();
+
+				//builder_rule current_builders = static_config.next_builders;
+				//_data.modify(static_config, [&](static_config_object& obj) {
+				//	obj.current_builders = current_builders;
+				//	obj.new_builders.reset();
+				//	obj.next_builders.reset();
+				//});
+				//builder_elect_state = elect_new_builders;
+			}
 
             // update dynamic states
-            _data.modify( _dgp, [&]( dynamic_states_object& dgp ){
+            _data.modify( dy_state, [&]( dynamic_states_object& dgp ){
                 dgp.head_block_number = b.block_num();
                 dgp.head_block_id = b.id();
                 dgp.state_time = b.timestamp.time_point();
-                dgp.current_builder = b.builder;
+                dgp.block_builder = b.builder;
+				dgp.round_begin_time = round_begin_time;
+				dgp.total_slot = total_slot;
+				dgp.round_slot = current_round_slot;
+				dgp.builders_elect_state = builder_elect_state;
             });
+
+
+
 
         }
 

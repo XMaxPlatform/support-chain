@@ -10,19 +10,21 @@
 namespace Xmaxplatform { namespace Native_contract {
 using namespace Xmaxplatform::Chain;
 
-        Basetypes::time native_contract_chain_init::get_chain_init_time() {
+Basetypes::time native_contract_chain_init::get_chain_init_time() const {
    return genesis.initial_timestamp;
 }
 
-blockchain_setup native_contract_chain_init::get_blockchain_setup() {
+Chain::blockchain_setup native_contract_chain_init::get_blockchain_setup() const {
    return genesis.initial_configuration;
 }
 
-std::array<Basetypes::account_name, Config::blocks_per_round> native_contract_chain_init::get_chain_init_builders() {
-   std::array<Basetypes::account_name, Config::blocks_per_round> result;
-   std::transform(genesis.initial_builders.begin(), genesis.initial_builders.end(), result.begin(),
-                  [](const auto& p) { return p.owner_name; });
-   return result;
+Chain::xmax_builders native_contract_chain_init::get_chain_init_builders() const {
+	Chain::xmax_builders result;
+	for (auto it : genesis.initial_builders)
+	{
+		result.push_back(it.owner_name);
+	}
+	return result;
 }
 
 void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain::database &db) {
@@ -97,7 +99,15 @@ std::vector<message_xmax> native_contract_chain_init::prepare_data(chain_xmax &c
                                   "transfer", Basetypes::transfer(Config::xmax_contract_name, acct.name,
                                                               acct.xmx_token.amount, "Genesis Allocation"));
          messages_to_process.emplace_back(std::move(msg));
+
+
       }
+	  msg = message_xmax(Config::xmax_contract_name,
+		  vector<Basetypes::account_permission>{ {Config::xmax_contract_name, "active"}},
+		  "regbuilder", Basetypes::regbuilder(Config::xmax_contract_name, Config::xmax_contract_key)
+	  );
+
+	  messages_to_process.emplace_back(std::move(msg));
    }
 
    return messages_to_process;

@@ -8,9 +8,11 @@
 
 namespace Xmaxplatform { namespace Chain {
 
-    chain_timestamp chain_timestamp::from(fc::time_point val)
+	const chain_timestamp chain_timestamp::zero_timestamp;
+
+    chain_timestamp chain_timestamp::from(fc::time_point time_val)
     {
-        uint64_t us = val.time_since_epoch().count();
+        uint64_t us = time_val.time_since_epoch().count();
         uint64_t stamp_us = us - Config::chain_timestamp_epoch_us;
 
         uint64_t stamp = stamp_us / Config::chain_timestamp_unit_us;
@@ -18,9 +20,9 @@ namespace Xmaxplatform { namespace Chain {
         return chain_timestamp((chain_timestamp::stamp_type) stamp);
     }
 
-	chain_timestamp chain_timestamp::from(stamp_type val)
+	chain_timestamp chain_timestamp::from(stamp_type stamp_val)
 	{
-		return chain_timestamp(val);
+		return chain_timestamp(stamp_val);
 	}
 
     fc::time_point chain_timestamp::to_time_point(const chain_timestamp& val)

@@ -18,11 +18,12 @@ namespace Xmaxplatform { namespace Chain {
             return to_time_point(*this);
         }
 
-        static chain_timestamp from(fc::time_point val);
-		static chain_timestamp from(stamp_type val);
+        static chain_timestamp from(fc::time_point time_val);
+		static chain_timestamp from(stamp_type stamp_val);
 
         static fc::time_point to_time_point(const chain_timestamp& val);
 
+		static const chain_timestamp zero_timestamp;
 
         bool operator > ( const chain_timestamp& t )const   { return _stamp >  t._stamp; }
         bool operator >=( const chain_timestamp& t )const   { return _stamp >= t._stamp; }
@@ -50,12 +51,12 @@ namespace Xmaxplatform { namespace Chain {
 			return *this;
 		}
         
-        inline void set_data(const stamp_type & val)
+        inline void set_stamp(const stamp_type & val)
         {
             _stamp = val;
         }
 
-        inline stamp_type get_data() const
+        inline stamp_type get_stamp() const
         {
             return _stamp;
         }

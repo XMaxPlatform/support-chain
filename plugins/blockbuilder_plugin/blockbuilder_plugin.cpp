@@ -19,8 +19,12 @@ public:
     blockbuilder_plugin_impl(boost::asio::io_service& io)
     : _timer(io) {}
     boost::asio::deadline_timer _timer;
-
+	void start_build();
+private: 
+	void start_check();
     void build_block();
+
+	void genesis_block_build();
     block_build_condition block_build_loop();
     block_build_condition build_block(fc::mutable_variant_object& capture);
 };
@@ -42,24 +46,53 @@ void blockbuilder_plugin::plugin_initialize(const variables_map& options) {
 
 void blockbuilder_plugin::plugin_startup() {
     ilog("blockbuilder_plugin::plugin_startup");
-    Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
-    my->build_block();
+    my->start_build();
 }
 
 void blockbuilder_plugin::plugin_shutdown() {
     ilog("blockbuilder_plugin::plugin_startup");
 }
 
+	void blockbuilder_plugin_impl::start_build()
+	{
+		int64_t start_delay = 1000000;
+
+		_timer.expires_from_now(boost::posix_time::microseconds(start_delay));
+		_timer.async_wait(boost::bind(&blockbuilder_plugin_impl::start_check, this));
+	}
+
+	void blockbuilder_plugin_impl::start_check()
+	{
+		const Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
+		const Chain::dynamic_states_object& states = chain.get_dynamic_states();
+		if (0 == chain.head_block_num())
+		{
+			ilog("build loop with genesis block.");
+			genesis_block_build();
+		}
+		else
+		{
+			ilog("build loop.");
+			build_block();
+		}
+	}
+
+
+
     void blockbuilder_plugin_impl::build_block() {
 
-        fc::time_point now = fc::time_point::now();
-        int64_t time_to_next_second = 1000000 - (now.time_since_epoch().count() % 1000000);
-        if(time_to_next_second < 50000) {     // we must sleep for at least 50ms
-            wlog("Less than 50ms to next second, time_to_next_second ${s}ms", ("s", time_to_next_second/1000));
-            time_to_next_second += 1000000;
-        }
+		// Next build time.
+		// If we would wait less than "1/10 of block_interval", wait for the whole block interval.
+		fc::time_point now = fc::time_point::now();
+		int64_t time_to_next_block_time = (Config::chain_timestamp_unit_us) - (now.time_since_epoch().count() % (Config::chain_timestamp_unit_us));
+		if (time_to_next_block_time < Config::mini_next_block_us) {     // we must sleep for at least 50ms
+			ilog("Less than ${t}us to next block time, time_to_next_block_time ${bt}us",
+				("t", Config::mini_next_block_us)("bt", time_to_next_block_time));
+			time_to_next_block_time += Config::chain_timestamp_unit_us;
+		}
 
-        _timer.expires_from_now(boost::posix_time::microseconds(time_to_next_second));
+
+        _timer.expires_from_now(boost::posix_time::microseconds(time_to_next_block_time));
         _timer.async_wait(boost::bind(&blockbuilder_plugin_impl::block_build_loop, this));
     }
 
@@ -106,6 +139,35 @@ void blockbuilder_plugin::plugin_shutdown() {
         return result;
     }
 
+	void blockbuilder_plugin_impl::genesis_block_build()
+	{
+		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
+
+		const Chain::dynamic_states_object& states = chain.get_dynamic_states();
+
+		Chain::chain_timestamp now_timestamp = Chain::chain_timestamp::from(states.state_time);
+
+		const account_name current_builder = states.block_builder;
+
+		try
+		{
+			Chain::signed_block block = chain.generate_block(
+				now_timestamp,
+				current_builder
+			);
+		}
+		catch (const fc::canceled_exception&)
+		{
+			//We're trying to exit. Go ahead and let this one out.
+			throw;
+		}
+		catch (const fc::exception& e)
+		{
+			elog("Got exception while generating genesis block:\n${e}", ("e", e.to_detail_string()));	
+		}
+
+		build_block();
+	}
     block_build_condition blockbuilder_plugin_impl::build_block(
             fc::mutable_variant_object &capture) {
 
@@ -114,24 +176,20 @@ void blockbuilder_plugin::plugin_shutdown() {
 
         Chain::chain_timestamp now_timestamp = Chain::chain_timestamp::from(now);
 
-
-		uint32_t slot = chain.get_slot_at_chain_time(now_timestamp);
-		if (slot == 0)
+		//delta slot
+		uint32_t delta_slot = chain.get_delta_slot_at_time(now_timestamp);
+		if (delta_slot == 0)
 		{
-			capture("next_time", chain.get_slot_chain_time(1));
+			capture("next_time", chain.get_delta_slot_time(1));
 			return block_build_condition::not_time_yet;
 		}
 
+		const account_name current_builder = chain.get_block_builder(delta_slot);
+
+
 		assert(now > chain.head_block_time());
 
-		Chain::signed_block block = chain.generate_block(
-                now_timestamp,
-                chain.get_dynamic_states().current_builder
-        );
-
-
-
-
+		Chain::signed_block block = chain.generate_block(now_timestamp, current_builder);
 
         //TODO
         //broadcast

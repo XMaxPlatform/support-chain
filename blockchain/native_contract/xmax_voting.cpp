@@ -360,9 +360,9 @@ namespace Native_contract {
         }
     }
 
-	builder_schedule xmax_voting::next_round(Basechain::database& db)
+	xmax_builders xmax_voting::next_round(Basechain::database& db)
 	{
-		builder_schedule round;
+		xmax_builders round;
 
 		builders_table builders_tbl(db);
 
@@ -378,16 +378,28 @@ namespace Native_contract {
 
 		auto ActiveProducersByVotes = AllProducersByVotes | FilterRetiredProducers;
 
-		// Copy the top voted active producer's names into the round
-		auto runnerUpStorage =
-			//boost::copy_n(ActiveProducersByVotes | ProducerObjectToName, Config::voted_producers_per_round, round.begin());
-			boost::copy_n(ActiveProducersByVotes | ProducerObjectToName, Config::blocks_per_round, round.builders.begin());
-
-
-		std::sort(round.builders.begin(), round.builders.end(), [](const account_name& r, const account_name& l) -> bool
+		int count = 0;
+		for (auto it : ActiveProducersByVotes)
 		{
-			return r < l;
-		});
+			round.push_back(it.owner);
+			++count;
+			if (count >= Config::blocks_per_round)
+			{
+				break;
+			}
+		}
+
+		if (round.empty())
+		{
+			round.push_back(Config::xmax_contract_name);
+		}
+		else
+		{
+			std::sort(round.begin(), round.end(), [](const account_name& r, const account_name& l) -> bool
+			{
+				return r < l;
+			});
+		}
 
 		return round;
 	}

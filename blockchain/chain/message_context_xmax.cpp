@@ -18,7 +18,7 @@ namespace Xmaxplatform { namespace Chain {
 
 void message_context_xmax::get_active_builders(Basetypes::account_name *builders, uint32_t datalen) {
    const auto& gsc = _chain_xmax.get_static_config();
-   memcpy(builders, gsc.buid_schedule.builders.data(), std::min(sizeof(account_name)*gsc.buid_schedule.builders.size(),(size_t)datalen));
+   memcpy(builders, gsc.current_builders.builders.data(), std::min(sizeof(account_name)*gsc.current_builders.builders.size(),(size_t)datalen));
 }
 
 time message_context_xmax::current_time() const {

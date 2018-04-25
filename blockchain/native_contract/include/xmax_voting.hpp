@@ -5,7 +5,7 @@
 #pragma once
 
 #include <xmaxtypes.hpp>
-#include <builder_schedule.hpp>
+#include <builder_rule.hpp>
 
 namespace Xmaxplatform {namespace Chain{
         class message_context_xmax;
@@ -37,7 +37,7 @@ namespace Native_contract {
         static void reg_proxy(Chain::message_context_xmax& context);
         static void unreg_proxy(Chain::message_context_xmax& context);
 
-		static Chain::builder_schedule next_round(Basechain::database& db);
+		static Chain::xmax_builders next_round(Basechain::database& db);
 
     };
 
