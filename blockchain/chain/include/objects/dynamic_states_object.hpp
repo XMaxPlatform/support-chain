@@ -15,6 +15,7 @@
 namespace Xmaxplatform { namespace Chain {
 
 
+
 	enum elect_state
 	{
 		unknown_elect_state = 0,
@@ -37,6 +38,7 @@ namespace Xmaxplatform { namespace Chain {
 		uint32_t				round_slot;
 
 		elect_state				builders_elect_state;
+		uint32_t last_irreversible_block_num = 0;
 	};
 
 	using dynamic_states_multi_index = Basechain::shared_multi_index_container<
@@ -59,7 +61,9 @@ FC_REFLECT(Xmaxplatform::Chain::dynamic_states_object,
            (head_block_id)
            (state_time)
 		   (total_slot)
-           (current_builder)
+           (block_builder)
 		   (round_begin_time)
-		   (builder_vote_state)
+		   (round_slot)
+		   (builders_elect_state)
+		  (last_irreversible_block_num)
           )

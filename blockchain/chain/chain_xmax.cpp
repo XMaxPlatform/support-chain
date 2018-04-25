@@ -608,7 +608,28 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::check_transaction_authorization(const signed_transaction& trx, bool allow_unused_signatures /*= false*/) const
 		{
+			//TODO
+		}
 
+		xmax_type_block_id              chain_xmax::get_blockid_from_num(uint32_t block_num)const
+		{
+			try {
+				if (const auto& block = get_block_from_num(block_num))
+					return block->id();
+
+				FC_THROW_EXCEPTION(unknown_block_exception, "Could not find block");
+			} FC_CAPTURE_AND_RETHROW((block_num))
+		}
+
+		optional<signed_block>			chain_xmax::get_block_from_id(const xmax_type_block_id& id)const
+		{
+			//TODO
+			return optional<signed_block>();
+		}
+		optional<signed_block>      chain_xmax::get_block_from_num(uint32_t num)const
+		{
+			//TODO
+			return optional<signed_block>();
 		}
 
 		void chain_xmax::create_block_summary(const signed_block& next_block)
