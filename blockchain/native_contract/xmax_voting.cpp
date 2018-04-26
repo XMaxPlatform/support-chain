@@ -33,7 +33,6 @@ namespace Native_contract {
 
     void xmax_voting::increase_votes(message_context_xmax &context, account_name acnt, share_type amount)
     {
-
         voters_table voters_tbl(context.mutable_db);
 
         const voter_info_object* voter = voters_tbl.find(acnt);

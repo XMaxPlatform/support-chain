@@ -54,6 +54,24 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
     xmax_abi.structs.push_back( Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transfer>::type() );
     xmax_abi.structs.push_back( Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::addaccount>::type() );
 	xmax_abi.structs.push_back( Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::setcode>::type());
+
+	xmax_abi.actions.push_back(Types::action{ name("lock"), "lock" });
+	xmax_abi.actions.push_back(Types::action{ name("unlock"), "unlock" });
+	xmax_abi.actions.push_back(Types::action{ name("votebuilder"), "votebuilder" });
+	xmax_abi.actions.push_back(Types::action{ name("regbuilder"), "regbuilder" });
+	xmax_abi.actions.push_back(Types::action{ name("unregbuilder"), "unregbuilder" });
+	xmax_abi.actions.push_back(Types::action{ name("regproxy"), "regproxy" });
+	xmax_abi.actions.push_back(Types::action{ name("unregproxy"), "unregproxy" });
+
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::lock>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unlock>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::votebuilder>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::regbuilder>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unregbuilder>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::regproxy>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unregproxy>::type());
+
+
    return xmax_abi;
 }
 
