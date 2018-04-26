@@ -4,7 +4,8 @@ add_library( wallet_plugin
              ${HEADERS} )
 
 target_link_libraries( wallet_plugin 
-        baseapp basetypes basechain fc chainhttp_plugin xmaxutilities )
+        baseapp basetypes basechain xmaxchain
+        fc chainhttp_plugin xmaxutilities )
 
 target_include_directories( wallet_plugin 
                                 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" 

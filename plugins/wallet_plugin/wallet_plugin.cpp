@@ -7,6 +7,7 @@
 
 #include <blockchain_types.hpp>
 #include <key_conversion.hpp>
+#include <transaction.hpp>
 
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
@@ -16,9 +17,10 @@
 #include <fc/crypto/elliptic.hpp>
 
 using namespace std;
+using namespace Xmaxplatform;
 using namespace Xmaxplatform::Chain;
 using namespace Xmaxplatform::Utilities;
-using namespace Xmaxplatform;
+using namespace Xmaxplatform::Basetypes;
 
 namespace Xmaxplatform {
 
@@ -29,12 +31,27 @@ namespace Xmaxplatform {
 
 		struct empty {};
 
+		//-------------------------------------
 		using create_key_params = empty;
 		struct create_key_results {
-			string public_key;
-			string private_key;
+			std::string public_key;
+			std::string private_key;
 		};
 		create_key_results create_key(const create_key_params&) const;
+
+		//-------------------------------------
+		struct sign_transaction_params {
+			Xmaxplatform::Chain::signed_transaction transaction;
+			std::string private_key;
+			Chain::chain_id_type chain_id;
+
+		};
+
+		struct sign_transaction_results {
+			Xmaxplatform::Chain::signed_transaction transaction;
+		};
+
+		sign_transaction_results sign_transaction(const sign_transaction_params& params);
 	};
 
 
@@ -70,15 +87,29 @@ namespace Xmaxplatform {
 	{
 		create_key_results result;
 		auto privateKey = fc::ecc::private_key::generate();
-		string pubKey = string(public_key_type(privateKey.get_public_key()));
+		std::string pubKey = std::string(public_key_type(privateKey.get_public_key()));
 		result.private_key = key_to_wif(privateKey.get_secret());
 		result.public_key = pubKey;
 		return result;
 	}
 
 
+	//--------------------------------------------------
+	wallet_plugin_impl::sign_transaction_results wallet_plugin_impl::sign_transaction(const sign_transaction_params& params)
+	{
+		sign_transaction_results result;
+		Xmaxplatform::Chain::signed_transaction strans(params.transaction);
 
+		fc::optional<fc::ecc::private_key> private_key = Utilities::wif_to_key(params.private_key);
+		FC_ASSERT(private_key, "Invalid WIF-format private key ${key_string}",
+			("key_string", params.private_key));
 
+		strans.sign(*private_key, params.chain_id);
+
+		result.transaction = strans;
+
+		return result;
+	}
 
 	/*!
 	* \class wallet_plugin implementations
@@ -96,7 +127,8 @@ namespace Xmaxplatform {
 
 	void wallet_plugin::plugin_startup() {
 		app().get_plugin<chainhttp_plugin>().add_api({
-			WALLET_CALL(create_key, 200)	
+			WALLET_CALL(create_key, 200),
+			WALLET_CALL(sign_transaction, 201)
 			});
 		impl.reset(new wallet_plugin_impl);
 	}
@@ -110,3 +142,5 @@ namespace Xmaxplatform {
 
 FC_REFLECT(Xmaxplatform::wallet_plugin_impl::empty, )
 FC_REFLECT(Xmaxplatform::wallet_plugin_impl::create_key_results, (public_key)(private_key))
+FC_REFLECT(Xmaxplatform::wallet_plugin_impl::sign_transaction_params, (transaction)(private_key)(chain_id))
+FC_REFLECT(Xmaxplatform::wallet_plugin_impl::sign_transaction_results, (transaction))
