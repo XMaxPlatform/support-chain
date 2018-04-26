@@ -79,8 +79,7 @@ namespace Native_contract {
 
     void xmax_voting::decrease_votes(message_context_xmax &context, account_name acnt, share_type amount)
     {
-
-        context.require_authorization(acnt);
+        //context.require_authorization(acnt);
 
         voters_table voters_tbl(context.mutable_db);
         auto voter = voters_tbl.find(acnt);
@@ -136,7 +135,7 @@ namespace Native_contract {
     {
         auto vp = context.msg.as<votebuilder>();
 
-        context.require_authorization(vp.voter);
+        //context.require_authorization(vp.voter);
 
         if (vp.proxy.good()) {
             XMAX_ASSERT(vp.builders.size() == 0, message_validate_exception,
@@ -257,7 +256,7 @@ namespace Native_contract {
     {
         auto reg = context.msg.as<regbuilder>();
 
-        context.require_authorization(reg.builder);
+        //context.require_authorization(reg.builder);
 
         builders_table builders_tbl(context.mutable_db);
         auto prod = builders_tbl.find(reg.builder);
@@ -281,7 +280,7 @@ namespace Native_contract {
     {
         auto unreg = context.msg.as<unregbuilder>();
 
-        context.require_authorization(unreg.builder);
+        //context.require_authorization(unreg.builder);
 
         builders_table builders_tbl(context.mutable_db);
         auto prod = builders_tbl.find(unreg.builder);
@@ -297,7 +296,7 @@ namespace Native_contract {
 
         auto reg = context.msg.as<regproxy>();
 
-        context.require_authorization(reg.proxy);
+        //context.require_authorization(reg.proxy);
 
         voters_table voters_tbl(context.mutable_db);
         auto proxy = voters_tbl.find(reg.proxy);
@@ -335,7 +334,7 @@ namespace Native_contract {
     {
         auto reg = context.msg.as<unregproxy>();
 
-        context.require_authorization(reg.proxy);
+        //context.require_authorization(reg.proxy);
 
         voters_table voters_tbl(context.mutable_db);
         auto proxy = voters_tbl.find(reg.proxy);
