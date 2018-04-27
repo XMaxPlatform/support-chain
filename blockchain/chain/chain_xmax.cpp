@@ -33,6 +33,7 @@
 #include <objects/vote_objects.hpp>
 #include <objects/resource_token_object.hpp>
 #include <objects/xmx_token_object.hpp>
+#include <objects/builder_object.hpp>
 
 #include <vm_xmax.hpp>
 
@@ -58,6 +59,7 @@ namespace Xmaxplatform { namespace Chain {
 
 			_data.add_index<voter_info_index>();
 			_data.add_index<builder_info_index>();
+			_data.add_index<builder_multi_index>();
 			_data.add_index<resource_token_multi_index>();
 
         }
@@ -72,13 +74,13 @@ namespace Xmaxplatform { namespace Chain {
 						const chain_timestamp pre_stamp = init_stamp - chain_timestamp::create(1);
 
 						xmax_builder_infos list;
-						list.push_back(builder_info(Config::xmax_contract_name, Config::xmax_builder_key));
+						list.push_back(builder_info(Config::xmax_contract_name, Config::xmax_build_public_key));
 
                         // Create global properties
                         _data.create<static_config_object>([&](static_config_object &p) {
                             p.setup = initer.get_blockchain_setup();
                             p.current_builders.set_builders(list, 0);
-							p.new_builders.set_builders(p.current_builders.builders, 1);
+							p.next_builders.set_builders(p.current_builders.builders, 1);
                         });
 
                         _data.create<dynamic_states_object>([&](dynamic_states_object &p) {
@@ -156,30 +158,48 @@ namespace Xmaxplatform { namespace Chain {
 			return get_dynamic_states().head_block_id;
 		}
 
-		account_name chain_xmax::get_block_builder(uint32_t delta_slot) const
+		const builder_info& _get_builder(const static_config_object& config, uint32_t index)
 		{
+			if (index < Config::blocks_per_round)
+			{
+				uint32_t bias = index % config.current_builders.number();
+				return config.current_builders.builders[bias];
+			}
+
+			if (config.next_builders.is_empty()) // no next list.
+			{
+				uint32_t bias = index % config.current_builders.number();
+				return config.current_builders.builders[bias];
+			}
+			// get builder in next list.
+			uint32_t deltaslot = index - config.current_builders.number();
+
+			uint32_t bias = index % config.next_builders.number();
+
+			return config.next_builders.builders[bias];
+		}
+
+		const builder_info& chain_xmax::get_block_builder(uint32_t delta_slot) const
+		{
+			asset(delta_slot >= 0);
 			const dynamic_states_object& states = get_dynamic_states();
 			const static_config_object& config = get_static_config();
 
 			uint32_t slot = states.round_slot + delta_slot;
 
-			if (slot < Config::blocks_per_round)
-			{
-				uint32_t index = slot % config.current_builders.number();
-				return config.current_builders.builders[index].builder_name;
-			}
+			return _get_builder(config, slot);
+		}
 
-			if (config.next_builders.is_empty()) // no next list.
-			{
-				uint32_t index = slot % config.current_builders.number();
-				return config.current_builders.builders[index].builder_name;
-			}
-			// get builder in next list.
-			uint32_t deltaslot = slot - config.current_builders.number();
+		const builder_info& chain_xmax::get_order_builder(uint32_t order_slot) const
+		{
+			asset(order_slot >= 0);
+			const static_config_object& config = get_static_config();
+			return _get_builder(config, order_slot);
+		}
 
-			uint32_t bias = slot % config.next_builders.number();
-
-			return config.next_builders.builders[bias].builder_name;
+		const builder_object* chain_xmax::find_builder_object(account_name builder_name) const
+		{
+			return _data.find<builder_object, by_owner>(builder_name);
 		}
 
 		uint32_t chain_xmax::get_delta_slot_at_time(chain_timestamp when) const
@@ -261,7 +281,8 @@ namespace Xmaxplatform { namespace Chain {
 
 		signed_block chain_xmax::generate_block(
                 chain_timestamp when,
-                const account_name& builder
+                const account_name& builder,
+				const private_key_type sign_private_key
         )
         { try {
                 _data.start_undo_session(true);
@@ -392,18 +413,39 @@ namespace Xmaxplatform { namespace Chain {
 			uint32_t current_round_slot = dy_state.round_slot + delta_slot;
 
 			// missed_block
-			//uint32_t missed_blocks = delta_slot - 1;
-
-
-			if (b.next_builders.valid()) // store next builder list.
+			uint32_t missed_blocks = delta_slot - 1;
+			// info of miss builders.
+			if (missed_blocks > 0)
 			{
+				uint32_t pre_slot = dy_state.round_slot + 1;
+				for (int i = 0; i < missed_blocks; ++i)
+				{
+					int miss_slot = pre_slot + i;
+					account_name miss_name = get_order_builder(miss_slot).builder_name;
+					if (const builder_object* builder_obj = find_builder_object(miss_name))
+					{
+						uint64_t last_miss = builder_obj->total_missed;
+						_data.modify(*builder_obj, [&](builder_object& obj) {
+							obj.total_missed = last_miss + 1;
+						});
+					}
+				}
+			}
+
+
+			// store next builder list.
+			if (b.next_builders.valid()) 
+			{
+				update_or_create_builders(*b.next_builders);
+
 				const static_config_object& static_config = get_static_config();
 				_data.modify(static_config, [&](static_config_object& obj) {
 					obj.next_builders = *b.next_builders;
 				});
 				builder_elect_state = builders_confirmed;
 			}
-			if (elect_new_builders == builder_elect_state) // create new builder list.
+			// create new builder list.
+			if (elect_new_builders == builder_elect_state) 
 			{
 				xmax_builder_infos new_builders = Native_contract::xmax_voting::next_round(_data);
 				
@@ -426,7 +468,7 @@ namespace Xmaxplatform { namespace Chain {
 
 				ilog("next round: ${builders}", (capcture));
 			}
-
+			// apply next builder.
 			if (current_round_slot >= Config::blocks_per_round)
 			{
 				const static_config_object& static_config = get_static_config();
@@ -449,18 +491,14 @@ namespace Xmaxplatform { namespace Chain {
 				}
 			}
 
-			//else if (builders_confirmed == builder_elect_state)
+			// update builder info
+			if (const builder_object* builder_obj = find_builder_object(b.builder))
 			{
-				//const static_config_object& static_config = get_static_config();
-
-				//builder_rule current_builders = static_config.next_builders;
-				//_data.modify(static_config, [&](static_config_object& obj) {
-				//	obj.current_builders = current_builders;
-				//	obj.new_builders.reset();
-				//	obj.next_builders.reset();
-				//});
-				//builder_elect_state = elect_new_builders;
+				_data.modify(*builder_obj, [&](builder_object& obj) {
+					obj.last_block_time = b.timestamp.time_point();
+				});
 			}
+
 
             // update dynamic states
             _data.modify( dy_state, [&]( dynamic_states_object& dgp ){
@@ -474,11 +512,7 @@ namespace Xmaxplatform { namespace Chain {
 				dgp.builders_elect_state = builder_elect_state;
             });
 
-
-
-
         }
-
 
         void chain_xmax::set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v ) {
             message_handlers[contract][std::make_pair(scope,action)] = v;
@@ -652,6 +686,30 @@ namespace Xmaxplatform { namespace Chain {
 			_data.modify(_data.get<block_summary_object, by_id>(sid), [&](block_summary_object& p) {
 				p.block_id = next_block.id();
 			});
+		}
+
+		void chain_xmax::update_or_create_builders(const builder_rule& builders)
+		{
+			for (const builder_info& info : builders.builders) 
+			{
+				if (const builder_object* obj = find_builder_object(info.builder_name))
+				{
+					if (obj->signing_key != info.block_signing_key)
+					{
+						_data.modify(*obj, [&](builder_object& newobj)
+						{
+							newobj.signing_key = info.block_signing_key;
+						});
+					}
+				}
+				else
+				{
+					_data.create<builder_object>([&](auto& pro) {
+						pro.owner = info.builder_name;
+						pro.signing_key = info.block_signing_key;
+					});
+				}
+			}
 		}
 
 		template<typename T>

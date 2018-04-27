@@ -6,6 +6,10 @@
 #include <include/xmaxtypes.hpp>
 #include <include/basemisc.hpp>
 #include <chain_time.hpp>
+#include <publickey.hpp>
+#include <fc/crypto/elliptic.hpp>
+
+
 
 namespace Xmaxplatform { namespace Config {
 using Basetypes::uint16;
@@ -17,10 +21,13 @@ using Basetypes::asset;
 using Basetypes::account_name;
 using Basetypes::permission_name;
 using Basetypes::public_key;
+using fc::ecc::private_key;
         const static char key_prefix[] = "XMX";
         const static int blocks_per_round = 21;
         const static account_name xmax_contract_name = STN(xmax);
-		const static public_key xmax_builder_key = public_key("XMX7VX43svCQNJ5zp6uKV5EYGG9dUjgSUrm4m1w1FZAtNT2fCkMoQ");
+
+		const extern public_key xmax_build_public_key;
+		const extern private_key xmax_build_private_key;
 
         const static uint32 default_max_block_size = 5 * 1024 * 1024;
         const static uint32 default_target_block_size = 128 * 1024;

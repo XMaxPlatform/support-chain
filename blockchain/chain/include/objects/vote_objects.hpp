@@ -45,13 +45,9 @@ namespace Xmaxplatform { namespace Chain {
         //blockchain_configuration prefs;
 
         public_key_type     builder_key;
-        //share_type          per_block_payments;
-        //time                last_rewards_claim;
-        //time                active_time;
-        time                last_build_time;
 
     public:
-        bool active() const { return builder_key != empty_public_key; }
+        bool is_actived() const { return builder_key != empty_public_key; }
 
         std::pair<uint128, id_type> get_vote_order() const    { return {total_votes, id}; }
         share_type  get_votes() const { return (share_type)total_votes; }

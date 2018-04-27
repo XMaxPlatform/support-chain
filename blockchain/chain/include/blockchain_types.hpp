@@ -148,6 +148,7 @@ namespace Xmaxplatform { namespace Chain {
             key64x64x64_value_object_type,
             key128x128_value_object_type,
             account_object_type,
+			builder_object_type,
             vote_info_object_type,
             builder_info_object_type,
             resource_token_object_type,
