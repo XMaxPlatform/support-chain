@@ -81,7 +81,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 		fc::optional<private_key_type> optional_private_key = Utilities::wif_to_key(private_key);
 		if (!optional_private_key)
 		{
-			//FC_THROW("Invalid private key of producer");
+			//FC_THROW("Invalid private key of builder");
 			return false;
 		}
 		import_key(builder, *optional_private_key);

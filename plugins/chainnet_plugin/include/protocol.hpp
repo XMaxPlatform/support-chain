@@ -17,7 +17,7 @@ namespace Xmaxplatform {
       int16_t                    network_version = 0; ///< derived from git commit hash, not sequential
       chain_id_type              chain_id; ///< used to identify chain
       fc::sha256                 node_id; ///< used to identify peers and prevent self-connect
-      Chain::public_key_type     key; ///< authentication key; may be a producer or peer key, or empty
+      Chain::public_key_type     key; ///< authentication key; may be a builder or peer key, or empty
       tstamp                     time;
       fc::sha256                 token; ///< digest of time to prove we own the private key of the key above
       fc::ecc::compact_signature sig; ///< signature for the digest
