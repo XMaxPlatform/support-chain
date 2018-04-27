@@ -1,7 +1,3 @@
-/**
- *  @file
- *  @copyright defined in xmax/LICENSE.txt
- */
 #include <xmaxlib/xmax.hpp>
 #include <xmaxlib/core.h>
 #include <xmaxlib/database.hpp>
