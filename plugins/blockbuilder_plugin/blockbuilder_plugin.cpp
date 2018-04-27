@@ -154,16 +154,30 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
         {
             case block_build_condition::generated:
             {
-                const auto& data = app().get_plugin<blockchain_plugin>().getchain();
+                //const auto& data = app().get_plugin<blockchain_plugin>().getchain();
                 ilog("block_build_condition::generated");
                 break;
             }
             case block_build_condition::exception:
-                elog( "exception producing block." );
-                break;
-			case block_build_condition::not_time_yet:
-				ilog("not time for producing block.");
+			{
+				elog("exception producing block.");
 				break;
+			}
+			case block_build_condition::not_time_yet:
+			{
+				ilog("not time for building block.");
+				break;
+			}
+			case block_build_condition::not_my_turn:
+			{
+				ilog("not my turn to build block.");
+				break;
+			}
+			case block_build_condition::no_private_key:
+			{
+				ilog("no suitable private key for '${signing_key}'.", (capture) );
+				break;
+			}
 			default:
 			{
 				elog("unexpectedly block_build_condition.");

@@ -102,8 +102,9 @@ namespace Xmaxplatform { namespace Chain {
        void initialize_chain(chain_init& initer);
 
        signed_block _generate_block(
-               chain_timestamp when,
-               const account_name& builder
+				chain_timestamp when,
+				const account_name& builder,
+				const private_key_type& sign_private_key
        );
 	   bool push_block(const signed_block& b);
        bool _push_block(const signed_block& new_block);
@@ -182,7 +183,7 @@ namespace Xmaxplatform { namespace Chain {
        signed_block generate_block(
                chain_timestamp when,
                const account_name& builder,
-			   const private_key_type sign_private_key
+			   const private_key_type& sign_private_key
        );
 
        void apply_block(const signed_block& next_block);

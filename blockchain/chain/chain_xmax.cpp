@@ -282,12 +282,12 @@ namespace Xmaxplatform { namespace Chain {
 		signed_block chain_xmax::generate_block(
                 chain_timestamp when,
                 const account_name& builder,
-				const private_key_type sign_private_key
+				const private_key_type& sign_private_key
         )
         { try {
                 _data.start_undo_session(true);
                 auto b = _data.with_write_lock( [&](){
-                    return _generate_block( when, builder );
+                    return _generate_block( when, builder, sign_private_key );
                 });
                 push_block(b);
                 return b;
@@ -295,7 +295,8 @@ namespace Xmaxplatform { namespace Chain {
 
         signed_block chain_xmax::_generate_block(
                 chain_timestamp when,
-                const account_name& builder
+                const account_name& builder,
+				const private_key_type& sign_private_key
         )
         {
             try {
@@ -331,7 +332,7 @@ namespace Xmaxplatform { namespace Chain {
 
 
 
-                //pending_block.sign( block_signing_private_key );
+                pending_block.sign(sign_private_key);
 
                 return pending_block;
             } FC_CAPTURE_AND_RETHROW( (builder) ) }
@@ -388,6 +389,7 @@ namespace Xmaxplatform { namespace Chain {
 					const static_config_object& config = get_static_config();
 					FC_ASSERT(next_block.next_builders.valid() && (*next_block.next_builders == config.new_builders), "error builder list.");
 				}
+				
 
                 _finalize_block(next_block);
 
