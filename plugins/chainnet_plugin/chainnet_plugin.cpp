@@ -21,6 +21,7 @@
 #include <boost/intrusive/set.hpp>
 #include <boost/multi_index_container.hpp>
 
+#include<blockchain_exceptions.hpp>
 namespace fc {
    extern std::unordered_map<std::string,logger>& get_logger_map();
 }
@@ -179,7 +180,7 @@ namespace Xmaxplatform {
       bool is_valid( const handshake_message &msg);
 
       void handle_message( connection_ptr c, const handshake_message &msg);
-      void handle_message( connection_ptr c, const go_away_message &msg );
+      void handle_message( connection_ptr c, const leave_message &msg );
       /** \name Peer Timestamps
        *  Time message handling
        *  @{
@@ -265,7 +266,7 @@ namespace Xmaxplatform {
 
 
    void chainnet_plugin_impl::connect( connection_ptr c ) {
-      if( c->no_retry != go_away_reason::no_reason) {
+      if( c->no_retry != leave_reason::no_reason) {
          fc_dlog( logger, "Skipping connect due to go_away reason ${r}",("r", reason_str( c->no_retry )));
          return;
       }
@@ -296,7 +297,7 @@ namespace Xmaxplatform {
    }
 
    void chainnet_plugin_impl::connect( connection_ptr c, tcp::resolver::iterator endpoint_itr ) {
-      if( c->no_retry != go_away_reason::no_reason) {
+      if( c->no_retry != leave_reason::no_reason) {
 		  Chain::string rsn = reason_str(c->no_retry);
          return;
       }
@@ -487,10 +488,112 @@ namespace Xmaxplatform {
    }
 
    void chainnet_plugin_impl::handle_message( connection_ptr c, const handshake_message &msg) {
-      //TODO
+	   fc_dlog(logger, "got a handshake_message from ${p} ${h}", ("p", c->peer_addr)("h", msg.p2p_address));
+	   if (!is_valid(msg)) {
+		   elog("Invalid handshake message received from ${p} ${h}", ("p", c->peer_addr)("h", msg.p2p_address));
+		   c->msg_enqueue(leave_message(fatal_other));
+		   return;
+	   }
+	   chain_xmax& cc = chain_plug->getchain();
+	   uint32_t liblock_num = cc.get_dynamic_states().last_irreversible_block_num;
+	   uint32_t peer_liblock = msg.last_irreversible_block_num;
+	   if (c->connecting) {
+		   c->connecting = false;
+	   }
+	   if (msg.generation == 1) {
+		   if (msg.node_id == node_id) {
+			   elog("Self connection detected. Closing connection");
+			   c->msg_enqueue(leave_message(self));
+			   return;
+		   }
+
+		   if (c->peer_addr.empty() || c->last_handshake_recv.node_id == fc::sha256()) {
+			   fc_dlog(logger, "checking for duplicate");
+			   for (const auto &check : connections) {
+				   if (check == c)
+					   continue;
+				   if (check->connected() && check->peer_name() == msg.p2p_address) {
+					   // It's possible that both peers could arrive here at relatively the same time, so
+					   // we need to avoid the case where they would both tell a different connection to go away.
+					   // Using the sum of the initial handshake times of the two connections, we will
+					   // arbitrarily (but consistently between the two peers) keep one of them.
+					   if (msg.time + c->last_handshake_sent.time <= check->last_handshake_sent.time + check->last_handshake_recv.time)
+						   continue;
+
+					   fc_dlog(logger, "sending leave duplicate to ${ep}", ("ep", msg.p2p_address));
+					   leave_message gam(duplicate);
+					   gam.node_id = node_id;
+					   c->msg_enqueue(gam);
+					   c->no_retry = duplicate;
+					   return;
+				   }
+			   }
+		   }
+		   else {
+			   fc_dlog(logger, "skipping duplicate check, addr == ${pa}, id = ${ni}", ("pa", c->peer_addr)("ni", c->last_handshake_recv.node_id));
+		   }
+
+		   if (msg.chain_id != chain_id) {
+			   elog("Peer on a different chain. Closing connection");
+			   c->msg_enqueue(leave_message(leave_reason::wrong_chain));
+			   return;
+		   }
+		   if (msg.network_version != network_version) {
+			   if (network_version_match) {
+				   elog("Peer network version does not match expected ${nv} but got ${mnv}",
+					   ("nv", network_version)("mnv", msg.network_version));
+				   c->msg_enqueue(leave_message(wrong_version));
+				   return;
+			   }
+			   else {
+				   wlog("Peer network version does not match expected ${nv} but got ${mnv}",
+					   ("nv", network_version)("mnv", msg.network_version));
+			   }
+		   }
+
+		   if (c->node_id != msg.node_id) {
+			   c->node_id = msg.node_id;
+		   }
+
+		   if (!authenticate_peer(msg)) {
+			   elog("Peer not authenticated.  Closing connection.");
+			   c->msg_enqueue(leave_message(authentication));
+			   return;
+		   }
+
+		   bool on_fork = false;
+		   fc_dlog(logger, "liblock_num = ${ln} peer_liblock = ${pl}", ("ln", liblock_num)("pl", peer_liblock));
+
+		   if (peer_liblock <= liblock_num && peer_liblock > 0) {
+			   try {
+				   xmax_type_block_id peer_lib_id = cc.get_blockid_from_num(peer_liblock);
+				   on_fork = (msg.last_irreversible_block_id != peer_lib_id);
+			   }
+			   catch (const unknown_block_exception &ex) {
+				   wlog("peer last irreversible block ${pl} is unknown", ("pl", peer_liblock));
+				   on_fork = true;
+			   }
+			   catch (...) {
+				   wlog("caught an exception getting block id for ${pl}", ("pl", peer_liblock));
+				   on_fork = true;
+			   }
+			   if (on_fork) {
+				   elog("Peer chain is forked");
+				   c->msg_enqueue(leave_message(forked));
+				   return;
+			   }
+		   }
+
+		   if (c->sent_handshake_count == 0) {
+			   c->send_handshake();
+		   }
+	   }
+
+	   c->last_handshake_recv = msg;
+	   //TODO: resolve message
    }
 
-   void chainnet_plugin_impl::handle_message( connection_ptr c, const go_away_message &msg ) {
+   void chainnet_plugin_impl::handle_message( connection_ptr c, const leave_message &msg ) {
 	   Chain::string rsn = reason_str( msg.reason );
       ilog( "received a go away message from ${p}, reason = ${r}",
             ("p", c->peer_name())("r",rsn));
@@ -592,7 +695,7 @@ namespace Xmaxplatform {
       }
       fc_dlog(logger, "send req = ${sr}", ("sr",send_req));
       if( send_req) {
-         c->enqueue(req);
+         c->msg_enqueue(req);
       }
    }
 
@@ -782,7 +885,9 @@ namespace Xmaxplatform {
    void chainnet_plugin::set_program_options( options_description& /*cli*/, options_description& cfg )
    {
 	   cfg.add_options()
+		   ("chainnet_plugin-log-level", bpo::value<Chain::string>()->default_value("all"), "Log level: one of 'all', 'debug', 'info', 'warn', 'error', or 'off'")
 		   ("p2p-listen-endpoint", bpo::value<Chain::string>()->default_value("0.0.0.0:19876"), "Host:port used to listen incoming p2p connections.")
+		   ("p2p-peer-address", bpo::value< Chain::vector<Chain::string> >()->composing(), "The public endpoint of a peer node to connect to. Multiple p2p-peer-address can be used if need to compose a network.")
 		   ("max-clients", bpo::value<int>()->default_value(def_max_clients), "Maximum clients from which connections are accepted, (0)zero means unlimit")
 		   ("connection-cleanup-period", bpo::value<int>()->default_value(def_conn_retry_wait), "Seconds to wait before cleaning up dead connections")
 		   ("network-version-match", bpo::value<bool>()->default_value(false),"If require exact match of peer network version.")
@@ -810,11 +915,11 @@ namespace Xmaxplatform {
          chainnet_plugin_impl::logger.add_appender(appender);
       }
 
-      if( options.count( "log-level-net-plugin" ) ) {
+      if( options.count( "chainnet_plugin-log-level" ) ) {
          fc::log_level logl;
 
-         fc::from_variant(options.at("log-level-net-plugin").as<Chain::string>(), logl);
-         ilog("Setting net_plugin logging level to ${level}", ("level", logl));
+         fc::from_variant(options.at("chainnet_plugin-log-level").as<Chain::string>(), logl);
+         ilog("Setting chainnet_plugin logging level to ${level}", ("level", logl));
 		 connection_xmax::logger.set_log_level(logl);
          chainnet_plugin_impl::logger.set_log_level(logl);
       }
@@ -1047,7 +1152,7 @@ namespace Xmaxplatform {
 	   note.known_blocks.pending = 0;
 	   fc_dlog(logger, "head_num = ${h}", ("h", head_num));
 	   if (head_num == 0) {
-		   enqueue(note);
+		   msg_enqueue(note);
 		   return;
 	   }
 	   xmax_type_block_id head_id;
@@ -1061,7 +1166,7 @@ namespace Xmaxplatform {
 	   }
 	   catch (const assert_exception &ex) {
 		   elog("unable to retrieve block info: ${n} for ${p}", ("n", ex.to_string())("p", peer_name()));
-		   enqueue(note);
+		   msg_enqueue(note);
 		   return;
 	   }
 	   catch (const fc::exception &ex) {
@@ -1090,7 +1195,7 @@ namespace Xmaxplatform {
 	   if (bstack.back()->previous == lib_id) {
 		   count = bstack.size();
 		   while (bstack.size()) {
-			   enqueue(*bstack.back());
+			   msg_enqueue(*bstack.back());
 			   bstack.pop_back();
 		   }
 	   }
@@ -1108,7 +1213,7 @@ namespace Xmaxplatform {
 			   optional<signed_block> b = cc.get_block_from_id(blkid);
 			   if (b) {
 				   fc_dlog(logger, "get block from id at num ${n}", ("n", b->block_num()));
-				   enqueue(*b);
+				   msg_enqueue(*b);
 			   }
 			   else {
 				   ilog("get block from id returned null, id ${id} on block ${c} of ${s} for ${p}",
@@ -1179,7 +1284,7 @@ namespace Xmaxplatform {
 	   });
    }
 
-   void connection_xmax::enqueue(const net_message &m, bool trigger_send) {
+   void connection_xmax::msg_enqueue(const net_message &m, bool trigger_send) {
 	   bool close_after_send = false;
 	   if (m.contains<sync_request_message>()) {
 		   sync_wait();
@@ -1189,7 +1294,7 @@ namespace Xmaxplatform {
 		   fetch_wait();
 	   }
 	   else {
-		   close_after_send = m.contains<go_away_message>();
+		   close_after_send = m.contains<leave_message>();
 	   }
 
 	   uint32_t payload_size = fc::raw::pack_size(m);
@@ -1273,5 +1378,57 @@ namespace Xmaxplatform {
 		   return false;
 	   }
 	   return true;
+   }
+   void handshake_initializer::setup(handshake_message &handshake)
+   {
+	   handshake.time = std::chrono::system_clock::now().time_since_epoch().count();
+	   handshake.network_version = cnet_impl->network_version;
+
+
+	   handshake.chain_id = cnet_impl->chain_id;
+	   handshake.node_id = cnet_impl->node_id;
+	   //hello.key = empty();//TODO
+	   
+	   handshake.token = fc::sha256::hash(handshake.time);
+	   handshake.sig = cnet_impl->sign_compact(handshake.key, handshake.token);
+
+	   if (handshake.sig == ecc::compact_signature())
+		   handshake.token = sha256();
+
+
+	   handshake.p2p_address = cnet_impl->p2p_address + " - " + handshake.node_id.str().substr(0, 7);
+#if defined( __APPLE__ )
+	   handshake.os = "osx";
+#elif defined( __linux__ )
+	   handshake.os = "linux";
+#elif defined( _MSC_VER )
+	   handshake.os = "win32";
+#else
+	   handshake.os = "other";
+#endif
+	   handshake.agent = cnet_impl->user_agent_name;
+
+
+	   chain_xmax& cx = cnet_impl->chain_plug->getchain();
+	   handshake.head_id = fc::sha256();
+	   handshake.last_irreversible_block_id = fc::sha256();
+	   handshake.head_num = cx.head_block_num();
+	   handshake.last_irreversible_block_num = cx.get_dynamic_states().last_irreversible_block_num;
+	   if (handshake.last_irreversible_block_num) {
+		   try {
+			   handshake.last_irreversible_block_id = cx.get_blockid_from_num(handshake.last_irreversible_block_num);
+		   }
+		   catch (const unknown_block_exception &ex) {
+			   handshake.last_irreversible_block_num = 0;
+		   }
+	   }
+	   if (handshake.head_num) {
+		   try {
+			   handshake.head_id = cx.get_blockid_from_num(handshake.head_num);
+		   }
+		   catch (const unknown_block_exception &ex) {
+			   handshake.head_num = 0;
+		   }
+	   }
    }
 }

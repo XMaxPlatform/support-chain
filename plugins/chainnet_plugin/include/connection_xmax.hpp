@@ -119,10 +119,6 @@ namespace Xmaxplatform {
 		ordered_unique< tag<by_id>, member<block_state, xmax_type_block_id, &block_state::id > >
 		>
 	> block_state_index;
-	
-	struct handshake_initializer {
-		static void populate(handshake_message &hello);
-	};
 
 	class chainnet_plugin_impl;
 	struct msgHandler : public fc::visitor<void> {
@@ -190,7 +186,7 @@ namespace Xmaxplatform {
 		Chain::string                  peer_addr;
 		unique_ptr<boost::asio::steady_timer> response_expected;
 		optional<request_message> pending_fetch;
-		go_away_reason         no_retry;
+		leave_reason         no_retry;
 		xmax_type_block_id          fork_head;
 		uint32_t               fork_head_num;
 
@@ -260,9 +256,9 @@ namespace Xmaxplatform {
 		void blk_send(const Chain::vector<xmax_type_block_id> &txn_lis);
 		void stop_send();
 
-		void enqueue(xmax_type_transaction_id id);
-		void enqueue(const net_message &msg, bool trigger_send = true);
-		void cancel_sync(go_away_reason);
+		void msg_enqueue(xmax_type_transaction_id id);
+		void msg_enqueue(const net_message &msg, bool trigger_send = true);
+		void cancel_sync(leave_reason);
 		void cancel_fetch();
 		void flush_queues();
 		bool enqueue_sync_block();
@@ -291,8 +287,10 @@ namespace Xmaxplatform {
 		static const fc::string logger_name;
 		static fc::logger logger;
 	};
+	struct handshake_initializer {
+		static void setup(handshake_message &hello);
+	};
 
-	
 }
 
 FC_REFLECT(Xmaxplatform::connection_status, (peer)(connecting)(syncing)(last_handshake))

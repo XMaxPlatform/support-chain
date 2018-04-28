@@ -14,10 +14,10 @@ namespace Xmaxplatform {
    typedef std::chrono::system_clock::duration::rep tstamp;
 
    struct handshake_message {
-      int16_t                    network_version = 0; ///< derived from git commit hash, not sequential
+      int16_t                    network_version = 0; ///TODO < derived from git commit hash, not sequential
       chain_id_type              chain_id; ///< used to identify chain
       fc::sha256                 node_id; ///< used to identify peers and prevent self-connect
-      Chain::public_key_type     key; ///< authentication key; may be a producer or peer key, or empty
+      Chain::public_key_type     key; ///< authentication key; may be a builder or peer key, or empty
       tstamp                     time;
       fc::sha256                 token; ///< digest of time to prove we own the private key of the key above
       fc::ecc::compact_signature sig; ///< signature for the digest
@@ -31,7 +31,7 @@ namespace Xmaxplatform {
       int16_t                    generation;
    };
 
-  enum go_away_reason {
+  enum leave_reason {
     no_reason, ///< no reason to go away
     self, ///< the connection is to itself
     duplicate, ///< the connection is redundant
@@ -47,9 +47,9 @@ namespace Xmaxplatform {
   };
 
 #ifdef WIN32
-  auto inline reason_str( go_away_reason rsn ) {
+  auto inline reason_str( leave_reason rsn ) {
 #else
-  constexpr auto reason_str(go_away_reason rsn) {
+  constexpr auto reason_str(leave_reason rsn) {
 #endif//WIN32
     switch (rsn ) {
     case no_reason : return "no reason";
@@ -68,9 +68,9 @@ namespace Xmaxplatform {
     }
   }
 
-  struct go_away_message {
-    go_away_message (go_away_reason r = no_reason) : reason(r), node_id() {}
-    go_away_reason reason;
+  struct leave_message {
+    leave_message (leave_reason r = no_reason) : reason(r), node_id() {}
+    leave_reason reason;
     fc::sha256 node_id; ///<for duplicate notification
   };
 
@@ -152,7 +152,7 @@ namespace Xmaxplatform {
    };
 
    using net_message = static_variant<handshake_message,
-                                      go_away_message,
+                                      leave_message,
                                       time_message,
                                       notice_message,
                                       request_message,
@@ -170,7 +170,7 @@ FC_REFLECT(Xmaxplatform::handshake_message,
             (last_irreversible_block_num)(last_irreversible_block_id)
             (head_num)(head_id)
             (os)(agent)(generation) )
-FC_REFLECT(Xmaxplatform::go_away_message, (reason)(node_id) )
+FC_REFLECT(Xmaxplatform::leave_message, (reason)(node_id) )
 FC_REFLECT(Xmaxplatform::time_message, (org)(rec)(xmt)(dst) )
 FC_REFLECT(Xmaxplatform::processed_trans_summary, (id)(outmsgs) )
 FC_REFLECT(Xmaxplatform::thread_ids, (gen_trx)(user_trx) )

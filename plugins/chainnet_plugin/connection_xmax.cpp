@@ -120,11 +120,11 @@ namespace Xmaxplatform {
 	}
 
 	void connection_xmax::send_handshake() {
-		handshake_initializer::populate(last_handshake_sent);
+		handshake_initializer::setup(last_handshake_sent);
 		last_handshake_sent.generation = ++sent_handshake_count;
 		fc_dlog(logger, "Sending handshake generation ${g} to ${ep}",
 			("g", last_handshake_sent.generation)("ep", peer_addr));
-		enqueue(last_handshake_sent);
+		msg_enqueue(last_handshake_sent);
 	}
 
 	char* connection_xmax::convert_tstamp(const tstamp& t)
@@ -142,7 +142,7 @@ namespace Xmaxplatform {
 		xpkt.rec = dst;
 		xpkt.xmt = get_time();
 		org = xpkt.xmt;
-		enqueue(xpkt);
+		msg_enqueue(xpkt);
 	}
 
 	void connection_xmax::send_time(const time_message& msg) {
@@ -150,7 +150,7 @@ namespace Xmaxplatform {
 		xpkt.org = msg.xmt;
 		xpkt.rec = msg.dst;
 		xpkt.xmt = get_time();
-		enqueue(xpkt);
+		msg_enqueue(xpkt);
 	}
 
 	void connection_xmax::queue_write(std::shared_ptr<Chain::vector<char>> buff,
@@ -162,7 +162,7 @@ namespace Xmaxplatform {
 	}
 
 
-	void connection_xmax::cancel_sync(go_away_reason reason) {
+	void connection_xmax::cancel_sync(leave_reason reason) {
 		fc_dlog(logger, "cancel sync reason = ${m}, write queue size ${o} peer ${p}",
 			("m", reason_str(reason)) ("o", write_queue.size())("p", peer_name()));
 		cancel_wait();
@@ -171,7 +171,7 @@ namespace Xmaxplatform {
 		case validation:
 		case fatal_other: {
 			no_retry = reason;
-			enqueue(go_away_message(reason));
+			msg_enqueue(leave_message(reason));
 			break;
 		}
 		default:
@@ -182,7 +182,7 @@ namespace Xmaxplatform {
 	}
 
 	void connection_xmax::cancel_fetch() {
-		enqueue(request_message());
+		msg_enqueue(request_message());
 	}
 
 	bool connection_xmax::enqueue_sync_block() {
@@ -197,7 +197,7 @@ namespace Xmaxplatform {
 		try {
 			fc::optional<signed_block> sb = cc.get_block_from_num(num);
 			if (sb) {
-				enqueue(*sb, trigger_send);
+				msg_enqueue(*sb, trigger_send);
 				return true;
 			}
 		}
@@ -253,8 +253,5 @@ namespace Xmaxplatform {
 	}
 
 
-	void
-		handshake_initializer::populate(handshake_message &hello) {
 
-	}
 }
