@@ -1,7 +1,3 @@
-/**
- *  @file
- *  @copyright defined in xmax/LICENSE.txt
- */
 #include <cat.hpp>
 #include<xmaxlib/message.hpp>
 

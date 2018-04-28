@@ -233,12 +233,12 @@ namespace Native_contract {
             end_it = std::copy(new_builders->begin(), new_builders->end(), elected.begin());
         }
         for (auto it = elected.begin(); it != end_it; ++it) {
-            auto prod = builders_tbl.find(*it);
-            XMAX_ASSERT(prod != nullptr, message_validate_exception, "builder is not registered");
+            auto builder = builders_tbl.find(*it);
+            XMAX_ASSERT(builder != nullptr, message_validate_exception, "builder is not registered");
             if (vp.proxy.empty()) { //direct xmax_voting, in case of proxy xmax_voting update total_votes even for inactive builders
-                XMAX_ASSERT(prod->active(), message_validate_exception, "builder is not currently registered");
+                XMAX_ASSERT(builder->is_actived(), message_validate_exception, "builder is not currently registered");
             }
-            builders_tbl.modify(prod, [&](auto &pi) {
+            builders_tbl.modify(builder, [&](auto &pi) {
                 pi.total_votes += votes;
             });
         }
@@ -386,7 +386,7 @@ namespace Native_contract {
 
 		if (round.empty())
 		{
-			round.push_back(builder_info(Config::xmax_contract_name, Config::xmax_builder_key));
+			round.push_back(builder_info(Config::xmax_contract_name, Config::xmax_build_public_key));
 		}
 		else
 		{

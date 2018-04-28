@@ -28,6 +28,7 @@ namespace Xmaxplatform { namespace Chain {
    using boost::signals2::signal;
         class chain_init;
         class message_xmax;
+		class builder_object;
    class chain_xmax {
       public:
 
@@ -44,7 +45,7 @@ namespace Xmaxplatform { namespace Chain {
 		 {
 			 skip_nothing = 0,
 			 skip_producer_signature = 1 << 0,  ///< used while reindexing
-			 skip_transaction_signatures = 1 << 1,  ///< used by non-producer nodes
+			 skip_transaction_signatures = 1 << 1,  ///< used by non-builder nodes
 			 skip_transaction_dupe_check = 1 << 2,  ///< used while reindexing
 			 skip_fork_db = 1 << 3,  ///< used while reindexing
 			 skip_block_size_check = 1 << 4,  ///< used when applying locally generated transactions
@@ -70,7 +71,9 @@ namespace Xmaxplatform { namespace Chain {
 	   uint32_t			head_block_num() const;
 	   xmax_type_block_id    head_block_id()const;
 
-	   account_name         get_block_builder(uint32_t delta_slot) const;
+	   const builder_info&         get_block_builder(uint32_t delta_slot) const;
+	   const builder_info&         get_order_builder(uint32_t order_slot) const;
+	   const builder_object*	find_builder_object(account_name builder_name) const;
 	   uint32_t				get_delta_slot_at_time(chain_timestamp when) const;
        chain_timestamp		get_delta_slot_time(uint32_t delta_slot) const;
 
@@ -99,8 +102,9 @@ namespace Xmaxplatform { namespace Chain {
        void initialize_chain(chain_init& initer);
 
        signed_block _generate_block(
-               chain_timestamp when,
-               const account_name& builder
+				chain_timestamp when,
+				const account_name& builder,
+				const private_key_type& sign_private_key
        );
 	   bool push_block(const signed_block& b);
        bool _push_block(const signed_block& new_block);
@@ -137,6 +141,7 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void check_transaction_authorization(const signed_transaction& trx, bool allow_unused_signatures = false)const;
 	   void create_block_summary(const signed_block& next_block);
+	   void update_or_create_builders(const builder_rule& builders);
 	   template<typename T>
 	   void validate_transaction(const T& trx) const {
 		   try {
@@ -177,7 +182,8 @@ namespace Xmaxplatform { namespace Chain {
 
        signed_block generate_block(
                chain_timestamp when,
-               const account_name& builder
+               const account_name& builder,
+			   const private_key_type& sign_private_key
        );
 
        void apply_block(const signed_block& next_block);

@@ -303,7 +303,7 @@ void mongodb_plugin_impl::_process_irreversible_block(const signed_block& block)
    block_doc << "block_num" << b_int32{static_cast<int32_t>(block_num)}
        << "block_id" << block_id_str
        << "prev_block_id" << prev_block_id_str
-       << "timestamp" << b_date{std::chrono::milliseconds{std::chrono::seconds{block.timestamp.get_data()}}}
+       << "timestamp" << b_date{std::chrono::milliseconds{std::chrono::seconds{block.timestamp.time_point().sec_since_epoch()}}}
        << "transaction_merkle_root" << block.transaction_merkle_root.str()
        << "producer_account_id" << block.builder.to_string();
    auto blk_doc = block_doc << "transactions" << stream::open_array;

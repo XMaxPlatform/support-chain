@@ -122,7 +122,7 @@ std::vector<message_xmax> native_contract_chain_init::prepare_data(chain_xmax &c
       }
 	  msg = message_xmax(Config::xmax_contract_name,
 		  vector<Basetypes::account_permission>{ {Config::xmax_contract_name, "active"}},
-		  "regbuilder", Basetypes::regbuilder(Config::xmax_contract_name, Config::xmax_builder_key)
+		  "regbuilder", Basetypes::regbuilder(Config::xmax_contract_name, Config::xmax_build_public_key)
 	  );
 
 	  messages_to_process.emplace_back(std::move(msg));

@@ -549,14 +549,21 @@ namespace WAST
 		// Parse an optional function type reference.
 		const Token* typeReferenceToken = state.nextToken;
 		IndexedFunctionType referencedFunctionType = {UINT32_MAX};
+
+		const FunctionType* directFunctionType = nullptr;
+
+		//Before parseFunctionType will be called twice if foo has type token.
 		if(state.nextToken[0].type == t_leftParenthesis
 		&& state.nextToken[1].type == t_type)
 		{
-			referencedFunctionType = parseFunctionTypeRef(state,*localNameToIndexMap,*localDisassemblyNames);
+			referencedFunctionType = parseFunctionTypeRef2(state,*localNameToIndexMap,*localDisassemblyNames,directFunctionType);
 		}
-
-		// Parse the explicit function parameters and result type.
-		const FunctionType* directFunctionType = parseFunctionType(state,*localNameToIndexMap,*localDisassemblyNames);
+		else
+		{
+			// Parse the explicit function parameters and result type.
+			directFunctionType = parseFunctionType(state, *localNameToIndexMap, *localDisassemblyNames);
+		}
+		
 		const bool hasNoDirectType = directFunctionType == FunctionType::get();
 
 		// Validate that if the function definition has both a type reference, and explicit parameter/result type declarations, that they match.

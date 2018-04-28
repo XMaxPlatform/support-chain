@@ -141,6 +141,7 @@ namespace WAST
 	IR::ValueType parseValueType(ParseState& state);
 
 	const IR::FunctionType* parseFunctionType(ModuleParseState& state,NameToIndexMap& outLocalNameToIndexMap,std::vector<std::string>& outLocalDisassemblyNames);
+	IR::IndexedFunctionType parseFunctionTypeRef2(ModuleParseState& state, NameToIndexMap& outLocalNameToIndexMap, std::vector<std::string>& outLocalDisassemblyNames,const IR::FunctionType*&  outFuncType);
 	IR::IndexedFunctionType parseFunctionTypeRef(ModuleParseState& state,NameToIndexMap& outLocalNameToIndexMap,std::vector<std::string>& outLocalDisassemblyNames);
 	IR::IndexedFunctionType getUniqueFunctionTypeIndex(ModuleParseState& state,const IR::FunctionType* functionType);
 

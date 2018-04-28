@@ -1,7 +1,3 @@
-/**
- *  @file
- *  @copyright defined in eos/LICENSE.txt
- */
 #include <empty.hpp>
 #include <xmaxlib/xmax.hpp>
 

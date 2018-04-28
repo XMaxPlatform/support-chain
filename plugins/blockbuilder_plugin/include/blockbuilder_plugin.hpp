@@ -16,6 +16,8 @@ namespace Xmaxplatform {
         generated = 0,
         exception = 1,
 		not_time_yet,
+		not_my_turn,
+		no_private_key,
     };
 
 class blockbuilder_plugin : public plugin<blockbuilder_plugin> {
@@ -31,6 +33,7 @@ public:
    void plugin_startup();
    void plugin_shutdown();
 
+   bool import_key(const account_name& builder, const Basetypes::string& private_key);
 public:
 
 private:

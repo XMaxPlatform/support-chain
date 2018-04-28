@@ -123,7 +123,7 @@ namespace Xmaxplatform {
 	  Chain::vector<Chain::string>                   supplied_peers;
 	  Chain::vector<Chain::public_key_type>   allowed_peers; ///< peer keys allowed to connect
       std::map<Chain::public_key_type,
-               fc::ecc::private_key>   private_keys; ///< overlapping with producer keys, also authenticating non-producing nodes
+               fc::ecc::private_key>   private_keys; ///< overlapping with builder keys, also authenticating non-producing nodes
 
       enum possible_connections : char {
          None = 0,
