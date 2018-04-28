@@ -217,15 +217,25 @@ public:
 
    void addImport(Module& module)
    {
-      const U32 functionTypeIndex = typeSlot;
+	   const U32 functionTypeIndex = typeSlot;
 #if WIN32
-	  module.functions.imports.push_back({ { functionTypeIndex },(u8"env"), (u8"checktime") });
+	   module.functions.imports.push_back({ { functionTypeIndex },(u8"env"), (u8"checktime") });
+	 
 #else
 	  module.functions.imports.push_back({ { functionTypeIndex },std::move(u8"env"),std::move(u8"checktime") });
 #endif
-      
-   }
+	  if (module.startFunctionIndex != (UINTPTR_MAX) && module.startFunctionIndex>checktimeIndex(module))
+	  {
+		  module.startFunctionIndex++;
+	  }
 
+   }
+   void adjustStartFooIndex(Module& module) {
+	   if (module.startFunctionIndex!=(UINTPTR_MAX)&& module.startFunctionIndex>checktimeIndex(module))
+	   {
+		   module.startFunctionIndex++;
+	   }
+   }
    void conditionallyAddCall(Opcode opcode, const ControlStructureImm& imm, const Module& module, Serialization::OutputStream& inByteStream)
    {
       switch(opcode)
@@ -279,6 +289,7 @@ struct NoOpInjection
    void adjustExportIndex(Module& ) {}
    template<typename Imm>
    void adjustCallIndex(const Module& , Imm& ) {}
+   void adjustStartFooIndex(Module&) {}
 };
 
 namespace WASM
@@ -853,6 +864,7 @@ namespace WASM
          {
             serializeVarUInt32(sectionStream,module.startFunctionIndex);
          });
+		 injection.adjustStartFooIndex(module);
       }
 
       template<typename Stream>
