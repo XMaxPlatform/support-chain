@@ -7,6 +7,7 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <sstream>
 
 #define XXH_FORCE_NATIVE_FORMAT 1
 #define XXH_PRIVATE_API
@@ -476,6 +477,86 @@ namespace WAST
 			};
 		};
 	}
+
+	// a charset is 3 char.
+	static bool parseAsmChar(const char*& thischar, char & outvalue)
+	{
+		if (*thischar != '\\')
+		{
+			return false;
+		}
+		thischar += 3;
+		outvalue = *thischar;
+		thischar += 1;
+		return true;
+	}
+
+	// a charset is 3 char.
+	static bool parseAsmCharSize(const char*& thischar, int & outvalue)
+	{
+		if (*thischar != '\\')
+		{
+			return false;
+		}
+		const char* countchar1 = thischar + 1;
+		const char* countchar2 = countchar1 + 1;
+		std::string temp;
+		temp.push_back(*countchar1);
+		temp.push_back(*countchar2);
+		unsigned int x;
+		std::stringstream ss;
+		ss << std::hex << temp.c_str();
+		ss >> x;
+		outvalue = x;
+		thischar += 9;
+		return true;
+	}
+
+
+	bool tryParseAsmString(ParseState& state, std::string& outString)
+	{
+		if (state.nextToken->type != t_string)
+		{
+			return false;
+		}
+
+		// Parse a string literal; the lexer has already rejected unterminated strings,
+		// so this just needs to copy the characters and evaluate escape codes.
+		const char* nextChar = state.string + state.nextToken->begin;
+		assert(*nextChar == '\"');
+		++nextChar;
+		int strlen = -1;
+		bool isasmstr = false;
+		if (strlen==-1)
+		{
+			isasmstr = parseAsmCharSize(nextChar, strlen);
+		}
+		if (!isasmstr)
+		{
+			return false;
+		}
+		for (int count =0;count<strlen;count++)
+		{
+			char outtemp;
+			parseAsmChar(nextChar, outtemp);
+			outString.push_back(outtemp);
+		}
+		outString.push_back('\0');
+		nextChar += 3;
+		if (*nextChar== '\"')
+		{
+			++state.nextToken;
+			assert(state.string + state.nextToken->begin > nextChar);
+			return true;
+
+		}
+		else
+		{
+			parseErrorf(state, nextChar, "invalid asm string");
+		}
+		return true;
+	}
+
 
 	std::string parseUTF8String(ParseState& state)
 	{
