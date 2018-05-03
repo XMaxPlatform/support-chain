@@ -290,8 +290,11 @@ static void parseData(ModuleParseState& state)
 
 	// Parse a list of strings that contains the segment's data.
 	std::string dataString;
-	while(tryParseString(state,dataString)) {};
-	
+	if (!tryParseAsmString(state, dataString))
+	{
+		while (tryParseString(state, dataString)) {};
+	}
+
 	// Create the data segment.
 	std::vector<U8> dataVector((const U8*)dataString.data(),(const U8*)dataString.data() + dataString.size());
 	const Uptr dataSegmentIndex = state.module.dataSegments.size();

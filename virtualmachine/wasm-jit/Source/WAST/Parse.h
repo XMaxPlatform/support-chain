@@ -158,6 +158,7 @@ namespace WAST
 	F64 parseF64(ParseState& state);
 
 	bool tryParseString(ParseState& state,std::string& outString);
+	bool tryParseAsmString(ParseState& state, std::string& outString);
 
 	std::string parseUTF8String(ParseState& state);
 
