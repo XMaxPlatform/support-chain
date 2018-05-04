@@ -538,8 +538,15 @@ namespace WAST
 		for (int count =0;count<strlen;count++)
 		{
 			char outtemp;
-			parseAsmChar(nextChar, outtemp);
-			outString.push_back(outtemp);
+			if (parseAsmChar(nextChar, outtemp))
+			{
+				outString.push_back(outtemp);
+			}
+			else
+			{
+				return false;
+			}
+			
 		}
 		outString.push_back('\0');
 		nextChar += 3;
