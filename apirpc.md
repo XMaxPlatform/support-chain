@@ -8,6 +8,8 @@ Describe RPC interfaces of XMax chain. Use HTTP protocal.
 - [Blockchain API](#blockchainapi)
     - [get_account](#getaccount)
     - [get_table_rows](#gettablerows)
+    - [get_info](#getinfo)
+    - [get_block](#getblock)
 - [ContractUtil API](#contractutilapi)
     - [create_account](#createaccount)
     - [push_transaction](#pushtransaction)
@@ -36,6 +38,25 @@ Retrive contract data from an account.
 ```bash
 $ curl http://127.0.0.1:18888/v0/xmaxchain/get_table_rows -X POST -d '{"scope":"testera", "code":"currency", "table":"account", "json":"true"}'
 $ curl http://127.0.0.1:18888/v0/xmaxchain/get_table_rows -X POST -d '{"scope":"testera", "code":"currency", "table":"account", "json":"true", "lower_bound":0, "upper_bound":-1, "limit":10}'
+```
+
+<a name="getinfo"></a>
+### get_info
+Get blockchain infomation
+
+#### Example:
+```bash
+$ curl http://127.0.0.1:18888/v0/xmaxchain/get_info
+```
+
+<a name="getblock"></a>
+### get_block
+Get specific block info use id or block num.
+
+#### Example
+```bash
+$ curl http://127.0.0.1:18888/v0/xmaxchain/get_block -X POST -d '{"block_num_or_id":3}'
+$ curl http://127.0.0.1:18888/v0/xmaxchain/get_block -X POST -d '{"block_num_or_id":000000034e41cef56934029d3e1be3ea812169320934c42386adec9f8bb94710}'
 ```
 
 

@@ -47,14 +47,12 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
         Basetypes::abi native_contract_chain_init::xmax_contract_abi()
 {
    Basetypes::abi xmax_abi;
-    xmax_abi.types.push_back( Types::type_def{"share_type","int64"} );
+    
+   xmax_abi.types.push_back( Types::type_def{"share_type","int64"} );
+
     xmax_abi.actions.push_back( Types::action{name("transfer"), "transfer"} );
     xmax_abi.actions.push_back( Types::action{name("addaccount"), "addaccount"} );
-	xmax_abi.actions.push_back( Types::action{name("setcode"), "setcode" });
-    xmax_abi.structs.push_back( Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transfer>::type() );
-    xmax_abi.structs.push_back( Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::addaccount>::type() );
-	xmax_abi.structs.push_back( Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::setcode>::type());
-
+	xmax_abi.actions.push_back( Types::action{name("setcode"), "setcode" });   
 	xmax_abi.actions.push_back(Types::action{ name("lock"), "lock" });
 	xmax_abi.actions.push_back(Types::action{ name("unlock"), "unlock" });
 	xmax_abi.actions.push_back(Types::action{ name("votebuilder"), "votebuilder" });
@@ -63,6 +61,9 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 	xmax_abi.actions.push_back(Types::action{ name("regproxy"), "regproxy" });
 	xmax_abi.actions.push_back(Types::action{ name("unregproxy"), "unregproxy" });
 
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transfer>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::addaccount>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::setcode>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::lock>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unlock>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::votebuilder>::type());

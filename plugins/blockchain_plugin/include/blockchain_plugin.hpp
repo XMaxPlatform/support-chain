@@ -36,6 +36,31 @@ namespace Xmaxplatform {
                     : _chain(chain) {}
 
 
+			using get_info_params = empty;
+
+			struct get_info_results {
+
+				get_info_results(const string& v, uint32_t hbn, uint32_t libn, 
+					const Chain::xmax_type_block_id& hbi, const Basetypes::time& hbt) :
+					server_version(v),
+					head_block_num(hbn),
+					last_irreversible_block_num(libn),
+					head_block_id(hbi),
+					head_block_time(hbt)
+				{
+
+				}
+
+				string                server_version;
+				uint32_t              head_block_num = 0;		
+				uint32_t              last_irreversible_block_num = 0;
+				Chain::xmax_type_block_id  head_block_id;
+				Basetypes::time    head_block_time;
+			};
+
+			get_info_results get_info( const get_info_params& params) const;
+
+
             struct get_account_results {
                 name                       account_name;
                 asset                      xmx_token = asset(0,XMX_SYMBOL);
@@ -61,6 +86,26 @@ namespace Xmaxplatform {
 				bool                more;
 			};
 			get_table_rows_result get_table_rows( const get_table_rows_params& params )const;
+			
+
+			struct get_block_params {
+				string block_num_or_id;
+			};
+
+			struct get_block_results : public Chain::signed_block {
+				get_block_results(const Chain::signed_block& b)
+					:signed_block(b),
+					id(b.id()),
+					block_num(b.block_num()),
+					ref_block_prefix(id._hash[1])
+				{}
+
+				Chain::xmax_type_block_id id;
+				uint32_t             block_num = 0;
+				uint32_t             ref_block_prefix = 0;
+			};
+
+			get_block_results get_block(const get_block_params& params) const;
 
 			void copy_row(const Chain::key_value_object& obj, vector<char>& data)const {
 				data.resize(sizeof(uint64_t) + obj.value.size());
@@ -159,10 +204,21 @@ private:
 
 }
 
+FC_REFLECT(Xmaxplatform::Chain_APIs::empty, )
+
 FC_REFLECT( Xmaxplatform::Chain_APIs::read_only::get_account_results, (account_name)(xmx_token) )
 
 FC_REFLECT( Xmaxplatform::Chain_APIs::read_only::get_account_params, (account_name) )
 
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_table_rows_params, (json)(table_key)(scope)(code)(table)(lower_bound)(upper_bound)(limit))
 
-FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_table_rows_result, (rows)(more));
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_table_rows_result, (rows)(more))
+
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_block_params, (block_num_or_id))
+
+FC_REFLECT_DERIVED(Xmaxplatform::Chain_APIs::read_only::get_block_results, (Xmaxplatform::Chain::signed_block), (id)(block_num)(ref_block_prefix));
+
+
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_info_results,
+(server_version)(head_block_num)(last_irreversible_block_num)(head_block_id)(head_block_time))
+
