@@ -97,7 +97,7 @@ struct claim
    account   account_name
    amount    share_type
 
-struct newaccount
+struct addaccount
    creator   account_name
    name      account_name
    owner     authority

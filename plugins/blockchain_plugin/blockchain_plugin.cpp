@@ -92,6 +92,8 @@ namespace Xmaxplatform {
         app().get_plugin<chainhttp_plugin>().add_api({
                                                         CHAIN_RO_CALL(get_account, 200),
 														CHAIN_RO_CALL(get_table_rows, 200),
+														CHAIN_RO_CALL(get_info, 200),
+														CHAIN_RO_CALL(get_block, 200)
                                                 });
     }
 
@@ -119,7 +121,40 @@ namespace Chain_APIs{
 	const string read_only::SECONDARY = "secondary";
 	const string read_only::TERTIARY = "tertiary";
 
-    read_only::get_account_results read_only::get_account(const get_account_params &params) const {
+	//--------------------------------------------------
+	Xmaxplatform::Chain_APIs::read_only::get_info_results read_only::get_info(const get_info_params& params) const {
+		auto itoh = [](uint32_t n, size_t hlen = sizeof(uint32_t) << 1) {
+			static const char* digits = "0123456789abcdef";
+			std::string r(hlen, '0');
+			for (size_t i = 0, j = (hlen - 1) * 4; i < hlen; ++i, j -= 4)
+				r[i] = digits[(n >> j) & 0x0f];
+			return r;
+		};
+
+		return get_info_results( itoh(static_cast<uint32_t>(app().version())),
+			_chain.head_block_num(),		
+			_chain.get_dynamic_states().last_irreversible_block_num,
+			_chain.head_block_id(),
+			_chain.head_block_time()
+		);
+	}
+	//--------------------------------------------------
+	Xmaxplatform::Chain_APIs::read_only::get_block_results read_only::get_block(const get_block_params& params) const {
+		try {
+			if (auto block = _chain.get_block_from_id(fc::json::from_string(params.block_num_or_id).as<Chain::xmax_type_block_id>()))
+				return *block;
+		}
+		catch (fc::bad_cast_exception) {/* do nothing */ }
+		try {
+			if (auto block = _chain.get_block_from_num(fc::to_uint64(params.block_num_or_id)))
+				return *block;
+		}
+		catch (fc::bad_cast_exception) {/* do nothing */ }
+
+		FC_THROW_EXCEPTION(Chain::unknown_block_exception,
+			"Could not find block: ${block}", ("block", params.block_num_or_id));
+	}
+	read_only::get_account_results read_only::get_account(const get_account_params &params) const {
         using namespace Xmaxplatform::Chain;
 
         get_account_results result;
@@ -178,6 +213,8 @@ namespace Chain_APIs{
 		}
 		FC_ASSERT(false, "invalid table type/key ${type}/${key}", ("type", table_type)("key", table_key)("code_abi", abi));
 	}
+
+	
 
 }// namespace Chain_APIs
 } // namespace Xmaxplatform
