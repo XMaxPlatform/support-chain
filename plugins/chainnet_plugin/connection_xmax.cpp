@@ -252,6 +252,4 @@ namespace Xmaxplatform {
 		}
 	}
 
-
-
 }

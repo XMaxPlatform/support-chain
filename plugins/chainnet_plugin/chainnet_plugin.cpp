@@ -22,6 +22,8 @@
 #include <boost/multi_index_container.hpp>
 
 #include<blockchain_exceptions.hpp>
+
+#include<sync_main.hpp>
 namespace fc {
    extern std::unordered_map<std::string,logger>& get_logger_map();
 }
@@ -521,9 +523,9 @@ namespace Xmaxplatform {
 						   continue;
 
 					   fc_dlog(logger, "sending leave duplicate to ${ep}", ("ep", msg.p2p_address));
-					   leave_message gam(duplicate);
-					   gam.node_id = node_id;
-					   c->msg_enqueue(gam);
+					   leave_message lm(duplicate);
+					   lm.node_id = node_id;
+					   c->msg_enqueue(lm);
 					   c->no_retry = duplicate;
 					   return;
 				   }
@@ -595,7 +597,7 @@ namespace Xmaxplatform {
 
    void chainnet_plugin_impl::handle_message( connection_ptr c, const leave_message &msg ) {
 	   Chain::string rsn = reason_str( msg.reason );
-      ilog( "received a go away message from ${p}, reason = ${r}",
+      ilog( "received a leave message from ${p}, reason = ${r}",
             ("p", c->peer_name())("r",rsn));
       c->no_retry = msg.reason;
       if(msg.reason == duplicate ) {
@@ -1430,5 +1432,115 @@ namespace Xmaxplatform {
 			   handshake.head_num = 0;
 		   }
 	   }
+   }
+
+   void connection_xmax::enqueue(const net_message &m, bool trigger_send) {
+	   bool close_after_send = false;
+	   if (m.contains<sync_request_message>()) {
+		   sync_wait();
+	   }
+	   else if (m.contains<request_message>()) {
+		   pending_fetch = m.get<request_message>();
+		   fetch_wait();
+	   }
+	   else {
+		   close_after_send = m.contains<leave_message>();
+	   }
+
+	   uint32_t payload_size = fc::raw::pack_size(m);
+	   char * header = reinterpret_cast<char*>(&payload_size);
+	   size_t header_size = sizeof(payload_size);
+
+	   size_t buffer_size = header_size + payload_size;
+
+	   auto send_buffer = std::make_shared<std::vector<char>>(buffer_size);
+	   fc::datastream<char*> ds(send_buffer->data(), buffer_size);
+	   ds.write(header, header_size);
+	   fc::raw::pack(ds, m);
+	   write_depth++;
+	   queue_write(send_buffer, trigger_send,
+		   [this, close_after_send](boost::system::error_code ec, std::size_t) {
+		   write_depth--;
+		   if (close_after_send) {
+			   elog("sent a leave message, closing connection to ${p}", ("p", peer_name()));
+			   cnet_impl->close(shared_from_this());
+			   return;
+		   }
+	   });
+   }
+
+   void sync_main::recv_handshake(connection_ptr c, const handshake_message &msg) {
+	   chain_xmax& cc = bc_plugin->getchain();
+	   uint32_t lib_num = cc.get_dynamic_states().last_irreversible_block_num;
+	   uint32_t peer_liblock = msg.last_irreversible_block_num;
+	   reset_liblock_num(cnet_impl->connections);
+	   c->syncing = false;
+	   state = in_sync;
+
+	   //--------------------------------
+	   // sync need checkz; (liblock == last irreversible block)
+	   //
+	   // 0. my head block id == peer head id means we are all caugnt up block wise
+	   // 1. my head block num < peer liblock - start sync locally
+	   // 2. my lib > peer head num - send an last_irr_catch_up notice if not the first generation
+	   //
+	   // 3  my head block num <= peer head block num - update sync state and send a catchup request
+	   // 4  my head block num > peer block num send a notice catchup if this is not the first generation
+	   //
+	   //-----------------------------
+
+	   uint32_t head = cc.head_block_num();
+	   xmax_type_block_id head_id = cc.head_block_id();
+	   if (head_id == msg.head_id) {
+		   fc_dlog(logger, "sync check state 0");
+		   // notify peer of our pending transactions
+		   notice_message note;
+		   note.known_blocks.mode = none;
+		   note.known_trx.mode = catch_up;
+		   note.known_trx.pending = cnet_impl->local_txns.size();
+		   c->enqueue(note);
+		   return;
+	   }
+	   if (head < peer_liblock) {
+		   //TODO
+		   fc_dlog(logger, "sync check state 1");
+		   return;
+	   }
+	   if (lib_num > msg.head_num) {
+		   fc_dlog(logger, "sync check state 2");
+		   // for generation 1, we wlso sent a handshake so they will treat this as state 1
+		   if (msg.generation > 1) {
+			   notice_message note;
+			   note.known_trx.pending = lib_num;
+			   note.known_trx.mode = last_irr_catch_up;
+			   note.known_blocks.mode = last_irr_catch_up;
+			   note.known_blocks.pending = head;
+			   c->enqueue(note);
+		   }
+		   c->syncing = true;
+		   return;
+	   }
+
+	   if (head <= msg.head_num) {
+		   //TODO
+		   fc_dlog(logger, "sync check state 3");
+		   
+		   return;
+	   }
+	   else {
+		   //TODO
+		   fc_dlog(logger, "sync check state 4");
+		   if (msg.generation > 1) {
+			   notice_message note;
+			   note.known_trx.mode = none;
+			   note.known_blocks.mode = catch_up;
+			   note.known_blocks.pending = head;
+			   note.known_blocks.ids.push_back(head_id);
+			   c->enqueue(note);
+		   }
+		   c->syncing = true;
+		   return;
+	   }
+	   elog("sync check failed to resolve status");
    }
 }

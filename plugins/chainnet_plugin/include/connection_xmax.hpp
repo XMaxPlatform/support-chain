@@ -258,6 +258,7 @@ namespace Xmaxplatform {
 
 		void msg_enqueue(xmax_type_transaction_id id);
 		void msg_enqueue(const net_message &msg, bool trigger_send = true);
+		void enqueue(const net_message &msg, bool trigger_send = true);
 		void cancel_sync(leave_reason);
 		void cancel_fetch();
 		void flush_queues();

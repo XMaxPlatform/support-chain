@@ -2,6 +2,7 @@ file(GLOB HEADERS "include/*.hpp")
 add_library( chainnet_plugin
 			 connection_xmax.cpp
              chainnet_plugin.cpp
+			 sync_main.cpp
              ${HEADERS} )
 
 target_link_libraries( chainnet_plugin blockchain_plugin blockbuilder_plugin baseapp fc )
