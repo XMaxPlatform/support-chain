@@ -5,6 +5,7 @@
 
 #include <sync_main.hpp>
 namespace Xmaxplatform {
+	fc::logger sync_main::logger;
 
 	sync_main::sync_main(uint32_t req_span)
 		:sync_known_liblock_num(0)
@@ -28,6 +29,5 @@ namespace Xmaxplatform {
 	}
 
 	
-
 
 }
