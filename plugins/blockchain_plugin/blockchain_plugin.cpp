@@ -20,6 +20,7 @@ namespace Xmaxplatform {
         Baseapp::bfs::path genesis_file;
         std::unique_ptr<Chain::chain_xmax> chain;
 		Chain::chain_id_type      chain_id;
+		uint32_t	skip_flags = Chain::chain_xmax::skip_nothing;
     };
 
 
@@ -71,6 +72,7 @@ namespace Xmaxplatform {
        }}
 
 #define CHAIN_RO_CALL(call_name, http_response_code) CALL(xmaxchain, ro_api, Chain_APIs::read_only, call_name, http_response_code)
+#define CHAIN_RW_CALL(call_name, http_response_code) CALL(xmaxchain, rw_api, Chain_APIs::read_write, call_name, http_response_code)
 
     void blockchain_plugin::plugin_startup() {
         ilog("blockchain_plugin::plugin_startup");
@@ -88,12 +90,16 @@ namespace Xmaxplatform {
         ilog("register chain api");
 
         auto ro_api = get_read_only_api();
+		auto rw_api = get_read_write_api();
 
         app().get_plugin<chainhttp_plugin>().add_api({
                                                         CHAIN_RO_CALL(get_account, 200),
 														CHAIN_RO_CALL(get_table_rows, 200),
 														CHAIN_RO_CALL(get_info, 200),
-														CHAIN_RO_CALL(get_block, 200)
+														CHAIN_RO_CALL(get_block, 200),
+														//---------------Write Apis-------------
+														CHAIN_RW_CALL(push_transaction, 202),
+														CHAIN_RW_CALL(push_transactions, 202)
                                                 });
     }
 
@@ -109,6 +115,10 @@ namespace Xmaxplatform {
 		memcpy(cid.data(), my->chain_id.data(), cid.data_size());
 	}
 
+
+	//--------------------------------------------------
+	Xmaxplatform::Chain_APIs::read_write blockchain_plugin::get_read_write_api() { 
+		return Chain_APIs::read_write(getchain(), my->skip_flags); }
 
 namespace Chain_APIs{
 
@@ -154,6 +164,8 @@ namespace Chain_APIs{
 		FC_THROW_EXCEPTION(Chain::unknown_block_exception,
 			"Could not find block: ${block}", ("block", params.block_num_or_id));
 	}
+
+
 	read_only::get_account_results read_only::get_account(const get_account_params &params) const {
         using namespace Xmaxplatform::Chain;
 
@@ -215,6 +227,35 @@ namespace Chain_APIs{
 	}
 
 	
+
+	//--------------------------------------------------
+	Xmaxplatform::Chain_APIs::read_write::push_transaction_results read_write::push_transaction(const push_transaction_params& params)
+	{
+		auto pretty_input = _chain.transaction_from_variant(params);
+		auto ptrx = _chain.push_transaction(pretty_input, skip_flags);
+		auto pretty_trx = _chain.transaction_to_variant(ptrx);
+		auto pretty_events = _chain.transaction_events_to_variant(ptrx);
+		return read_write::push_transaction_results{ pretty_input.id(), pretty_trx, pretty_events };
+	}
+
+
+	//--------------------------------------------------
+	Xmaxplatform::Chain_APIs::read_write::push_transactions_results read_write::push_transactions(const push_transactions_params& params) {
+		FC_ASSERT(params.size() <= 1000, "Attempt to push too many transactions at once");
+
+		push_transactions_results result;
+		result.reserve(params.size());
+		for (const auto& item : params) {
+			try {
+				result.emplace_back(push_transaction(item));
+			}
+			catch (const fc::exception& e) {
+				result.emplace_back(read_write::push_transaction_results{ Chain::xmax_type_transaction_id(),
+					fc::mutable_variant_object("error", e.to_detail_string()) });
+			}
+		}
+		return result;
+	}
 
 }// namespace Chain_APIs
 } // namespace Xmaxplatform

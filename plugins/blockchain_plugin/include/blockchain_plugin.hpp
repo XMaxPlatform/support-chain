@@ -107,6 +107,9 @@ namespace Xmaxplatform {
 
 			get_block_results get_block(const get_block_params& params) const;
 
+
+			
+
 			void copy_row(const Chain::key_value_object& obj, vector<char>& data)const {
 				data.resize(sizeof(uint64_t) + obj.value.size());
 				memcpy(data.data(), &obj.primary_key, sizeof(uint64_t));
@@ -175,6 +178,31 @@ namespace Xmaxplatform {
 			}
         };
 
+
+		class read_write {
+			Chain::chain_xmax& _chain;
+			uint32_t skip_flags;
+
+		public:
+			read_write(Chain::chain_xmax& chain, uint32_t skip_flags)
+				: _chain(chain), skip_flags(skip_flags) {}
+
+			using push_transaction_params = fc::variant_object;
+
+			struct push_transaction_results {
+				Chain::xmax_type_transaction_id  transaction_id;
+				fc::variant                 processed;
+				fc::variant                 events;
+			};
+
+			push_transaction_results push_transaction(const push_transaction_params& params);
+
+			using push_transactions_params = vector<push_transaction_params>;
+			using push_transactions_results = vector<push_transaction_results>;
+			push_transactions_results push_transactions(const push_transactions_params& params);
+
+		};
+
     } // namespace Chain_APIs
 
 
@@ -197,6 +225,7 @@ public:
 	void get_chain_id(Chain::chain_id_type &cid) const;
 
     Chain_APIs::read_only get_read_only_api() const { return Chain_APIs::read_only(getchain()); }
+	Chain_APIs::read_write get_read_write_api();
 private:
     std::unique_ptr<class chain_plugin_impl> my;
     void register_chain_api();
@@ -221,4 +250,6 @@ FC_REFLECT_DERIVED(Xmaxplatform::Chain_APIs::read_only::get_block_results, (Xmax
 
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_info_results,
 (server_version)(head_block_num)(last_irreversible_block_num)(head_block_id)(head_block_time))
+
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_write::push_transaction_results, (transaction_id)(processed)(events))
 

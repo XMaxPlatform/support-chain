@@ -36,6 +36,7 @@ extern "C" {
 
 	typedef xmax_name scope_name;
 	typedef xmax_name action_name;
+	typedef xmax_name event_name;
 
 	typedef xmax_time time;
 	typedef uint16_t region_id;

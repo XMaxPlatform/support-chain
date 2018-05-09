@@ -3,6 +3,7 @@ namespace Xmaxplatform { namespace Basetypes {
     typedef name                             account_name;
     typedef name                             permission_name;
     typedef name                             func_name;
+    typedef name                             event_name;
     typedef fixed_string32                   message_name;
     typedef fixed_string32                   type_name;
     struct account_permission { 

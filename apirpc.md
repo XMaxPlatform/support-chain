@@ -10,6 +10,8 @@ Describe RPC interfaces of XMax chain. Use HTTP protocal.
     - [get_table_rows](#gettablerows)
     - [get_info](#getinfo)
     - [get_block](#getblock)
+    - [push_transaction](#chainpushtransaction)
+    - [push_transactions](#chainpushtransactions)
 - [ContractUtil API](#contractutilapi)
     - [create_account](#createaccount)
     - [push_transaction](#pushtransaction)
@@ -58,6 +60,29 @@ Get specific block info use id or block num.
 $ curl http://127.0.0.1:18888/v0/xmaxchain/get_block -X POST -d '{"block_num_or_id":3}'
 $ curl http://127.0.0.1:18888/v0/xmaxchain/get_block -X POST -d '{"block_num_or_id":000000034e41cef56934029d3e1be3ea812169320934c42386adec9f8bb94710}'
 ```
+
+<a name="chainpushtransaction"></a>
+### push_transaction
+Push a transaction to blockchain, return HTTP 202 on success.
+
+#### Example
+```bash
+$ curl  http://127.0.0.1:18888/v0/xmaxchain/push_transaction -X POST -d '{"ref_block_num":21453,"ref_block_prefix":3165644999,"expiration":"2017-12-08T10:28:49","scope":["testerb","testerc"],"read_scope":[],"messages":[{"code":"currency","type":"transfer","authorization":[{"account":"testerb","permission":"active"}],"data":"000000008093dd74000000000094dd74e803000000000000"}],"signatures":["1f393cc5ce6a6951fb53b11812345bcf14ffd978b07be386fd639eaf440bca7dca16b14833ec661ca0703d15e55a2a599a36d55ce78c4539433f6ce8bcee0158c3"]}'
+```
+
+<a name="chainpushtransactions"></a>
+### push_transactions
+Push multiple transactions to chain to process.
+
+#### Example:
+``` bash
+$ curl http://127.0.0.1:18888/v0/xmaxchain/push_transaction -X POST -d '[{"ref_block_num":21453,"ref_block_prefix":3165644999,"expiration":"2017-12-08T10:28:49","scope":["testerb","testerc"],"read_scope":[],"messages":[{"code":"currency","type":"transfer","authorization":[{"account":"testerb","permission":"active"}],"data":"000000008093dd74000000000094dd74e803000000000000"}],"signatures":["1f393cc5ce6a6951fb53b11812345bcf14ffd978b07be386fd639eaf440bca7dca16b14833ec661ca0703d15e55a2a599a36d55ce78c4539433f6ce8bcee0158c3"]},...]'
+``` 
+
+
+
+
+
 
 
 <a name="contractutilapi"></a>

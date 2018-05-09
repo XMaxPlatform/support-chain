@@ -82,6 +82,11 @@ namespace Xmaxplatform { namespace Chain {
 
 	   vector<char>       message_to_binary(name code, name type, const fc::variant& obj)const;
 	   fc::variant        message_from_binary(name code, name type, const vector<char>& bin)const;
+	   fc::variant        event_from_binary(name code, type_name tname, const vector<char>& bin)const;
+
+	   processed_transaction transaction_from_variant(const fc::variant& v)const;
+	   fc::variant       transaction_to_variant(const processed_transaction& trx)const;
+	   fc::variant       transaction_events_to_variant(const processed_transaction& trx)const;
 
 	   processed_transaction push_transaction(const signed_transaction& trx, uint32_t skip = skip_nothing);
 	   processed_transaction _push_transaction(const signed_transaction& trx);

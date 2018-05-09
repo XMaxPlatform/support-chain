@@ -248,6 +248,143 @@ namespace Xmaxplatform { namespace Chain {
 			return fc::variant();
 		}
 
+
+		//--------------------------------------------------
+		fc::variant chain_xmax::event_from_binary(name code, type_name tname, const vector<char>& bin) const {
+			const auto& code_account = _data.get<account_object, by_name>(code);
+			Xmaxplatform::Basetypes::abi abi;
+			if (Basetypes::abi_serializer::to_abi(code_account.abi, abi)) {
+				Basetypes::abi_serializer abis(abi);
+				return abis.binary_to_variant(tname, bin);
+			}
+			return fc::variant();
+		}
+
+
+		//--------------------------------------------------
+		Xmaxplatform::Chain::processed_transaction chain_xmax::transaction_from_variant(const fc::variant& v) const {
+			const variant_object& vo = v.get_object();
+#define GET_FIELD( VO, FIELD, RESULT ) \
+   if( VO.contains(#FIELD) ) fc::from_variant( VO[#FIELD], RESULT.FIELD )
+
+			processed_transaction result;
+			GET_FIELD(vo, ref_block_num, result);
+			GET_FIELD(vo, ref_block_prefix, result);
+			GET_FIELD(vo, expiration, result);
+			GET_FIELD(vo, scope, result);
+			GET_FIELD(vo, signatures, result);
+
+			if (vo.contains("messages")) {
+				const vector<variant>& msgs = vo["messages"].get_array();
+				result.messages.resize(msgs.size());
+				for (uint32_t i = 0; i < msgs.size(); ++i) {
+					const auto& vo = msgs[i].get_object();
+					GET_FIELD(vo, code, result.messages[i]);
+					GET_FIELD(vo, type, result.messages[i]);
+					GET_FIELD(vo, authorization, result.messages[i]);
+
+					if (vo.contains("data")) {
+						const auto& data = vo["data"];
+						if (data.is_string()) {
+							GET_FIELD(vo, data, result.messages[i]);
+						}
+						else if (data.is_object()) {
+							result.messages[i].data = message_to_binary(result.messages[i].code, result.messages[i].type, data);							
+						}
+					}
+				}
+			}
+			if (vo.contains("output")) {
+				const vector<variant>& outputs = vo["output"].get_array();
+			}
+			return result;
+#undef GET_FIELD
+		}
+
+		//--------------------------------------------------
+		fc::variant chain_xmax::transaction_to_variant(const processed_transaction& trx) const
+		{
+#define SET_FIELD( MVO, OBJ, FIELD ) MVO(#FIELD, OBJ.FIELD)
+
+			fc::mutable_variant_object trx_mvo;
+			SET_FIELD(trx_mvo, trx, ref_block_num);
+			SET_FIELD(trx_mvo, trx, ref_block_prefix);
+			SET_FIELD(trx_mvo, trx, expiration);
+			SET_FIELD(trx_mvo, trx, scope);
+			SET_FIELD(trx_mvo, trx, signatures);
+
+			vector<fc::mutable_variant_object> msgs(trx.messages.size());
+			vector<fc::variant> msgsv(msgs.size());
+
+
+			for (uint32_t i = 0; i < trx.messages.size(); ++i) {
+				auto& msg_mvo = msgs[i];
+				auto& msg = trx.messages[i];
+				SET_FIELD(msg_mvo, msg, code);
+				SET_FIELD(msg_mvo, msg, type);
+				SET_FIELD(msg_mvo, msg, authorization);
+
+				const auto& code_account = _data.get<account_object, by_name>(msg.code);
+				if (!Basetypes::abi_serializer::is_empty_abi(code_account.abi)) {
+					try {
+						msg_mvo("data", message_from_binary(msg.code, msg.type, msg.data));
+						msg_mvo("hex_data", msg.data);
+					}
+					catch (...) {
+						SET_FIELD(msg_mvo, msg, data);
+					}
+				}
+				else {
+					SET_FIELD(msg_mvo, msg, data);
+				}
+
+				msgsv[i] = std::move(msgs[i]);
+			}
+			trx_mvo("messages", std::move(msgsv));
+			trx_mvo("output", fc::variant(trx.output));
+
+			return fc::variant(std::move(trx_mvo));
+#undef SET_FIELD
+		}
+
+
+		//--------------------------------------------------
+		fc::variant chain_xmax::transaction_events_to_variant(const processed_transaction& trx) const {
+#define SET_FIELD(MVO, OBJ, FIELD) MVO(#FIELD, OBJ.FIELD)
+
+			fc::mutable_variant_object events_mvo;
+
+			vector<event_output> evtv;
+
+			for (auto& message_output : trx.output)
+			{
+				for (auto& event_output : message_output.events)
+				{
+					evtv.push_back(event_output);
+				}
+			}
+
+			vector<fc::mutable_variant_object> evtomv(evtv.size());
+			vector<fc::variant> evtov(evtomv.size());
+			for (int i = 0; i < evtv.size(); ++i)
+			{
+				auto& evt = evtv[i];
+				auto& evto = evtomv[i];
+				SET_FIELD(evto, evt, name);
+				SET_FIELD(evto, evt, code);
+				SET_FIELD(evto, evt, type);
+				//SET_FIELD( evto, evt, data );
+				evto("data", event_from_binary(evt.code, evt.event_type_name, evt.data));
+
+				evtov[i] = std::move(evtomv[i]);
+			}
+
+			//events_mvo( "events", fc::variant( evtov ) );
+
+			return evtov;
+#undef SET_FIELD
+		}
+
 		Xmaxplatform::Chain::processed_transaction chain_xmax::push_transaction(const signed_transaction& trx, uint32_t skip /*= skip_nothing*/)
 		{
 			try {
