@@ -140,7 +140,7 @@ namespace Xmaxplatform {namespace Chain {
 		class ds_val : public ds<_Type, _VM_Type, _VM_V_Type, _VM_Result_Type>
 		{
 		public:
-			typedef ds<_Type, ptr_t, _VM_V_Type, _VM_Result_Type> super;
+			typedef ds<_Type, _VM_Type, _VM_V_Type, _VM_Result_Type> super;
 
 			typedef typename super::value_type value_type;
 			typedef typename super::vm_type vm_type;
