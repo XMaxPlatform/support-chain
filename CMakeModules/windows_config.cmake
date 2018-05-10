@@ -2,6 +2,7 @@ if(WIN32)
 	message(STATUS "-------------- Window config --------------")
 	
 	
+
 	if("${XMAX_ROOT_DIR}" STREQUAL "")
 		set(XMAX_ROOT_DIR ${CMAKE_SOURCE_DIR})
 	endif()
@@ -12,6 +13,14 @@ if(WIN32)
 			set(LLVM_DIR "$ENV{LLVM_DIR}")
 		endif()
 	endif()
+
+	if(EXISTS ${BINARYEN_BIN})
+
+	else()
+		set(BINARYEN_BIN ${XMAX_ROOT_DIR}/tools/binaryen)
+	endif()
+
+	message(STATUS "BINARYEN_BIN: ${BINARYEN_BIN}")
 
 	if(EXISTS ${LLVM_DIR})
 	else()
