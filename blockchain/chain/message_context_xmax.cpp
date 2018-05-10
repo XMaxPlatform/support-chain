@@ -24,6 +24,35 @@ void message_context_xmax::get_active_builders(Basetypes::account_name *builders
 time message_context_xmax::current_time() const {
    return mutable_controller.head_block_time();
 }
+
+Xmaxplatform::Chain::message_context_xmax::pending_message& message_context_xmax::get_pending_message(pending_message::handle_type handle)
+{
+	auto itr = boost::find_if(pending_messages, [&](const auto& msg) { return msg.handle == handle; });
+	XMAX_ASSERT(itr != pending_messages.end(), tx_unknown_argument,
+		"Transaction refers to non-existant/destroyed pending message");
+	return *itr;
+}
+
+Xmaxplatform::Chain::message_context_xmax::pending_message& message_context_xmax::create_pending_message(const account_name& code, const func_name& type, const bytes& data)
+{
+	pending_message::handle_type handle = next_pending_message_serial++;
+	pending_messages.emplace_back(handle, code, type, data);
+	return pending_messages.back();
+}
+
+void message_context_xmax::release_pending_message(pending_message::handle_type handle)
+{
+	auto itr = boost::find_if(pending_messages, [&](const auto& trx) { return trx.handle == handle; });
+	XMAX_ASSERT(itr != pending_messages.end(), tx_unknown_argument,
+		"Transaction refers to non-existant/destroyed pending message");
+
+	auto last = pending_messages.end() - 1;
+	if (itr != last) {
+		std::swap(itr, last);
+	}
+	pending_messages.pop_back();
+}
+
 void message_context_xmax::require_authorization(const Basetypes::account_name& account) {
     auto itr = boost::find_if(msg.authorization, [&account](const auto& auth) { return auth.account == account; });
     XMAX_ASSERT(itr != msg.authorization.end(), tx_missing_auth,

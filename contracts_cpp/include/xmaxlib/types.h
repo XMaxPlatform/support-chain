@@ -33,7 +33,8 @@ extern "C" {
 	typedef xmax_name permission_name;
 	typedef xmax_name token_name;
 	typedef xmax_name table_name;
-
+	typedef xmax_name func_name;
+	
 	typedef xmax_name scope_name;
 	typedef xmax_name action_name;
 	typedef xmax_name event_name;

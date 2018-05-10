@@ -528,7 +528,7 @@ struct table_implement<sizeof(uint64_t),0> {
 template<uint64_t scope, uint64_t code, uint64_t table_n, typename Record, typename PrimaryType>
 struct table<scope,code,table_n,Record,PrimaryType,void> {
    private:
-   typedef table_implement<sizeof( PrimaryType ),0> implment;
+   typedef table_implement<sizeof( PrimaryType ),0> implement;
    static_assert( sizeof(PrimaryType) <= sizeof(Record), "invalid template parameters" );
 
    public:

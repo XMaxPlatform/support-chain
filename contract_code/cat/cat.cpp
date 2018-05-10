@@ -1,5 +1,7 @@
 #include <cat.hpp>
+#include<xmaxlib/token.hpp>
 #include<xmaxlib/message.hpp>
+#include<xmaxlib/transaction.hpp>
 
 namespace MYNAME {
     using namespace Xmaxplatform;
@@ -88,16 +90,16 @@ namespace MYNAME {
     }
 
     void xmax_transfer(uint64_t from, uint64_t to, uint64_t amount) {
-		/*
+		
 		 Xmaxplatform::transfer trans;
-      trans.from = from;
-      trans.to = to;
-      trans.quantity = Xmaxplatform::tokens(amount); 
-      
-      Xmaxplatform::message Msg(XNAME(xmax), XNAME(transfer), trans);
-      Msg.add_permissions(from, XNAME(active));
-      Msg.send();
-		*/
+		  trans.from = from;
+		  trans.to = to;
+		  trans.quantity = Xmaxplatform::tokens(amount); 
+		  
+		  Xmaxplatform::message Msg(XNAME(xmax), XNAME(transfer), trans);
+		  Msg.add_permissions(from, XNAME(active));
+		  Msg.send();
+		
      
     }
 

@@ -261,7 +261,7 @@ namespace Xmaxplatform {namespace Chain {
 		return ( ##nativ_func( arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get(), arg_ds3(mem, val3).get(), arg_ds4(mem, val4).get() ) );\
 	}
 
-#define BIND_VM_NATIVE_FUCTION_R4(nativ_func, vm_rt, vm_func, arg_ds1, arg_ds2, arg_ds3, arg_ds4, arg_ds5) \
+#define BIND_VM_NATIVE_FUCTION_R5(nativ_func, vm_rt, vm_func, arg_ds1, arg_ds2, arg_ds3, arg_ds4, arg_ds5) \
 	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type, arg_ds2::vm_type, arg_ds3::vm_type, arg_ds4::vm_type, arg_ds5::vm_type); \
 	static Intrinsics::Function s_vm_void##vm_func	\
 	("env" "." #vm_func, \

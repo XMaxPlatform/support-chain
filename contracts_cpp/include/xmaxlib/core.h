@@ -34,4 +34,6 @@ extern "C" {
 	*/
 	void prints(const char* cstr);
 
+	bool strcmpn(int64_t test, const char* cstr);
+	
 }
