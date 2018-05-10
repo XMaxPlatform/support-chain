@@ -415,6 +415,14 @@ namespace Xmaxplatform { namespace Chain {
 
 			return pt;
 		}
+		
+
+		//--------------------------------------------------
+		Xmaxplatform::Chain::flat_set<Xmaxplatform::Chain::public_key_type> chain_xmax::get_required_keys(const signed_transaction& transaction, const flat_set<public_key_type>& candidateKeys) const
+		{
+			// Todo: Authentication is to be supported later. Return keys directly now.
+			return flat_set<Xmaxplatform::Chain::public_key_type>(candidateKeys);			
+		}
 
 		signed_block chain_xmax::generate_block(
                 chain_timestamp when,

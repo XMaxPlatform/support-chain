@@ -10,6 +10,8 @@ Describe RPC interfaces of XMax chain. Use HTTP protocal.
     - [get_table_rows](#gettablerows)
     - [get_info](#getinfo)
     - [get_block](#getblock)
+    - [get_code](#getcode)
+    - [get_required_keys](#getrequiredkeys)
     - [push_transaction](#chainpushtransaction)
     - [push_transactions](#chainpushtransactions)
 - [ContractUtil API](#contractutilapi)
@@ -80,7 +82,23 @@ $ curl http://127.0.0.1:18888/v0/xmaxchain/push_transaction -X POST -d '[{"ref_b
 ``` 
 
 
+<a name="getcode"></a>
+### get_code
+Get smart contract code.
 
+#### Example
+``` bash
+$ curl  http://127.0.0.1:18888/v0/xmaxchain/get_code -X POST -d '{"account_name":"currency"}'
+```
+
+<a name="getrequiredkeys"></a>
+### get_required_keys
+Get keys for signing transactions from provide candidates public keys.
+
+#### Example
+``` bash
+$ curl  http://127.0.0.1:18888/v0/xmaxchain/get_required_keys -X POST -d '{"transaction": {"ref_block_num":"100","ref_block_prefix":"137469861","expiration":"2017-09-25T06:28:49","scope":["testerb","testerc"],"messages":[{"code":"currency","type":"transfer","recipients":["testerb","testerc"],"authorization":[{"account":"testerb","permission":"active"}],"data":"000000000041934b000000008041934be803000000000000"}],"signatures":[],"authorizations":[]}, "available_keys":["XMX4toFS3YXEQCkuuw1aqDLrtHim86Gz9u3hBdcBw5KNPZcursVHq","XMX7d9A3uLe6As66jzN8j44TXJUqJSK3bFjjEEqR4oTvNAB3iM9SA","XMX6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"]}'
+```
 
 
 

@@ -90,6 +90,8 @@ namespace Xmaxplatform { namespace Chain {
 
 	   processed_transaction push_transaction(const signed_transaction& trx, uint32_t skip = skip_nothing);
 	   processed_transaction _push_transaction(const signed_transaction& trx);
+
+	   flat_set<public_key_type> get_required_keys(const signed_transaction& transaction, const flat_set<public_key_type>& candidateKeys)const;
    private:
 
        database&                        _data;

@@ -11,6 +11,7 @@
 
 #include <native_contract_chain_init.hpp>
 #include <chain_xmax.hpp>
+#include <wast_to_wasm.hpp>
 
 namespace Xmaxplatform {
 
@@ -97,6 +98,8 @@ namespace Xmaxplatform {
 														CHAIN_RO_CALL(get_table_rows, 200),
 														CHAIN_RO_CALL(get_info, 200),
 														CHAIN_RO_CALL(get_block, 200),
+														CHAIN_RO_CALL(get_code, 200),
+														CHAIN_RO_CALL(get_required_keys, 200),
 														//---------------Write Apis-------------
 														CHAIN_RW_CALL(push_transaction, 202),
 														CHAIN_RW_CALL(push_transactions, 202)
@@ -165,6 +168,36 @@ namespace Chain_APIs{
 			"Could not find block: ${block}", ("block", params.block_num_or_id));
 	}
 
+
+	//--------------------------------------------------
+	Xmaxplatform::Chain_APIs::read_only::get_code_results read_only::get_code(const get_code_params& params) const
+	{
+		get_code_results result;
+		result.account_name = params.account_name;
+		const auto& d = _chain.get_database();
+		const auto& accnt = d.get<Chain::account_object, Chain::by_name>(params.account_name);
+
+		if (accnt.code.size()) {
+			result.wast = Chain::ConvertFromWasmToWast((const uint8_t*)accnt.code.data(), accnt.code.size());
+			result.code_hash = fc::sha256::hash(accnt.code.data(), accnt.code.size());
+		}
+		Xmaxplatform::Basetypes::abi abi;
+		if (Basetypes::abi_serializer::to_abi(accnt.abi, abi)) {
+			result.abi = std::move(abi);
+		}
+		return result;
+	}
+
+
+	//--------------------------------------------------
+	Xmaxplatform::Chain_APIs::read_only::get_required_keys_result read_only::get_required_keys(const get_required_keys_params& params) const
+	{
+		auto pretty_input = _chain.transaction_from_variant(params.transaction);
+		auto required_keys_set = _chain.get_required_keys(pretty_input, params.available_keys);
+		get_required_keys_result result;
+		result.required_keys = required_keys_set;
+		return result;
+	}
 
 	read_only::get_account_results read_only::get_account(const get_account_params &params) const {
         using namespace Xmaxplatform::Chain;

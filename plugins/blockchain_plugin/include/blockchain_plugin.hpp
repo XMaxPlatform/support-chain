@@ -15,7 +15,8 @@ using namespace Baseapp;
 namespace Xmaxplatform {
 
     using namespace Basetypes;
-
+	using boost::container::flat_set;
+	using fc::optional;
 
     namespace Chain_APIs {
         struct empty{};
@@ -107,8 +108,31 @@ namespace Xmaxplatform {
 
 			get_block_results get_block(const get_block_params& params) const;
 
-
 			
+
+			struct get_code_results {
+				name                   account_name;
+				string                 wast;
+				fc::sha256             code_hash;
+				optional<Basetypes::abi>   abi;
+			};
+
+			struct get_code_params {
+				name                   account_name;
+			};
+			get_code_results get_code(const get_code_params& params)const;
+
+			struct get_required_keys_params {
+				fc::variant transaction;
+				flat_set<Chain::public_key_type> available_keys;
+			};
+
+			struct get_required_keys_result {
+				flat_set<Chain::public_key_type> required_keys;
+			};
+
+			get_required_keys_result get_required_keys(const get_required_keys_params& params)const;
+
 
 			void copy_row(const Chain::key_value_object& obj, vector<char>& data)const {
 				data.resize(sizeof(uint64_t) + obj.value.size());
@@ -247,9 +271,10 @@ FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_block_params, (block_num_or_
 
 FC_REFLECT_DERIVED(Xmaxplatform::Chain_APIs::read_only::get_block_results, (Xmaxplatform::Chain::signed_block), (id)(block_num)(ref_block_prefix));
 
-
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_info_results,
 (server_version)(head_block_num)(last_irreversible_block_num)(head_block_id)(head_block_time))
-
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_write::push_transaction_results, (transaction_id)(processed)(events))
-
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_required_keys_params, (transaction)(available_keys))
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_required_keys_result, (required_keys))
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_code_results, (account_name)(code_hash)(wast)(abi))
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_code_params, (account_name))
