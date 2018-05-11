@@ -9,13 +9,13 @@ xmax blockchain system
 3. [Build Boost](#buildboost)
 4. [Build Wasm-Compiler](#buildwasmcompiler)
 5. [Build Binaryen](#buildbinaryen)
-6. [Install Openssl](#installopenssl)
+6. [Install OpenSSL](#installopenssl)
 7. [Build Xmax](#buildxmax)
 
 <a name="xmaxprepare"></a>
 # Prepare
 
-Develop IDE: visual studio 2015
+Develop IDE: Visual Studio 2015
 
 Tools: CMake, Git
 
@@ -60,9 +60,6 @@ Open `Developer Command Prompt for 2015` and goto `mongo-c-driver-1.9.4` then ex
 msbuild.exe /p:Configuration=Release ALL_BUILD.vcxproj
 msbuild.exe /p:Configuration=Release INSTALL.vcxproj
 ```
-
-
-
 
 ### Build mongo-cxx-driver:
 
@@ -111,14 +108,14 @@ Then you can run `xmaxrun` with MongoDB in install directory.
 <a name="buildboost"></a>
 ## Build boost on Windows
 
-boost version: 1.66.0
+Boost version: 1.66.0
 Binaries of boost for msvc-14(x64), or build from source.
 
 Binaries download link: https://dl.bintray.com/boostorg/release/1.66.0/binaries/
 
 Source download link: https://dl.bintray.com/boostorg/release/1.66.0/source/
 
-* build boost from source
+### build boost from source
 
 Open cmd or Windows PowerShell and cd to boost root path, call build command:
 ```bash
@@ -144,11 +141,11 @@ cd build
 cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX="c:/wasm" -DLLVM_TARGETS_TO_BUILD= -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=WebAssembly ../
 ```
 
-If cmake succeed, you will found the file `LLVM.sln` in `build` path. Double click `LLVM.sln`, open the LLVM solution by visual studio 2015.
+If cmake succeed, you will found the file `LLVM.sln` in `build` folder. Double click `LLVM.sln`, open the LLVM solution by Visual Studio 2015.
 
-If you want to build the release version of Xmax, you must to change the `Solution Configurations` to `Release`
+If you want to build the release version of Xmax, you must to change the `Solution Configurations` to `Release`.
 
-If you want to build the debug version of Xmax, you must to change the `Solution Configurations` to `Debug`
+If you want to build the debug version of Xmax, you must to change the `Solution Configurations` to `Debug`.
 
 Build the solution.
 
@@ -157,28 +154,28 @@ Right click `INSTALL` project in `Solution Explorer`, click `Build`.
 <a name="buildbinaryen"></a>
 ## Build binaryen on Windows
 
-Open cmd or Windows PowerShell and cd to `tools\binaryen` of xmax code root.
+Open cmd or Windows PowerShell and cd to `tools\binaryen` in Xmax code root.
 
 ```bash
 cmake -G "Visual Studio 14 2015 Win64" .
 ```
-If cmake succeed, you will found the file `binaryen.sln` in `binaryen` path. Double click `binaryen.sln`, open the binaryen solution by visual studio 2015.
+If cmake succeed, you will found the file `binaryen.sln` in `binaryen` folder. Double click `binaryen.sln`, open the binaryen solution by Visual Studio 2015.
 
 Build the solution.
 
 <a name="installopenssl"></a>
 ## Install OpenSSL-Win64 on Windows
 
-Download OpenSSL: https://slproweb.com/products/Win32OpenSSL.html
+Download Page: https://slproweb.com/products/Win32OpenSSL.html
 
-Choose version: Win64 OpenSSL v1.1.0h
+Choose Version: Win64 OpenSSL v1.1.0h
 
 Install it to `C:\OpenSSL-Win64`.
 
 <a name="buildxmax"></a>
 ## Build Xmax on Windows
 
-Open cmd or Windows PowerShell and cd to xmax code root path.
+Open cmd or Windows PowerShell and cd to the root path of Xmax code.
 
 
 ```bash
@@ -187,7 +184,7 @@ cd build
 cmake -G "Visual Studio 14 2015 Win64" -DLLVM_DIR="c:/wasm/lib/cmake/llvm" -DWASM_LLVM_CONFIG="c:/wasm/bin/llvm-config.exe" -DBOOST_ROOT="c:/Boost/boost_1_66_0" -DOPENSSL_ROOT_DIR="C:\OpenSSL-Win64" -DXMAX_LIBBSONCXX="C:/mongo-cxx-driver/lib/bsoncxx.lib" -DXMAX_LIBMONGOCXX="C:/mongo-cxx-driver/lib/mongocxx.lib" ../
 ```
 
-If cmake succeed, you will found the file `Xmax.sln` in `build` folder. Double click `Xmax.sln`, open the Xmax solution by visual studio 2015.
+If cmake succeed, you will found the file `Xmax.sln` in `build` folder. Double click `Xmax.sln`, open the Xmax solution by Visual Studio 2015.
 
 Build the solution.
 
@@ -197,28 +194,28 @@ Right click `xmaxrun` project in `Solution Explorer`, click `Set as StartUp Proj
 
 ### Debug setting for xmaxrun on Windows
 
-Right click `xmaxrun` project again, click `Properties`.
+Right click `xmaxrun` project, click `Properties`.
 
 Select `Configuration Properties` --> `Debugging`.
 
 Set the `Working Directory` to `$(SolutionDir)install\bin`.
 
-You can debug now.
+You can debug it now.
 
 ### Run xmaxrun on Windows
 
-`$(SolutionDir)install\bin` is the working directory for xmaxrun.
+`$(SolutionDir)install\bin` is the working directory for xmaxrun program.
 
-Double click `xmaxrun.exe`(Found in working directory) run the xmax block chain node.
+Double click `xmaxrun.exe`(Found in working directory) run the Xmax block chain node.
 
-If it is Fist run, the program would be crashed.
+If it is fist run, the program would be crashed.
 
-You will find two new floders( `config-dir` and `data-dir` ) in working directory.
+You will find two new folders( `config-dir` and `data-dir` ) in working directory.
 
 * `config-dir`：Store configuration files of block chain.
-* `data-dir`：Store data files of block chain. (You can custom it by set the arg `--data-dir` when run xmaxrun e.g. `--data-dir /path/to/data`）.
+* `data-dir`：Store data files of block chain. (You can custom it by set the arg `--data-dir` when setup xmaxrun e.g. `--data-dir /path/to/data`）.
 
-Copy `genesis.json`(Found in xmax code root path) to working directory.
+Copy `genesis.json`(Found in Xmax code root path) to working directory.
 And then, open `config.ini` (Found in `config-dir`).
 
 Set:
@@ -231,7 +228,13 @@ plugin = Xmaxplatform::chainhttp_plugin
 plugin = Xmaxplatform::blockchain_plugin
 plugin = Xmaxplatform::blockbuilder_plugin
 plugin = Xmaxplatform::contractutil_plugin
+
+# setting for mongodb.
+plugin = Xmaxplatform::mongodb_plugin
+mongodb-uri = mongodb://localhost:27017
+
 ```
+The config of mongodb is not neccessary, if you just want to test or debug.
 
 When first run of xmax block chain, it take a lot of time to init block chain db, please wait patiently.
 
