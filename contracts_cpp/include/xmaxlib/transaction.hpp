@@ -24,7 +24,6 @@ namespace Xmaxplatform {
       {
       }
 
-      // no copy constructor due to opaque handle
       message( const message& ) = delete;
 
       message( message&& msg ) {
@@ -61,8 +60,6 @@ namespace Xmaxplatform {
       }
 
       message_handle handle;
-
-      friend class transaction;
 
    };
 } 

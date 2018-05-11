@@ -64,58 +64,6 @@ namespace Xmaxplatform {
 		}
 	};
 
-
-	template<typename BaseToken, typename QuoteToken>
-	struct price
-	{
-		typedef BaseToken  base_token_type;
-		typedef QuoteToken quote_token_type;
-		
-		static const uint64_t precision = 1000ll * 1000ll * 1000ll * 1000ll * 1000ll;
-
-		price() :base_per_quote((uint128_t)1ul) {}
-
-		price(BaseToken base, QuoteToken quote) {
-			assert(base >= BaseToken(1ul), "invalid price");
-			assert(quote >= QuoteToken(1ul), "invalid price");
-
-			base_per_quote = base.quantity;
-			base_per_quote *= precision;
-			base_per_quote /= quote.quantity;
-		}
-
-		friend QuoteToken operator / (BaseToken b, const price& q) {
-			//Xmaxplatform::print("operator/ ", uint128(b.quantity), " * ", uint128(precision), " / ", q.base_per_quote, "\n");
-			return QuoteToken(uint64_t((uint128(b.quantity) * uint128(precision) / q.base_per_quote)));
-		}
-
-		friend BaseToken operator * (const QuoteToken& b, const price& q) {
-			//Xmaxplatform::print("b: ", b, " \n");
-			//Xmaxplatform::print("operator* ", uint128(b.quantity), " * ", uint128(q.base_per_quote), " / ", precision, "\n");
-			//return QuoteToken( uint64_t( mult_div_i128( b.quantity, q.base_per_quote, precision ) ) );
-			return BaseToken(uint64_t((b.quantity * q.base_per_quote) / precision));
-		}
-
-		friend bool operator <= (const price& a, const price& b) { return a.base_per_quote <= b.base_per_quote; }
-
-		friend bool operator <  (const price& a, const price& b) { return a.base_per_quote <  b.base_per_quote; }
-
-		friend bool operator >= (const price& a, const price& b) { return a.base_per_quote >= b.base_per_quote; }
-
-		friend bool operator >  (const price& a, const price& b) { return a.base_per_quote >  b.base_per_quote; }
-
-		friend bool operator == (const price& a, const price& b) { return a.base_per_quote == b.base_per_quote; }
-
-		friend bool operator != (const price& a, const price& b) { return a.base_per_quote != b.base_per_quote; }
-
-		inline void print() {
-		//	Xmaxplatform::print(base_per_quote, ".", " ", name(base_token_type::currency_type), "/", name(quote_token_type::currency_type));
-		}
-	private:
-		Xmaxplatform::uint128 base_per_quote;
-	};
-
-
 	typedef Xmaxplatform::token<uint64_t, XNAME(xmx)>   tokens;
 
 

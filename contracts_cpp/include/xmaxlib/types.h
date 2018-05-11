@@ -1,11 +1,6 @@
-/**
-*  @file
-*  @copyright defined in xmax/LICENSE
-*/
 #pragma once
 
 #include <stdint.h>
-//#include <wchar.h>
 #include "uint128.h"
 
 
@@ -13,13 +8,6 @@
 extern "C" {
 #endif
 
-	/**
-	*  @defgroup types of contract.
-	*  @ingroup contractdev
-	*  @brief Specifies typedefs and aliases
-	*
-	*  @{
-	*/
 #ifdef WIN32
 	typedef _uint128_win    uint128_t;
 #else
@@ -90,6 +78,5 @@ extern "C" {
 	};
 
 #ifdef __cplusplus
-} /// extern "C"
+}
 #endif
-  /// @}
