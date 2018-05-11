@@ -26,7 +26,7 @@ class application_impl {
       bfs::path               _config_dir{"config-dir"};
       bfs::path               _logging_conf{"logging.json"};
 
-      uint64_t                _version;
+	  uint64_t                _version{0};
 };
 
 application::application()
