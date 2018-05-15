@@ -145,9 +145,17 @@ If you want to build the debug version, you can change  CMAKE_BUILD_TYPE value:
 
 ### Run xmaxrun
 
-`$(SolutionDir)install\bin` is the working directory for xmaxrun program.
+`$(SolutionDir)install\bin` is the `working directory` for xmaxrun program.
 
-Double click `xmaxrun.exe`(Found in working directory) run the Xmax block chain node.
+#### run Xmax block chain node.
+
+Open Terminal, and run:
+```bash
+cd {to working directory}
+./xmaxrun
+
+```
+
 
 If it is fist run, the program would be crashed.
 
@@ -186,7 +194,7 @@ Setup mongodb in another bash terminal. Setup command:
 mongod --config /usr/local/etc/mongod.conf
 ``` 
 
-When first run of xmax block chain, it take a lot of time to init block chain db, please wait patiently.
+If it is first run of xmax block chain, it will take a lot of time to init block chain db, please wait patiently.
 
 If you just want to test or debug something, you can set the smaller size of block chain db by config property `shared-file-size`.
 
@@ -194,4 +202,4 @@ Only insert a init command `shared-file-size={size of mb}` into `config.ini`,suc
 
 `shared-file-size=1024`
 
-`1024` means set the shared file size of block chain db to 1024 mega byte(1G). It would takes less time to init block chain db, when first run of xmax block chain.
+`1024` means set the shared file size of block chain db to `1024 mega byte(1G)`. It would takes less time to init block chain db in first run of xmax block chain.
