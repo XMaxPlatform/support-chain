@@ -157,9 +157,10 @@ You will find two new folders( `config-dir` and `data-dir` ) in working director
 * `data-dir`：Store data files of block chain. (You can custom it by set the arg `--data-dir` when setup xmaxrun e.g. `--data-dir /path/to/data`）.
 
 Copy `genesis.json`(Found in Xmax code root path) to working directory.
+
 And then, open `config.ini` (Found in `config-dir`).
 
-Set:
+Append Setting:
 ```bash
 # Load the testnet genesis state, which creates some initial block producers with the default key
 genesis-json = genesis.json     
@@ -176,6 +177,14 @@ mongodb-uri = mongodb://localhost:27017
 
 ```
 The config of mongodb is not neccessary, if you just want to test or debug.
+
+If you want to run xmax with mongodb, you must setup mongodb sevice first.
+
+Setup mongodb in another bash terminal. Setup command:
+
+```bash
+mongod --config /usr/local/etc/mongod.conf
+``` 
 
 When first run of xmax block chain, it take a lot of time to init block chain db, please wait patiently.
 
