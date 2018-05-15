@@ -119,7 +119,6 @@ export OPENSSL_ROOT_DIR=/usr/local/opt/openssl
 export OPENSSL_LIBRARIES=/usr/local/opt/openssl/lib
 export XMX_LIBBSONCXX=/usr/local/lib/libbsoncxx.dylib
 export XMX_LIBMONGOCXX=/usr/local/lib/libmongocxx.dylib
-export CMAKE_BUILD_TYPE=Release
 export CXX_COMPILER=clang++
 export C_COMPILER=clang
 
@@ -132,23 +131,17 @@ cd ${XMXHOME}  #Enter xmx code path.
 mkdir build
 cd build
 source ~/.bashrc
-cmake -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE} " -DCMAKE_CXX_COMPILER="${CXX_COMPILER}" -DCMAKE_C_COMPILER="${C_COMPILER}" -DBOOST_ROOT=${BOOST_ROOT} -DWASM_ROOT="${WASM_ROOT}" -DOPENSSL_ROOT_DIR="${OPENSSL_ROOT_DIR}" -DXMAX_LIBBSONCXX=/usr/local/lib/libbsoncxx.dylib -DXMAX_LIBMONGOCXX=/usr/local/lib/libmongocxx.dylib ..
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER="${CXX_COMPILER}" -DCMAKE_C_COMPILER="${C_COMPILER}" -DBOOST_ROOT=${BOOST_ROOT} -DWASM_ROOT="${WASM_ROOT}" -DOPENSSL_ROOT_DIR="${OPENSSL_ROOT_DIR}" -DXMAX_LIBBSONCXX=/usr/local/lib/libbsoncxx.dylib -DXMAX_LIBMONGOCXX=/usr/local/lib/libmongocxx.dylib ..
 
 make -j4 
 
 make install
 
-
-
-
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${C_COMPILER} -DWASM_LLVM_CONFIG=${WASM_LLVM_CONFIG} -DBOOST_ROOT=${BOOST_ROOT} -DBINARYEN_BIN=${BINARYEN_BIN} -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR} -DOPENSSL_LIBRARIES=${OPENSSL_LIBRARIES} -DXMAX_LIBBSONCXX=/usr/local/lib/libbsoncxx.dylib -DXMAX_LIBMONGOCXX=/usr/local/lib/libmongocxx.dylib ..
 ```
 
-If you want to build the debug version, you can add a arg to cmake command:
+If you want to build the debug version, you can change  CMAKE_BUILD_TYPE value:
 
 -DCMAKE_BUILD_TYPE=Debug.
-
-
 
 ### Run xmaxrun
 
