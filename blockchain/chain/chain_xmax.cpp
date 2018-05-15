@@ -5,6 +5,8 @@
 
 #include <blockchain_types.hpp>
 #include <block.hpp>
+#include <blockchain_exceptions.hpp>
+#include <chain_init.hpp>
 #include <chain_xmax.hpp>
 #include <xmax_voting.hpp>
 

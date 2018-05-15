@@ -57,18 +57,4 @@ namespace Xmaxplatform {namespace Chain {
 	}
 	BIND_VM_NATIVE_FUCTION_R2(vm_xmax_read_message, ds_int, read_message, ds_int,ds_int)
 
-	void vm_xmax_read_string(int offset,const std::string& str)
-	{
-		int destsize = sizeof(void*);
-		FC_ASSERT(destsize > 0);
-
-		vm_xmax& wasm = vm_xmax::get();
-		auto  mem = wasm.current_memory;
-		char* begin = memoryArrayPtr<char>(mem, (int)str.c_str(), uint32_t(destsize));
-
-		int minlen = std::min<int>(wasm.current_validate_context->msg.data.size(), destsize);
-
-		memcpy(begin, wasm.current_validate_context->msg.data.data(), minlen);
-	}
-	BIND_VM_NATIVE_FUCTION_R2(vm_xmax_read_string, ds_void, read_string,ds_int, ds_string)
 }}

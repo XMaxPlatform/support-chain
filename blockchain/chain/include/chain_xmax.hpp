@@ -27,7 +27,7 @@ namespace Xmaxplatform { namespace Chain {
    using database = Basechain::database;
    using boost::signals2::signal;
         class chain_init;
-        class message_xmax;
+        struct message_xmax;
 		class builder_object;
    class chain_xmax {
       public:
@@ -202,22 +202,5 @@ namespace Xmaxplatform { namespace Chain {
 
 
    };
-
-    class message_xmax;
-        class chain_init {
-        public:
-            virtual ~chain_init();
-
-
-            virtual Basetypes::time get_chain_init_time() const = 0;
-
-            virtual Chain::blockchain_setup get_blockchain_setup() const = 0;
-
-            virtual Chain::xmax_builder_infos get_chain_init_builders() const = 0;
-
-            virtual void register_handlers(chain_xmax &chain, database &db) = 0;
-
-            virtual vector<message_xmax> prepare_data(chain_xmax &chain, database &db) = 0;
-        };
 
 } }

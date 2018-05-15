@@ -2,7 +2,7 @@
 *  @file
 *  @copyright defined in xmax/LICENSE
 */
-
+#include <blockchain_exceptions.hpp>
 #include <vm_native_interface.hpp>
 
 namespace Xmaxplatform {namespace Chain {

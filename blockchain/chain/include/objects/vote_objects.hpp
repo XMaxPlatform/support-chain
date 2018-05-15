@@ -97,7 +97,7 @@ FC_REFLECT(Xmaxplatform::Chain::voter_info_object, (id)(owner)(proxy)(is_proxy)(
 
 FC_REFLECT(Basechain::oid<Xmaxplatform::Chain::builder_info_object>, (_id))
 
-FC_REFLECT(Xmaxplatform::Chain::builder_info_object, (owner)(total_votes)(builder_key)(last_build_time))
+FC_REFLECT(Xmaxplatform::Chain::builder_info_object, (owner)(total_votes)(builder_key))
                                                                                     //(per_block_payments)(last_rewards_claim)(time_became_active)
 
 

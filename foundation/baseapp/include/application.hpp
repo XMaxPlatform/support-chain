@@ -77,12 +77,12 @@ namespace Baseapp {
          abstract_plugin& get_plugin(const string& name)const;
 
          template<typename Plugin>
-         auto& register_plugin() {
-            auto existing = find_plugin<Plugin>();
+         Plugin& register_plugin() {
+            Plugin* existing = find_plugin<Plugin>();
             if(existing)
                return *existing;
 
-            auto plug = new Plugin();
+            Plugin* plug = new Plugin();
             plugins[plug->name()].reset(plug);
             plug->register_dependencies();
             return *plug;

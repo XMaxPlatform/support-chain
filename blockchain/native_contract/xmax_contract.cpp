@@ -3,11 +3,11 @@
  *  @copyright defined in xmax/LICENSE
  */
 #include <xmax_contract.hpp>
-
+#include <blockchain_exceptions.hpp>
 #include <chain_xmax.hpp>
 #include <message_context_xmax.hpp>
 #include <message_xmax.hpp>
-#include <blockchain_exceptions.hpp>
+
 
 #include <objects/account_object.hpp>
 #include <objects/xmx_token_object.hpp>

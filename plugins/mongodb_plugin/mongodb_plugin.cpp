@@ -2,6 +2,8 @@
  *  @file
  *  @copyright defined in xmax/LICENSE.txt
  */
+
+#include <blockchain_exceptions.hpp>
 #include <mongodb_plugin.hpp>
 #include <fc/filesystem.hpp>
 #include <fc/log/logger.hpp>

@@ -3,6 +3,8 @@
  *  @copyright defined in xmax/LICENSE
  */
 #include <native_contract_chain_init.hpp>
+#include <blockchain_exceptions.hpp>
+#include <chain_xmax.hpp>
 #include <xmax_contract.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/algorithm/copy.hpp>

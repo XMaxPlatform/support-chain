@@ -19,8 +19,12 @@ include_directories(${WAVM_INCLUDE_DIR})
 	# Compile with all warnings and fatal warnings
 #	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
 
+if(UNIX)
+  if(APPLE)
 	# Disable RTTI
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+  endif()
+endif()
 	
 	# Ensure that even static libraries are relocatable so they can be linked into a .so
 #	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")

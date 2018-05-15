@@ -8,7 +8,6 @@
 
 using namespace Baseapp;
 namespace Xmaxplatform {
-
 	class contractutil_plugin : public plugin<contractutil_plugin> {
 	public:
 		contractutil_plugin();

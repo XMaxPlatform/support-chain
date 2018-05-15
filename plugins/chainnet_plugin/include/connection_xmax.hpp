@@ -120,19 +120,6 @@ namespace Xmaxplatform {
 		>
 	> block_state_index;
 
-	class chainnet_plugin_impl;
-	struct msgHandler : public fc::visitor<void> {
-		chainnet_plugin_impl &impl;
-		connection_ptr c;
-		msgHandler(chainnet_plugin_impl &imp, connection_ptr conn) : impl(imp), c(conn) {}
-
-		template <typename T>
-		void operator()(const T &msg) const
-		{
-			impl.handle_message(c, msg);
-		}
-	};
-
 	struct connection_status {
 		Chain::string            peer;
 		bool              connecting = false;
@@ -140,7 +127,7 @@ namespace Xmaxplatform {
 		handshake_message last_handshake;
 	};
 
-
+	class chainnet_plugin_impl;
 	
 
 	class connection_xmax : public std::enable_shared_from_this<connection_xmax> {

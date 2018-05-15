@@ -46,3 +46,9 @@ namespace Baseapp {
    template<typename Impl>
    class plugin;
 }
+
+
+namespace Xmaxplatform
+{
+    class chainhttp_plugin;
+}

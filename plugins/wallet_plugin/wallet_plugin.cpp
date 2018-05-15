@@ -2,6 +2,7 @@
 *  @file
 *  @copyright defined in xmax/LICENSE.txt
 */
+#include <blockchain_exceptions.hpp>
 #include <wallet_plugin.hpp>
 #include <chainhttp_plugin.hpp>
 

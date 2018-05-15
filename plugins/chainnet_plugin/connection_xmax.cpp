@@ -3,10 +3,12 @@
 *  @copyright defined in xmax/LICENSE
 */
 
-#include<blockchain_plugin.hpp>
-#include<chainnet_plugin.hpp>
-#include<application.hpp>
-#include<chain_xmax.hpp>
+#include <blockchain_exceptions.hpp>
+#include <blockchain_plugin.hpp>
+//#include <chainnet_plugin.hpp>
+#include <connection_xmax.hpp>
+#include <application.hpp>
+#include <chain_xmax.hpp>
 using namespace Baseapp;
 namespace Xmaxplatform {
 

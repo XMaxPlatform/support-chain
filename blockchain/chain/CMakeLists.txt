@@ -1,8 +1,10 @@
 file(GLOB HEADERS "include/*.hpp" "include/objects/*.hpp")
 file (GLOB SOURCE_FILES "*.cpp" "objects/*.cpp")
 
+if(MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj") 
+endif(MSVC)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj") 
 add_library( xmaxchain ${SOURCE_FILES} ${HEADERS} )
 target_link_libraries(
         xmaxchain fc basetypes basechain xmax_native_contract

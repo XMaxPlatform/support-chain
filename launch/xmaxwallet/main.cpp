@@ -2,7 +2,7 @@
  *  @file
  *  @copyright defined in xmax/LICENSE
  */
-
+#include <blockchain_exceptions.hpp>
 #include <application.hpp>
 
 #include <fc/log/logger_config.hpp>

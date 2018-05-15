@@ -2,12 +2,12 @@
  *  @file
  *  @copyright defined in xmax/LICENSE
  */
+#include <blockchain_exceptions.hpp>
 #include <blockchain_plugin.hpp>
 #include <genesis_state.hpp>
 #include <fc/io/json.hpp>
 #include <fc/variant.hpp>
 #include <fc/log/logger.hpp>
-#include <blockchain_exceptions.hpp>
 
 #include <native_contract_chain_init.hpp>
 #include <chain_xmax.hpp>

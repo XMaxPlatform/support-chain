@@ -15,9 +15,13 @@ add_executable( embed_genesis
 set(SPECIFIC_LIBS "")
 
 get_property(EMBED_GENESIS_BIN_DIR TARGET embed_genesis PROPERTY RUNTIME_OUTPUT_DIRECTORY)
+
+
+if("${EMBED_GENESIS_BIN_DIR}" STREQUAL "")
+        set(EMBED_GENESIS_BIN_DIR ${CMAKE_CURRENT_BINARY_DIR})
+endif()
+
 message(STATUS "EMBED_GENESIS_BIN_DIR:" ${EMBED_GENESIS_BIN_DIR})
-
-
 
 
 if(WIN32)
@@ -54,9 +58,8 @@ if( XMAX_EGENESIS_JSON )
    list( APPEND embed_genesis_args --genesis-json "${XMAX_EGENESIS_JSON}" )
 endif( XMAX_EGENESIS_JSON )
 
+
 MESSAGE( STATUS "embed_genesis_args: " ${embed_genesis_args} )
-
-
 
 
 add_custom_command(

@@ -2,14 +2,14 @@
 *  @file
 *  @copyright defined in xmax/LICENSE
 */
-
+#include <blockchain_exceptions.hpp>
 #include <vm_native_interface.hpp>
 #include <vm_native_interface_database.hpp>
 #include <vm_native_interface_message.hpp>
 #include <vm_native_interface_math.hpp>
 #include <vm_native_interface_transaction.hpp>
 #include <message_context_xmax.hpp>
-#include <blockchain_exceptions.hpp>
+
 #include <fc/uint128.hpp>
 
 namespace Xmaxplatform {namespace Chain {

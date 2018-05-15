@@ -2,7 +2,7 @@
 *  @file
 *  @copyright defined in xmax/LICENSE
 */
-
+#include <blockchain_exceptions.hpp>
 #include <sync_main.hpp>
 namespace Xmaxplatform {
 	fc::logger sync_main::logger;

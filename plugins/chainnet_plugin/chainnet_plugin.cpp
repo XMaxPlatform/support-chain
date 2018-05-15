@@ -2,6 +2,7 @@
  *  @file
  *  @copyright defined in xmax/LICENSE
  */
+#include <blockchain_exceptions.hpp>
 #include <xmaxtypes.hpp>
 #include <chainnet_plugin.hpp>
 #include <blockbuilder_plugin.hpp>
@@ -84,8 +85,6 @@ namespace Xmaxplatform {
          fc::raw::pack( ds, msg );
       }
    };
-
-   
 
    struct by_expiry;
    struct by_block_num;
@@ -875,6 +874,20 @@ namespace Xmaxplatform {
       //TODO
       return ecc::compact_signature();
    }
+
+   	class chainnet_plugin_impl;
+	struct msgHandler : public fc::visitor<void> {
+		chainnet_plugin_impl &impl;
+		connection_ptr c;
+		msgHandler(chainnet_plugin_impl &imp, connection_ptr conn) : impl(imp), c(conn) {}
+
+		template <typename T>
+		inline void operator()(const T &msg) const
+		{
+			impl.handle_message(c, msg);
+		}
+	};
+
 
    chainnet_plugin::chainnet_plugin()
       :my( new chainnet_plugin_impl ) {

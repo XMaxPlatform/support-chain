@@ -5,9 +5,11 @@
 #pragma once
 
 #include <genesis_state.hpp>
-
-#include <chain_xmax.hpp>
-
+#include <chain_init.hpp>
+namespace Xmaxplatform { namespace Chain{
+class chain_xmax;
+}
+}
 
 namespace Xmaxplatform { namespace Native_contract {
 

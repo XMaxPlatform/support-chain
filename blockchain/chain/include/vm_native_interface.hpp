@@ -210,7 +210,7 @@ namespace Xmaxplatform {namespace Chain {
 		IR::FunctionType::get(vm_rt::get_vm_result_type()), \
 	(void*)&VM_NATIVE_FUCTION_NAME(vm_func));\
 	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)() { \
-	 return ( ##nativ_func() );\
+	 return ( nativ_func() );\
 	}
 
 #define BIND_VM_NATIVE_FUCTION_R1(nativ_func, vm_rt, vm_func, arg_ds) \
@@ -222,7 +222,7 @@ namespace Xmaxplatform {namespace Chain {
 	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds::vm_type val1) { \
 		vm_xmax& wasm = vm_xmax::get();								\
 		Runtime::MemoryInstance*   mem = wasm.current_memory;		\
-		return ( ##nativ_func(arg_ds(mem, val1).get()) );\
+		return ( nativ_func(arg_ds(mem, val1).get()) );\
 	}
 
 #define BIND_VM_NATIVE_FUCTION_R2(nativ_func, vm_rt, vm_func, arg_ds1, arg_ds2) \
@@ -234,7 +234,7 @@ namespace Xmaxplatform {namespace Chain {
 	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type val1, arg_ds2::vm_type val2) { \
 		vm_xmax& wasm = vm_xmax::get();								\
 		Runtime::MemoryInstance*   mem = wasm.current_memory;		\
-		return ( ##nativ_func(arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get()) );\
+		return ( nativ_func(arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get()) );\
 	}
 
 #define BIND_VM_NATIVE_FUCTION_R3(nativ_func, vm_rt, vm_func, arg_ds1, arg_ds2, arg_ds3) \
@@ -246,7 +246,7 @@ namespace Xmaxplatform {namespace Chain {
 	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type val1, arg_ds2::vm_type val2, arg_ds3::vm_type val3) { \
 		vm_xmax& wasm = vm_xmax::get();								\
 		Runtime::MemoryInstance*   mem = wasm.current_memory;		\
-		return ( ##nativ_func( arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get(), arg_ds3(mem, val3).get() ) );\
+		return ( nativ_func( arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get(), arg_ds3(mem, val3).get() ) );\
 	}
 
 #define BIND_VM_NATIVE_FUCTION_R4(nativ_func, vm_rt, vm_func, arg_ds1, arg_ds2, arg_ds3, arg_ds4) \
@@ -258,7 +258,7 @@ namespace Xmaxplatform {namespace Chain {
 	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type val1, arg_ds2::vm_type val2, arg_ds3::vm_type val3, arg_ds4::vm_type val4) { \
 		vm_xmax& wasm = vm_xmax::get();								\
 		Runtime::MemoryInstance*   mem = wasm.current_memory;		\
-		return ( ##nativ_func( arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get(), arg_ds3(mem, val3).get(), arg_ds4(mem, val4).get() ) );\
+		return ( nativ_func( arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get(), arg_ds3(mem, val3).get(), arg_ds4(mem, val4).get() ) );\
 	}
 
 #define BIND_VM_NATIVE_FUCTION_R5(nativ_func, vm_rt, vm_func, arg_ds1, arg_ds2, arg_ds3, arg_ds4, arg_ds5) \
@@ -270,6 +270,6 @@ namespace Xmaxplatform {namespace Chain {
 	vm_rt::vm_type VM_NATIVE_FUCTION_NAME(vm_func)(arg_ds1::vm_type val1, arg_ds2::vm_type val2, arg_ds3::vm_type val3, arg_ds4::vm_type val4, arg_ds5::vm_type val5) { \
 		vm_xmax& wasm = vm_xmax::get();								\
 		Runtime::MemoryInstance*   mem = wasm.current_memory;		\
-		return ( ##nativ_func( arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get(), arg_ds3(mem, val3).get(), arg_ds4(mem, val4).get(), arg_ds5(mem, val5).get() ) );\
+		return ( nativ_func( arg_ds1(mem, val1).get(), arg_ds2(mem, val2).get(), arg_ds3(mem, val3).get(), arg_ds4(mem, val4).get(), arg_ds5(mem, val5).get() ) );\
 	}
 
