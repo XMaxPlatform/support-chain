@@ -1,6 +1,9 @@
 #include <xmaxlib/xmax.hpp>
 #include <xmaxlib/core.h>
 #include <xmaxlib/database.hpp>
+#include <xmaxlib/token.hpp>
+#include <xmaxlib/message.hpp>
+#include <xmaxlib/transaction.hpp>
 
 namespace testcontract
 {
@@ -21,7 +24,7 @@ struct testaction
      *  account to transfer to
      */
     test_tokens quantity;
-}
+};
 
 /**
      * @brief Test data for store data
@@ -34,7 +37,7 @@ struct testdata
     test_tokens balance;
 
     testdata(uint64_t key = XNAME(testcontract), test_tokens b = test_tokens()):key(key), balance(b) {}
-}
+};
 
 /**
    Defines the database table for test information

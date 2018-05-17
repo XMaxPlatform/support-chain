@@ -5,22 +5,22 @@ const uint64_t max_quantity = 9000000000ull;
 namespace testcontract {
 
     void apply_testaction( const testcontract::testaction& msg) {
-        if(msg.quantity <= 0 || msg.quantity > max_quantity) {
+        if(msg.quantity.quantity <= 0 || msg.quantity.quantity > max_quantity) {
             return;
         }
 
          testdata data(msg.account);         
 
-         if(!testdatas::get(data, N(msg.account))) {
+         if(!testdatas::get(data, XNAME(msg.account))) {
              testdatas::store(testdata(msg.account, msg.quantity), XNAME(msg.account));
              return;
          }
          else {
-             if(data.quantity > max_quantity - msg.quantity) {
+             if(data.balance.quantity > max_quantity - msg.quantity.quantity) {
                  return;
              }
 
-             data.quantity += msg.quantity;
+             data.balance.quantity += msg.quantity.quantity;
              testdatas::store(data, XNAME(msg.account));
          }
     }
@@ -50,7 +50,7 @@ extern "C" {
         //Dispatch call method accroding to the code and action
         if( code == XNAME(testcontract)) {
             if( action == XNAME(testaction)) {
-                apply_testaction( current_message<testcontract::testaction>() );
+                apply_testaction( Xmaxplatform::current_message<testcontract::testaction>() );
             }
 
 
