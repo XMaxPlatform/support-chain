@@ -5,23 +5,30 @@ const uint64_t max_quantity = 9000000000ull;
 namespace testcontract {
 
     void apply_testaction( const testcontract::testaction& msg) {
+        prints("a");
+
         if(msg.quantity.quantity <= 0 || msg.quantity.quantity > max_quantity) {
             return;
         }
 
+        prints("b");
          testdata data(msg.account);         
 
-         if(!testdatas::get(data, XNAME(msg.account))) {
-             testdatas::store(testdata(msg.account, msg.quantity), XNAME(msg.account));
+         if(!testdatas::get(msg.account, data, XNAME(testcontract))) {
+             data.balance = msg.quantity;
+             testdatas::store(data, XNAME(testcontract));
+             prints("cc");
              return;
          }
          else {
              if(data.balance.quantity > max_quantity - msg.quantity.quantity) {
+                 prints("d");
                  return;
              }
 
              data.balance.quantity += msg.quantity.quantity;
-             testdatas::store(data, XNAME(msg.account));
+             testdatas::store(data, XNAME(testcontract));
+             prints("e");
          }
     }
 
@@ -42,7 +49,7 @@ extern "C" {
     void init()  {        
         testdata data(XNAME(testcontract));
         if ( !testdatas::get(data, XNAME(testcontract) ))
-            testdatas::store(testdata(1000000000ull), XNAME(testcontract));
+            testdatas::store(testdata(XNAME(testcontract), testcontract::test_tokens(1000000000ull)), XNAME(testcontract));
     }
 
     /// The apply method implements the dispatch of events to this contract

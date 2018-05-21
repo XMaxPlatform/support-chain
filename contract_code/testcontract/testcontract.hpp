@@ -42,6 +42,6 @@ struct testdata
 /**
    Defines the database table for test information
    **/
-using testdatas = Xmaxplatform::table<XNAME(defaultscope), XNAME(testdata), XNAME(testdata), testdata, uint64_t>;
+using testdatas = Xmaxplatform::table<XNAME(defaultscope), XNAME(testcontract), XNAME(testdata), testdata, uint64_t>;
 
 } // namespace testcontract
