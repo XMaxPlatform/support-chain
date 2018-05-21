@@ -141,13 +141,13 @@ make install
 
 If you want to build the debug version, you can change  CMAKE_BUILD_TYPE value:
 
--DCMAKE_BUILD_TYPE=Debug.
+`-DCMAKE_BUILD_TYPE=Debug`
 
 ### Run xmaxrun
 
 `$(SolutionDir)install\bin` is the `working directory` for xmaxrun program.
 
-#### run Xmax block chain node.
+#### Run Xmax block chain node
 
 Open Terminal, and run:
 ```bash
@@ -184,9 +184,9 @@ plugin = Xmaxplatform::mongodb_plugin
 mongodb-uri = mongodb://localhost:27017
 
 ```
-The config of mongodb is not neccessary, if you just want to test or debug.
+The config of `MongoDB` is not neccessary, if you just want to test or debug.
 
-If you want to run xmax with mongodb, you must setup mongodb sevice first.
+If you want to run xmax with mongodb, you must setup `MongoDB` sevice first.
 
 Setup mongodb in another bash terminal. Setup command:
 

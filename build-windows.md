@@ -186,9 +186,11 @@ cmake -G "Visual Studio 14 2015 Win64" -DLLVM_DIR="c:/wasm/lib/cmake/llvm" -DWAS
 
 If cmake succeed, you will found the file `Xmax.sln` in `build` folder. Double click `Xmax.sln`, open the Xmax solution by Visual Studio 2015.
 
-Build the solution.
+Build the solution: 
 
 Right click `INSTALL` project in `Solution Explorer`, click `Build`.
+
+Set as StartUp Project: 
 
 Right click `xmaxrun` project in `Solution Explorer`, click `Set as StartUp Project`.
 
@@ -200,7 +202,7 @@ Select `Configuration Properties` --> `Debugging`.
 
 Set the `Working Directory` to `$(SolutionDir)install\bin`.
 
-You can debug it now.
+You can debug it with VS2015 now.
 
 ### Run xmaxrun on Windows
 
@@ -234,9 +236,12 @@ plugin = Xmaxplatform::mongodb_plugin
 mongodb-uri = mongodb://localhost:27017
 
 ```
-The config of mongodb is not neccessary, if you just want to test or debug.
 
-When first run of xmax block chain, it take a lot of time to init block chain db, please wait patiently.
+### Tips for debug
+
+The config of `MongoDB` is not neccessary, if you just want to test or debug.
+
+In first run of xmax block chain, it take a lot of time to init block chain db, please wait patiently.
 
 If you just want to test or debug something, you can set the smaller size of block chain db by config property `shared-file-size`.
 
