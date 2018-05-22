@@ -302,7 +302,7 @@ namespace Xmaxplatform { namespace Chain {
       auto& state = instances[name];
       if( state.code_version != recipient.code_version ) {
         if( state.instance ) {
-           /// TODO: free existing instance and module
+/// TODO: free existing instance and module
 //#warning TODO: free existing module if the code has been updated, currently leak memory
            state.instance     = nullptr;
            state.module       = nullptr;

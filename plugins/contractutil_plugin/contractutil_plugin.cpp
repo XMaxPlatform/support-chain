@@ -143,7 +143,32 @@ namespace Xmaxplatform {
 			cc.push_transaction(trx);
 		
 		}
+#ifdef USE_V8
+		void set_jscode(const std::string& callername, const std::string& wastPath, const std::string& abiPath)
+		{
+			std::string wast;
+			std::cout << "Reading JS..." << std::endl;
+			fc::read_file_contents(wastPath, wast);
 
+			Basetypes::setcode handler;
+			handler.account = callername;
+			handler.code.assign(wast.begin(), wast.end());
+
+			handler.code_abi = fc::json::from_file(abiPath).as<Basetypes::abi>();
+
+			Chain::signed_transaction trx;
+			trx.scope = sort_names({ Config::xmax_contract_name, callername });
+			transaction_emplace_message(trx, Config::xmax_contract_name, Basetypes::vector<Basetypes::account_permission>{ {callername, "active"}},
+				"setjscode", handler);
+
+			std::cout << "Publishing contract..." << std::endl;
+			Chain::chain_xmax& cc = app().get_plugin<blockchain_plugin>().getchain();
+			trx.expiration = cc.head_block_time() + fc::seconds(30);
+			transaction_set_reference_block(trx, cc.head_block_id());
+			cc.push_transaction(trx);
+
+		}
+#endif
 
 		void push_transaction(const std::string& callerPK, const std::string& callername, const fc::variant& vscope, const fc::variant& v)
 		{
@@ -251,8 +276,10 @@ namespace Xmaxplatform {
 		app().get_plugin<chainhttp_plugin>().add_api({
 			CALL(contractutil_plugin, my, create_account, INVOKE_V_R_R_R_R_R(my, create_account, std::string, std::string, std::string, public_key_type, public_key_type), 200),
 			CALL(contractutil_plugin, my, push_transaction, INVOKE_V_R_R_R_R(my, push_transaction, std::string, std::string, fc::variant , fc::variant), 200),
-			CALL(contractutil_plugin, my, set_code, INVOKE_V_R_R_R(my, set_code, std::string, std::string,  std::string), 200)
-
+			CALL(contractutil_plugin, my, set_code, INVOKE_V_R_R_R(my, set_code, std::string, std::string,  std::string), 200),
+#ifdef USE_V8
+			CALL(contractutil_plugin, my, set_jscode, INVOKE_V_R_R_R(my, set_jscode, std::string, std::string,  std::string), 200),
+#endif
 			
 		});
 		my.reset(new customised_plugin_impl);

@@ -15,4 +15,9 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/../../virtualmachine/wasm-jit/Include
 )
+
+if(USE_V8_VM)
+target_include_directories(xmaxchain  PUBLIC "include" ${CMAKE_CURRENT_SOURCE_DIR}/../../libraries/v8/include )
+endif()
+
 set_target_properties( xmaxchain PROPERTIES PUBLIC_HEADER "${HEADERS}" FOLDER "4.BlockChain")

@@ -1,0 +1,41 @@
+{
+    "types": [
+        {
+            "new_type_name": "account_name",
+            "type": "name"
+        }
+    ],
+    "structs": [
+        {
+            "name": "testaction",
+            "base": "",
+            "fields": {
+                "account": "account_name",
+                "quantity": "uint64"
+            }
+        },
+        {
+            "name": "testdata",
+            "base": "",
+            "fields": {
+                "key": "uint64",
+                "balance": "uint64"
+            }
+        }
+    ],
+    "actions": [
+        {
+            "action_name": "testaction",
+            "type": "testaction"
+        }
+    ],
+    "tables": [
+        {
+            "table_name": "testdata",
+            "type": "testdata",
+            "index_type": "i64",
+            "key_names": ["key"],
+            "key_types": ["uint64"]
+        }
+    ]
+}

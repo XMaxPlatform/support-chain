@@ -16,8 +16,12 @@
 #include <objects/static_config_object.hpp>
 #include <xmax_voting.hpp>
 #include <vm_xmax.hpp>
+
 #include <abi_serializer.hpp>
 
+#ifdef USE_V8
+#include <jsvm_xmax.h>
+#endif
 
 namespace Xmaxplatform {
     namespace Native_contract {
@@ -151,7 +155,35 @@ void handle_xmax_unlock(message_context_xmax& context)      {
     xmax_voting::decrease_votes(context, unlock.account, share_type(unlock.amount));
 }
 
+#ifdef USE_V8
+void handle_xmax_setjscode(Chain::message_context_xmax& context)
+{
+	auto& db = context.mutable_db;
+	auto  msg = context.msg.as<Types::setcode>();
 
+	context.require_authorization(msg.account);
+
+	FC_ASSERT(msg.vm_type == 0);
+	FC_ASSERT(msg.vm_version == 0);
+
+	abi_serializer(msg.code_abi).validate();
+
+	const auto& account = db.get<account_object, by_name>(msg.account);
+	db.modify(account, [&](auto& a) {
+	
+		a.code_version = fc::sha256::hash(msg.code.data(), msg.code.size());
+		a.code.resize(0);
+		a.code.resize(msg.code.size());
+		memcpy(a.code.data(), msg.code.data(), msg.code.size());
+
+		a.set_abi(msg.code_abi);
+	});
+
+	message_context_xmax init_context(context.mutable_controller, context.mutable_db, context.trx, context.msg, msg.account);
+	jsvm_xmax::get().init(init_context);
+
+}
+#endif
 
 void handle_xmax_setcode(message_context_xmax& context) {
 	auto& db = context.mutable_db;

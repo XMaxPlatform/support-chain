@@ -1,5 +1,6 @@
-#include "jsvm_xmax.h"
+#ifdef USE_V8
 
+#include "jsvm_xmax.h"
 /**
 *  @file
 *  @copyright defined in xmax/LICENSE
@@ -87,8 +88,9 @@ namespace Xmaxplatform {
 				checktime_limit = CHECKTIME_LIMIT;
 
 				load(c.code, c.db);
-
-				vm_onInit();
+				const auto& recipient = c.db.get<account_object, by_name>(c.code);
+				
+				vm_onInit((char*)recipient.code.data());
 
 			} FC_CAPTURE_AND_RETHROW()
 		}
@@ -102,7 +104,7 @@ namespace Xmaxplatform {
 			V8::Initialize();
 		}
 
-		void  jsvm_xmax::vm_apply() {
+		void  jsvm_xmax::vm_apply(char* code) {
 		
 			Handle<String> js_func_name = String::NewFromUtf8(current_state->current_isolate, "init", NewStringType::kNormal).ToLocalChecked();
 			Handle<v8::Value>  js_func_val = current_state->current_context->Global()->Get(js_func_name);
@@ -116,7 +118,7 @@ namespace Xmaxplatform {
 		
 		}
 
-		void  jsvm_xmax::vm_onInit()
+		void  jsvm_xmax::vm_onInit(char* code)
 		{
 			try {
 				try {
@@ -127,28 +129,36 @@ namespace Xmaxplatform {
 					
 
 					// Enter the context for compiling and running the hello world script.
-					//Context::Scope context_scope(context);
-					state.current_context_scope = new Context::Scope(context);
-					const char* jscode = recipient.code.data();
+					Context::Scope context_scope(context);
+					
+					const char* jscode = code;
 
 					// Create a string containing the JavaScript source code.
 					Local<String> source =
-						String::NewFromUtf8(isolate, jscode,
+						String::NewFromUtf8(current_state->current_isolate, jscode,
 							NewStringType::kNormal).ToLocalChecked();
 
 					// Compile the source code.
 					Local<Script> script = Script::Compile(context, source).ToLocalChecked();
-					state.current_script = script;
-
+					//state.current_script = script;
+					if (script.IsEmpty()) {
+						std::cerr << "js compile failed" << std::endl;
+					}
+					//运行脚本代码
+					script->Run();
 				
 					Handle<String> js_func_name = String::NewFromUtf8(current_state->current_isolate , "init", NewStringType::kNormal).ToLocalChecked();
-					Handle<v8::Value>  js_func_val = current_state->current_context->Global()->Get(js_func_name);
+					Handle<v8::Value>  js_func_val = context->Global()->Get(js_func_name);
 					if (!js_func_val->IsFunction())
 					{
 						std::cerr << "Can't find js funcion init()" << std::endl;
 					}
-					Handle<Function> js_func = Handle<Function>::Cast(js_func_val);
-					Handle<v8::Value> hResult = js_func->Call(current_state->current_context->Global(), 0, nullptr);
+					else
+					{
+						Handle<Function> js_func = Handle<Function>::Cast(js_func_val);
+						Handle<v8::Value> hResult = js_func->Call(context->Global(), 0, nullptr);
+					}
+					
 				}
 				catch (const Runtime::Exception& e) {
 					edump((std::string(describeExceptionCause(e.cause))));
@@ -216,5 +226,5 @@ namespace Xmaxplatform {
 	}
 }
 
-
+#endif
 
