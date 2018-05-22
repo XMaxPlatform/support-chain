@@ -56,7 +56,12 @@ if(WIN32)
 		set(MASM_FOUND true)
 	endif(CMAKE_ASM_MASM_COMPILER)
 
-	message(STATUS "-------------- Window config end -----------")
+	set(USE_V8_VM false CACHE BOOL "vmtype")
+	if(USE_V8_VM)
+		message(STATUS "use v8 vm")
+		add_definitions(-DUSE_V8)
+	endif()	
 	
+	message(STATUS "-------------- Window config end -----------")
 	
 endif(WIN32)

@@ -23,6 +23,10 @@ void handle_xmax_unlock(Chain::message_context_xmax& context);
 
 void handle_xmax_setcode(Chain::message_context_xmax& context);
 
+#ifdef USE_V8
+void handle_xmax_setjscode(Chain::message_context_xmax& context);
+#endif
+
 void handle_xmax_votebuilder(Chain::message_context_xmax& context);
 void handle_xmax_regbuilder(Chain::message_context_xmax& context);
 void handle_xmax_unregbuilder(Chain::message_context_xmax& context);

@@ -44,6 +44,9 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
     SET_APP_HANDLER( xmax, xmax, regproxy, Xmaxplatform );
     SET_APP_HANDLER( xmax, xmax, unregproxy, Xmaxplatform );
 	SET_APP_HANDLER(xmax, xmax, setcode, Xmaxplatform);
+#ifdef USE_V8
+	SET_APP_HANDLER(xmax, xmax, setjscode, Xmaxplatform);
+#endif
 }
 
         Basetypes::abi native_contract_chain_init::xmax_contract_abi()

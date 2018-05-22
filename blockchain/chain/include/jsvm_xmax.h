@@ -79,8 +79,8 @@ namespace Xmaxplatform {
 			void load(const account_name& name, const Basechain::database& db);
 			void  vm_validate();
 			void  vm_precondition();
-			void  vm_apply();
-			void  vm_onInit();
+			void  vm_apply(char* code);
+			void  vm_onInit(char* code);
 			//U32   vm_pointer_to_offset(char*);
 
 
