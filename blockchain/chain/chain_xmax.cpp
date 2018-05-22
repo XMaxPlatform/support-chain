@@ -447,8 +447,12 @@ namespace Xmaxplatform { namespace Chain {
         )
         {
             try {
+
+				//check properties.
 				FC_ASSERT(head_block_time() < when.time_point(), "block must be generated at a timestamp after the head block time");
 
+
+				// prepare data.
 				const dynamic_states_object& dy_state = get_dynamic_states();
 
 				time_point start = fc::time_point::now();
@@ -457,6 +461,8 @@ namespace Xmaxplatform { namespace Chain {
 
                 uint32_t pending_block_size = fc::raw::pack_size( pending_block );
 
+
+				// build block.
                 pending_block.previous = dy_state.head_block_id;
                 pending_block.timestamp = when;
                 pending_block.transaction_merkle_root = pending_block.calculate_merkle_root();
@@ -478,7 +484,7 @@ namespace Xmaxplatform { namespace Chain {
                 }
 
 
-
+				
                 pending_block.sign(sign_private_key);
 
                 return pending_block;
@@ -547,6 +553,8 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::_finalize_block(const signed_block& b) 
 		{		
+
+			
 			const dynamic_states_object& dy_state = get_dynamic_states();
 
 			chain_timestamp current_block_time = b.timestamp;

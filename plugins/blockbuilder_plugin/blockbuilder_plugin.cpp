@@ -102,12 +102,12 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 	{
 		const Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
 		const Chain::dynamic_states_object& states = chain.get_dynamic_states();
-		if (0 == chain.head_block_num())
+		if (0 == chain.head_block_num()) // start genesis.
 		{
 			ilog("build loop with genesis block.");
 			genesis_block_build();
 		}
-		else
+		else// continue work.
 		{
 			ilog("build loop.");
 			next_block();
@@ -192,6 +192,8 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
 	void blockbuilder_plugin_impl::genesis_block_build()
 	{
+
+		// init first block properties.
 		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
 
 		const Chain::dynamic_states_object& states = chain.get_dynamic_states();
@@ -203,6 +205,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
 		try
 		{
+			// build the first block.
 			Chain::signed_block block = chain.generate_block(
 				now_timestamp,
 				current_builder,
