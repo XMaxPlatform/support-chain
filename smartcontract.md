@@ -60,7 +60,7 @@ extern "C" {
 
 ```C++
 //...
-#include #include <xmaxlib/token.hpp>
+#include <xmaxlib/token.hpp>
 
 namespace testcontract
 {
@@ -131,3 +131,34 @@ You need to make sure the code's name is same as the contract: `testcontract`, u
 
 
 ### Impelment the message business logic.
+
+#### Add data table to save business data
+
+Add bellow struct to `testcontract.hpp`
+```C++
+struct testdata
+{
+    uint64_t key;
+
+    test_tokens balance;
+
+    testdata(uint64_t key = XNAME(testcontract), test_tokens b = test_tokens()):key(key), balance(b) {}
+};
+
+/**
+   Defines the database table for test information
+   **/
+using testdatas = Xmaxplatform::table<XNAME(defaultscope), XNAME(testcontract), XNAME(testdata), testdata, uint64_t>;
+```
+
+#### Add contract init logic
+
+```C++
+void init()  {        
+        testdata data(XNAME(testcontract));
+        if ( !testdatas::get(data, XNAME(testcontract) ))
+            testdatas::store(testdata(XNAME(testcontract), testcontract::test_tokens(1000000000ull)), XNAME(testcontract));
+    }
+```
+We initiailize contract account `testcontract` with the tokens.
+
