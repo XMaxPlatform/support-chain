@@ -23,15 +23,10 @@ namespace Xmaxplatform {
 			};
 			typedef map<name, key_type> TableMap;
 			struct ModuleState {
-				/*
-				Runtime::ModuleInstance* instance = nullptr;
-				IR::Module*              module = nullptr;
-				int                      mem_start = 0;
-				int                      mem_end = 1 << 16;
-				vector<char>             init_memory;*/
+				
 
 				Local<Script>			 current_script;
-				Isolate*                 current_isolate;
+				Isolate*                 current_isolate = nullptr;
 				Local<Context>           current_context;
 
 				Isolate::Scope*          current_isolate_scope;

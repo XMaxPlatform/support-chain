@@ -21,7 +21,45 @@
 #include <fc/int128.hpp>
 #endif
 
+#include "jsvm_util.h"
+/*
+	void exportFoo(const FunctionCallbackInfo<v8::Value>& args) {
+	
+		for (int i = 0; i < args.Length(); i++) {
+		v8::HandleScope handle_scope(args.GetIsolate());
 
+		Handle<v8::Value> js_data_value = args[i];
+	
+		bool bIsObject = js_data_value->IsObject();
+		if (bIsObject)
+		{
+			Handle<Object> js_data_object = Handle<Object>::Cast(js_data_value);
+
+			Handle<String> js_func_name = String::NewFromUtf8(
+				Xmaxplatform::Chain::jsvm_xmax::get().current_state->current_isolate,
+				"toOctetString",
+				NewStringType::kNormal).ToLocalChecked();
+
+			Handle<String> js_param_name = String::NewFromUtf8(
+				Xmaxplatform::Chain::jsvm_xmax::get().current_state->current_isolate,
+				" ",
+				NewStringType::kNormal).ToLocalChecked();
+
+			Handle<Value>  js_func_ref = js_data_object->Get(js_func_name);
+			Handle<Function> js_func = Handle<Function>::Cast(js_func_ref);
+ 
+ 			Handle<v8::Value> args[1];
+ 			args[0] = js_param_name;
+ 
+ 			Handle<Value> result = js_func->Call(js_data_object, 1, args);
+ 
+ 			String::Utf8Value utf8(result);
+ 			printf("%s\n", *utf8);
+		
+		}
+	}
+}
+*/
 namespace Xmaxplatform {
 
 	namespace Chain {
@@ -118,36 +156,95 @@ namespace Xmaxplatform {
 		
 		}
 
+		void vm_init(const HandleScope& scope, const Local<ObjectTemplate>& global, const Local<Context>& context, const Context::Scope& ctxScope)
+		{
+			Isolate* isolate = jsvm_xmax::get().current_state->current_isolate;
+		
+			message_context_xmax& msg_contxt = *jsvm_xmax::get().current_message_context;
+			const auto& recipient = msg_contxt.db.get<account_object, by_name>(msg_contxt.code);
+
+			CompileJsCode(isolate, context, (char*)recipient.code.data());
+			
+			message_context_xmax & validate_context = *jsvm_xmax::get().current_validate_context;
+			Handle<v8::Value> params[2];
+			params[0] = I64Cpp2JS(isolate, context, uint64_t(validate_context.msg.code));
+			params[1] = I64Cpp2JS(isolate, context, uint64_t(validate_context.msg.type));
+			CallJsFoo(isolate, context,"init", 2, params);
+		}
+
 		void  jsvm_xmax::vm_onInit(char* code)
 		{
 			try {
-				try {
-					//const auto& recipient = db.get<account_object, by_name>(name);
+				namespace  ph = std::placeholders;
+				EnterJsContext(current_state->current_isolate, std::bind(&vm_init, ph::_1, ph::_2, ph::_3, ph::_4));
 
-					HandleScope current_handle_scope(current_state->current_isolate);
-					Local<Context> context = Context::New(current_state->current_isolate);
-					
+				/*
+				//const auto& recipient = db.get<account_object, by_name>(name);
+				HandleScope current_handle_scope(current_state->current_isolate);
 
-					// Enter the context for compiling and running the hello world script.
-					Context::Scope context_scope(context);
-					
-					const char* jscode = code;
+				v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(current_state->current_isolate);
+				// Bind the global 'print' function to the C++ Print callback.  
+				global->Set(
+					v8::String::NewFromUtf8(current_state->current_isolate, "exportFoo", v8::NewStringType::kNormal)
+					.ToLocalChecked(),
+					v8::FunctionTemplate::New(current_state->current_isolate, exportFoo));
 
-					// Create a string containing the JavaScript source code.
-					Local<String> source =
-						String::NewFromUtf8(current_state->current_isolate, jscode,
-							NewStringType::kNormal).ToLocalChecked();
-
-					// Compile the source code.
-					Local<Script> script = Script::Compile(context, source).ToLocalChecked();
-					//state.current_script = script;
-					if (script.IsEmpty()) {
-						std::cerr << "js compile failed" << std::endl;
-					}
-					//运行脚本代码
-					script->Run();
 				
-					Handle<String> js_func_name = String::NewFromUtf8(current_state->current_isolate , "init", NewStringType::kNormal).ToLocalChecked();
+				Local<Context> context = Context::New(current_state->current_isolate, NULL, global);
+
+				// Enter the context for compiling and running the hello world script.
+				Context::Scope context_scope(context);
+				
+
+				const char* jscode = code;
+
+				// Create a string containing the JavaScript source code.
+				Local<String> source =
+					String::NewFromUtf8(current_state->current_isolate, jscode,
+						NewStringType::kNormal).ToLocalChecked();
+
+				// Compile the source code.
+
+				MaybeLocal<Script> temp = Script::Compile(context, source);
+				if (temp.IsEmpty())
+				{
+					std::cerr << "js compile failed" << std::endl;
+				}
+				Local<Script> script = temp.ToLocalChecked();
+				//state.current_script = script;
+				if (script.IsEmpty()) {
+					std::cerr << "js compile failed" << std::endl;
+				}
+				//运行脚本代码
+				script->Run();
+				
+				Handle<String> js_data = String::NewFromUtf8(current_state->current_isolate, "Int64", NewStringType::kNormal).ToLocalChecked();
+				Handle<v8::Value> js_data_value = context->Global()->Get(js_data);
+
+				bool bIsObject = js_data_value->IsObject();
+				if (bIsObject)
+				{
+					Handle<Object> js_data_object = Handle<Object>::Cast(js_data_value);
+
+					uint64_t  pcode = uint64_t(current_validate_context->msg.code);
+					int* pcodes = (int*)&pcode;
+
+					Handle<v8::Value>  argcodev[2];
+					argcodev[0] = Int32::New(current_state->current_isolate, pcodes[1]);
+					argcodev[1] = Int32::New(current_state->current_isolate, pcodes[0]);
+
+					Handle<v8::Value> codeObj = js_data_object->CallAsConstructor(2, argcodev);
+
+					uint64_t  ptype = uint64_t(current_validate_context->msg.type);
+					int* ptypes = (int*)&ptype;
+
+					Handle<v8::Value>  argtypev[2];
+					argtypev[0] = Int32::New(current_state->current_isolate, ptypes[0]);
+					argtypev[1] = Int32::New(current_state->current_isolate, ptypes[1]);
+
+					Handle<v8::Value> typeObj = js_data_object->CallAsConstructor(2, argtypev);
+
+					Handle<String> js_func_name = String::NewFromUtf8(current_state->current_isolate, "init", NewStringType::kNormal).ToLocalChecked();
 					Handle<v8::Value>  js_func_val = context->Global()->Get(js_func_name);
 					if (!js_func_val->IsFunction())
 					{
@@ -155,17 +252,19 @@ namespace Xmaxplatform {
 					}
 					else
 					{
+						Handle<v8::Value> initargs[2];
+						initargs[0] = codeObj;
+						initargs[1] = typeObj;
 						Handle<Function> js_func = Handle<Function>::Cast(js_func_val);
-						Handle<v8::Value> hResult = js_func->Call(context->Global(), 0, nullptr);
+						Handle<v8::Value> hResult = js_func->Call(context->Global(), 2, initargs);
 					}
-					
-				}
-				catch (const Runtime::Exception& e) {
-					edump((std::string(describeExceptionCause(e.cause))));
-					edump((e.callStack));
-					throw;
-				}
-			} FC_CAPTURE_AND_RETHROW()
+				}*/
+			}
+			catch (const Runtime::Exception& e) {
+				edump((std::string(describeExceptionCause(e.cause))));
+				edump((e.callStack));
+				throw;
+			}
 		}
 
 		void jsvm_xmax::load(const account_name& name, const Basechain::database& db)
@@ -182,15 +281,15 @@ namespace Xmaxplatform {
 				try
 				{
 					const auto init_time = fc::time_point::now();
-
-					Isolate::CreateParams create_params;
-					create_params.array_buffer_allocator =
-						v8::ArrayBuffer::Allocator::NewDefaultAllocator();
-					Isolate* isolate = Isolate::New(create_params);
-					state.current_isolate = isolate;
-					state.current_isolate_scope = new Isolate::Scope(isolate);
-
-
+					if (state.current_isolate == nullptr)
+					{
+						Isolate::CreateParams create_params;
+						create_params.array_buffer_allocator =
+							v8::ArrayBuffer::Allocator::NewDefaultAllocator();
+						Isolate* isolate = Isolate::New(create_params);
+						state.current_isolate = isolate;
+						state.current_isolate_scope = new Isolate::Scope(isolate);
+					}
 
 					//init abi
 					Basetypes::abi abi;
