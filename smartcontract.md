@@ -160,5 +160,33 @@ void init()  {
             testdatas::store(testdata(XNAME(testcontract), testcontract::test_tokens(1000000000ull)), XNAME(testcontract));
     }
 ```
-We initiailize contract account `testcontract` with the tokens.
+We set contract account `testcontract` with the init tokens.
 
+
+#### Handle message logic
+
+When received message, we check the quantity validation first, return if not valid. Then we check the contract account for the account specified by the message, create one if not exist. Finally we add the token to the account balance.
+```C++
+void apply_testaction( const testcontract::testaction& msg) {
+      
+        if(msg.quantity.quantity <= 0 || msg.quantity.quantity > max_quantity) {
+            return;
+        }
+
+         testdata data(msg.account);         
+
+         if(!testdatas::get(msg.account, data, XNAME(testcontract))) {
+             data.balance = msg.quantity;
+             testdatas::store(data, XNAME(testcontract));
+             return;
+         }
+         else {
+             if(data.balance.quantity > max_quantity - msg.quantity.quantity) {
+                 return;
+             }
+
+             data.balance.quantity += msg.quantity.quantity;
+             testdatas::store(data, XNAME(testcontract));
+         }
+    }
+```
