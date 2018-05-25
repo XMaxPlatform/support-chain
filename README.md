@@ -1,5 +1,5 @@
-# xmax
-Xmax BlockChain System
+# support-chain
+Xmax Support BlockChain System
 
 # Table of contents
 
