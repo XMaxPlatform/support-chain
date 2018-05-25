@@ -156,6 +156,7 @@ namespace Xmaxplatform { namespace Chain {
 			generated_transaction_object_type,
 			block_summary_object_type,
 			rate_limiting_object_type,
+			block_object_type,
             OBJECT_TYPE_COUNT ///< Sentry value which contains the number of different object types
         };
    

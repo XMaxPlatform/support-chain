@@ -158,11 +158,14 @@ namespace Chain_APIs{
 				return *block;
 		}
 		catch (fc::bad_cast_exception) {/* do nothing */ }
+		catch (std::out_of_range) {/* do nothing */ }
+
 		try {
 			if (auto block = _chain.get_block_from_num(fc::to_uint64(params.block_num_or_id)))
 				return *block;
 		}
 		catch (fc::bad_cast_exception) {/* do nothing */ }
+		catch (std::out_of_range) {/* do nothing */ }
 
 		FC_THROW_EXCEPTION(Chain::unknown_block_exception,
 			"Could not find block: ${block}", ("block", params.block_num_or_id));

@@ -36,10 +36,12 @@
 #include <objects/resource_token_object.hpp>
 #include <objects/xmx_token_object.hpp>
 #include <objects/builder_object.hpp>
+#include <objects/block_object.hpp>
 
 #include <vm_xmax.hpp>
 
 #include <abi_serializer.hpp>
+
 
 namespace Xmaxplatform { namespace Chain {
 
@@ -54,6 +56,7 @@ namespace Xmaxplatform { namespace Chain {
 			_data.add_index<transaction_multi_index>();
 			_data.add_index<generated_transaction_multi_index>();
 			_data.add_index<block_summary_multi_index>();
+			_data.add_index<block_multi_index>();
 
             _data.add_index<static_config_multi_index>();
             _data.add_index<dynamic_states_multi_index>();
@@ -669,6 +672,12 @@ namespace Xmaxplatform { namespace Chain {
 				dgp.builders_elect_state = builder_elect_state;
             });
 
+			// update block data
+			_data.create<block_object>([&](block_object& block) {
+				block.blk_id = b.id();
+				block.block = b;
+			});
+				
         }
 
         void chain_xmax::set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v ) {
@@ -827,14 +836,15 @@ namespace Xmaxplatform { namespace Chain {
 		}
 
 		optional<signed_block>			chain_xmax::get_block_from_id(const xmax_type_block_id& id)const
-		{
-			//TODO
-			return optional<signed_block>();
+		{			
+
+			const auto& block_obj = _data.get<block_object, by_blk_id>(id);
+			return block_obj.block;
 		}
 		optional<signed_block>      chain_xmax::get_block_from_num(uint32_t num)const
 		{
-			//TODO
-			return optional<signed_block>();
+			const auto& block_obj = _data.get<block_object, by_blk_num>(num);
+			return block_obj.block;
 		}
 
 		void chain_xmax::create_block_summary(const signed_block& next_block)
