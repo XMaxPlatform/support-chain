@@ -1,7 +1,7 @@
-#include "jsvm_util.h"
-#include <iostream>
 
 #ifdef USE_V8
+#include "jsvm_util.h"
+#include <iostream>
 
 namespace Xmaxplatform {
 
