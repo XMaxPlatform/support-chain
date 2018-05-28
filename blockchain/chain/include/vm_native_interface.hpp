@@ -190,7 +190,7 @@ namespace Xmaxplatform {namespace Chain {
 		typedef vm_arg::ds_val<double, NativeTypes::f64, ValueType::f64, ResultType::f64> ds_f64; // ds for double
 
 		typedef vm_arg::ds_val<bool, vm_arg::vm_int_t, vm_arg::vm_value_t, vm_arg::vm_result_t> ds_bool; // ds for bool
-		typedef vm_arg::ds_val<uint32, uint32, ValueType::i32, ResultType::i32> ds_time; // ds for bool
+		typedef vm_arg::ds_val<uint32, uint32_t, ValueType::i32, ResultType::i32> ds_time; // ds for bool
 
 		typedef vm_arg::ds_ptr<const char> ds_cp_char; // ds for const char *
 		typedef vm_arg::ds_char_string ds_string; // ds for string	
