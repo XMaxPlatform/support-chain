@@ -8,6 +8,7 @@
 #include <vm_native_interface_message.hpp>
 #include <vm_native_interface_math.hpp>
 #include <vm_native_interface_transaction.hpp>
+#include <vm_native_interface_event.hpp>
 #include <message_context_xmax.hpp>
 
 #include <fc/uint128.hpp>
@@ -23,6 +24,7 @@ namespace Xmaxplatform {namespace Chain {
 		vm_message_log();
 		vm_math_log();
 		vm_transaction_log();
+		vm_event_log();
 	}
 
 	void vm_checktime()

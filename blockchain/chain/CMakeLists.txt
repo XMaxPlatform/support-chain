@@ -14,6 +14,7 @@ target_include_directories(
         xmaxchain PUBLIC "include"
         ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/../../virtualmachine/wasm-jit/Include
+        ${CMAKE_SOURCE_DIR}/contracts_cpp/include
 )
 
 if(USE_V8_VM)

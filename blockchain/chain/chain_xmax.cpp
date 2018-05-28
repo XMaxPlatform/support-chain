@@ -694,6 +694,11 @@ namespace Xmaxplatform { namespace Chain {
             message_context_xmax xmax_ctx(*this, _data, trx, message, code);
             apply_message(xmax_ctx);
 
+			for (auto& event_output : xmax_ctx.events)
+			{
+				output.events.push_back(std::move(event_output));
+			}
+
             output.notify.reserve( xmax_ctx.notified.size() );
 
             for( uint32_t i = 0; i < xmax_ctx.notified.size(); ++i ) {

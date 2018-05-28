@@ -319,6 +319,7 @@ public:
    std::deque<account_name>             notified;
    std::vector<Basetypes::message>          inline_messages; ///< queued inline messages
    std::vector<Basetypes::transaction>      deferred_transactions; ///< deferred txs
+   std::vector<event_output>            events;
 
    ///< Parallel to msg.authorization; tracks which permissions have been used while processing the message
    vector<bool> used_authorizations;

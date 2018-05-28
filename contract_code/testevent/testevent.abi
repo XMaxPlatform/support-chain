@@ -1,0 +1,34 @@
+{
+    "types": [
+        {
+            "new_type_name": "account_name",
+            "type": "name"
+        }
+    ],
+    "structs": [
+        {
+            "name": "ontestevent",
+            "base": "",
+            "fields": {
+                "from": "account_name",
+                "numfield": "uint64"
+            }
+        },
+        {
+            "name": "normalaction",
+            "base": "",
+            "fields": {
+                "testaccount": "account_name",
+                "abc": "uint64"
+            }
+        }
+    ],
+    "actions": [
+        {
+            "action_name": "normalaction",
+            "type": "normalaction"
+        }
+    ],
+    "tables": [      
+    ]
+}
