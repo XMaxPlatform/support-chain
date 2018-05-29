@@ -22,6 +22,7 @@
 #endif
 
 #include "jsvm_util.h"
+#include "jsvm_objbind/Int64Bind.h"
 /*
 	void exportFoo(const FunctionCallbackInfo<v8::Value>& args) {
 	
@@ -159,17 +160,17 @@ namespace Xmaxplatform {
 		void vm_init(const HandleScope& scope, const Local<ObjectTemplate>& global, const Local<Context>& context, const Context::Scope& ctxScope)
 		{
 			Isolate* isolate = jsvm_xmax::get().current_state->current_isolate;
-		
+
 			message_context_xmax& msg_contxt = *jsvm_xmax::get().current_message_context;
 			const auto& recipient = msg_contxt.db.get<account_object, by_name>(msg_contxt.code);
 
 			CompileJsCode(isolate, context, (char*)recipient.code.data());
 			
 			message_context_xmax & validate_context = *jsvm_xmax::get().current_validate_context;
-			Handle<v8::Value> params[2];
-			params[0] = I64Cpp2JS(isolate, context, uint64_t(validate_context.msg.code));
-			params[1] = I64Cpp2JS(isolate, context, uint64_t(validate_context.msg.type));
-			CallJsFoo(isolate, context,"init", 2, params);
+ 			Handle<v8::Value> params[2];
+ 			params[0] = I64Cpp2JS(isolate, context, uint64_t(validate_context.msg.code));
+ 			params[1] = I64Cpp2JS(isolate, context, uint64_t(validate_context.msg.type));
+			CallJsFoo(isolate, context,"init", 0, NULL);
 		}
 
 		void  jsvm_xmax::vm_onInit(char* code)

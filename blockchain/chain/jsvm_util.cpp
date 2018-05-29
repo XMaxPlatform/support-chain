@@ -2,11 +2,10 @@
 #ifdef USE_V8
 #include "jsvm_util.h"
 #include <iostream>
-
+#include "jsvm_objbind/Int64Bind.h"
 namespace Xmaxplatform {
 
 	namespace Chain {
-
 
 		void EnterJsContext(Isolate* pIsolate,DoWorkInJsCtx dowork)
 		{
@@ -15,7 +14,7 @@ namespace Xmaxplatform {
 			v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(pIsolate);
 
 			BindJsFoos(pIsolate, global, FooBind::GetBindFoos(pIsolate));
-
+			SetupV8i64ObjectToJs(pIsolate, global);
 			Local<Context> context = Context::New(pIsolate, NULL, global);
 			Context::Scope context_scope(context);
 
@@ -59,7 +58,7 @@ namespace Xmaxplatform {
 			if (!js_func_val->IsFunction())
 			{
 				std::cerr << "Can't find js funcion init()" << std::endl;
-				return Handle<v8::Value>();
+				return  Undefined(pIsolate);
 			}
 			else
 			{
@@ -71,7 +70,7 @@ namespace Xmaxplatform {
 
 		Handle<v8::Value> I64Cpp2JS(Isolate* isolate, const Local<Context>& context, int64_t v)
 		{
-			Handle<String> js_data = String::NewFromUtf8(isolate, "Int64", NewStringType::kNormal).ToLocalChecked();
+			Handle<String> js_data = String::NewFromUtf8(isolate, "V8i64", NewStringType::kNormal).ToLocalChecked();
 			Handle<v8::Value> js_data_value = context->Global()->Get(js_data);
 
 			bool bIsObject = js_data_value->IsObject();
@@ -88,8 +87,7 @@ namespace Xmaxplatform {
 				Handle<v8::Value> codeObj = js_data_object->CallAsConstructor(2, argcodev);
 				return codeObj;
 			}
-			return Handle<v8::Value>();
-
+			return Undefined(isolate);
 		}
 		/*
 		int64_t  I64JS2Cpp(Isolate* isolate,Handle<Object> jsobj)

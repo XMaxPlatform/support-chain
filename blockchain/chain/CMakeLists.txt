@@ -1,11 +1,21 @@
 file(GLOB HEADERS "include/*.hpp" "include/objects/*.hpp")
 file (GLOB SOURCE_FILES "*.cpp" "objects/*.cpp")
 
+if(USE_V8_VM)
+file (GLOB JSVM_BIND "jsvm_objbind/*.cpp" "jsvm_objbind/*.h")
+source_group("jsvm_bind"            FILES ${JSVM_BIND})
+endif()
+
 if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj") 
 endif(MSVC)
 
-add_library( xmaxchain ${SOURCE_FILES} ${HEADERS} )
+if(USE_V8_VM)
+add_library( xmaxchain ${SOURCE_FILES} ${HEADERS} ${JSVM_BIND} )
+else()
+add_library( xmaxchain ${SOURCE_FILES} ${HEADERS}  )
+endif()
+
 target_link_libraries(
         xmaxchain fc basetypes basechain xmax_native_contract
         Runtime IR WASM
