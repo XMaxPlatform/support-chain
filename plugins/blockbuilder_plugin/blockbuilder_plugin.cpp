@@ -4,6 +4,7 @@
  */
 #include <blockchain_exceptions.hpp>
 #include <chaindata_plugin.hpp>
+#include <initial_builder_state.hpp>
 #include <blockbuilder_plugin.hpp>
 #include <blockchain_plugin.hpp>
 #include <block.hpp>
@@ -25,6 +26,10 @@ public:
 	void start_build();
 	bool import_key(const account_name& builder, const Basetypes::string& private_key);
 	bool import_key(const account_name& builder, const private_key_type& private_key);
+
+	void set_builders_file(const Baseapp::bfs::path& file_path);
+
+	void init_builders();
 private: 
 
 	void start_check();
@@ -34,6 +39,7 @@ private:
     block_build_condition next_block_impl();
     block_build_condition build_block(fc::mutable_variant_object& capture);
 private:
+	Baseapp::bfs::path _builders_file;
 	std::map<Chain::public_key_type, Chain::private_key_type> _builder_keys;
 	std::set<account_name> _builders;
 };
@@ -42,21 +48,30 @@ private:
 :my(new blockbuilder_plugin_impl(app().get_io_service())) {
 }
 
+	void blockbuilder_plugin_impl::set_builders_file(const Baseapp::bfs::path& file_path)
+	{
+		_builders_file = file_path;
+	}
+
     blockbuilder_plugin::~blockbuilder_plugin(){}
 
 void blockbuilder_plugin::set_program_options(options_description& cli, options_description& cfg)
 {
-
+	cfg.add_options()
+		("initial-builders", bpo::value<boost::filesystem::path>(), "Json file to read builders from");
 }
 
 void blockbuilder_plugin::plugin_initialize(const variables_map& options) {
     ilog("blockbuilder_plugin::plugin_initialize");
+
+	if (options.count("initial-builders")) {
+		my->set_builders_file(options.at("initial-builders").as<Baseapp::bfs::path>());
+	}
 }
 
 void blockbuilder_plugin::plugin_startup() {
 
-	my->import_key(Config::xmax_contract_name, Config::xmax_build_private_key);
-
+	my->init_builders();
 
     ilog("blockbuilder_plugin::plugin_startup");
     my->start_build();
@@ -87,6 +102,22 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 		}
 		import_key(builder, *optional_private_key);
 		return true;
+	}
+
+	void blockbuilder_plugin_impl::init_builders()
+	{
+		import_key(Config::xmax_contract_name, Config::xmax_build_private_key);
+
+		if (_builders_file.has_leaf())
+		{
+			auto builder_state = fc::json::from_file(_builders_file).as<initial_builder_state>();
+
+			for (const auto& it : builder_state.initial_builders)
+			{
+				account_name name = it.builder_name;
+				import_key(name, it.sign_private_key);
+			}
+		}
 	}
 
 	bool blockbuilder_plugin_impl::import_key(const account_name& builder, const private_key_type& private_key)

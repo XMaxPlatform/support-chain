@@ -40,9 +40,8 @@ namespace Xmaxplatform {
     void blockchain_plugin::plugin_initialize(const variables_map &options) {
         ilog("blockchain_plugin::plugin_initialize");
         if (options.count("genesis-json")) {
-            my->genesis_file = options.at("genesis-json").as<Baseapp::bfs::path>();
+			my->genesis_file = options.at("genesis-json").as<Baseapp::bfs::path>();
         }
-
     }
 
 #define CALL(api_name, api_handle, api_namespace, call_name, http_response_code) \

@@ -1,0 +1,88 @@
+{
+  "initial_builders": [
+    {
+      "builder_name": "testera",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testerb",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testerc",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testerd",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testere",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testerf",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testerg",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testerh",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testeri",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testerj",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testerk",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testerl",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testerm",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testern",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testero",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testerp",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+        {
+      "builder_name": "testerq",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testerr",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testers",
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+    {
+      "builder_name": "testert",
+      "sign_private_key" : "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    },
+                {
+      "builder_name": "testeru",
+      "sign_private_key" : "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+    }
+  ]
+}
