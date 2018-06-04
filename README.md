@@ -6,3 +6,4 @@ Xmax Support BlockChain System
 1. [Build on Windows 10](build-windows.md)
 2. [Build on MacOS Sierra](build-macos.md)
 3. [Smart contract](smartcontract.md)
+4. [Test Memo](test-memo.md)
