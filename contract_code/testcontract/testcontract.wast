@@ -1,4 +1,5 @@
 (module
+ (type $FUNCSIG$i (func (result i32)))
  (type $FUNCSIG$ijjjii (func (param i64 i64 i64 i32 i32) (result i32)))
  (type $FUNCSIG$ijjii (func (param i64 i64 i32 i32) (result i32)))
  (type $FUNCSIG$iii (func (param i32 i32) (result i32)))
@@ -7,6 +8,7 @@
  (import "env" "read_message" (func $read_message (param i32 i32) (result i32)))
  (import "env" "store_i64" (func $store_i64 (param i64 i64 i32 i32) (result i32)))
  (import "env" "xmax_assert" (func $xmax_assert (param i32 i32)))
+ (import "env" "xmax_now" (func $xmax_now (result i32)))
  (table 0 anyfunc)
  (memory $0 1)
  (data (i32.const 4) "P@\00\00")
@@ -48,6 +50,9 @@
      )
      (i64.const 8999999999)
     )
+   )
+   (drop
+    (call $xmax_now)
    )
    (set_local $5
     (i64.const 0)
