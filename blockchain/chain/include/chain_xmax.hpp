@@ -5,7 +5,6 @@
 #pragma once
 
 
-#include <basechain.hpp>
 #include <fc/scoped_exit.hpp>
 
 #include <boost/signals2/signal.hpp>
@@ -24,11 +23,12 @@
 #include <message_context_xmax.hpp>
 
 namespace Xmaxplatform { namespace Chain {
-   using database = Basechain::database;
    using boost::signals2::signal;
+   using database = Basechain::database;
         class chain_init;
         struct message_xmax;
 		class builder_object;
+		class chain_context;
    class chain_xmax {
       public:
 
@@ -77,8 +77,8 @@ namespace Xmaxplatform { namespace Chain {
 	   uint32_t				get_delta_slot_at_time(chain_timestamp when) const;
        chain_timestamp		get_delta_slot_time(uint32_t delta_slot) const;
 
-	   const Basechain::database& get_database() const { return _data; }
-	   Basechain::database& get_mutable_database() { return _data; }
+	   const Basechain::database& get_database() const;
+	   Basechain::database& get_mutable_database();
 
 	   vector<char>       message_to_binary(name code, name type, const fc::variant& obj)const;
 	   fc::variant        message_from_binary(name code, name type, const vector<char>& bin)const;
@@ -94,16 +94,7 @@ namespace Xmaxplatform { namespace Chain {
 	   flat_set<public_key_type> get_required_keys(const signed_transaction& transaction, const flat_set<public_key_type>& candidateKeys)const;
    private:
 
-       database&                        _data;
-       bool                             _currently_applying_block = false;
-	   const uint32_t                   _pending_txn_depth_limit;
-       uint64_t                         _skip_flags = 0;
-       typedef pair<account_name,Basetypes::name> handler_key;
-
-       map< account_name, map<handler_key, msg_handler> >                   message_handlers;
-
-	   optional<database::session>      _pending_tx_session;
-	   deque<signed_transaction>         _pending_transactions;
+	   std::unique_ptr<chain_context>   _context;
 
        void setup_data_indexes();
        void initialize_chain(chain_init& initer);
@@ -142,8 +133,8 @@ namespace Xmaxplatform { namespace Chain {
 	   void record_transaction(const generated_transaction& trx);
 
 
-	   bool should_check_for_duplicate_transactions()const { return !(_skip_flags&skip_transaction_dupe_check); }
-	   bool should_check_tapos()const { return !(_skip_flags&skip_tapos_check); }
+	   bool should_check_for_duplicate_transactions()const;
+	   bool should_check_tapos()const;
 
 
 	   void check_transaction_authorization(const signed_transaction& trx, bool allow_unused_signatures = false)const;
@@ -163,24 +154,6 @@ namespace Xmaxplatform { namespace Chain {
 		   } FC_CAPTURE_AND_RETHROW((trx))
 	   }
 
-	   template<typename Function>
-	   auto with_applying_block(Function&& f) -> decltype((*((Function*)nullptr))()) {
-		   auto on_exit = fc::make_scoped_exit([this]() {
-			   _currently_applying_block = false;
-		   });
-		   _currently_applying_block = true;
-		   return f();
-	   }
-
-	   template<typename Function>
-	   auto with_skip_flags(uint64_t flags, Function&& f) -> decltype((*((Function*)nullptr))())
-	   {
-		   auto old_flags = _skip_flags;
-		   auto on_exit = fc::make_scoped_exit([&]() { _skip_flags = old_flags; });
-		   _skip_flags = flags;
-		   return f();
-	   }
-
 
    public:
 	   xmax_type_block_id               get_blockid_from_num(uint32_t block_num)const;
@@ -196,9 +169,6 @@ namespace Xmaxplatform { namespace Chain {
        void apply_block(const signed_block& next_block);
 
        void set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v );
-
-
-       const Basechain::database& get_data() const { return _data; }
 
 
    };

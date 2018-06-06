@@ -9,9 +9,9 @@
 #include <connection_xmax.hpp>
 #include <application.hpp>
 #include <chain_xmax.hpp>
+
 using namespace Baseapp;
 namespace Xmaxplatform {
-
 
 	connection_xmax::connection_xmax(Chain::string endpoint)
 		: blk_state(),

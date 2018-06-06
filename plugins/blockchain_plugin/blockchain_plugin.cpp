@@ -4,6 +4,7 @@
  */
 #include <blockchain_exceptions.hpp>
 #include <blockchain_plugin.hpp>
+#include <basechain.hpp>
 #include <genesis_state.hpp>
 #include <fc/io/json.hpp>
 #include <fc/variant.hpp>
@@ -207,7 +208,7 @@ namespace Chain_APIs{
         get_account_results result;
         result.account_name = params.account_name;
 
-        const auto &data = _chain.get_data();
+        const auto &data = _chain.get_database();
         const auto &token = data.get<xmx_token_object, by_owner_name>(params.account_name);
 
         result.xmx_token = asset(token.xmx_token, XMX_SYMBOL);
