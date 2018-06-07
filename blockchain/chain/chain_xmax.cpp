@@ -176,7 +176,7 @@ namespace Xmaxplatform { namespace Chain {
 
         }
 
-        chain_xmax::chain_xmax(database& database,chain_init& init)
+        chain_xmax::chain_xmax(database& database, chain_init& init, const finalize_block_func& finalize_func)
 		: _context(new chain_context(database, 1000)) {
 
             setup_data_indexes();
@@ -184,6 +184,9 @@ namespace Xmaxplatform { namespace Chain {
 
 			initialize_chain(init);
 
+			if (finalize_func) {
+				on_finalize_block.connect(*finalize_func);
+			}
         }
 
         chain_xmax::~chain_xmax() {
