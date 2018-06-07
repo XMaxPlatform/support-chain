@@ -12,6 +12,7 @@
 #include <native_contract_chain_init.hpp>
 #include <chain_xmax.hpp>
 #include <wast_to_wasm.hpp>
+#include <mongodb_plugin.hpp>
 
 namespace Xmaxplatform {
 
@@ -79,8 +80,19 @@ namespace Xmaxplatform {
         auto &data = app().get_plugin<chaindata_plugin>().data();
         auto genesis = fc::json::from_file(my->genesis_file).as<Native_contract::genesis_state_type>();
         Native_contract::native_contract_chain_init chainsetup(genesis);
-		my->chain_id = genesis.compute_chain_id();
-        my->chain.reset(new Chain::chain_xmax(data, chainsetup));
+		my->chain_id = genesis.compute_chain_id();		
+		auto& mongo_plugin = app().get_plugin<mongodb_plugin>();
+
+		Xmaxplatform::Chain::finalize_block_func finalize_func;
+		if (mongo_plugin.get_state() == mongodb_plugin::registered)
+		{
+			auto p_mongo_plugin = &mongo_plugin;
+			ilog("Found mongodb_plugin and ready to serialize data to the plugin.");
+			finalize_func = [p_mongo_plugin](const Chain::signed_block& b) { p_mongo_plugin->finalize_block(b); };
+		}
+
+
+        my->chain.reset(new Chain::chain_xmax(data, chainsetup, finalize_func));
 
         register_chain_api();
 

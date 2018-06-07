@@ -69,7 +69,7 @@ if (libmongoc-1.0_FOUND)
   
     message(STATUS "Found mongocxx library: ${XMAX_LIBMONGOCXX}")
 
-    add_definitions(-DMONGODB=1)
+    add_definitions(-DMONGO_DB=1)
 
 
 else()
@@ -104,6 +104,7 @@ set_target_properties( mongodb_plugin PROPERTIES
                         FOLDER "5.Plugins")
 
 
+# Copy dependent runtime libraries to confiuration specific bin path
 if(WIN32 AND libmongoc-1.0_FOUND)
 
     string(REGEX REPLACE "/" "\\\\" MONGO_C_DLLS ${MONGO_DB_C_ROOT}/bin/*.dll)
@@ -126,6 +127,7 @@ install( TARGETS
 )
 
 
+# Install dependent runtime libraries to running path
 if(WIN32 AND  NOT ("${MONGO_DB_CXX_ROOT}" STREQUAL ""))
 #    message("Found db cxx root and install.")       
                 install(DIRECTORY ${MONGO_DB_CXX_ROOT}/bin/ DESTINATION ${CMAKE_INSTALL_PREFIX}/bin

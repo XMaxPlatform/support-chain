@@ -126,13 +126,18 @@ namespace Xmaxplatform { namespace Chain {
 
         }
 
-        chain_xmax::chain_xmax(database& database,chain_init& init) : _data(database), _pending_txn_depth_limit(1000){
+        chain_xmax::chain_xmax(database& database,chain_init& init, const finalize_block_func& finalize_func) : _data(database), _pending_txn_depth_limit(1000){
 
             setup_data_indexes();
             init.register_handlers(*this, _data);
                     with_applying_block([&] {
                         initialize_chain(init);
                     });
+
+			if (finalize_func) {
+				on_finalize_block.connect(*finalize_func);
+			}
+
 
         }
 
@@ -677,6 +682,8 @@ namespace Xmaxplatform { namespace Chain {
 				block.blk_id = b.id();
 				block.block = b;
 			});
+
+			on_finalize_block(b);
 				
         }
 
