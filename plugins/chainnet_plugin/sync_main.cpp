@@ -19,7 +19,7 @@ namespace Xmaxplatform {
 	}
 
 	void sync_main::reset_liblock_num(std::set< connection_ptr > conns_ptr) {
-		sync_known_liblock_num = bc_plugin->getchain().get_dynamic_states().last_irreversible_block_num;
+		sync_known_liblock_num = bc_plugin->getchain().last_irreversible_block_num();
 		sync_last_requested_num = bc_plugin->getchain().head_block_num();
 		for (auto& c : conns_ptr) {
 			if (c->last_handshake_recv.last_irreversible_block_num > sync_known_liblock_num) {

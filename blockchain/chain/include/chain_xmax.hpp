@@ -73,6 +73,7 @@ namespace Xmaxplatform { namespace Chain {
 
        time             head_block_time() const;
 	   uint32_t			head_block_num() const;
+	   uint32_t			last_irreversible_block_num() const;
 	   xmax_type_block_id    head_block_id()const;
 
 	   const builder_info&         get_block_builder(uint32_t delta_slot) const;
@@ -149,7 +150,7 @@ namespace Xmaxplatform { namespace Chain {
 
 
 	   void check_transaction_authorization(const signed_transaction& trx, bool allow_unused_signatures = false)const;
-	   void create_block_summary(const signed_block& next_block);
+	   void block_summary(const signed_block& next_block);
 	   void update_or_create_builders(const builder_rule& builders);
 	   template<typename T>
 	   void validate_transaction(const T& trx) const {

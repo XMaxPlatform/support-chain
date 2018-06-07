@@ -53,8 +53,8 @@ namespace Xmaxplatform { namespace Chain {
 		typedef pair<account_name, Basetypes::name> handler_key;
 		optional<pending_block>			pending_build;
 		database&                        data;
-		//bool                             currently_applying_block = false;
 
+		uint32_t last_irreversible_block_num = 0;
 
 		const uint32_t                   pending_txn_depth_limit;
 		uint64_t                         skip_flags = 0;
@@ -209,6 +209,11 @@ namespace Xmaxplatform { namespace Chain {
 		uint32_t chain_xmax::head_block_num() const
 		{
 			return get_dynamic_states().head_block_number;
+		}
+
+		uint32_t chain_xmax::last_irreversible_block_num() const
+		{
+			return _context->last_irreversible_block_num;
 		}
 
 		Xmaxplatform::Chain::xmax_type_block_id chain_xmax::head_block_id() const
@@ -591,11 +596,13 @@ namespace Xmaxplatform { namespace Chain {
 
 				_finalize_block(new_block);
 
-				create_block_summary(new_block);
+				block_summary(new_block);
 
 				_context->pending_build->push_block();
 
 			} FC_CAPTURE_AND_RETHROW((new_block.block_num()))
+
+			_context->last_irreversible_block_num = new_block.block_num();
 		
 		}
 
@@ -621,7 +628,7 @@ namespace Xmaxplatform { namespace Chain {
 
                 _finalize_block(next_block);
 
-				create_block_summary(next_block);
+				block_summary(next_block);
 
             } FC_CAPTURE_AND_RETHROW( (next_block.block_num()) ) 
 		}
@@ -933,7 +940,7 @@ namespace Xmaxplatform { namespace Chain {
 			return block_obj.block;
 		}
 
-		void chain_xmax::create_block_summary(const signed_block& next_block)
+		void chain_xmax::block_summary(const signed_block& next_block)
 		{
 			auto sid = next_block.block_num() & 0xffff;
 			_context->data.modify(_context->data.get<block_summary_object, by_id>(sid), [&](block_summary_object& p) {

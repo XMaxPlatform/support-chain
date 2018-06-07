@@ -496,7 +496,7 @@ namespace Xmaxplatform {
 		   return;
 	   }
 	   chain_xmax& cc = chain_plug->getchain();
-	   uint32_t liblock_num = cc.get_dynamic_states().last_irreversible_block_num;
+	   uint32_t liblock_num = cc.last_irreversible_block_num();
 	   uint32_t peer_liblock = msg.last_irreversible_block_num;
 	   if (c->connecting) {
 		   c->connecting = false;
@@ -812,7 +812,7 @@ namespace Xmaxplatform {
 
       auto &stale = local_txns.get<by_block_num>();
       chain_xmax &cc = chain_plug->getchain();
-      uint32_t bn = cc.get_dynamic_states().last_irreversible_block_num;
+      uint32_t bn = cc.last_irreversible_block_num();
       auto bn_up = stale.upper_bound(bn);
       auto bn_lo = stale.lower_bound(1);
       stale.erase( bn_lo, bn_up);
@@ -1174,7 +1174,7 @@ namespace Xmaxplatform {
 	   xmax_type_block_id lib_id;
 	   uint32_t lib_num;
 	   try {
-		   lib_num = cc.get_dynamic_states().last_irreversible_block_num;
+		   lib_num = cc.last_irreversible_block_num();
 		   if (lib_num != 0)
 			   lib_id = cc.get_blockid_from_num(lib_num);
 		   head_id = cc.get_blockid_from_num(head_num);
@@ -1428,7 +1428,7 @@ namespace Xmaxplatform {
 	   handshake.head_id = fc::sha256();
 	   handshake.last_irreversible_block_id = fc::sha256();
 	   handshake.head_num = cx.head_block_num();
-	   handshake.last_irreversible_block_num = cx.get_dynamic_states().last_irreversible_block_num;
+	   handshake.last_irreversible_block_num = cx.last_irreversible_block_num();
 	   if (handshake.last_irreversible_block_num) {
 		   try {
 			   handshake.last_irreversible_block_id = cx.get_blockid_from_num(handshake.last_irreversible_block_num);
@@ -1484,7 +1484,7 @@ namespace Xmaxplatform {
 
    void sync_main::recv_handshake(connection_ptr c, const handshake_message &msg) {
 	   chain_xmax& cc = bc_plugin->getchain();
-	   uint32_t lib_num = cc.get_dynamic_states().last_irreversible_block_num;
+	   uint32_t lib_num = cc.last_irreversible_block_num();
 	   uint32_t peer_liblock = msg.last_irreversible_block_num;
 	   reset_liblock_num(cnet_impl->connections);
 	   c->syncing = false;
