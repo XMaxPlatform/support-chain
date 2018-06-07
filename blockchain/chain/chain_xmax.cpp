@@ -745,6 +745,8 @@ namespace Xmaxplatform { namespace Chain {
 				block.blk_id = b.id();
 				block.block = b;
 			});
+
+			on_finalize_block(b);
 				
         }
 

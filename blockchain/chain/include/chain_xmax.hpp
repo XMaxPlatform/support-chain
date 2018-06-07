@@ -26,6 +26,8 @@
 namespace Xmaxplatform { namespace Chain {
    using boost::signals2::signal;
    using database = Basechain::database;
+   using finalize_block_func = fc::optional<signal<void(const signed_block&)>::slot_type>;
+   
         class chain_init;
         struct message_xmax;
 		class builder_object;
@@ -33,7 +35,7 @@ namespace Xmaxplatform { namespace Chain {
    class chain_xmax {
       public:
 
-         chain_xmax(database& database,chain_init& init);
+         chain_xmax(database& database, chain_init& init, const finalize_block_func& finalize_func);
          chain_xmax(const chain_xmax&) = delete;
          chain_xmax(chain_xmax&&) = delete;
          chain_xmax& operator=(const chain_xmax&) = delete;
@@ -41,6 +43,7 @@ namespace Xmaxplatform { namespace Chain {
          ~chain_xmax();
 
 		 signal<void(const signed_transaction&)> on_pending_transaction;
+		 signal<void(const signed_block&)> on_finalize_block;
 
 		 enum validation_steps
 		 {
