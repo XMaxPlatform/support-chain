@@ -29,7 +29,6 @@
 #include <iostream>
 #include <chrono>
 
-#include <transaction.hpp>
 #include <objects/transaction_object.hpp>
 #include <objects/generated_transaction_object.hpp>
 #include <objects/block_summary_object.hpp>
@@ -40,6 +39,7 @@
 #include <objects/builder_object.hpp>
 #include <objects/block_object.hpp>
 #include <pending_block.hpp>
+
 #include <vm_xmax.hpp>
 
 #include <abi_serializer.hpp>
@@ -51,9 +51,9 @@ namespace Xmaxplatform { namespace Chain {
 	{
 	public:
 		typedef pair<account_name, Basetypes::name> handler_key;
-		optional<pending_block>			pending_block;
+		optional<pending_block>			pending_build;
 		database&                        data;
-		bool                             currently_applying_block = false;
+		//bool                             currently_applying_block = false;
 
 
 		const uint32_t                   pending_txn_depth_limit;
@@ -61,8 +61,7 @@ namespace Xmaxplatform { namespace Chain {
 
 		map< account_name, map<handler_key, msg_handler> >  message_handlers;
 
-		optional<database::session>      pending_tx_session;
-		deque<signed_transaction>         pending_transactions;
+		vector<transaction_request_ptr>         pending_transactions;
 		chain_context(database& _data, uint32_t _txn_depth_limit)
 			: data(_data)
 			, pending_txn_depth_limit(_txn_depth_limit)
@@ -71,17 +70,18 @@ namespace Xmaxplatform { namespace Chain {
 		}
 		~chain_context()
 		{
-			pending_block.reset();
+			pending_build.reset();
+			data.flush();
 		}
 
-		template<typename Function>
-		auto with_applying_block(Function&& f) -> decltype((*((Function*)nullptr))()) {
-			auto on_exit = fc::make_scoped_exit([this]() {
-				currently_applying_block = false;
-			});
-			currently_applying_block = true;
-			return f();
-		}
+		//template<typename Function>
+		//auto with_applying_block(Function&& f) -> decltype((*((Function*)nullptr))()) {
+		//	auto on_exit = fc::make_scoped_exit([this]() {
+		//		currently_applying_block = false;
+		//	});
+		//	currently_applying_block = true;
+		//	return f();
+		//}
 
 		template<typename Function>
 		auto with_skip_flags(uint64_t flags, Function&& f) -> decltype((*((Function*)nullptr))())
@@ -181,9 +181,8 @@ namespace Xmaxplatform { namespace Chain {
 
             setup_data_indexes();
             init.register_handlers(*this, _context->data);
-					_context->with_applying_block([&] {
-                        initialize_chain(init);
-                    });
+
+			initialize_chain(init);
 
         }
 
@@ -453,29 +452,28 @@ namespace Xmaxplatform { namespace Chain {
 		{
 			try {
 				return _context->with_skip_flags(skip | pushed_transaction, [&]() {
-					return _context->data.with_write_lock([&]() {
-						return _push_transaction(trx);
-					});
+					transaction_request_ptr request = std::make_shared<transaction_request>(trx);
+					return _push_transaction(request);
 				});
 			} FC_CAPTURE_AND_RETHROW((trx))
 		}
 
-		Xmaxplatform::Chain::processed_transaction chain_xmax::_push_transaction(const signed_transaction& trx)
+		Xmaxplatform::Chain::processed_transaction chain_xmax::_push_transaction(transaction_request_ptr request)
 		{
-			if (!_context->pending_tx_session.valid())
-				_context->pending_tx_session = _context->data.start_undo_session(true);
 
 			FC_ASSERT(_context->pending_transactions.size() < 1000, "too many pending transactions, try again later");
 
+
+
 			auto temp_session = _context->data.start_undo_session(true);
-			validate_referenced_accounts(trx);
-			check_transaction_authorization(trx);
-			auto pt = apply_transaction(trx);
-			_context->pending_transactions.push_back(trx);
+			validate_referenced_accounts(request->signed_trx);
+			check_transaction_authorization(request->signed_trx);
+			auto pt = apply_transaction(request->signed_trx);
+			_context->pending_transactions.push_back(request);
 
 			temp_session.squash();
 
-			on_pending_transaction(trx); 
+			on_pending_transaction(request->signed_trx);
 
 			return pt;
 		}
@@ -488,113 +486,125 @@ namespace Xmaxplatform { namespace Chain {
 			return flat_set<Xmaxplatform::Chain::public_key_type>(candidateKeys);			
 		}
 
-		signed_block chain_xmax::generate_block(
+		void chain_xmax::build_block(
                 chain_timestamp when,
                 const account_name& builder,
 				const private_key_type& sign_private_key
-        )
-        { try {
-                _context->data.start_undo_session(true);
-                auto b = _context->data.with_write_lock( [&](){
-                    return _generate_block( when, builder, sign_private_key );
-                });
-                push_block(b);
-                return b;
-            } FC_CAPTURE_AND_RETHROW( (when) ) }
+        ) { 
 
-        signed_block chain_xmax::_generate_block(
-                chain_timestamp when,
-                const account_name& builder,
-				const private_key_type& sign_private_key
-        )
-        {
-            try {
+			_abort_build();
 
-				//check properties.
-				FC_ASSERT(head_block_time() < when.time_point(), "block must be generated at a timestamp after the head block time");
+			auto exec_start = std::chrono::high_resolution_clock::now();
 
+			_start_build(when, builder);
+
+			_build_block(when, builder, sign_private_key);
+
+			auto exec_stop = std::chrono::high_resolution_clock::now();
+			auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_stop - exec_start);
+
+			const signed_block& new_block = _context->pending_build->_block;
+
+			ilog("${builder} generate block #${num}  at ${time}, exectime_ms=${extm}",
+				("builder", new_block.builder)
+				("time", new_block.timestamp)
+				("num", new_block.block_num())
+				("extm", exec_ms.count())
+			);
+
+			// temp process. commit impl.
+			_commit_block();
+
+		}
+
+		void chain_xmax::_abort_build()
+		{
+			if (_context->pending_build)
+			{
+				_context->pending_build.reset();
+			}
+		}
+
+		void chain_xmax::_start_build(chain_timestamp when, const account_name& builder)
+		{
+			FC_ASSERT(!_context->pending_build);
+			//check properties.
+			FC_ASSERT(head_block_time() < when.time_point(), "block must be generated at a timestamp after the head block time");
+
+			auto pending_undo = fc::make_scoped_exit([&]() {
+				_context->pending_build.reset();
+			});
+
+			_context->pending_build = _context->data.start_undo_session(true);
+
+			try {
 
 				// prepare data.
 				const dynamic_states_object& dy_state = get_dynamic_states();
 
 				time_point start = fc::time_point::now();
 
-                signed_block pending_block;
-
-                uint32_t pending_block_size = fc::raw::pack_size( pending_block );
-
+				signed_block& new_blk = _context->pending_build->_block;
 
 				// build block.
-                pending_block.previous = dy_state.head_block_id;
-                pending_block.timestamp = when;
-                pending_block.transaction_merkle_root = pending_block.calculate_merkle_root();
-
-
-
-                pending_block.builder = builder;
+				new_blk.previous = dy_state.head_block_id;
+				new_blk.timestamp = when;
+				new_blk.builder = builder;
 
 				if (builders_elected == dy_state.builders_elect_state)
 				{
-					pending_block.next_builders = get_static_config().new_builders;
+					new_blk.next_builders = get_static_config().new_builders;
 				}
 
-                const auto end = fc::time_point::now();
-                const auto gen_time = end - start;
-                if( gen_time > fc::milliseconds(10) ) {
-                    ilog("generation took ${x} ms", ("x", gen_time.count() / 1000));
-                    FC_ASSERT(gen_time < fc::milliseconds(250), "block took too long to build");
-                }
+				pending_undo.cancel();
+
+				_context->pending_build->push_block();
+			} FC_CAPTURE_AND_RETHROW((builder))
+		}
+
+        void chain_xmax::_build_block(
+                chain_timestamp when,
+                const account_name& builder,
+				const private_key_type& sign_private_key
+        ) {
+			FC_ASSERT(_context->pending_build);
+            try {
+				signed_block& new_blk = _context->pending_build->_block;
+				new_blk.transaction_merkle_root = new_blk.calculate_merkle_root();
+				new_blk.sign(sign_private_key);
 
 
-				
-                pending_block.sign(sign_private_key);
 
-                return pending_block;
-            } FC_CAPTURE_AND_RETHROW( (builder) ) }
+            } FC_CAPTURE_AND_RETHROW( (builder) ) 
+		}
 
-        bool chain_xmax::push_block(const signed_block& new_block)
-        { try {
-                return _context->data.with_write_lock( [&]() {
-                    return _push_block(new_block);
-                        });
 
-            } FC_CAPTURE_AND_RETHROW((new_block)) }
+		void chain_xmax::_commit_block() {
 
-        bool chain_xmax::_push_block(const signed_block& new_block)
-        { try {
+			FC_ASSERT(_context->pending_build);
+			const signed_block& new_block = _context->pending_build->_block;
 
-                try {
-                    auto session = _context->data.start_undo_session(true);
-                    auto exec_start = std::chrono::high_resolution_clock::now();
-                    apply_block(new_block);
-                    auto exec_stop = std::chrono::high_resolution_clock::now();
-                    auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_stop - exec_start);
-                    ilog( "${builder} generate block #${num}  at ${time}, exectime_ms=${extm}",
-                          ("builder", new_block.builder)
-                                  ("time", new_block.timestamp)
-                                  ("num", new_block.block_num())
-                                  ("extm", exec_ms.count())
-                    );
+			try {
 
-                    session.push();
-                } catch ( const fc::exception& e ) {
-                    elog("Failed to push new block:\n${e}", ("e", e.to_detail_string()));
-                    throw;
-                }
+				_finalize_block(new_block);
 
-                return false;
-            } FC_CAPTURE_AND_RETHROW((new_block)) }
+				create_block_summary(new_block);
 
-        void chain_xmax::apply_block(const signed_block& next_block)
-        {
+				_context->pending_build->push_block();
 
-			_context->with_applying_block([&] {
-                    _apply_block(next_block);
-            });
+			} FC_CAPTURE_AND_RETHROW((new_block.block_num()))
+		
+		}
+
+        void chain_xmax::apply_block(const signed_block& next_block) {
+
+			_abort_build();
+			_apply_block(next_block);
+
         }
 
-        void chain_xmax::_apply_block(const signed_block& next_block)
-        { try {
+        void chain_xmax::_apply_block(const signed_block& next_block) { 
+			try {
 
 				FC_ASSERT(next_block.transaction_merkle_root == next_block.calculate_merkle_root(), "action merkle root does not match");
 
@@ -610,12 +620,11 @@ namespace Xmaxplatform { namespace Chain {
 
 				create_block_summary(next_block);
 
-            } FC_CAPTURE_AND_RETHROW( (next_block.block_num()) )  }
-
+            } FC_CAPTURE_AND_RETHROW( (next_block.block_num()) ) 
+		}
 
 		void chain_xmax::_finalize_block(const signed_block& b) 
 		{		
-
 			
 			const dynamic_states_object& dy_state = get_dynamic_states();
 

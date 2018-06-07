@@ -12,16 +12,17 @@ namespace Xmaxplatform { namespace Chain {
 	using Basechain::database;
 
 	struct pending_block
-	{
+	{		
 		pending_block(database::session&& s)
 			:_db_session(std::move(s)) {}
 
 		database::session                  _db_session;
-		typedef pair<account_name, Basetypes::name> handler_key;
-		map< account_name, map<handler_key, msg_handler> >                   message_handlers;
+		signed_block						_block;
 
-		optional<database::session>      _pending_tx_session;
-		deque<signed_transaction>         _pending_transactions;
+		void push_block()
+		{
+			_db_session.push();
+		}
 	};
 
 }

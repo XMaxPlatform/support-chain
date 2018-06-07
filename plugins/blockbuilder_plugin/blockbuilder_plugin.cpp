@@ -237,7 +237,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 		try
 		{
 			// build the first block.
-			Chain::signed_block block = chain.generate_block(
+			chain.build_block(
 				now_timestamp,
 				current_builder,
 				*(current_key)
@@ -289,7 +289,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
 		}
 
-		Chain::signed_block block = chain.generate_block(now_timestamp, current_builder.builder_name, private_key->second);
+		chain.build_block(now_timestamp, current_builder.builder_name, private_key->second);
 
         //TODO
         //broadcast

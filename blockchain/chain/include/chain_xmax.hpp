@@ -20,6 +20,7 @@
 #include <objects/xmx_token_object.hpp>
 #include <objects/account_object.hpp>
 #include <transaction.hpp>
+#include <transaction_request.hpp>
 #include <message_context_xmax.hpp>
 
 namespace Xmaxplatform { namespace Chain {
@@ -89,7 +90,7 @@ namespace Xmaxplatform { namespace Chain {
 	   fc::variant       transaction_events_to_variant(const processed_transaction& trx)const;
 
 	   processed_transaction push_transaction(const signed_transaction& trx, uint32_t skip = skip_nothing);
-	   processed_transaction _push_transaction(const signed_transaction& trx);
+	   processed_transaction _push_transaction(transaction_request_ptr request);
 
 	   flat_set<public_key_type> get_required_keys(const signed_transaction& transaction, const flat_set<public_key_type>& candidateKeys)const;
    private:
@@ -99,14 +100,21 @@ namespace Xmaxplatform { namespace Chain {
        void setup_data_indexes();
        void initialize_chain(chain_init& initer);
 
-       signed_block _generate_block(
+	   void _abort_build();
+
+	   void _start_build(chain_timestamp when,
+		   const account_name& builder);
+
+       void _build_block(
 				chain_timestamp when,
 				const account_name& builder,
 				const private_key_type& sign_private_key
        );
-	   bool push_block(const signed_block& b);
-       bool _push_block(const signed_block& new_block);
+
+	   void _commit_block();
+
        void _apply_block(const signed_block& next_block);
+
 	   void _finalize_block(const signed_block& b);
 	 // void rate_limit_message(const message& message);
       void process_message(const transaction& trx, account_name code, const message_xmax& message,
@@ -160,7 +168,7 @@ namespace Xmaxplatform { namespace Chain {
 	   optional<signed_block>			get_block_from_id(const xmax_type_block_id& id)const;
 	   optional<signed_block>      get_block_from_num(uint32_t num)const;
 
-       signed_block generate_block(
+       void build_block(
                chain_timestamp when,
                const account_name& builder,
 			   const private_key_type& sign_private_key
