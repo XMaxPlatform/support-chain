@@ -39,6 +39,7 @@
 #include <objects/builder_object.hpp>
 #include <objects/block_object.hpp>
 #include <pending_block.hpp>
+#include <chain_stream.hpp>
 
 #include <vm_xmax.hpp>
 
@@ -51,10 +52,11 @@ namespace Xmaxplatform { namespace Chain {
 	{
 	public:
 		typedef pair<account_name, Basetypes::name> handler_key;
-		optional<pending_block>			pending_build;
-		database&                        data;
+		optional<pending_block>				pending_build;
+		chain_stream						chain_log;
 
-		uint32_t last_irreversible_block_num = 0;
+		database&							data;
+		uint32_t							last_irreversible_block_num = 0;
 
 		const uint32_t                   pending_txn_depth_limit;
 		uint64_t                         skip_flags = 0;
@@ -62,11 +64,13 @@ namespace Xmaxplatform { namespace Chain {
 		map< account_name, map<handler_key, msg_handler> >  message_handlers;
 
 		vector<transaction_request_ptr>         pending_transactions;
-		chain_context(database& _data, uint32_t _txn_depth_limit)
+
+
+		chain_context(database& _data, const fc::path& block_file_dir, uint32_t _txn_depth_limit)
 			: data(_data)
+			, chain_log(block_file_dir)
 			, pending_txn_depth_limit(_txn_depth_limit)
 		{
-			
 		}
 		~chain_context()
 		{
@@ -176,8 +180,8 @@ namespace Xmaxplatform { namespace Chain {
 
         }
 
-        chain_xmax::chain_xmax(database& database, chain_init& init, const finalize_block_func& finalize_func)
-		: _context(new chain_context(database, 1000)) {
+        chain_xmax::chain_xmax(database& database, chain_init& init, const fc::path& block_log_dir, const finalize_block_func& finalize_func)
+		: _context(new chain_context(database, block_log_dir, 1000)) {
 
             setup_data_indexes();
             init.register_handlers(*this, _context->data);
@@ -511,7 +515,7 @@ namespace Xmaxplatform { namespace Chain {
 			auto exec_stop = std::chrono::high_resolution_clock::now();
 			auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_stop - exec_start);
 
-			const signed_block& new_block = _context->pending_build->_block;
+			const signed_block& new_block = *_context->pending_build->_block;
 
 			ilog("${builder} generate block #${num}  at ${time}, exectime_ms=${extm}",
 				("builder", new_block.builder)
@@ -552,7 +556,7 @@ namespace Xmaxplatform { namespace Chain {
 
 				time_point start = fc::time_point::now();
 
-				signed_block& new_blk = _context->pending_build->_block;
+				signed_block& new_blk = *_context->pending_build->_block;
 
 				// build block.
 				new_blk.previous = dy_state.head_block_id;
@@ -577,7 +581,7 @@ namespace Xmaxplatform { namespace Chain {
         ) {
 			FC_ASSERT(_context->pending_build);
             try {
-				signed_block& new_blk = _context->pending_build->_block;
+				signed_block& new_blk = *_context->pending_build->_block;
 				new_blk.transaction_merkle_root = new_blk.calculate_merkle_root();
 				new_blk.sign(sign_private_key);
 
@@ -590,19 +594,22 @@ namespace Xmaxplatform { namespace Chain {
 		void chain_xmax::_commit_block() {
 
 			FC_ASSERT(_context->pending_build);
-			const signed_block& new_block = _context->pending_build->_block;
+			const auto& new_block = _context->pending_build->_block;
 
 			try {
 
-				_finalize_block(new_block);
+				_finalize_block(*new_block);
 
-				block_summary(new_block);
+				block_summary(*new_block);
+
+				_context->chain_log.append_block(new_block);
 
 				_context->pending_build->push_block();
 
-			} FC_CAPTURE_AND_RETHROW((new_block.block_num()))
+			} FC_CAPTURE_AND_RETHROW((new_block->block_num()))
 
-			_context->last_irreversible_block_num = new_block.block_num();
+			// tmp code irreversible immediately
+			_irreversible_block(new_block);
 		
 		}
 
@@ -759,6 +766,13 @@ namespace Xmaxplatform { namespace Chain {
 			on_finalize_block(b);
 				
         }
+
+		void chain_xmax::_irreversible_block(const signed_block_ptr& block)
+		{
+			_context->last_irreversible_block_num = block->block_num();
+
+			_context->chain_log.append_block(block);
+		}
 
         void chain_xmax::set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v ) {
 			_context->message_handlers[contract][std::make_pair(scope,action)] = v;

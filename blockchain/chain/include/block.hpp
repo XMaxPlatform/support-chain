@@ -47,7 +47,7 @@ namespace Xmaxplatform { namespace Chain {
             xmax_type_merkle_root calculate_merkle_root() const;
             vector<vector<thread>> threads;
         };
-
+		using signed_block_ptr = std::shared_ptr<signed_block>;
     } } // Xmaxplatform::Chain
 
 FC_REFLECT(Xmaxplatform::Chain::block_header, (previous)(timestamp)(transaction_merkle_root)(builder))

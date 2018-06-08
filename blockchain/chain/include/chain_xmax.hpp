@@ -35,7 +35,7 @@ namespace Xmaxplatform { namespace Chain {
    class chain_xmax {
       public:
 
-         chain_xmax(database& database, chain_init& init, const finalize_block_func& finalize_func);
+         chain_xmax(database& database, chain_init& init, const fc::path& block_log_dir, const finalize_block_func& finalize_func);
          chain_xmax(const chain_xmax&) = delete;
          chain_xmax(chain_xmax&&) = delete;
          chain_xmax& operator=(const chain_xmax&) = delete;
@@ -120,6 +120,8 @@ namespace Xmaxplatform { namespace Chain {
        void _apply_block(const signed_block& next_block);
 
 	   void _finalize_block(const signed_block& b);
+
+	   void _irreversible_block(const signed_block_ptr& block);
 	 // void rate_limit_message(const message& message);
       void process_message(const transaction& trx, account_name code, const message_xmax& message,
                             message_output& output, message_context_xmax* parent_context = nullptr,

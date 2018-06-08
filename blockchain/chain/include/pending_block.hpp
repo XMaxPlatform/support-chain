@@ -14,10 +14,13 @@ namespace Xmaxplatform { namespace Chain {
 	struct pending_block
 	{		
 		pending_block(database::session&& s)
-			:_db_session(std::move(s)) {}
+			:_db_session(std::move(s)) 
+			, _block(std::make_shared<signed_block>())
+		{
+		}
 
-		database::session                  _db_session;
-		signed_block						_block;
+		database::session					_db_session;
+		signed_block_ptr					_block;
 
 		void push_block()
 		{

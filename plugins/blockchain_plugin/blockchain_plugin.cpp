@@ -21,6 +21,7 @@ namespace Xmaxplatform {
     class chain_plugin_impl {
     public:
         Baseapp::bfs::path genesis_file;
+		Baseapp::bfs::path block_log_dir;
         std::unique_ptr<Chain::chain_xmax> chain;
 		Chain::chain_id_type      chain_id;
 		uint32_t	skip_flags = Chain::chain_xmax::skip_nothing;
@@ -36,7 +37,10 @@ namespace Xmaxplatform {
     void blockchain_plugin::set_program_options(options_description &cli, options_description &cfg) {
         ilog("blockchain_plugin::set_program_options");
         cfg.add_options()
-                ("genesis-json", bpo::value<boost::filesystem::path>(), "File to read Genesis State from");
+                ("genesis-json", bpo::value<boost::filesystem::path>(), "File to read Genesis State from")
+				("block-log-dir", bpo::value<boost::filesystem::path>()->default_value("blocks"),
+				"the location of the block log (absolute path or relative to application data dir)")
+				;
     }
 
     void blockchain_plugin::plugin_initialize(const variables_map &options) {
@@ -44,6 +48,13 @@ namespace Xmaxplatform {
         if (options.count("genesis-json")) {
 			my->genesis_file = options.at("genesis-json").as<Baseapp::bfs::path>();
         }
+		if (options.count("block-log-dir")) {
+			auto bld = options.at("block-log-dir").as<bfs::path>();
+			if (bld.is_relative())
+				my->block_log_dir = app().data_dir() / bld;
+			else
+				my->block_log_dir = bld;
+		}
     }
 
 #define CALL(api_name, api_handle, api_namespace, call_name, http_response_code) \
@@ -93,7 +104,7 @@ namespace Xmaxplatform {
 		}
 
 
-        my->chain.reset(new Chain::chain_xmax(data, chainsetup, finalize_func));
+        my->chain.reset(new Chain::chain_xmax(data, chainsetup, my->block_log_dir, finalize_func));
 
         register_chain_api();
 
