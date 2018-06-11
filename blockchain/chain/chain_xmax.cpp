@@ -515,7 +515,7 @@ namespace Xmaxplatform { namespace Chain {
 			auto exec_stop = std::chrono::high_resolution_clock::now();
 			auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_stop - exec_start);
 
-			const signed_block& new_block = *_context->pending_build->_block;
+			const signed_block& new_block = *_context->pending_build->pack->block;
 
 			ilog("${builder} generate block #${num}  at ${time}, exectime_ms=${extm}",
 				("builder", new_block.builder)
@@ -556,7 +556,7 @@ namespace Xmaxplatform { namespace Chain {
 
 				time_point start = fc::time_point::now();
 
-				signed_block& new_blk = *_context->pending_build->_block;
+				signed_block& new_blk = *_context->pending_build->pack->block;
 
 				// build block.
 				new_blk.previous = dy_state.head_block_id;
@@ -581,7 +581,7 @@ namespace Xmaxplatform { namespace Chain {
         ) {
 			FC_ASSERT(_context->pending_build);
             try {
-				signed_block& new_blk = *_context->pending_build->_block;
+				signed_block& new_blk = *_context->pending_build->pack->block;
 				new_blk.transaction_merkle_root = new_blk.calculate_merkle_root();
 				new_blk.sign(sign_private_key);
 
@@ -594,7 +594,7 @@ namespace Xmaxplatform { namespace Chain {
 		void chain_xmax::_commit_block() {
 
 			FC_ASSERT(_context->pending_build);
-			const auto& new_block = _context->pending_build->_block;
+			const auto& new_block = _context->pending_build->pack->block;
 
 			try {
 
