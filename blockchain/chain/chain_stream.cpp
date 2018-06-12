@@ -115,6 +115,8 @@ namespace Xmaxplatform { namespace Chain {
 				// empty now.
 			}
 
+			block_stream.seekg(0, std::ios::end);
+			index_stream.seekg(0, std::ios::end);
 		}
 
 		uint64_t append_block(const signed_block_ptr& blockptr)
