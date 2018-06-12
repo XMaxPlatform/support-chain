@@ -3,6 +3,8 @@ Xmax blockchain smart contract mannual.
 
 # Table of contents
 1. [Example - Create testcontract in Windows](#examplewindows)
+2. [Build and deploy the testcontract in Windows](#buildexample)
+    1. [Create the contract account](#buildexample-1)
 
 
 
@@ -190,3 +192,20 @@ void apply_testaction( const testcontract::testaction& msg) {
          }
     }
 ```
+
+<a name="buildexample"></a>
+## Build and depoly the testcontract
+
+<a name="buildexample-1"></a>
+### 1. Create the contract account
+
+Call the `create_account` RPC interface and create a account with the same name as the `testaccount`. For example:
+```bash
+POST the chain rpc address:
+http://127.0.0.1:18888/v0/contractutil_plugin/create_account
+
+with the data:
+["testera", "testcontract", "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3", "XMX5t1afATcE8hZpVqBnMsgc9g3dGPCMmaHCkVcRtGMdtkri9CaKp", "XMX5t1afATcE8hZpVqBnMsgc9g3dGPCMmaHCkVcRtGMdtkri9CaKp"]
+```
+You need use the private key of `testera`(5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3 in this example) and also a couple of public keys for the `owner` and `active` authorities of the new account.
+You can create the publickey/privatekey pair use the `xmaxwallet` program's `create_key` RPC interface, the way is same as the `xmaxrun` program.
