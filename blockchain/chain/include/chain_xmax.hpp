@@ -28,14 +28,51 @@ namespace Xmaxplatform { namespace Chain {
    using database = Basechain::database;
    using finalize_block_func = fc::optional<signal<void(const signed_block&)>::slot_type>;
    
-        class chain_init;
-        struct message_xmax;
-		class builder_object;
-		class chain_context;
+   class chain_init;
+   struct message_xmax;
+   class builder_object;
+   class chain_context;
+
    class chain_xmax {
+
+   public:
+	   enum validation_steps
+	   {
+		   skip_nothing = 0,
+		   skip_producer_signature = 1 << 0,  ///< used while reindexing
+		   skip_transaction_signatures = 1 << 1,  ///< used by non-builder nodes
+		   skip_transaction_dupe_check = 1 << 2,  ///< used while reindexing
+		   skip_fork_db = 1 << 3,  ///< used while reindexing
+		   skip_block_size_check = 1 << 4,  ///< used when applying locally generated transactions
+		   skip_tapos_check = 1 << 5,  ///< used while reindexing -- note this skips expiration check as well
+		   skip_authority_check = 1 << 6,  ///< used while reindexing -- disables any checking of authority on transactions
+		   skip_merkle_check = 1 << 7,  ///< used while reindexing
+		   skip_assert_evaluation = 1 << 8,  ///< used while reindexing
+		   skip_undo_history_check = 1 << 9,  ///< used while reindexing
+		   skip_producer_schedule_check = 1 << 10, ///< used while reindexing
+		   skip_validate = 1 << 11, ///< used prior to checkpoint, skips validate() call on transaction
+		   skip_scope_check = 1 << 12, ///< used to skip checks for proper scope
+		   skip_output_check = 1 << 13, ///< used to skip checks for outputs in block exactly matching those created from apply
+		   pushed_transaction = 1 << 14, ///< used to indicate that the origination of the call was from a push_transaction, to determine time allotment
+		   created_block = 1 << 15, ///< used to indicate that the origination of the call was for creating a block, to determine time allotment
+		   received_block = 1 << 16, ///< used to indicate that the origination of the call was for a received block, to determine time allotment
+		   irreversible = 1 << 17  ///< indicates the block was received while catching up and is already considered irreversible.
+	   };
+
+	   struct xmax_config
+	   {
+		   bool open_flag = false;
+		   uint64_t  shared_memory_size = 0;
+		   Basechain::bfs::path block_memory_dir;
+		   Basechain::bfs::path fork_memory_dir;
+		   Basechain::bfs::path block_log_dir;
+		   Chain::chain_id_type      chain_id;
+		   uint32_t	skip_flags = Chain::chain_xmax::skip_nothing;
+	   };
+
       public:
 
-         chain_xmax(database& database, chain_init& init, const fc::path& block_log_dir, const finalize_block_func& finalize_func);
+         chain_xmax(chain_init& init, const xmax_config& config, const finalize_block_func& finalize_func);
          chain_xmax(const chain_xmax&) = delete;
          chain_xmax(chain_xmax&&) = delete;
          chain_xmax& operator=(const chain_xmax&) = delete;
@@ -44,29 +81,6 @@ namespace Xmaxplatform { namespace Chain {
 
 		 signal<void(const signed_transaction&)> on_pending_transaction;
 		 signal<void(const signed_block&)> on_finalize_block;
-
-		 enum validation_steps
-		 {
-			 skip_nothing = 0,
-			 skip_producer_signature = 1 << 0,  ///< used while reindexing
-			 skip_transaction_signatures = 1 << 1,  ///< used by non-builder nodes
-			 skip_transaction_dupe_check = 1 << 2,  ///< used while reindexing
-			 skip_fork_db = 1 << 3,  ///< used while reindexing
-			 skip_block_size_check = 1 << 4,  ///< used when applying locally generated transactions
-			 skip_tapos_check = 1 << 5,  ///< used while reindexing -- note this skips expiration check as well
-			 skip_authority_check = 1 << 6,  ///< used while reindexing -- disables any checking of authority on transactions
-			 skip_merkle_check = 1 << 7,  ///< used while reindexing
-			 skip_assert_evaluation = 1 << 8,  ///< used while reindexing
-			 skip_undo_history_check = 1 << 9,  ///< used while reindexing
-			 skip_producer_schedule_check = 1 << 10, ///< used while reindexing
-			 skip_validate = 1 << 11, ///< used prior to checkpoint, skips validate() call on transaction
-			 skip_scope_check = 1 << 12, ///< used to skip checks for proper scope
-			 skip_output_check = 1 << 13, ///< used to skip checks for outputs in block exactly matching those created from apply
-			 pushed_transaction = 1 << 14, ///< used to indicate that the origination of the call was from a push_transaction, to determine time allotment
-			 created_block = 1 << 15, ///< used to indicate that the origination of the call was for creating a block, to determine time allotment
-			 received_block = 1 << 16, ///< used to indicate that the origination of the call was for a received block, to determine time allotment
-			 irreversible = 1 << 17  ///< indicates the block was received while catching up and is already considered irreversible.
-		 };
 
        const static_config_object&          get_static_config()const;
        const dynamic_states_object&         get_dynamic_states()const;

@@ -7,7 +7,6 @@
 #include <plugin.hpp>
 #include <boost/container/flat_set.hpp>
 #include <chain_xmax.hpp>
-#include <chaindata_plugin.hpp>
 #include <chainhttp_plugin.hpp>
 #include <abi_serializer.hpp>
 
@@ -233,7 +232,7 @@ namespace Xmaxplatform {
 class blockchain_plugin : public plugin<blockchain_plugin> {
 public:
 
-    BASEAPP_DEPEND_PLUGINS((chaindata_plugin)(chainhttp_plugin))
+    BASEAPP_DEPEND_PLUGINS((chainhttp_plugin))
     blockchain_plugin();
    virtual ~blockchain_plugin();
 

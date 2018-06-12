@@ -8,6 +8,7 @@
 #include <block.hpp>
 #include <blockchain_exceptions.hpp>
 #include <basechain.hpp>
+#include <forkchain.hpp>
 #include <chain_init.hpp>
 #include <chain_xmax.hpp>
 #include <xmax_voting.hpp>
@@ -54,8 +55,9 @@ namespace Xmaxplatform { namespace Chain {
 		typedef pair<account_name, Basetypes::name> handler_key;
 		optional<pending_block>				pending_build;
 		chain_stream						chain_log;
-
-		database&							data;
+		chain_xmax::xmax_config				config;
+		database							block_db;
+		forkdatabase						fork_db;
 		uint32_t							last_irreversible_block_num = 0;
 
 		const uint32_t                   pending_txn_depth_limit;
@@ -66,16 +68,21 @@ namespace Xmaxplatform { namespace Chain {
 		vector<transaction_request_ptr>         pending_transactions;
 
 
-		chain_context(database& _data, const fc::path& block_file_dir, uint32_t _txn_depth_limit)
-			: data(_data)
-			, chain_log(block_file_dir)
+		chain_context(const chain_xmax::xmax_config& _config, uint32_t _txn_depth_limit)
+			: config(_config)
+			, chain_log(_config.block_log_dir)
 			, pending_txn_depth_limit(_txn_depth_limit)
+			, block_db(config.block_memory_dir,
+				config.open_flag ? database::read_only : database::read_write,
+				config.shared_memory_size)
+			, fork_db(config.block_memory_dir)
 		{
+
 		}
 		~chain_context()
 		{
 			pending_build.reset();
-			data.flush();
+			block_db.flush();
 		}
 
 		//template<typename Function>
@@ -100,33 +107,33 @@ namespace Xmaxplatform { namespace Chain {
 
 
         void chain_xmax::setup_data_indexes() {
-            _context->data.add_index<account_index>();
+            _context->block_db.add_index<account_index>();
 
-            _context->data.add_index<key_value_index>();
-            _context->data.add_index<keystr_value_index>();
-            _context->data.add_index<key128x128_value_index>();
-            _context->data.add_index<key64x64x64_value_index>();
+            _context->block_db.add_index<key_value_index>();
+            _context->block_db.add_index<keystr_value_index>();
+            _context->block_db.add_index<key128x128_value_index>();
+            _context->block_db.add_index<key64x64x64_value_index>();
 
-			_context->data.add_index<transaction_multi_index>();
-			_context->data.add_index<generated_transaction_multi_index>();
-			_context->data.add_index<block_summary_multi_index>();
-			_context->data.add_index<block_multi_index>();
+			_context->block_db.add_index<transaction_multi_index>();
+			_context->block_db.add_index<generated_transaction_multi_index>();
+			_context->block_db.add_index<block_summary_multi_index>();
+			_context->block_db.add_index<block_multi_index>();
 
-            _context->data.add_index<static_config_multi_index>();
-            _context->data.add_index<dynamic_states_multi_index>();
-            _context->data.add_index<xmx_token_multi_index>();
+            _context->block_db.add_index<static_config_multi_index>();
+            _context->block_db.add_index<dynamic_states_multi_index>();
+            _context->block_db.add_index<xmx_token_multi_index>();
 
-			_context->data.add_index<voter_info_index>();
-			_context->data.add_index<builder_info_index>();
-			_context->data.add_index<builder_multi_index>();
-			_context->data.add_index<resource_token_multi_index>();
+			_context->block_db.add_index<voter_info_index>();
+			_context->block_db.add_index<builder_info_index>();
+			_context->block_db.add_index<builder_multi_index>();
+			_context->block_db.add_index<resource_token_multi_index>();
 
         }
 
         void chain_xmax::initialize_chain(chain_init& initer)
         { try {
-                if (!_context->data.find<static_config_object>()) {
-                    _context->data.with_write_lock([this,&initer] {
+                if (!_context->block_db.find<static_config_object>()) {
+                    _context->block_db.with_write_lock([this,&initer] {
 
 						const fc::time_point init_point = initer.get_chain_init_time();;
 						const chain_timestamp init_stamp = chain_timestamp::from(init_point);
@@ -136,13 +143,13 @@ namespace Xmaxplatform { namespace Chain {
 						list.push_back(builder_info(Config::xmax_contract_name, Config::xmax_build_public_key));
 
                         // Create global properties
-                        _context->data.create<static_config_object>([&](static_config_object &p) {
+                        _context->block_db.create<static_config_object>([&](static_config_object &p) {
                             p.setup = initer.get_blockchain_setup();
                             p.current_builders.set_builders(list, 0);
 							p.next_builders.set_builders(p.current_builders.builders, 1);
                         });
 
-                        _context->data.create<dynamic_states_object>([&](dynamic_states_object &p) {
+                        _context->block_db.create<dynamic_states_object>([&](dynamic_states_object &p) {
 							p.head_block_number = 0;
 							p.head_block_id = xmax_type_block_id();
                             p.state_time = pre_stamp.time_point();
@@ -154,7 +161,7 @@ namespace Xmaxplatform { namespace Chain {
                         });
 
 						for (int i = 0; i < 0x10000; i++)
-							_context->data.create<block_summary_object>([&](block_summary_object&) {});
+							_context->block_db.create<block_summary_object>([&](block_summary_object&) {});
 
 
                         //signed_block block{};
@@ -162,7 +169,7 @@ namespace Xmaxplatform { namespace Chain {
                         //block.threads.emplace_back();
                         //block.threads[0].emplace_back();
 
-                        auto messages = initer.prepare_data(*this, _context->data);
+                        auto messages = initer.prepare_data(*this, _context->block_db);
                         std::for_each(messages.begin(), messages.end(), [&](const message_xmax& m) {
                             message_output output;
                             processed_transaction trx; /// dummy transaction required for scope validation
@@ -180,11 +187,11 @@ namespace Xmaxplatform { namespace Chain {
 
         }
 
-        chain_xmax::chain_xmax(database& database, chain_init& init, const fc::path& block_log_dir, const finalize_block_func& finalize_func)
-		: _context(new chain_context(database, block_log_dir, 1000)) {
+        chain_xmax::chain_xmax(chain_init& init, const xmax_config& config, const finalize_block_func& finalize_func)
+		: _context(new chain_context(config, 1000)) {
 
             setup_data_indexes();
-            init.register_handlers(*this, _context->data);
+            init.register_handlers(*this, _context->block_db);
 
 			initialize_chain(init);
 
@@ -195,15 +202,15 @@ namespace Xmaxplatform { namespace Chain {
 
         chain_xmax::~chain_xmax() {
 
-            _context->data.flush();
+            _context->block_db.flush();
         }
 
         const static_config_object& chain_xmax::get_static_config()const {
-            return _context->data.get<static_config_object>();
+            return _context->block_db.get<static_config_object>();
         }
 
         const dynamic_states_object& chain_xmax::get_dynamic_states() const {
-            return _context->data.get<dynamic_states_object>();
+            return _context->block_db.get<dynamic_states_object>();
         }
 
         time chain_xmax::head_block_time() const {
@@ -266,7 +273,7 @@ namespace Xmaxplatform { namespace Chain {
 
 		const builder_object* chain_xmax::find_builder_object(account_name builder_name) const
 		{
-			return _context->data.find<builder_object, by_owner>(builder_name);
+			return _context->block_db.find<builder_object, by_owner>(builder_name);
 		}
 
 		uint32_t chain_xmax::get_delta_slot_at_time(chain_timestamp when) const
@@ -292,17 +299,17 @@ namespace Xmaxplatform { namespace Chain {
         }
 		const Basechain::database& chain_xmax::get_database() const
 		{ 
-			return _context->data;
+			return _context->block_db;
 		}
 		Basechain::database& chain_xmax::get_mutable_database()
 		{ 
-			return _context->data;
+			return _context->block_db;
 		}
 
 		vector<char> chain_xmax::message_to_binary(name code, name type, const fc::variant& obj)const
 		{
 			try {
-				const auto& code_account = _context->data.get<account_object, by_name>(code);
+				const auto& code_account = _context->block_db.get<account_object, by_name>(code);
 				Xmaxplatform::Basetypes::abi abi;
 				if (Basetypes::abi_serializer::to_abi(code_account.abi, abi)) {
 					Basetypes::abi_serializer abis(abi);
@@ -314,7 +321,7 @@ namespace Xmaxplatform { namespace Chain {
 
 		fc::variant chain_xmax::message_from_binary(name code, name type, const vector<char>& bin) const
 		{
-			const auto& code_account = _context->data.get<account_object, by_name>(code);
+			const auto& code_account = _context->block_db.get<account_object, by_name>(code);
 			Xmaxplatform::Basetypes::abi abi;
 			if (Basetypes::abi_serializer::to_abi(code_account.abi, abi)) {
 				Basetypes::abi_serializer abis(abi);
@@ -326,7 +333,7 @@ namespace Xmaxplatform { namespace Chain {
 
 		//--------------------------------------------------
 		fc::variant chain_xmax::event_from_binary(name code, type_name tname, const vector<char>& bin) const {
-			const auto& code_account = _context->data.get<account_object, by_name>(code);
+			const auto& code_account = _context->block_db.get<account_object, by_name>(code);
 			Xmaxplatform::Basetypes::abi abi;
 			if (Basetypes::abi_serializer::to_abi(code_account.abi, abi)) {
 				Basetypes::abi_serializer abis(abi);
@@ -399,7 +406,7 @@ namespace Xmaxplatform { namespace Chain {
 				SET_FIELD(msg_mvo, msg, type);
 				SET_FIELD(msg_mvo, msg, authorization);
 
-				const auto& code_account = _context->data.get<account_object, by_name>(msg.code);
+				const auto& code_account = _context->block_db.get<account_object, by_name>(msg.code);
 				if (!Basetypes::abi_serializer::is_empty_abi(code_account.abi)) {
 					try {
 						msg_mvo("data", message_from_binary(msg.code, msg.type, msg.data));
@@ -477,7 +484,7 @@ namespace Xmaxplatform { namespace Chain {
 
 
 
-			auto temp_session = _context->data.start_undo_session(true);
+			auto temp_session = _context->block_db.start_undo_session(true);
 			validate_referenced_accounts(request->signed_trx);
 			check_transaction_authorization(request->signed_trx);
 			auto pt = apply_transaction(request->signed_trx);
@@ -547,7 +554,7 @@ namespace Xmaxplatform { namespace Chain {
 				_context->pending_build.reset();
 			});
 
-			_context->pending_build = _context->data.start_undo_session(true);
+			_context->pending_build = _context->block_db.start_undo_session(true);
 
 			try {
 
@@ -601,8 +608,6 @@ namespace Xmaxplatform { namespace Chain {
 				_finalize_block(*new_block);
 
 				block_summary(*new_block);
-
-				_context->chain_log.append_block(new_block);
 
 				_context->pending_build->push_block();
 
@@ -670,7 +675,7 @@ namespace Xmaxplatform { namespace Chain {
 					if (const builder_object* builder_obj = find_builder_object(miss_name))
 					{
 						uint64_t last_miss = builder_obj->total_missed;
-						_context->data.modify(*builder_obj, [&](builder_object& obj) {
+						_context->block_db.modify(*builder_obj, [&](builder_object& obj) {
 							obj.total_missed = last_miss + 1;
 						});
 					}
@@ -684,7 +689,7 @@ namespace Xmaxplatform { namespace Chain {
 				update_or_create_builders(*b.next_builders);
 
 				const static_config_object& static_config = get_static_config();
-				_context->data.modify(static_config, [&](static_config_object& obj) {
+				_context->block_db.modify(static_config, [&](static_config_object& obj) {
 					obj.next_builders = *b.next_builders;
 				});
 				builder_elect_state = builders_confirmed;
@@ -692,13 +697,13 @@ namespace Xmaxplatform { namespace Chain {
 			// create new builder list.
 			if (elect_new_builders == builder_elect_state) 
 			{
-				xmax_builder_infos new_builders = Native_contract::xmax_voting::next_round(_context->data);
+				xmax_builder_infos new_builders = Native_contract::xmax_voting::next_round(_context->block_db);
 				
 				const static_config_object& static_config = get_static_config();
 
 				uint32_t new_version = static_config.current_builders.version + 1;
 
-				_context->data.modify(static_config, [&](static_config_object& obj) {
+				_context->block_db.modify(static_config, [&](static_config_object& obj) {
 					obj.new_builders.set_builders(new_builders, new_version);
 				});		
 				builder_elect_state = builders_elected;
@@ -720,7 +725,7 @@ namespace Xmaxplatform { namespace Chain {
 				if (!static_config.next_builders.is_empty())
 				{
 					builder_rule current_builders = static_config.next_builders;
-					_context->data.modify(static_config, [&](static_config_object& obj) {
+					_context->block_db.modify(static_config, [&](static_config_object& obj) {
 						obj.current_builders = current_builders;
 						obj.new_builders.reset();
 						obj.next_builders.reset();
@@ -739,14 +744,14 @@ namespace Xmaxplatform { namespace Chain {
 			// update builder info
 			if (const builder_object* builder_obj = find_builder_object(b.builder))
 			{
-				_context->data.modify(*builder_obj, [&](builder_object& obj) {
+				_context->block_db.modify(*builder_obj, [&](builder_object& obj) {
 					obj.last_block_time = b.timestamp.time_point();
 				});
 			}
 
 
             // update dynamic states
-            _context->data.modify( dy_state, [&]( dynamic_states_object& dgp ){
+            _context->block_db.modify( dy_state, [&]( dynamic_states_object& dgp ){
                 dgp.head_block_number = b.block_num();
                 dgp.head_block_id = b.id();
                 dgp.state_time = b.timestamp.time_point();
@@ -758,7 +763,7 @@ namespace Xmaxplatform { namespace Chain {
             });
 
 			// update block data
-			_context->data.create<block_object>([&](block_object& block) {
+			_context->block_db.create<block_object>([&](block_object& block) {
 				block.blk_id = b.id();
 				block.block = b;
 			});
@@ -785,7 +790,7 @@ namespace Xmaxplatform { namespace Chain {
 
             auto us_duration = (fc::time_point::now() - start_time).count();
 
-            message_context_xmax xmax_ctx(*this, _context->data, trx, message, code);
+            message_context_xmax xmax_ctx(*this, _context->block_db, trx, message, code);
             apply_message(xmax_ctx);
 
 			for (auto& event_output : xmax_ctx.events)
@@ -826,7 +831,7 @@ namespace Xmaxplatform { namespace Chain {
                         return;
                     }
                 }
-                const auto& recipient = _context->data.get<account_object,by_name>(context.code);
+                const auto& recipient = _context->block_db.get<account_object,by_name>(context.code);
                 if (recipient.code.size()) {
                     idump((context.code)(context.msg.type));
                     const uint32_t execution_time = 10000;//TODO
@@ -841,7 +846,7 @@ namespace Xmaxplatform { namespace Chain {
 		void chain_xmax::validate_uniqueness(const Chain::signed_transaction& trx)const {
 			if (!should_check_for_duplicate_transactions()) return;
 
-			auto transaction = _context->data.find<transaction_object, by_trx_id>(trx.id());
+			auto transaction = _context->block_db.find<transaction_object, by_trx_id>(trx.id());
 			XMAX_ASSERT(transaction == nullptr, tx_duplicate, "Transaction is not unique");
 		}
 
@@ -851,14 +856,14 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::record_transaction(const Chain::signed_transaction& trx) {
 			//Insert transaction into unique transactions database.
-			_context->data.create<transaction_object>([&](transaction_object& transaction) {
+			_context->block_db.create<transaction_object>([&](transaction_object& transaction) {
 				transaction.trx_id = trx.id(); /// TODO: consider caching ID
 				transaction.expiration = trx.expiration;
 			});
 		}
 
 		void chain_xmax::record_transaction(const generated_transaction& trx) {
-			_context->data.modify(_context->data.get<generated_transaction_object, generated_transaction_object::by_trx_id>(trx.id), [&](generated_transaction_object& transaction) {
+			_context->block_db.modify(_context->block_db.get<generated_transaction_object, generated_transaction_object::by_trx_id>(trx.id), [&](generated_transaction_object& transaction) {
 				transaction.status = generated_transaction_object::PROCESSED;
 			});
 		}
@@ -869,7 +874,7 @@ namespace Xmaxplatform { namespace Chain {
 		void chain_xmax::validate_tapos(const transaction& trx)const {
 			if (!should_check_tapos()) return;
 
-			const auto& tapos_block_summary = _context->data.get<block_summary_object>((uint16_t)trx.ref_block_num);
+			const auto& tapos_block_summary = _context->block_db.get<block_summary_object>((uint16_t)trx.ref_block_num);
 
 			//Verify TaPoS block summary has correct ID prefix, and that this block's time is not past the expiration
 			XMAX_ASSERT(transaction_verify_reference_block(trx, tapos_block_summary.block_id), transaction_exception,
@@ -945,19 +950,19 @@ namespace Xmaxplatform { namespace Chain {
 		optional<signed_block>			chain_xmax::get_block_from_id(const xmax_type_block_id& id)const
 		{			
 
-			const auto& block_obj = _context->data.get<block_object, by_blk_id>(id);
+			const auto& block_obj = _context->block_db.get<block_object, by_blk_id>(id);
 			return block_obj.block;
 		}
 		optional<signed_block>      chain_xmax::get_block_from_num(uint32_t num)const
 		{
-			const auto& block_obj = _context->data.get<block_object, by_blk_num>(num);
+			const auto& block_obj = _context->block_db.get<block_object, by_blk_num>(num);
 			return block_obj.block;
 		}
 
 		void chain_xmax::block_summary(const signed_block& next_block)
 		{
 			auto sid = next_block.block_num() & 0xffff;
-			_context->data.modify(_context->data.get<block_summary_object, by_id>(sid), [&](block_summary_object& p) {
+			_context->block_db.modify(_context->block_db.get<block_summary_object, by_id>(sid), [&](block_summary_object& p) {
 				p.block_id = next_block.id();
 			});
 		}
@@ -970,7 +975,7 @@ namespace Xmaxplatform { namespace Chain {
 				{
 					if (obj->signing_key != info.block_signing_key)
 					{
-						_context->data.modify(*obj, [&](builder_object& newobj)
+						_context->block_db.modify(*obj, [&](builder_object& newobj)
 						{
 							newobj.signing_key = info.block_signing_key;
 						});
@@ -978,7 +983,7 @@ namespace Xmaxplatform { namespace Chain {
 				}
 				else
 				{
-					_context->data.create<builder_object>([&](auto& pro) {
+					_context->block_db.create<builder_object>([&](auto& pro) {
 						pro.owner = info.builder_name;
 						pro.signing_key = info.block_signing_key;
 					});
@@ -1027,7 +1032,7 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::require_account(const account_name& name) const
 		{
-			auto account = _context->data.find<account_object, by_name>(name);
+			auto account = _context->block_db.find<account_object, by_name>(name);
 			FC_ASSERT(account != nullptr, "Account not found: ${name}", ("name", name));
 		}
 

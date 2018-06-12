@@ -4,6 +4,7 @@
 */
 #pragma once
 #include <block.hpp>
+#include <block_pack.hpp>
 
 namespace Xmaxplatform {
 namespace Chain {

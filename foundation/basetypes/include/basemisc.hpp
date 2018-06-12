@@ -18,3 +18,5 @@ namespace Xmaxplatform {
 #define empty_name Xmaxplatform::basemisc::empty_name_type
 
 #define empty_public_key Xmaxplatform::basemisc::empty_public_key_type
+
+#define size_mb (1024 * 1024)

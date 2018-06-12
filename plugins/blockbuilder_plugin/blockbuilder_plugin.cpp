@@ -3,7 +3,6 @@
  *  @copyright defined in xmax/LICENSE
  */
 #include <blockchain_exceptions.hpp>
-#include <chaindata_plugin.hpp>
 #include <initial_builder_state.hpp>
 #include <blockbuilder_plugin.hpp>
 #include <blockchain_plugin.hpp>

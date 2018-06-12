@@ -16,15 +16,15 @@
 #include <mongodb_plugin.hpp>
 
 namespace Xmaxplatform {
-
+	namespace bfs = boost::filesystem;
 
     class chain_plugin_impl {
     public:
-        Baseapp::bfs::path genesis_file;
-		Baseapp::bfs::path block_log_dir;
-        std::unique_ptr<Chain::chain_xmax> chain;
+        bfs::path genesis_file;
 		Chain::chain_id_type      chain_id;
-		uint32_t	skip_flags = Chain::chain_xmax::skip_nothing;
+		Chain::chain_xmax::xmax_config config;
+        std::unique_ptr<Chain::chain_xmax> chain;
+
     };
 
 
@@ -41,20 +41,51 @@ namespace Xmaxplatform {
 				("block-log-dir", bpo::value<boost::filesystem::path>()->default_value("blocks"),
 				"the location of the block log (absolute path or relative to application data dir)")
 				;
+
+		cfg.add_options()
+			("readonly", bpo::value<bool>()->default_value(false), "open data mode")
+			("block-state-dir", bpo::value<Basechain::bfs::path>()->default_value("chainstate"),
+				"the location of xmax chain block state memory files (absolute path or relative to application data dir)")
+			("block-state-size", bpo::value<uint64_t>()->default_value(8 * 1024),
+					"Minimum size MB of database block state memory file")
+			("fork-state-dir", bpo::value<Basechain::bfs::path>()->default_value("chainstate"),
+						"the location of xmax chain fork memory files (absolute path or relative to application data dir)")
+			;
     }
 
     void blockchain_plugin::plugin_initialize(const variables_map &options) {
         ilog("blockchain_plugin::plugin_initialize");
         if (options.count("genesis-json")) {
-			my->genesis_file = options.at("genesis-json").as<Baseapp::bfs::path>();
+			my->genesis_file = options.at("genesis-json").as<bfs::path>();
         }
 		if (options.count("block-log-dir")) {
 			auto bld = options.at("block-log-dir").as<bfs::path>();
 			if (bld.is_relative())
-				my->block_log_dir = app().data_dir() / bld;
+				my->config.block_log_dir = app().data_dir() / bld;
 			else
-				my->block_log_dir = bld;
+				my->config.block_log_dir = bld;
 		}
+
+		my->config.block_memory_dir = app().data_dir() / "chainstate";
+		my->config.fork_memory_dir = app().data_dir() / "chainstate";
+
+		if (options.count("block-state-dir")) {
+			auto sfd = options.at("block-state-dir").as<Basechain::bfs::path>();
+			if (sfd.is_relative())
+				my->config.block_memory_dir = app().data_dir() / sfd;
+			else
+				my->config.block_memory_dir = sfd;
+		}
+		if (options.count("fork-state-dir")) {
+			auto sfd = options.at("fork-state-dir").as<Basechain::bfs::path>();
+			if (sfd.is_relative())
+				my->config.fork_memory_dir = app().data_dir() / sfd;
+			else
+				my->config.fork_memory_dir = sfd;
+		}
+
+		my->config.shared_memory_size = options.at("block-state-size").as<uint64_t>() * size_mb;
+		my->config.open_flag = options.at("readonly").as<bool>();
     }
 
 #define CALL(api_name, api_handle, api_namespace, call_name, http_response_code) \
@@ -89,7 +120,6 @@ namespace Xmaxplatform {
 
     void blockchain_plugin::plugin_startup() {
         ilog("blockchain_plugin::plugin_startup");
-        auto &data = app().get_plugin<chaindata_plugin>().data();
         auto genesis = fc::json::from_file(my->genesis_file).as<Native_contract::genesis_state_type>();
         Native_contract::native_contract_chain_init chainsetup(genesis);
 		my->chain_id = genesis.compute_chain_id();		
@@ -104,7 +134,7 @@ namespace Xmaxplatform {
 		}
 
 
-        my->chain.reset(new Chain::chain_xmax(data, chainsetup, my->block_log_dir, finalize_func));
+        my->chain.reset(new Chain::chain_xmax(chainsetup, my->config, finalize_func));
 
         register_chain_api();
 
@@ -144,7 +174,7 @@ namespace Xmaxplatform {
 
 	//--------------------------------------------------
 	Xmaxplatform::Chain_APIs::read_write blockchain_plugin::get_read_write_api() { 
-		return Chain_APIs::read_write(getchain(), my->skip_flags); }
+		return Chain_APIs::read_write(getchain(), my->config.skip_flags); }
 
 namespace Chain_APIs{
 

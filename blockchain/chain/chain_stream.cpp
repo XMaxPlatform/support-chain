@@ -17,10 +17,11 @@ namespace block_detail
 	{
 		uint64_t num;
 		uint64_t pos;
-
+		uint64_t size;
 		block_desc()
 			: num(0)
 			, pos(0)
+			, size(0)
 		{
 
 		}
@@ -53,6 +54,19 @@ namespace Xmaxplatform { namespace Chain {
 		fc::path                 block_file;
 		fc::path                 index_file;
 		signed_block_ptr         head_block;
+
+		~chain_stream_impl()
+		{
+			if (block_stream.is_open())
+			{
+				block_stream.close();
+			}
+			if (index_stream.is_open())
+			{
+				index_stream.close();
+			}
+		}
+
 		void init()
 		{
 			block_stream.exceptions(std::fstream::failbit | std::fstream::badbit);
@@ -105,21 +119,30 @@ namespace Xmaxplatform { namespace Chain {
 
 		uint64_t append_block(const signed_block_ptr& blockptr)
 		{
-			uint64_t pos = block_stream.tellp();
 
-			FC_ASSERT(pos == sizeof(block_detail::block_index) * (blockptr->block_num() - 1),
-				"Append to index file occuring at wrong position.",
-				("position", pos)
-				("expected", (blockptr->block_num() - 1) * sizeof(uint64_t)));
+			auto data = fc::raw::pack(*blockptr);
+
+			uint64_t pos = block_stream.tellp();
 
 			block_detail::block_desc desc;
 			block_detail::block_index index;
-
 			desc.num = blockptr->block_num();
 			desc.pos = pos;
+			desc.size = data.size();
+
 			index.pos = pos;
 
-			auto data = fc::raw::pack(*blockptr);
+
+			uint64_t idx_pos = index_stream.tellp();
+
+			FC_ASSERT(idx_pos == sizeof(block_detail::block_index) * (desc.num - 1),
+				"Append to index file occuring at wrong position.",
+				("position", idx_pos)
+				("expected", (desc.num - 1) * sizeof(uint64_t)));
+
+
+			block_stream.seekg(desc.pos);
+
 			block_stream.write(data.data(), data.size());
 			block_stream.write((char*)&desc, sizeof(desc));
 			block_stream.flush();
@@ -137,7 +160,7 @@ namespace Xmaxplatform { namespace Chain {
 
 
 	chain_stream::chain_stream(const fc::path& data_dir)
-		:stream_impl(new chain_stream_impl()) {
+		:stream_impl(std::make_unique<chain_stream_impl>()) {
 		stream_impl->init();
 		stream_impl->open(data_dir);
 	}

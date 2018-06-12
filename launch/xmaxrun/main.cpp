@@ -37,7 +37,6 @@ void initialize_logging()
 
 void regist_plugins()
 {
-    app().register_plugin<Xmaxplatform::chaindata_plugin>();
     app().register_plugin<Xmaxplatform::chainhttp_plugin>();
 	app().register_plugin<Xmaxplatform::chainnet_plugin>();
     app().register_plugin<Xmaxplatform::blockchain_plugin>();
