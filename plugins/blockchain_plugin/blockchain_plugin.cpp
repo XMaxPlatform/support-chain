@@ -126,7 +126,7 @@ namespace Xmaxplatform {
 		auto& mongo_plugin = app().get_plugin<mongodb_plugin>();
 
 		Xmaxplatform::Chain::finalize_block_func finalize_func;
-		if (mongo_plugin.get_state() == mongodb_plugin::registered)
+		if (mongo_plugin.get_state() != mongodb_plugin::registered)
 		{
 			auto p_mongo_plugin = &mongo_plugin;
 			ilog("Found mongodb_plugin and ready to serialize data to the plugin.");
