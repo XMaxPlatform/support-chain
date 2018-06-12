@@ -578,6 +578,7 @@ namespace Xmaxplatform {
 		auto blocks = mongo_client[mongodb_name][col_blocks_name]; // Blocks
 		const auto prev_block_id = block.previous.str();
 		const auto block_id = block.id();
+		auto block_num = block.block_num();
 
 		if (handled_block_num == 0)
 		{
@@ -588,7 +589,9 @@ namespace Xmaxplatform {
 				opts.sort(bsoncxx::from_json(R"foo({ "_id" : -1 })foo"));
 				auto last_block = blocks.find_one({}, opts);
 				if (!last_block) {
-					FC_THROW("No blocks found in the mongo db");
+					//Release constraint temporary cause of the genesis block finalization which has not yet been finished
+					//FC_THROW("No blocks found in the mongo db");
+					return;
 				}
 				const auto id = last_block->view()["block_id"].get_utf8().value.to_string();
 				if (id != prev_block_id) {
@@ -600,6 +603,11 @@ namespace Xmaxplatform {
 			{
 				if(blocks.count(bsoncxx::from_json("{}")) > 0) {
 					FC_THROW("Error! There already exist a block.");
+				}
+
+				FC_ASSERT(block_num < 2, "Expected start of block, instead received block_num: ${bn}", ("bn", block_num));			
+				if (block_num == 1 && block.builder == Config::xmax_contract_name) {
+					block_num = 0;
 				}
 			}
 		}
