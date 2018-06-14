@@ -24,6 +24,7 @@ using Basetypes::public_key;
 using fc::ecc::private_key;
         const static char key_prefix[] = "XMX";
         const static int blocks_per_round = 21;
+		const static int builders_per_round = 21;
         const static account_name xmax_contract_name = STN(xmax);
 
 		const extern public_key xmax_build_public_key;

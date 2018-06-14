@@ -704,8 +704,9 @@ namespace Xmaxplatform { namespace Chain {
 			// info of miss builders.
 			if (missed_blocks > 0)
 			{
+				uint32_t fixed_missed = missed_blocks % Config::blocks_per_round;
 				uint32_t pre_slot = dy_state.round_slot + 1;
-				for (int i = 0; i < missed_blocks; ++i)
+				for (int i = 0; i < fixed_missed; ++i)
 				{
 					int miss_slot = pre_slot + i;
 					account_name miss_name = get_order_builder(miss_slot).builder_name;
