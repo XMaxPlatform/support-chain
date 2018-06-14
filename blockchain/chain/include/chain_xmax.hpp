@@ -14,6 +14,7 @@
 #include <map>
 #include <blockchain_types.hpp>
 #include <block.hpp>
+#include <block_pack.hpp>
 #include <blockchain_setup.hpp>
 #include <objects/static_config_object.hpp>
 #include <objects/dynamic_states_object.hpp>
@@ -133,9 +134,9 @@ namespace Xmaxplatform { namespace Chain {
 
        void _apply_block(const signed_block& next_block);
 
-	   void _finalize_block(const signed_block& b);
+	   void _update_block_state(const signed_block& b);
 
-	   void _irreversible_block(const signed_block_ptr& block);
+	   void _irreversible_block(const block_pack_ptr& pack);
 	 // void rate_limit_message(const message& message);
       void process_message(const transaction& trx, account_name code, const message_xmax& message,
                             message_output& output, message_context_xmax* parent_context = nullptr,

@@ -29,8 +29,8 @@ namespace Chain {
 	typedef multi_index_container <
 		block_pack_ptr,
 		indexed_by<
-		hashed_unique< tag<by_block_id>, member<block_header_summary, xmax_type_block_id, &block_header_summary::block_id>, std::hash<xmax_type_block_id> >,
-		ordered_non_unique< tag<by_pre_id>, const_mem_fun<block_header_summary, const xmax_type_block_id&, &block_header_summary::prev_id> >
+		hashed_unique< tag<by_block_id>, member<block_raw, xmax_type_block_id, &block_raw::block_id>, std::hash<xmax_type_block_id> >,
+		ordered_non_unique< tag<by_pre_id>, const_mem_fun<block_raw, const xmax_type_block_id&, &block_raw::prev_id> >
 		>
 		> block_pack_container;
 
@@ -65,7 +65,7 @@ namespace Chain {
 			for (uint32_t i = 0, n = size.value; i < n; ++i) {
 				block_pack s;
 				fc::raw::unpack(ds, s);
-				set_block(std::make_shared<block_pack>(std::move(s)));
+				add_block(std::make_shared<block_pack>(std::move(s)));
 			}
 			xmax_type_block_id head_id;
 			fc::raw::unpack(ds, head_id);
@@ -89,10 +89,10 @@ namespace Chain {
 	}
 
 
-	void forkdatabase::set_block(block_pack_ptr block_pack)
+	void forkdatabase::add_block(block_pack_ptr block_pack)
 	{
 		auto result = _context->packs.insert(block_pack);
-		FC_ASSERT(block_pack->block_id == block_pack->header.id());
+		FC_ASSERT(block_pack->block_id == block_pack->new_header.id());
 
 		FC_ASSERT(result.second, "unable to insert block state, duplicate state detected");
 

@@ -9,20 +9,22 @@
 namespace Xmaxplatform {
 namespace Chain {
 
-	struct block_header_summary
+	struct block_raw
 	{
-		uint32_t			block_num = 0;
-		xmax_type_block_id	block_id;
-		signed_block_header header;
-
+		uint32_t							block_num = 0;
+		xmax_type_block_id					block_id;
+		signed_block_header					new_header;
+		vector<block_confirmation>			confirmations;
 
 		const xmax_type_block_id& prev_id() const
 		{
-			return header.previous;
+			return new_header.previous;
 		}
+
+		void push_confirm(const block_confirmation& conf);
 	};
 
-	struct block_pack : public block_header_summary
+	struct block_pack : public block_raw
 	{
 		block_pack()
 			: block(std::make_shared<signed_block>())
@@ -38,8 +40,7 @@ namespace Chain {
 }
 }
 
-FC_REFLECT(Xmaxplatform::Chain::block_header_summary,
-	(block_id)(header))
+FC_REFLECT(Xmaxplatform::Chain::block_raw, (block_id)(new_header))
 
-FC_REFLECT_DERIVED(Xmaxplatform::Chain::block_pack, (Xmaxplatform::Chain::block_header_summary), (block))
+FC_REFLECT_DERIVED(Xmaxplatform::Chain::block_pack, (Xmaxplatform::Chain::block_raw), (block))
 

@@ -17,7 +17,7 @@ namespace Xmaxplatform { namespace Chain {
 
    class static_config_object : public Basechain::object<static_config_object_type, static_config_object>
    {
-      OBJECT_CCTOR(static_config_object, (current_builders)(next_builders)(new_builders))
+      OBJECT_CCTOR(static_config_object, (current_builders)(next_builders))
 
        id_type id;
        blockchain_setup setup;
@@ -25,7 +25,7 @@ namespace Xmaxplatform { namespace Chain {
 
 	   shared_builder_rule next_builders;
 
-	   shared_builder_rule new_builders;
+	   //shared_builder_rule new_builders;
 
    };
 

@@ -20,8 +20,7 @@ namespace Xmaxplatform { namespace Chain {
 	{
 		unknown_elect_state = 0,
 		elect_new_builders = 1,
-		builders_elected = 2,
-		builders_confirmed = 3,
+		builders_confirmed = 2,
 	};
 
 	class dynamic_states_object : public Basechain::object<dynamic_states_object_type, dynamic_states_object>

@@ -53,7 +53,7 @@ namespace Xmaxplatform { namespace Chain {
 	{
 	public:
 		typedef pair<account_name, Basetypes::name> handler_key;
-		optional<pending_block>				pending_build;
+		optional<pending_block>				building_block;
 		chain_stream						chain_log;
 		chain_xmax::xmax_config				config;
 		database							block_db;
@@ -81,8 +81,15 @@ namespace Xmaxplatform { namespace Chain {
 		}
 		~chain_context()
 		{
-			pending_build.reset();
+			building_block.reset();
 			block_db.flush();
+		}
+
+		xmax_type_merkle_root calculate_merkle_root() const
+		{
+			// empty now. test...
+#pragma message("Unrealized functions, realize in the future.") 
+			return xmax_type_merkle_root();
 		}
 
 		//template<typename Function>
@@ -522,62 +529,60 @@ namespace Xmaxplatform { namespace Chain {
 			auto exec_stop = std::chrono::high_resolution_clock::now();
 			auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_stop - exec_start);
 
-			const signed_block& new_block = *_context->pending_build->pack->block;
+			const auto& new_block = _context->building_block->pack->block;
 
 			ilog("${builder} generate block #${num}  at ${time}, exectime_ms=${extm}",
-				("builder", new_block.builder)
-				("time", new_block.timestamp)
-				("num", new_block.block_num())
+				("builder", new_block->builder)
+				("time", new_block->timestamp)
+				("num", new_block->block_num())
 				("extm", exec_ms.count())
 			);
 
 			// temp process. commit impl.
 			_commit_block();
 
+			// tmp code irreversible immediately
+			//_irreversible_block(_context->building_block->pack->block);
 		}
 
 		void chain_xmax::_abort_build()
 		{
-			if (_context->pending_build)
+			if (_context->building_block)
 			{
-				_context->pending_build.reset();
+				_context->building_block.reset();
 			}
 		}
 
 		void chain_xmax::_start_build(chain_timestamp when, const account_name& builder)
 		{
-			FC_ASSERT(!_context->pending_build);
+			FC_ASSERT(!_context->building_block);
 			//check properties.
 			FC_ASSERT(head_block_time() < when.time_point(), "block must be generated at a timestamp after the head block time");
 
 			auto pending_undo = fc::make_scoped_exit([&]() {
-				_context->pending_build.reset();
+				_context->building_block.reset();
 			});
 
-			_context->pending_build = _context->block_db.start_undo_session(true);
+			_context->building_block = _context->block_db.start_undo_session(true);
 
 			try {
+
+				_context->building_block->pack = std::make_shared<block_pack>();
 
 				// prepare data.
 				const dynamic_states_object& dy_state = get_dynamic_states();
 
 				time_point start = fc::time_point::now();
 
-				signed_block& new_blk = *_context->pending_build->pack->block;
+				signed_block_header& building_header = _context->building_block->pack->new_header;
 
 				// build block.
-				new_blk.previous = dy_state.head_block_id;
-				new_blk.timestamp = when;
-				new_blk.builder = builder;
-
-				if (builders_elected == dy_state.builders_elect_state)
-				{
-					new_blk.next_builders = get_static_config().new_builders;
-				}
+				building_header.previous = dy_state.head_block_id;
+				building_header.timestamp = when;
+				building_header.builder = builder;
 
 				pending_undo.cancel();
 
-				_context->pending_build->push_block();
 			} FC_CAPTURE_AND_RETHROW((builder))
 		}
 
@@ -586,13 +591,48 @@ namespace Xmaxplatform { namespace Chain {
                 const account_name& builder,
 				const private_key_type& sign_private_key
         ) {
-			FC_ASSERT(_context->pending_build);
+			FC_ASSERT(_context->building_block);
             try {
-				signed_block& new_blk = *_context->pending_build->pack->block;
-				new_blk.transaction_merkle_root = new_blk.calculate_merkle_root();
-				new_blk.sign(sign_private_key);
 
+				signed_block_header& building_header = _context->building_block->pack->new_header;
 
+				const dynamic_states_object& dy_state = get_dynamic_states();
+
+				// create new builder list. before sign.
+				if (elect_new_builders == dy_state.builders_elect_state)
+				{
+					xmax_builder_infos new_builders = Native_contract::xmax_voting::next_round(_context->block_db);
+					
+					const static_config_object& static_config = get_static_config();
+					uint32_t new_version = static_config.current_builders.version + 1;
+					builder_rule newrule;
+					newrule.set_builders(new_builders, new_version);
+					building_header.next_builders = newrule;
+					std::stringstream namestream;
+					for (const builder_info& it : new_builders)
+					{
+						namestream << it.builder_name.to_string() << ",";
+					}
+					fc::mutable_variant_object capcture;
+					capcture.set("builders", namestream.str());
+
+					ilog("next round: ${builders}", (capcture));
+				}
+
+				// merkle
+				building_header.transaction_merkle_root = _context->calculate_merkle_root();
+
+				building_header.sign(sign_private_key);
+
+				_context->building_block->pack->block_id = building_header.id();
+
+				_context->building_block->pack->block = std::make_shared<signed_block>();
+
+				signed_block_header* block_ptr = _context->building_block->pack->block.get();
+
+				(*block_ptr) = building_header;
+
+				_update_block_state(*_context->building_block->pack->block);
 
             } FC_CAPTURE_AND_RETHROW( (builder) ) 
 		}
@@ -600,21 +640,18 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::_commit_block() {
 
-			FC_ASSERT(_context->pending_build);
-			const auto& new_block = _context->pending_build->pack->block;
+			FC_ASSERT(_context->building_block);
+			const auto& new_block = _context->building_block->pack->block;
 
 			try {
 
-				_finalize_block(*new_block);
+				_context->fork_db.add_block(_context->building_block->pack);
 
 				block_summary(*new_block);
 
-				_context->pending_build->push_block();
+				_context->building_block->push_block();
 
 			} FC_CAPTURE_AND_RETHROW((new_block->block_num()))
-
-			// tmp code irreversible immediately
-			_irreversible_block(new_block);
 		
 		}
 
@@ -631,26 +668,26 @@ namespace Xmaxplatform { namespace Chain {
 				FC_ASSERT(next_block.transaction_merkle_root == next_block.calculate_merkle_root(), "action merkle root does not match");
 
 				const dynamic_states_object& dy_state = get_dynamic_states();
-				if (builders_elected == dy_state.builders_elect_state)
+				if (elect_state::elect_new_builders == dy_state.builders_elect_state)
 				{
 					const static_config_object& config = get_static_config();
-					FC_ASSERT(next_block.next_builders.valid() && (*next_block.next_builders == config.new_builders), "error builder list.");
+					FC_ASSERT(next_block.next_builders.valid(), "empty builder list.");
 				}
 				
 
-                _finalize_block(next_block);
+                _update_block_state(next_block);
 
 				block_summary(next_block);
 
             } FC_CAPTURE_AND_RETHROW( (next_block.block_num()) ) 
 		}
 
-		void chain_xmax::_finalize_block(const signed_block& b) 
+		void chain_xmax::_update_block_state(const signed_block& last_block)
 		{		
 			
 			const dynamic_states_object& dy_state = get_dynamic_states();
 
-			chain_timestamp current_block_time = b.timestamp;
+			chain_timestamp current_block_time = last_block.timestamp;
 
 			elect_state builder_elect_state = dy_state.builders_elect_state;
 
@@ -684,78 +721,54 @@ namespace Xmaxplatform { namespace Chain {
 
 
 			// store next builder list.
-			if (b.next_builders.valid()) 
+			if (last_block.next_builders.valid()) 
 			{
-				update_or_create_builders(*b.next_builders);
+				update_or_create_builders(*last_block.next_builders);
 
 				const static_config_object& static_config = get_static_config();
 				_context->block_db.modify(static_config, [&](static_config_object& obj) {
-					obj.next_builders = *b.next_builders;
+					obj.next_builders = *last_block.next_builders;
 				});
 				builder_elect_state = builders_confirmed;
 			}
-			// create new builder list.
-			if (elect_new_builders == builder_elect_state) 
-			{
-				xmax_builder_infos new_builders = Native_contract::xmax_voting::next_round(_context->block_db);
-				
-				const static_config_object& static_config = get_static_config();
 
-				uint32_t new_version = static_config.current_builders.version + 1;
-
-				_context->block_db.modify(static_config, [&](static_config_object& obj) {
-					obj.new_builders.set_builders(new_builders, new_version);
-				});		
-				builder_elect_state = builders_elected;
-
-				std::stringstream namestream;
-				for (const builder_info& it : new_builders)
-				{
-					namestream << it.builder_name.to_string() << ",";
-				}
-				fc::mutable_variant_object capcture;
-				capcture.set("builders", namestream.str());
-
-				ilog("next round: ${builders}", (capcture));
-			}
-			// apply next builder.
+			// change to next round.
 			if (current_round_slot >= Config::blocks_per_round)
 			{
 				const static_config_object& static_config = get_static_config();
 				if (!static_config.next_builders.is_empty())
 				{
-					builder_rule current_builders = static_config.next_builders;
+					builder_rule next_round = static_config.next_builders;
 					_context->block_db.modify(static_config, [&](static_config_object& obj) {
-						obj.current_builders = current_builders;
-						obj.new_builders.reset();
+						obj.current_builders = next_round;
 						obj.next_builders.reset();
 					});
 					builder_elect_state = elect_new_builders;
 
-					// new builders state
+					//// new builders state
 
-					current_round_slot = current_round_slot % Config::blocks_per_round;
-					chain_timestamp delta_time = chain_timestamp::create(current_round_slot);
-					round_begin_time = current_block_time - delta_time;
+					//current_round_slot = current_round_slot % Config::blocks_per_round;
+					//chain_timestamp delta_time = chain_timestamp::create(current_round_slot);
+					//round_begin_time = current_block_time - delta_time;
 
 				}
 			}
 
 			// update builder info
-			if (const builder_object* builder_obj = find_builder_object(b.builder))
+			if (const builder_object* builder_obj = find_builder_object(last_block.builder))
 			{
 				_context->block_db.modify(*builder_obj, [&](builder_object& obj) {
-					obj.last_block_time = b.timestamp.time_point();
+					obj.last_block_time = last_block.timestamp.time_point();
 				});
 			}
 
 
             // update dynamic states
             _context->block_db.modify( dy_state, [&]( dynamic_states_object& dgp ){
-                dgp.head_block_number = b.block_num();
-                dgp.head_block_id = b.id();
-                dgp.state_time = b.timestamp.time_point();
-                dgp.block_builder = b.builder;
+                dgp.head_block_number = last_block.block_num();
+                dgp.head_block_id = last_block.id();
+                dgp.state_time = last_block.timestamp.time_point();
+                dgp.block_builder = last_block.builder;
 				dgp.round_begin_time = round_begin_time;
 				dgp.total_slot = total_slot;
 				dgp.round_slot = current_round_slot;
@@ -763,20 +776,25 @@ namespace Xmaxplatform { namespace Chain {
             });
 
 			// update block data
-			_context->block_db.create<block_object>([&](block_object& block) {
-				block.blk_id = b.id();
-				block.block = b;
+			_context->block_db.create<block_object>([&](block_object& blk) {
+				blk.blk_id = last_block.id();
+				blk.block = last_block;
 			});
 
-			on_finalize_block(b);
+			on_finalize_block(last_block);
 				
         }
 
-		void chain_xmax::_irreversible_block(const signed_block_ptr& block)
+		void chain_xmax::_irreversible_block(const block_pack_ptr& pack)
 		{
-			_context->last_irreversible_block_num = block->block_num();
+			uint32_t block_num = pack->block->block_num();
 
-			_context->chain_log.append_block(block);
+			_context->last_irreversible_block_num = block_num;
+
+			_context->block_db.commit(block_num);
+
+			_context->chain_log.append_block(pack->block);
+
 		}
 
         void chain_xmax::set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v ) {

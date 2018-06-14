@@ -19,7 +19,7 @@ namespace Chain {
 
 		void close();
 
-		void set_block(block_pack_ptr block_pack);
+		void add_block(block_pack_ptr block_pack);
 
 		block_pack_ptr get_block(xmax_type_block_id block_id);
 

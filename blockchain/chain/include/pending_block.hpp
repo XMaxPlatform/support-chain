@@ -15,7 +15,6 @@ namespace Xmaxplatform { namespace Chain {
 	{		
 		pending_block(database::session&& s)
 			:db_session(std::move(s)) 
-			, pack(std::make_shared<block_pack>())
 		{
 		}
 
