@@ -31,8 +31,6 @@ namespace Chain {
 		{
 		}
 
-
-
 		signed_block_ptr	block;
 	};
 

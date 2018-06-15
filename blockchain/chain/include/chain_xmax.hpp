@@ -97,7 +97,7 @@ namespace Xmaxplatform { namespace Chain {
        void setup_data_indexes();
        void initialize_chain(chain_init& initer);
 	   void first_initialize(chain_init& initer);
-
+	   void initialize_impl(chain_init& initer);
 	   void _abort_build();
 
 	   void _start_build(chain_timestamp when);

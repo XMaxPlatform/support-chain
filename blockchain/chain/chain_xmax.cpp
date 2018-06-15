@@ -55,7 +55,7 @@ namespace Xmaxplatform { namespace Chain {
 	public:
 		typedef pair<account_name, Basetypes::name> handler_key;
 		optional<pending_block>				building_block;
-		block_pack_ptr						block_head;
+		//block_pack_ptr						block_head;
 		chain_stream						chain_log;
 		chain_xmax::xmax_config				config;
 		database							block_db;
@@ -146,8 +146,13 @@ namespace Xmaxplatform { namespace Chain {
         { 
 			bool bfirst_init = !_context->block_db.find<static_config_object>();			
 			
-			if (bfirst_init) {
+			if (bfirst_init) 
+			{
 				first_initialize(initer);
+			}
+			else
+			{
+				initialize_impl(initer);
 			}
         }
 
@@ -183,25 +188,27 @@ namespace Xmaxplatform { namespace Chain {
 				for (int i = 0; i < 0x10000; i++)
 					_context->block_db.create<block_summary_object>([&](block_summary_object&) {});
 
-
-				//signed_block block{};
-				//block.builder = Config::xmax_contract_name;
-				//block.threads.emplace_back();
-				//block.threads[0].emplace_back();
-
 				auto messages = initer.prepare_data(*this, _context->block_db);
 				std::for_each(messages.begin(), messages.end(), [&](const message_xmax& m) {
 					message_output output;
 					processed_transaction trx; /// dummy transaction required for scope validation
 					std::sort(trx.scope.begin(), trx.scope.end());
-					_context->with_skip_flags(0, [&]() {
-						process_message(trx, m.code, m, output);
-					});
+
+					process_message(trx, m.code, m, output);
 
 					trx.messages.push_back(m);
 				});
 
+				// default head, default block, the block must match the new header.
+				//_context->block_head = std::make_shared<block_pack>();
+				//static_cast<block_header&>(*_context->block_head->block) = _context->block_head->new_header;
+
+
 			} FC_CAPTURE_AND_RETHROW()
+		}
+
+		void chain_xmax::initialize_impl(chain_init& initer)
+		{
 		}
 
         chain_xmax::chain_xmax(chain_init& init, const xmax_config& config, const finalize_block_func& finalize_func)
@@ -505,8 +512,6 @@ namespace Xmaxplatform { namespace Chain {
 
 			FC_ASSERT(_context->pending_transactions.size() < 1000, "too many pending transactions, try again later");
 
-
-
 			auto temp_session = _context->block_db.start_undo_session(true);
 			validate_referenced_accounts(request->signed_trx);
 			check_transaction_authorization(request->signed_trx);
@@ -584,6 +589,7 @@ namespace Xmaxplatform { namespace Chain {
 			_context->building_block = _context->block_db.start_undo_session(true);
 
 			try {
+				const dynamic_states_object& dy_state = get_dynamic_states();
 
 				_context->building_block->pack = std::make_shared<block_pack>();
 
@@ -592,8 +598,7 @@ namespace Xmaxplatform { namespace Chain {
 				const auto& rule = _get_verifiers(get_static_config(), delta_slot);
 				_context->building_block->pack->verifiers = rule;
 
-
-				const dynamic_states_object& dy_state = get_dynamic_states();
+				_context->building_block->pack->block_num = dy_state.head_block_number + 1;
 
 				signed_block_header& building_header = _context->building_block->pack->new_header;
 
@@ -647,11 +652,12 @@ namespace Xmaxplatform { namespace Chain {
 
 				_context->building_block->pack->block_id = building_header.id();
 
+				// make final block from block pack.
 				_context->building_block->pack->block = std::make_shared<signed_block>();
 
-				signed_block_header* block_ptr = _context->building_block->pack->block.get();
+				signed_block_header* final_block = _context->building_block->pack->block.get();
 
-				(*block_ptr) = building_header;
+				(*final_block) = building_header;
 
 				_update_final_state(*_context->building_block->pack->block);
 
