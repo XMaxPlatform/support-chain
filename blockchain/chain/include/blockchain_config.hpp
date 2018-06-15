@@ -57,4 +57,30 @@ using fc::ecc::private_key;
 
         const static uint64_t chain_timestamp_epoch_us = chain_timestamp_epoch_s * 1000ll * 1000ll; 
 
+
+
+		enum validation_steps
+		{
+			skip_nothing = 0,
+			skip_producer_signature = 1 << 0,  ///< used while reindexing
+			skip_transaction_signatures = 1 << 1,  ///< used by non-builder nodes
+			skip_transaction_dupe_check = 1 << 2,  ///< used while reindexing
+			skip_fork_db = 1 << 3,  ///< used while reindexing
+			skip_block_size_check = 1 << 4,  ///< used when applying locally generated transactions
+			skip_tapos_check = 1 << 5,  ///< used while reindexing -- note this skips expiration check as well
+			skip_authority_check = 1 << 6,  ///< used while reindexing -- disables any checking of authority on transactions
+			skip_merkle_check = 1 << 7,  ///< used while reindexing
+			skip_assert_evaluation = 1 << 8,  ///< used while reindexing
+			skip_undo_history_check = 1 << 9,  ///< used while reindexing
+			skip_builder_rule_check = 1 << 10, ///< used while reindexing
+			skip_validate = 1 << 11, ///< used prior to checkpoint, skips validate() call on transaction
+			skip_scope_check = 1 << 12, ///< used to skip checks for proper scope
+			skip_output_check = 1 << 13, ///< used to skip checks for outputs in block exactly matching those created from apply
+			pushed_transaction = 1 << 14, ///< used to indicate that the origination of the call was from a push_transaction, to determine time allotment
+			created_block = 1 << 15, ///< used to indicate that the origination of the call was for creating a block, to determine time allotment
+			received_block = 1 << 16, ///< used to indicate that the origination of the call was for a received block, to determine time allotment
+			irreversible = 1 << 17,  ///< indicates the block was received while catching up and is already considered irreversible.
+			skip_confirmation = 1 << 18  ///< skip confirmation.
+		};
+
 } } // namespace Xmaxplatform::Config

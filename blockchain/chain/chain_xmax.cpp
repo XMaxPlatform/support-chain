@@ -12,6 +12,7 @@
 #include <chain_init.hpp>
 #include <chain_xmax.hpp>
 #include <xmax_voting.hpp>
+#include <misc_utilities.hpp>
 
 #include <rand.hpp>
 
@@ -77,7 +78,10 @@ namespace Xmaxplatform { namespace Chain {
 				config.shared_memory_size)
 			, fork_db(config.block_memory_dir)
 		{
-
+			//--------------------------------------
+#pragma message("-------------------------------------- skip some for test. --------------------------------------") 
+			skip_flags = skip_flags | Config::skip_confirmation;
+			//-----------------------------------------
 		}
 		~chain_context()
 		{
@@ -239,19 +243,23 @@ namespace Xmaxplatform { namespace Chain {
 			return get_dynamic_states().head_block_id;
 		}
 
+		const shared_builder_rule& _get_verifiers(const static_config_object& config, uint32_t index)
+		{
+			if (index < Config::blocks_per_round || config.next_builders.is_empty())
+			{
+				return config.current_builders;
+			}
+			return config.next_builders;
+		}
+
 		const builder_info& _get_builder(const static_config_object& config, uint32_t index)
 		{
-			if (index < Config::blocks_per_round)
+			if (index < Config::blocks_per_round || config.next_builders.is_empty())
 			{
 				uint32_t bias = index % config.current_builders.number();
 				return config.current_builders.builders[bias];
 			}
 
-			if (config.next_builders.is_empty()) // no next list.
-			{
-				uint32_t bias = index % config.current_builders.number();
-				return config.current_builders.builders[bias];
-			}
 			// get builder in next list.
 			uint32_t deltaslot = index - config.current_builders.number();
 
@@ -259,6 +267,8 @@ namespace Xmaxplatform { namespace Chain {
 
 			return config.next_builders.builders[bias];
 		}
+
+
 
 		const builder_info& chain_xmax::get_block_builder(uint32_t delta_slot) const
 		{
@@ -477,7 +487,7 @@ namespace Xmaxplatform { namespace Chain {
 		Xmaxplatform::Chain::processed_transaction chain_xmax::push_transaction(const signed_transaction& trx, uint32_t skip /*= skip_nothing*/)
 		{
 			try {
-				return _context->with_skip_flags(skip | pushed_transaction, [&]() {
+				return _context->with_skip_flags(skip | Config::pushed_transaction, [&]() {
 					transaction_request_ptr request = std::make_shared<transaction_request>(trx);
 					return _push_transaction(request);
 				});
@@ -514,17 +524,16 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::build_block(
                 chain_timestamp when,
-                const account_name& builder,
 				const private_key_type& sign_private_key
         ) { 
 
-			_abort_build();
-
 			auto exec_start = std::chrono::high_resolution_clock::now();
 
-			_start_build(when, builder);
+			_abort_build();
 
-			_build_block(when, builder, sign_private_key);
+			_start_build(when);
+
+			_build_block(sign_private_key);
 
 			auto exec_stop = std::chrono::high_resolution_clock::now();
 			auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_stop - exec_start);
@@ -553,11 +562,14 @@ namespace Xmaxplatform { namespace Chain {
 			}
 		}
 
-		void chain_xmax::_start_build(chain_timestamp when, const account_name& builder)
+		void chain_xmax::_start_build(chain_timestamp when)
 		{
 			FC_ASSERT(!_context->building_block);
 			//check properties.
 			FC_ASSERT(head_block_time() < when.time_point(), "block must be generated at a timestamp after the head block time");
+			//delta slot
+			uint32_t delta_slot = get_delta_slot_at_time(when);
+			const builder_info& current_builder = get_block_builder(delta_slot);
 
 			auto pending_undo = fc::make_scoped_exit([&]() {
 				_context->building_block.reset();
@@ -567,7 +579,9 @@ namespace Xmaxplatform { namespace Chain {
 
 			try {
 
+
 				_context->building_block->pack = std::make_shared<block_pack>();
+
 
 				// prepare data.
 				const dynamic_states_object& dy_state = get_dynamic_states();
@@ -579,18 +593,20 @@ namespace Xmaxplatform { namespace Chain {
 				// build block.
 				building_header.previous = dy_state.head_block_id;
 				building_header.timestamp = when;
-				building_header.builder = builder;
+				building_header.builder = current_builder.builder_name;
+
+				// set verifiers
+				const auto& rule = _get_verifiers(get_static_config(), delta_slot);
+				building_header.verifiers = rule;
+
 
 				pending_undo.cancel();
 
-			} FC_CAPTURE_AND_RETHROW((builder))
+			} FC_CAPTURE_AND_RETHROW((current_builder.builder_name))
 		}
 
-        void chain_xmax::_build_block(
-                chain_timestamp when,
-                const account_name& builder,
-				const private_key_type& sign_private_key
-        ) {
+        void chain_xmax::_build_block(const private_key_type& sign_private_key) {
+
 			FC_ASSERT(_context->building_block);
             try {
 
@@ -632,9 +648,9 @@ namespace Xmaxplatform { namespace Chain {
 
 				(*block_ptr) = building_header;
 
-				_update_block_state(*_context->building_block->pack->block);
+				_update_final_state(*_context->building_block->pack->block);
 
-            } FC_CAPTURE_AND_RETHROW( (builder) ) 
+            } FC_CAPTURE_AND_RETHROW( (_context->building_block->pack->new_header.builder) )
 		}
 
 
@@ -675,14 +691,14 @@ namespace Xmaxplatform { namespace Chain {
 				}
 				
 
-                _update_block_state(next_block);
+                _update_final_state(next_block);
 
 				block_summary(next_block);
 
             } FC_CAPTURE_AND_RETHROW( (next_block.block_num()) ) 
 		}
 
-		void chain_xmax::_update_block_state(const signed_block& last_block)
+		void chain_xmax::_update_final_state(const signed_block& last_block)
 		{		
 			
 			const dynamic_states_object& dy_state = get_dynamic_states();
@@ -748,7 +764,7 @@ namespace Xmaxplatform { namespace Chain {
 
 					//// new builders state
 
-					//current_round_slot = current_round_slot % Config::blocks_per_round;
+					current_round_slot = current_round_slot % Config::blocks_per_round;
 					//chain_timestamp delta_time = chain_timestamp::create(current_round_slot);
 					//round_begin_time = current_block_time - delta_time;
 
@@ -862,6 +878,12 @@ namespace Xmaxplatform { namespace Chain {
                 }
             } FC_CAPTURE_AND_RETHROW((context.msg)) }
 
+
+		void chain_xmax::process_confirmation(const block_confirmation& conf)
+		{
+			_context->fork_db.add_confirmation(conf, _context->skip_flags);
+		}
+
 		void chain_xmax::validate_uniqueness(const Chain::signed_transaction& trx)const {
 			if (!should_check_for_duplicate_transactions()) return;
 
@@ -944,11 +966,11 @@ namespace Xmaxplatform { namespace Chain {
 		}
 		bool chain_xmax::should_check_for_duplicate_transactions() const
 		{ 
-			return !(_context->skip_flags & skip_transaction_dupe_check);
+			return !(_context->skip_flags & Config::skip_transaction_dupe_check);
 		}
 		bool chain_xmax::should_check_tapos() const 
 		{ 
-			return !(_context->skip_flags & skip_tapos_check);
+			return !(_context->skip_flags & Config::skip_tapos_check);
 		}
 
 		void chain_xmax::check_transaction_authorization(const signed_transaction& trx, bool allow_unused_signatures /*= false*/) const

@@ -37,28 +37,6 @@ namespace Xmaxplatform { namespace Chain {
    class chain_xmax {
 
    public:
-	   enum validation_steps
-	   {
-		   skip_nothing = 0,
-		   skip_producer_signature = 1 << 0,  ///< used while reindexing
-		   skip_transaction_signatures = 1 << 1,  ///< used by non-builder nodes
-		   skip_transaction_dupe_check = 1 << 2,  ///< used while reindexing
-		   skip_fork_db = 1 << 3,  ///< used while reindexing
-		   skip_block_size_check = 1 << 4,  ///< used when applying locally generated transactions
-		   skip_tapos_check = 1 << 5,  ///< used while reindexing -- note this skips expiration check as well
-		   skip_authority_check = 1 << 6,  ///< used while reindexing -- disables any checking of authority on transactions
-		   skip_merkle_check = 1 << 7,  ///< used while reindexing
-		   skip_assert_evaluation = 1 << 8,  ///< used while reindexing
-		   skip_undo_history_check = 1 << 9,  ///< used while reindexing
-		   skip_producer_schedule_check = 1 << 10, ///< used while reindexing
-		   skip_validate = 1 << 11, ///< used prior to checkpoint, skips validate() call on transaction
-		   skip_scope_check = 1 << 12, ///< used to skip checks for proper scope
-		   skip_output_check = 1 << 13, ///< used to skip checks for outputs in block exactly matching those created from apply
-		   pushed_transaction = 1 << 14, ///< used to indicate that the origination of the call was from a push_transaction, to determine time allotment
-		   created_block = 1 << 15, ///< used to indicate that the origination of the call was for creating a block, to determine time allotment
-		   received_block = 1 << 16, ///< used to indicate that the origination of the call was for a received block, to determine time allotment
-		   irreversible = 1 << 17  ///< indicates the block was received while catching up and is already considered irreversible.
-	   };
 
 	   struct xmax_config
 	   {
@@ -68,7 +46,7 @@ namespace Xmaxplatform { namespace Chain {
 		   Basechain::bfs::path fork_memory_dir;
 		   Basechain::bfs::path block_log_dir;
 		   Chain::chain_id_type      chain_id;
-		   uint32_t	skip_flags = Chain::chain_xmax::skip_nothing;
+		   uint32_t	skip_flags = Config::skip_nothing;
 	   };
 
       public:
@@ -108,7 +86,7 @@ namespace Xmaxplatform { namespace Chain {
 	   fc::variant       transaction_to_variant(const processed_transaction& trx)const;
 	   fc::variant       transaction_events_to_variant(const processed_transaction& trx)const;
 
-	   processed_transaction push_transaction(const signed_transaction& trx, uint32_t skip = skip_nothing);
+	   processed_transaction push_transaction(const signed_transaction& trx, uint32_t skip = Config::skip_nothing);
 	   processed_transaction _push_transaction(transaction_request_ptr request);
 
 	   flat_set<public_key_type> get_required_keys(const signed_transaction& transaction, const flat_set<public_key_type>& candidateKeys)const;
@@ -121,20 +99,15 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void _abort_build();
 
-	   void _start_build(chain_timestamp when,
-		   const account_name& builder);
+	   void _start_build(chain_timestamp when);
 
-       void _build_block(
-				chain_timestamp when,
-				const account_name& builder,
-				const private_key_type& sign_private_key
-       );
+       void _build_block(const private_key_type& sign_private_key);
 
 	   void _commit_block();
 
        void _apply_block(const signed_block& next_block);
 
-	   void _update_block_state(const signed_block& b);
+	   void _update_final_state(const signed_block& b);
 
 	   void _irreversible_block(const block_pack_ptr& pack);
 	 // void rate_limit_message(const message& message);
@@ -148,6 +121,7 @@ namespace Xmaxplatform { namespace Chain {
 	   template<typename T>
 	   typename T::processed process_transaction(const T& trx, int depth, const fc::time_point& start_time);
 
+	   void process_confirmation(const block_confirmation& conf);
 
 	   void require_account(const account_name& name) const;
 
@@ -183,7 +157,6 @@ namespace Xmaxplatform { namespace Chain {
 		   } FC_CAPTURE_AND_RETHROW((trx))
 	   }
 
-
    public:
 	   xmax_type_block_id               get_blockid_from_num(uint32_t block_num)const;
 	   optional<signed_block>			get_block_from_id(const xmax_type_block_id& id)const;
@@ -191,7 +164,6 @@ namespace Xmaxplatform { namespace Chain {
 
        void build_block(
                chain_timestamp when,
-               const account_name& builder,
 			   const private_key_type& sign_private_key
        );
 

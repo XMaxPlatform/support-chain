@@ -5,17 +5,20 @@
 #pragma once
 
 #include <block_pack.hpp>
+#include <misc_utilities.hpp>
 
 namespace Xmaxplatform {
 namespace Chain {
 
-	void block_raw::push_confirm(const block_confirmation& conf)
+	void block_raw::add_confirmation(const block_confirmation& conf, uint32_t skip)
 	{
-		for (const auto& item : confirmations)
+		if (NO_BIT_FLAG(skip, Config::skip_confirmation))
 		{
-			FC_ASSERT(item.verifier != conf.verifier, "confirmation had exist.");
+			for (const auto& item : confirmations)
+			{
+				FC_ASSERT(item.verifier != conf.verifier, "confirmation had exist.");
+			}
 		}
-
 
 		confirmations.emplace_back(conf);
 	}

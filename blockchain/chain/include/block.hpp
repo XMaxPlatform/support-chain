@@ -21,6 +21,7 @@ namespace Xmaxplatform { namespace Chain {
             chain_timestamp               timestamp;
             xmax_type_merkle_root         transaction_merkle_root;
             account_name                  builder;
+			optional<builder_rule>		  verifiers;
 			optional<builder_rule>		  next_builders;
         };
 

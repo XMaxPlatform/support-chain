@@ -106,6 +106,13 @@ namespace Chain {
 		}
 	}
 
+	void forkdatabase::add_confirmation(const block_confirmation& conf, uint32_t skip)
+	{
+		auto block_pack = get_block(conf.block_id);
+
+		block_pack->add_confirmation(conf, skip);
+	}
+
 	block_pack_ptr forkdatabase::get_block(xmax_type_block_id block_id)
 	{
 		auto itr = _context->packs.find(block_id);
