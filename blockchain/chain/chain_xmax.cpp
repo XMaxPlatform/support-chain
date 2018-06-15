@@ -55,6 +55,7 @@ namespace Xmaxplatform { namespace Chain {
 	public:
 		typedef pair<account_name, Basetypes::name> handler_key;
 		optional<pending_block>				building_block;
+		block_pack_ptr						block_head;
 		chain_stream						chain_log;
 		chain_xmax::xmax_config				config;
 		database							block_db;
@@ -142,61 +143,66 @@ namespace Xmaxplatform { namespace Chain {
         }
 
         void chain_xmax::initialize_chain(chain_init& initer)
-        { try {
-                if (!_context->block_db.find<static_config_object>()) {
-                    _context->block_db.with_write_lock([this,&initer] {
-
-						const fc::time_point init_point = initer.get_chain_init_time();;
-						const chain_timestamp init_stamp = chain_timestamp::from(init_point);
-						const chain_timestamp pre_stamp = init_stamp - chain_timestamp::create(1);
-
-						xmax_builder_infos list;
-						list.push_back(builder_info(Config::xmax_contract_name, Config::xmax_build_public_key));
-
-                        // Create global properties
-                        _context->block_db.create<static_config_object>([&](static_config_object &p) {
-                            p.setup = initer.get_blockchain_setup();
-                            p.current_builders.set_builders(list, 0);
-							p.next_builders.set_builders(p.current_builders.builders, 1);
-                        });
-
-                        _context->block_db.create<dynamic_states_object>([&](dynamic_states_object &p) {
-							p.head_block_number = 0;
-							p.head_block_id = xmax_type_block_id();
-                            p.state_time = pre_stamp.time_point();
-							p.total_slot = 0;
-                            p.block_builder = empty_name;
-							p.round_begin_time = chain_timestamp::zero_timestamp;
-							p.round_slot = Config::blocks_per_round;
-							p.builders_elect_state = elect_state::elect_new_builders;
-                        });
-
-						for (int i = 0; i < 0x10000; i++)
-							_context->block_db.create<block_summary_object>([&](block_summary_object&) {});
-
-
-                        //signed_block block{};
-                        //block.builder = Config::xmax_contract_name;
-                        //block.threads.emplace_back();
-                        //block.threads[0].emplace_back();
-
-                        auto messages = initer.prepare_data(*this, _context->block_db);
-                        std::for_each(messages.begin(), messages.end(), [&](const message_xmax& m) {
-                            message_output output;
-                            processed_transaction trx; /// dummy transaction required for scope validation
-                            std::sort(trx.scope.begin(), trx.scope.end() );
-							_context->with_skip_flags(0,[&](){
-                                process_message(trx,m.code,m,output);
-                            });
-
-                            trx.messages.push_back(m);
-                        });
-                    });
-                }
-
-            } FC_CAPTURE_AND_RETHROW()
-
+        { 
+			bool bfirst_init = !_context->block_db.find<static_config_object>();			
+			
+			if (bfirst_init) {
+				first_initialize(initer);
+			}
         }
+
+		void chain_xmax::first_initialize(chain_init& initer)
+		{
+			try {
+
+				const fc::time_point init_point = initer.get_chain_init_time();;
+				const chain_timestamp init_stamp = chain_timestamp::from(init_point);
+				const chain_timestamp pre_stamp = init_stamp - chain_timestamp::create(1);
+
+				xmax_builder_infos list;
+				list.push_back(builder_info(Config::xmax_contract_name, Config::xmax_build_public_key));
+
+				// Create global properties
+				_context->block_db.create<static_config_object>([&](static_config_object &p) {
+					p.setup = initer.get_blockchain_setup();
+					p.current_builders.set_builders(list, 0);
+					p.next_builders.set_builders(p.current_builders.builders, 1);
+				});
+
+				_context->block_db.create<dynamic_states_object>([&](dynamic_states_object &p) {
+					p.head_block_number = 0;
+					p.head_block_id = xmax_type_block_id();
+					p.state_time = pre_stamp.time_point();
+					p.total_slot = 0;
+					p.block_builder = empty_name;
+					p.round_begin_time = chain_timestamp::zero_timestamp;
+					p.round_slot = Config::blocks_per_round;
+					p.builders_elect_state = elect_state::elect_new_builders;
+				});
+
+				for (int i = 0; i < 0x10000; i++)
+					_context->block_db.create<block_summary_object>([&](block_summary_object&) {});
+
+
+				//signed_block block{};
+				//block.builder = Config::xmax_contract_name;
+				//block.threads.emplace_back();
+				//block.threads[0].emplace_back();
+
+				auto messages = initer.prepare_data(*this, _context->block_db);
+				std::for_each(messages.begin(), messages.end(), [&](const message_xmax& m) {
+					message_output output;
+					processed_transaction trx; /// dummy transaction required for scope validation
+					std::sort(trx.scope.begin(), trx.scope.end());
+					_context->with_skip_flags(0, [&]() {
+						process_message(trx, m.code, m, output);
+					});
+
+					trx.messages.push_back(m);
+				});
+
+			} FC_CAPTURE_AND_RETHROW()
+		}
 
         chain_xmax::chain_xmax(chain_init& init, const xmax_config& config, const finalize_block_func& finalize_func)
 		: _context(new chain_context(config, 1000)) {
@@ -579,14 +585,15 @@ namespace Xmaxplatform { namespace Chain {
 
 			try {
 
-
 				_context->building_block->pack = std::make_shared<block_pack>();
 
+				//_context->building_block->pack->block_num = 
+				// set verifiers
+				const auto& rule = _get_verifiers(get_static_config(), delta_slot);
+				_context->building_block->pack->verifiers = rule;
 
-				// prepare data.
+
 				const dynamic_states_object& dy_state = get_dynamic_states();
-
-				time_point start = fc::time_point::now();
 
 				signed_block_header& building_header = _context->building_block->pack->new_header;
 
@@ -595,9 +602,7 @@ namespace Xmaxplatform { namespace Chain {
 				building_header.timestamp = when;
 				building_header.builder = current_builder.builder_name;
 
-				// set verifiers
-				const auto& rule = _get_verifiers(get_static_config(), delta_slot);
-				building_header.verifiers = rule;
+
 
 
 				pending_undo.cancel();

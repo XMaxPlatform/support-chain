@@ -15,7 +15,7 @@ namespace Chain {
 		xmax_type_block_id					block_id;
 		signed_block_header					new_header;
 		vector<block_confirmation>			confirmations;
-		builder_rule						builders;
+		builder_rule						verifiers;
 		const xmax_type_block_id& prev_id() const
 		{
 			return new_header.previous;
