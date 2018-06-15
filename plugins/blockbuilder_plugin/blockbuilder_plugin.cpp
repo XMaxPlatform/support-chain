@@ -35,6 +35,7 @@ private:
     void next_block();
 
 	void genesis_block_build();
+	void confirmation_block_self();
     block_build_condition next_block_impl();
     block_build_condition build_block(fc::mutable_variant_object& capture);
 private:
@@ -187,6 +188,8 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
             {
                 //const auto& data = app().get_plugin<blockchain_plugin>().getchain();
                 ilog("block_build_condition::generated");
+
+				confirmation_block_self();
                 break;
             }
             case block_build_condition::exception:
@@ -294,5 +297,38 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
         return block_build_condition::generated;
     }
 
+
+	void blockbuilder_plugin_impl::confirmation_block_self()
+	{
+		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
+		block_pack_ptr pack_ptr = chain.get_head_block();
+
+		if (!pack_ptr)
+		{
+			return;
+		}
+		const auto& verifiers = pack_ptr->verifiers;
+
+		for (const auto v : verifiers.builders)
+		{
+			if (v.builder_name != pack_ptr->new_header.builder)
+			{
+				// 
+				auto private_key = _builder_keys.find(v.block_signing_key);
+				if (private_key == _builder_keys.end())
+				{
+					block_confirmation conf;
+					conf.block_id = pack_ptr->block_id;
+					conf.verifier = v.builder_name;
+
+					conf.sign(private_key->second);
+
+					chain.push_confirmation(conf);
+				}
+			}
+
+		}
+
+	}
 
 } // namespace Xmaxplatform

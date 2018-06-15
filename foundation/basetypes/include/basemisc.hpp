@@ -20,3 +20,8 @@ namespace Xmaxplatform {
 #define empty_public_key Xmaxplatform::basemisc::empty_public_key_type
 
 #define size_mb (1024 * 1024)
+
+
+#define HAS_BIT_FLAG(_flag, _key) ((_flag & _key) != 0)
+
+#define NO_BIT_FLAG(_flag, _key) ((_flag & _key) == 0)
