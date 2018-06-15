@@ -65,6 +65,7 @@ namespace Chain {
 			for (uint32_t i = 0, n = size.value; i < n; ++i) {
 				block_pack s;
 				fc::raw::unpack(ds, s);
+
 				add_block(std::make_shared<block_pack>(std::move(s)));
 			}
 			xmax_type_block_id head_id;
@@ -110,15 +111,26 @@ namespace Chain {
 	{
 		auto block_pack = get_block(conf.block_id);
 
-		block_pack->add_confirmation(conf, skip);
+		if (block_pack)
+		{
+			block_pack->add_confirmation(conf, skip);
+			if (block_pack->enough_confirmation())
+			{
+			}
+		}
 	}
 
-	block_pack_ptr forkdatabase::get_block(xmax_type_block_id block_id)
+	block_pack_ptr forkdatabase::get_block(xmax_type_block_id block_id) const
 	{
 		auto itr = _context->packs.find(block_id);
 		if (itr != _context->packs.end())
 			return *itr;
 		return block_pack_ptr();
+	}
+
+	block_pack_ptr forkdatabase::get_head() const
+	{
+		return _context->head;
 	}
 
 

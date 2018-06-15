@@ -2,10 +2,9 @@
 *  @file
 *  @copyright defined in xmax/LICENSE
 */
-#pragma once
 
+#include <blockchain_exceptions.hpp>
 #include <block_pack.hpp>
-#include <misc_utilities.hpp>
 
 namespace Xmaxplatform {
 namespace Chain {
@@ -18,10 +17,19 @@ namespace Chain {
 			{
 				FC_ASSERT(item.verifier != conf.verifier, "confirmation had exist.");
 			}
+
+			auto key = verifiers.get_sign_key(conf.verifier);
+
+			XMAX_ASSERT(conf.is_signer_valid(key), confirmation_validate_exception, "confirmation fail.");
 		}
 
 		confirmations.emplace_back(conf);
 	}
 
+	bool block_raw::enough_confirmation() const
+	{
+		int minconf = verifiers.number() * 2 / 3;
+		return confirmations.size() >= minconf;
+	}
 }
 }

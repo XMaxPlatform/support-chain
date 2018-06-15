@@ -73,4 +73,28 @@ namespace Xmaxplatform { namespace Chain {
       return merkle(ids);
    }
 
+
+
+   xmax_type_summary block_confirmation_header::digest() const
+   {
+	   return xmax_type_summary::hash(*this);
+   }
+
+   fc::ecc::public_key block_confirmation::get_signer_key()const
+   {
+	   return fc::ecc::public_key(builder_signature, digest(), true/*enforce canonical*/);
+   }
+
+   void block_confirmation::sign(const fc::ecc::private_key& signer)
+   {
+	   builder_signature = signer.sign_compact(digest());
+   }
+
+   bool block_confirmation::is_signer_valid(const fc::ecc::public_key &signer_key) const
+   {
+	   return get_signer_key() == signer_key;
+   }
+
+
+
 } }

@@ -71,6 +71,18 @@ namespace Xmaxplatform { namespace Chain {
 			return builders.size() <= 0;
 		}
 
+		public_key_type get_sign_key(account_name name) const
+		{
+			for (const auto& it : builders)
+			{
+				if (it.builder_name == name)
+				{
+					return it.block_signing_key;
+				}
+			}
+			return empty_public_key;
+		}
+
     };
 
 	inline bool operator == (const builder_rule& a, const builder_rule& b)

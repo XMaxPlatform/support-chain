@@ -23,7 +23,9 @@ namespace Chain {
 
 		void add_confirmation(const block_confirmation& conf, uint32_t skip);
 
-		block_pack_ptr get_block(xmax_type_block_id block_id);
+		block_pack_ptr get_block(xmax_type_block_id block_id) const;
+
+		block_pack_ptr get_head() const;
 
 	private:
 		unique_ptr<fork_context> _context;

@@ -68,6 +68,7 @@ namespace Xmaxplatform { namespace Chain {
 	   uint32_t			head_block_num() const;
 	   uint32_t			last_irreversible_block_num() const;
 	   xmax_type_block_id    head_block_id()const;
+	   block_pack_ptr get_head_block() const;
 
 	   const builder_info&         get_block_builder(uint32_t delta_slot) const;
 	   const builder_info&         get_order_builder(uint32_t order_slot) const;
@@ -88,6 +89,8 @@ namespace Xmaxplatform { namespace Chain {
 
 	   processed_transaction push_transaction(const signed_transaction& trx, uint32_t skip = Config::skip_nothing);
 	   processed_transaction _push_transaction(transaction_request_ptr request);
+
+	   void push_confirmation(const block_confirmation& conf);
 
 	   flat_set<public_key_type> get_required_keys(const signed_transaction& transaction, const flat_set<public_key_type>& candidateKeys)const;
    private:

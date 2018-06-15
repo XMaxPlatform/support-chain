@@ -22,6 +22,9 @@ namespace Chain {
 		}
 
 		void add_confirmation(const block_confirmation& conf, uint32_t skip);
+
+		bool enough_confirmation() const;
+
 	};
 
 	struct block_pack : public block_raw

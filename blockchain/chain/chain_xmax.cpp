@@ -12,7 +12,6 @@
 #include <chain_init.hpp>
 #include <chain_xmax.hpp>
 #include <xmax_voting.hpp>
-#include <misc_utilities.hpp>
 
 #include <rand.hpp>
 
@@ -55,7 +54,7 @@ namespace Xmaxplatform { namespace Chain {
 	public:
 		typedef pair<account_name, Basetypes::name> handler_key;
 		optional<pending_block>				building_block;
-		//block_pack_ptr						block_head;
+		block_pack_ptr						block_head;
 		chain_stream						chain_log;
 		chain_xmax::xmax_config				config;
 		database							block_db;
@@ -200,8 +199,8 @@ namespace Xmaxplatform { namespace Chain {
 				});
 
 				// default head, default block, the block must match the new header.
-				//_context->block_head = std::make_shared<block_pack>();
-				//static_cast<block_header&>(*_context->block_head->block) = _context->block_head->new_header;
+				_context->block_head = std::make_shared<block_pack>();
+				static_cast<block_header&>(*_context->block_head->block) = _context->block_head->new_header;
 
 
 			} FC_CAPTURE_AND_RETHROW()
@@ -256,6 +255,11 @@ namespace Xmaxplatform { namespace Chain {
 			return get_dynamic_states().head_block_id;
 		}
 
+		block_pack_ptr chain_xmax::get_head_block() const
+		{
+			return _context->block_head;
+		}
+
 		const shared_builder_rule& _get_verifiers(const static_config_object& config, uint32_t index)
 		{
 			if (index < Config::blocks_per_round || config.next_builders.is_empty())
@@ -269,14 +273,14 @@ namespace Xmaxplatform { namespace Chain {
 		{
 			if (index < Config::blocks_per_round || config.next_builders.is_empty())
 			{
-				uint32_t bias = index % config.current_builders.number();
+				uint32_t bias = (index / Config::blocks_per_builder) % config.current_builders.number();
 				return config.current_builders.builders[bias];
 			}
 
 			// get builder in next list.
 			uint32_t deltaslot = index - config.current_builders.number();
 
-			uint32_t bias = index % config.next_builders.number();
+			uint32_t bias = (index / Config::blocks_per_builder) % config.next_builders.number();
 
 			return config.next_builders.builders[bias];
 		}
@@ -525,6 +529,10 @@ namespace Xmaxplatform { namespace Chain {
 			return pt;
 		}
 		
+		void chain_xmax::push_confirmation(const block_confirmation& conf)
+		{
+			process_confirmation(conf);
+		}
 
 		//--------------------------------------------------
 		Xmaxplatform::Chain::flat_set<Xmaxplatform::Chain::public_key_type> chain_xmax::get_required_keys(const signed_transaction& transaction, const flat_set<public_key_type>& candidateKeys) const
@@ -673,7 +681,7 @@ namespace Xmaxplatform { namespace Chain {
 			try {
 
 				_context->fork_db.add_block(_context->building_block->pack);
-
+				_context->block_head = _context->fork_db.get_head();
 				block_summary(*new_block);
 
 				_context->building_block->push_block();

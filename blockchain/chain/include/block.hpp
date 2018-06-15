@@ -49,10 +49,22 @@ namespace Xmaxplatform { namespace Chain {
         };
 		using signed_block_ptr = std::shared_ptr<signed_block>;
 
-		struct block_confirmation {
+		struct block_confirmation_header
+		{
+			xmax_type_block_id		block_id;
+			account_name			verifier;
+
+			xmax_type_summary       digest() const;
+		};
+
+		struct block_confirmation : public block_confirmation_header {
 			xmax_type_block_id		block_id;
 			account_name			verifier;
 			xmax_type_signature		builder_signature;
+
+			fc::ecc::public_key        get_signer_key() const;
+			void sign(const fc::ecc::private_key& signer);
+			bool is_signer_valid(const fc::ecc::public_key &signer_key) const;
 		};
 
     } } // Xmaxplatform::Chain
@@ -62,4 +74,5 @@ FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block_header, (Xmaxplatform::Chai
 FC_REFLECT(Xmaxplatform::Chain::thread, )
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block, (Xmaxplatform::Chain::signed_block_header), (threads))
 
-FC_REFLECT(Xmaxplatform::Chain::block_confirmation, (block_id)(verifier)(builder_signature))
+FC_REFLECT(Xmaxplatform::Chain::block_confirmation_header, (block_id)(verifier))
+FC_REFLECT_DERIVED(Xmaxplatform::Chain::block_confirmation, (Xmaxplatform::Chain::block_confirmation_header), (builder_signature))
