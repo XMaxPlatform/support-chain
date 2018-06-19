@@ -32,7 +32,7 @@ namespace Chain {
 		hashed_unique< tag<by_block_id>, member<block_raw, xmax_type_block_id, &block_raw::block_id>, std::hash<xmax_type_block_id> >,
 		ordered_non_unique< tag<by_pre_id>, const_mem_fun<block_raw, const xmax_type_block_id&, &block_raw::prev_id> >
 		>
-		> block_pack_container;
+		> block_pack_index;
 
 
 
@@ -41,9 +41,51 @@ namespace Chain {
 	class fork_context
 	{
 	public:
-		block_pack_container	packs;
+		block_pack_index		packs;
 		block_pack_ptr			head;
 		fc::path				datadir;
+
+
+		block_pack_ptr get_block(xmax_type_block_id block_id) const
+		{
+			auto itr = packs.find(block_id);
+			if (itr != packs.end())
+				return *itr;
+			return block_pack_ptr();
+		}
+
+		void set_last_confirmed(xmax_type_block_id last_id)
+		{
+			auto itr = packs.find(last_id);
+
+			FC_ASSERT(itr != packs.end(), "Unknown block id ${id}", ("id", last_id));
+
+			uint32_t block_num = (*itr)->block_num;
+
+			packs.modify(itr, [&](auto& it)
+			{
+				it->last_block_num = block_num;
+				it->last_confired_num = block_num;
+				it->last_confired_id = last_id;
+			});
+
+
+			xmax_type_block_id pre_id = (*itr)->prev_id();
+			block_pack_index::iterator pre_it = packs.find(pre_id);
+			while (pre_it != packs.end())
+			{
+				pre_id = (*pre_it)->prev_id();
+
+				packs.modify(pre_it, [&](auto& val) {
+					it->last_block_num = block_num;
+					it->last_confired_num = block_num;
+					it->last_confired_id = last_id;
+				});
+
+				pre_it = packs.find(pre_id);
+			};
+		}
+
 	};
 
 
@@ -110,22 +152,23 @@ namespace Chain {
 	void forkdatabase::add_confirmation(const block_confirmation& conf, uint32_t skip)
 	{
 		auto block_pack = get_block(conf.block_id);
-
+		FC_ASSERT(block_pack, "Unknown block id ${id}", ("id", conf.block_id));
 		if (block_pack)
 		{
 			block_pack->add_confirmation(conf, skip);
 			if (block_pack->enough_confirmation())
 			{
+				if (block_pack->last_confired_num < block_pack->block_num)
+				{
+					_context->set_last_confirmed(block_pack->block_id);
+				}
 			}
 		}
 	}
 
 	block_pack_ptr forkdatabase::get_block(xmax_type_block_id block_id) const
 	{
-		auto itr = _context->packs.find(block_id);
-		if (itr != _context->packs.end())
-			return *itr;
-		return block_pack_ptr();
+		return _context->get_block(block_id);
 	}
 
 	block_pack_ptr forkdatabase::get_head() const
