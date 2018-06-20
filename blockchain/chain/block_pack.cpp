@@ -31,5 +31,20 @@ namespace Chain {
 		int minconf = verifiers.number() * 2 / 3;
 		return confirmations.size() >= minconf;
 	}
+
+
+	void block_pack::setup(const block_pack& pre_pack, chain_timestamp when, account_name builder, const builder_rule& rule)
+	{
+		block_num = pre_pack.block_num + 1;
+		last_block_num = pre_pack.last_block_num;
+		last_confired_num = pre_pack.last_confired_num;
+		last_confired_id = pre_pack.last_confired_id;
+
+		// build block.
+		new_header.previous = pre_pack.block_id;
+		new_header.timestamp = when;
+		new_header.builder = builder;
+	}
+
 }
 }

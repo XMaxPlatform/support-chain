@@ -22,15 +22,28 @@ namespace Chain {
 	using boost::multi_index_container;
 
 	struct by_block_id;
-	//struct by_block_num;
+	struct by_oldest_block;
 	struct by_pre_id;
-
+	struct by_confired_num;
 
 	typedef multi_index_container <
 		block_pack_ptr,
 		indexed_by<
-		hashed_unique< tag<by_block_id>, member<block_raw, xmax_type_block_id, &block_raw::block_id>, std::hash<xmax_type_block_id> >,
-		ordered_non_unique< tag<by_pre_id>, const_mem_fun<block_raw, const xmax_type_block_id&, &block_raw::prev_id> >
+			hashed_unique< tag<by_block_id>, member<block_raw, xmax_type_block_id, &block_raw::block_id>, std::hash<xmax_type_block_id> >,
+			ordered_non_unique< tag<by_pre_id>, const_mem_fun<block_raw, const xmax_type_block_id&, &block_raw::prev_id> >,
+			ordered_non_unique < tag<by_oldest_block>,
+				composite_key< block_raw,
+					member<block_raw, uint32_t, &block_raw::block_num>
+				>,
+				composite_key_compare< std::less<uint32_t> >
+			>,
+			ordered_non_unique< tag<by_confired_num>,
+				composite_key<block_raw,
+					member<block_raw, uint32_t, &block_raw::last_confired_num>,
+					member<block_raw, uint32_t, &block_raw::block_num>
+				>,
+				composite_key_compare< std::greater<uint32_t>, std::greater<uint32_t> >
+			>
 		>
 		> block_pack_index;
 
@@ -53,7 +66,23 @@ namespace Chain {
 				return *itr;
 			return block_pack_ptr();
 		}
+		void add_block(block_pack_ptr block_pack)
+		{
+			auto result = packs.insert(block_pack);
+			FC_ASSERT(block_pack->block_id == block_pack->new_header.id());
 
+			FC_ASSERT(result.second, "unable to insert block state, duplicate state detected");
+
+			head = *packs.get<by_confired_num>().begin();
+
+			auto oldest = *packs.get<by_oldest_block>().begin();
+			// check update confirmed block.
+
+			if (oldest->block_num < head->last_confired_num)
+			{
+				on_confirmed(oldest);
+			}
+		}
 		void set_last_confirmed(xmax_type_block_id last_id)
 		{
 			auto itr = packs.find(last_id);
@@ -62,30 +91,36 @@ namespace Chain {
 
 			uint32_t block_num = (*itr)->block_num;
 
-			packs.modify(itr, [&](auto& it)
+			packs.modify(itr, [&](auto& val)
 			{
-				it->last_block_num = block_num;
-				it->last_confired_num = block_num;
-				it->last_confired_id = last_id;
+				val->last_block_num = block_num;
+				val->last_confired_num = block_num;
+				val->last_confired_id = last_id;
 			});
 
-
+			// flash all pre blocks.
 			xmax_type_block_id pre_id = (*itr)->prev_id();
 			block_pack_index::iterator pre_it = packs.find(pre_id);
-			while (pre_it != packs.end())
+			while (pre_it != packs.end() && pre_id != empty_chain_id)
 			{
 				pre_id = (*pre_it)->prev_id();
 
 				packs.modify(pre_it, [&](auto& val) {
-					it->last_block_num = block_num;
-					it->last_confired_num = block_num;
-					it->last_confired_id = last_id;
+					val->last_block_num = block_num;
+					val->last_confired_num = block_num;
+					val->last_confired_id = last_id;
 				});
 
 				pre_it = packs.find(pre_id);
 			};
 		}
 
+		void on_confirmed(block_pack_ptr block_pack)
+		{
+			for (auto it : packs)
+			{
+			}
+		}
 	};
 
 
@@ -134,19 +169,7 @@ namespace Chain {
 
 	void forkdatabase::add_block(block_pack_ptr block_pack)
 	{
-		auto result = _context->packs.insert(block_pack);
-		FC_ASSERT(block_pack->block_id == block_pack->new_header.id());
-
-		FC_ASSERT(result.second, "unable to insert block state, duplicate state detected");
-
-		if (!_context->head)
-		{
-			_context->head = block_pack;
-		}
-		else if (_context->head->block_num < block_pack->block_num)
-		{
-			_context->head = block_pack;
-		}
+		_context->add_block(block_pack);
 	}
 
 	void forkdatabase::add_confirmation(const block_confirmation& conf, uint32_t skip)

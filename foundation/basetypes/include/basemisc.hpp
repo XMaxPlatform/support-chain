@@ -9,6 +9,7 @@ namespace Xmaxplatform {
     public:
         static const Basetypes::name empty_name_type;
         static const Basetypes::public_key empty_public_key_type;
+		static const fc::sha256 empty_sha256;
     };
 
 

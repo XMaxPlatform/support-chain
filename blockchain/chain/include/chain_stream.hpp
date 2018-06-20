@@ -16,8 +16,10 @@ namespace Xmaxplatform { namespace Chain {
 
 		~chain_stream();
 
-
 		uint64_t append_block(const signed_block_ptr& block);
+
+		signed_block_ptr get_head() const;
+
 		void flush();
 
 

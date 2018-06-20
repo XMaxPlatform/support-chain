@@ -208,6 +208,11 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::initialize_impl(chain_init& initer)
 		{
+			block_pack_ptr head = _context->fork_db.get_head();
+			if (!head)
+			{
+				elog("No head block in fork db.");
+			}
 		}
 
         chain_xmax::chain_xmax(chain_init& init, const xmax_config& config, const finalize_block_func& finalize_func)
@@ -597,26 +602,14 @@ namespace Xmaxplatform { namespace Chain {
 			_context->building_block = _context->block_db.start_undo_session(true);
 
 			try {
-				const dynamic_states_object& dy_state = get_dynamic_states();
 
 				_context->building_block->pack = std::make_shared<block_pack>();
 
-				//_context->building_block->pack->block_num = 
-				// set verifiers
+				block_pack& pack = *_context->building_block->pack;
+
 				const auto& rule = _get_verifiers(get_static_config(), delta_slot);
-				_context->building_block->pack->verifiers = rule;
 
-				_context->building_block->pack->block_num = dy_state.head_block_number + 1;
-
-				signed_block_header& building_header = _context->building_block->pack->new_header;
-
-				// build block.
-				building_header.previous = dy_state.head_block_id;
-				building_header.timestamp = when;
-				building_header.builder = current_builder.builder_name;
-
-
-
+				_context->building_block->pack->setup(*_context->block_head, when, current_builder.builder_name, rule);
 
 				pending_undo.cancel();
 

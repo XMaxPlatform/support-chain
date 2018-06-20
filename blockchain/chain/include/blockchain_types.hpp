@@ -8,6 +8,7 @@
 
 #include <basechain.hpp>
 #include <include/xmaxtypes.hpp>
+#include <include/basemisc.hpp>
 
 #include <fc/container/flat_fwd.hpp>
 #include <fc/io/varint.hpp>
@@ -161,6 +162,8 @@ namespace Xmaxplatform { namespace Chain {
         };
    
 } }  // Xmaxplatform::Chain
+
+#define empty_chain_id Xmaxplatform::basemisc::empty_sha256
 
 namespace fc {
   void to_variant(const Xmaxplatform::Chain::shared_vector<Xmaxplatform::Basetypes::field>& c, fc::variant& v);
