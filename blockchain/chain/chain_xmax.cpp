@@ -201,9 +201,9 @@ namespace Xmaxplatform { namespace Chain {
 
 				// default head, default block, the block must match the new header.
 				_context->block_head = std::make_shared<block_pack>();
-				static_cast<block_header&>(*_context->block_head->block) = _context->block_head->new_header;
+				_context->block_head->setup();
 
-
+				_context->fork_db.add_block(_context->block_head);
 			} FC_CAPTURE_AND_RETHROW()
 		}
 
@@ -829,6 +829,11 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::on_irreversible(block_pack_ptr pack)
 		{
+			auto pre_block = _context->chain_log.get_head();
+
+			FC_ASSERT(pack->block_num - 1 == pre_block->block_num(), "error block", ("new block number", pack->block_num)("pre block number", pre_block->block_num()));
+			FC_ASSERT(pack->block->previous == pre_block->id(), "new block doesn't link to pre block head");
+
 			_irreversible_block(pack);
 		}
 

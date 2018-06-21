@@ -42,6 +42,7 @@ namespace Chain {
 		signed_block_ptr	block;
 
 		void setup(const block_pack& pre_pack, chain_timestamp when, account_name builder, const builder_rule& rule);
+		void setup();
 	};
 
 	using block_pack_ptr = std::shared_ptr<block_pack>;

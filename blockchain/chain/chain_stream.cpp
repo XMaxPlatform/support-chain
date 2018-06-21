@@ -263,6 +263,8 @@ namespace Xmaxplatform { namespace Chain {
 				block_detail::read_block_index(index_stream, index);
 
 				FC_ASSERT(desc.pos == index.pos, "Block log is corrupted");
+
+				head_block = read_head();
 			}
 		}
 
@@ -276,7 +278,7 @@ namespace Xmaxplatform { namespace Chain {
 			return pos;
 		}
 
-		signed_block_ptr get_head() const
+		signed_block_ptr read_head() const
 		{
 			std::fstream& stream = const_cast<std::fstream&>(block_stream);
 
@@ -312,7 +314,7 @@ namespace Xmaxplatform { namespace Chain {
 	}
 	signed_block_ptr chain_stream::get_head() const
 	{
-		return stream_impl->get_head();
+		return stream_impl->head_block;
 	}
 }
 }

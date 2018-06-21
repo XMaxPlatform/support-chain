@@ -46,5 +46,13 @@ namespace Chain {
 		new_header.builder = builder;
 	}
 
+	void block_pack::setup()
+	{
+		static_cast<block_header&>(*block) = new_header;
+
+		block_num = new_header.block_num();
+		block_id = new_header.id();
+	}
+
 }
 }
