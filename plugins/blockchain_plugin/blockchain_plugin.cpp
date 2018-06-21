@@ -32,7 +32,10 @@ namespace Xmaxplatform {
             : my(new chain_plugin_impl()) {
     }
 
-    blockchain_plugin::~blockchain_plugin() {}
+    blockchain_plugin::~blockchain_plugin() 
+	{
+
+	}
 
     void blockchain_plugin::set_program_options(options_description &cli, options_description &cfg) {
         ilog("blockchain_plugin::set_program_options");
@@ -160,7 +163,7 @@ namespace Xmaxplatform {
     }
 
     void blockchain_plugin::plugin_shutdown() {
-        ilog("blockchain_plugin::plugin_startup");
+        ilog("blockchain_plugin::plugin_shutdown");
     }
 
     Chain::chain_xmax &blockchain_plugin::getchain() { return *my->chain; }

@@ -214,6 +214,8 @@ namespace Xmaxplatform { namespace Chain {
 			{
 				elog("No head block in fork db.");
 			}
+
+			_context->block_head = head;
 		}
 
         chain_xmax::chain_xmax(chain_init& init, const xmax_config& config, const finalize_block_func& finalize_func)

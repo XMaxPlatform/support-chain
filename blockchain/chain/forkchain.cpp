@@ -10,9 +10,28 @@
 #include <boost/multi_index/composite_key.hpp>
 
 #include <fc/io/fstream.hpp>
+#include <fc/reflect/reflect.hpp>
 
 #include <block_pack.hpp>
 #include <forkchain.hpp>
+
+namespace Xmaxplatform {
+namespace Chain {
+	struct fork_db_head
+	{
+	public:
+		uint32_t size;
+		xmax_type_block_id head_id;
+
+		fork_db_head()
+		{
+			size = 0;
+		}
+	};
+}
+}
+FC_REFLECT(Xmaxplatform::Chain::fork_db_head, (size)(head_id))
+
 
 namespace Xmaxplatform {
 namespace Chain {
@@ -46,10 +65,6 @@ namespace Chain {
 			>
 		>
 		> block_pack_index;
-
-
-
-
 
 	class fork_context
 	{
@@ -165,17 +180,16 @@ namespace Chain {
 			fc::read_file_contents(abs_path, content);
 
 			fc::datastream<const char*> ds(content.data(), content.size());
-			unsigned_int size; fc::raw::unpack(ds, size);
-			for (uint32_t i = 0, n = size.value; i < n; ++i) {
+			fork_db_head head; 
+			fc::raw::unpack(ds, head);
+			for (uint32_t i = 0, n = head.size; i < n; ++i) {
 				block_pack s;
 				fc::raw::unpack(ds, s);
 
 				add_block(std::make_shared<block_pack>(std::move(s)));
 			}
-			xmax_type_block_id head_id;
-			fc::raw::unpack(ds, head_id);
 
-			_context->head = get_block(head_id);
+			_context->head = get_block(head.head_id);
 
 			fc::remove(abs_path);
 		}
@@ -185,7 +199,20 @@ namespace Chain {
 
 	void forkdatabase::close()
 	{
+		if (_context->packs.size() == 0) 
+			return;
+		auto abs_path = boost::filesystem::absolute(_context->datadir / "fork_memory.bin");
+		std::ofstream file(abs_path.generic_string().c_str(), std::ios::out | std::ios::binary | std::ofstream::trunc);
 
+		fork_db_head head;
+		head.size = _context->packs.size();
+		head.head_id = _context->head->block_id;
+		fc::raw::pack(file, head);
+		for (auto b : _context->packs)
+		{
+			fc::raw::pack(file, *b);
+		}
+	
 	}
 
 	forkdatabase::~forkdatabase()
