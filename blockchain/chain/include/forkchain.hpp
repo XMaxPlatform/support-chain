@@ -11,6 +11,8 @@ namespace Chain {
 
 	class fork_context;
 
+	using irreversible_block_handle = std::function<void(block_pack_ptr)>;
+
 	class forkdatabase
 	{
 	public:
@@ -27,7 +29,16 @@ namespace Chain {
 
 		block_pack_ptr get_head() const;
 
+		template<typename T, typename F>
+		void bind_irreversible(T* obj, F func)
+		{
+			get_irreversible_handle() = std::bind(func, obj, std::placeholders::_1);
+		}
+
 	private:
+
+		irreversible_block_handle& get_irreversible_handle();
+
 		unique_ptr<fork_context> _context;
 	};
 

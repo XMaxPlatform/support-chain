@@ -24,7 +24,7 @@ namespace Chain {
 	struct by_block_id;
 	struct by_oldest_block;
 	struct by_pre_id;
-	struct by_confired_num;
+	struct by_longest_num;
 
 	typedef multi_index_container <
 		block_pack_ptr,
@@ -37,7 +37,7 @@ namespace Chain {
 				>,
 				composite_key_compare< std::less<uint32_t> >
 			>,
-			ordered_non_unique< tag<by_confired_num>,
+			ordered_non_unique< tag<by_longest_num>,
 				composite_key<block_raw,
 					member<block_raw, uint32_t, &block_raw::last_confired_num>,
 					member<block_raw, uint32_t, &block_raw::block_num>
@@ -57,7 +57,7 @@ namespace Chain {
 		block_pack_index		packs;
 		block_pack_ptr			head;
 		fc::path				datadir;
-
+		irreversible_block_handle irreversible;
 
 		block_pack_ptr get_block(xmax_type_block_id block_id) const
 		{
@@ -73,14 +73,14 @@ namespace Chain {
 
 			FC_ASSERT(result.second, "unable to insert block state, duplicate state detected");
 
-			head = *packs.get<by_confired_num>().begin();
+			head = *packs.get<by_longest_num>().begin();
 
 			auto oldest = *packs.get<by_oldest_block>().begin();
 			// check update confirmed block.
 
 			if (oldest->block_num < head->last_confired_num)
 			{
-				on_confirmed(oldest);
+				on_last_confirmed_grow(head->last_confired_id, head->last_confired_num);
 			}
 		}
 		void set_last_confirmed(xmax_type_block_id last_id)
@@ -115,11 +115,38 @@ namespace Chain {
 			};
 		}
 
-		void on_confirmed(block_pack_ptr block_pack)
+		void on_last_confirmed_grow(xmax_type_block_id last_confirmed_id,uint32_t last_confirmed_num)
 		{
-			for (auto it : packs)
+			std::vector<xmax_type_block_id> remlist;
+			std::vector<xmax_type_block_id> confiremdlist;
+			auto& idx = packs.get<by_longest_num>();
+
+			auto it = idx.begin();
+			for (auto it = idx.begin(); (it != idx.end() && (*it)->block_num < last_confirmed_num); ++it)
 			{
+				remlist.push_back((*it)->block_id);
+				if ((*it)->last_confired_id == last_confirmed_id)
+				{
+					confiremdlist.push_back((*it)->block_id);
+				}
 			}
+
+			for (auto& it : confiremdlist)
+			{
+				auto ptr = get_block(it);
+
+				irreversible(ptr);
+			}
+
+			for (auto& it : remlist)
+			{
+				auto itr = packs.find(it);
+				if (itr != packs.end())
+				{
+					packs.erase(itr);
+				}
+			}
+
 		}
 	};
 
@@ -199,7 +226,10 @@ namespace Chain {
 		return _context->head;
 	}
 
-
+	irreversible_block_handle& forkdatabase::get_irreversible_handle()
+	{
+		return _context->irreversible;
+	}
 
 
 }

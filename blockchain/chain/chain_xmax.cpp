@@ -145,6 +145,7 @@ namespace Xmaxplatform { namespace Chain {
         { 
 			bool bfirst_init = !_context->block_db.find<static_config_object>();			
 			
+			_context->fork_db.bind_irreversible(this, &chain_xmax::on_irreversible);
 			if (bfirst_init) 
 			{
 				first_initialize(initer);
@@ -824,6 +825,11 @@ namespace Xmaxplatform { namespace Chain {
 
 			_context->chain_log.append_block(pack->block);
 
+		}
+
+		void chain_xmax::on_irreversible(block_pack_ptr pack)
+		{
+			_irreversible_block(pack);
 		}
 
         void chain_xmax::set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v ) {
