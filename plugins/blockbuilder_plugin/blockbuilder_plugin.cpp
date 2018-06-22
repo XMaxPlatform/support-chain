@@ -317,7 +317,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 			{
 				// 
 				auto private_key = _builder_keys.find(v.block_signing_key);
-				if (private_key == _builder_keys.end())
+				if (private_key != _builder_keys.end())
 				{
 					block_confirmation conf;
 					conf.block_id = pack_ptr->block_id;

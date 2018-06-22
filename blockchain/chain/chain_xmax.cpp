@@ -203,8 +203,8 @@ namespace Xmaxplatform { namespace Chain {
 				// default head, default block, the block must match the new header.
 				_context->block_head = std::make_shared<block_pack>();
 				_context->block_head->init_default();
-
-				_context->fork_db.add_block(_context->block_head);
+				_context->chain_log.append_block(_context->block_head->block);
+				//_context->fork_db.add_block(_context->block_head);
 			} FC_CAPTURE_AND_RETHROW()
 		}
 

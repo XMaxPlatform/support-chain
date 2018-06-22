@@ -134,7 +134,7 @@ namespace Chain {
 		{
 			std::vector<xmax_type_block_id> remlist;
 			std::vector<xmax_type_block_id> confiremdlist;
-			auto& idx = packs.get<by_longest_num>();
+			auto& idx = packs.get<by_oldest_block>();
 
 			auto it = idx.begin();
 			for (auto it = idx.begin(); (it != idx.end() && (*it)->block_num < last_confirmed_num); ++it)
@@ -186,7 +186,7 @@ namespace Chain {
 				block_pack s;
 				fc::raw::unpack(ds, s);
 
-				add_block(std::make_shared<block_pack>(std::move(s)));
+				auto result = _context->packs.insert(std::make_shared<block_pack>(std::move(s)));
 			}
 
 			_context->head = get_block(head.head_id);
