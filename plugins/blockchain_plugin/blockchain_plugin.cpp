@@ -164,6 +164,7 @@ namespace Xmaxplatform {
 
     void blockchain_plugin::plugin_shutdown() {
         ilog("blockchain_plugin::plugin_shutdown");
+		my->chain.reset();
     }
 
     Chain::chain_xmax &blockchain_plugin::getchain() { return *my->chain; }

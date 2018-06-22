@@ -34,7 +34,10 @@ application::application()
    io_serv = std::make_shared<boost::asio::io_service>();
 }
 
-application::~application() { }
+application::~application() 
+{ 
+
+}
 
 void application::set_version(uint64_t version) {
   my->_version = version;
@@ -200,6 +203,33 @@ void application::quit() {
    io_serv->stop();
 }
 
+
+#ifdef WIN32
+BOOL WINAPI HandlerRoutine(DWORD dwCtrlType)
+{
+	switch (dwCtrlType)
+	{
+	case CTRL_C_EVENT://  
+		break;
+	case CTRL_BREAK_EVENT://  
+		break;
+	case CTRL_CLOSE_EVENT://  
+	{
+		app().quit();
+		app().shutdown();
+		return 1;
+	}
+		break;
+	case CTRL_LOGOFF_EVENT://  
+		break;
+	case CTRL_SHUTDOWN_EVENT:// 
+	default:
+		break;
+	}
+	return 0;
+}
+#endif
+
 void application::exec() {
    std::shared_ptr<boost::asio::signal_set> sigint_set(new boost::asio::signal_set(*io_serv, SIGINT));
    sigint_set->async_wait([sigint_set,this](const boost::system::error_code& err, int num) {
@@ -213,6 +243,14 @@ void application::exec() {
      sigterm_set->cancel();
    });
 
+   //std::shared_ptr<boost::asio::signal_set> sigpipe_set(new boost::asio::signal_set(*io_serv, SIGPIPE));
+   //sigpipe_set->async_wait([sigpipe_set, this](const boost::system::error_code& err, int num) {
+	  // quit();
+	  // sigpipe_set->cancel();
+   //});
+//#ifdef WIN32
+//   SetConsoleCtrlHandler(HandlerRoutine, TRUE);
+//#endif
    io_serv->run();
 
    shutdown(); /// perform synchronous shutdown

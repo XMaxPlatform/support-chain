@@ -3,7 +3,7 @@
  *  @copyright defined in xmax/LICENSE
  */
 #include <blockchain_exceptions.hpp>
-#include <initial_builder_state.hpp>
+#include <import_builder_state.hpp>
 #include <blockbuilder_plugin.hpp>
 #include <blockchain_plugin.hpp>
 #include <block.hpp>
@@ -58,15 +58,16 @@ private:
 void blockbuilder_plugin::set_program_options(options_description& cli, options_description& cfg)
 {
 	cfg.add_options()
-		("initial-builders", bpo::value<boost::filesystem::path>(), "Json file to read builders from");
+		("import-builders", bpo::value<boost::filesystem::path>(), "Json file to read builders from");
 }
 
 void blockbuilder_plugin::plugin_initialize(const variables_map& options) {
     ilog("blockbuilder_plugin::plugin_initialize");
 
-	if (options.count("initial-builders")) {
-		my->set_builders_file(options.at("initial-builders").as<Baseapp::bfs::path>());
+	if (options.count("import-builders")) {
+		my->set_builders_file(options.at("import-builders").as<Baseapp::bfs::path>());
 	}
+
 }
 
 void blockbuilder_plugin::plugin_startup() {
@@ -106,13 +107,12 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
 	void blockbuilder_plugin_impl::init_builders()
 	{
-		import_key(Config::xmax_contract_name, Config::xmax_build_private_key);
 
 		if (_builders_file.has_leaf())
 		{
-			auto builder_state = fc::json::from_file(_builders_file).as<initial_builder_state>();
+			auto builder_state = fc::json::from_file(_builders_file).as<import_builder_state>();
 
-			for (const auto& it : builder_state.initial_builders)
+			for (const auto& it : builder_state.import_builders)
 			{
 				account_name name = it.builder_name;
 				import_key(name, it.sign_private_key);
@@ -126,7 +126,9 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 		{
 			_builders.insert(builder);
 		}
-		_builder_keys[private_key.get_public_key()] = private_key;
+		public_key_type public_key = private_key.get_public_key();
+		_builder_keys[public_key] = private_key;
+
 		return true;
 	}
 	void blockbuilder_plugin_impl::start_check()

@@ -58,6 +58,7 @@ int main(int argc, char** argv)
 		ilog("xmaxrun init success!");
 		app().startup();
 		app().exec();
+
 	}
 	catch (const fc::exception& e) {
 		elog("${e}", ("e", e.to_detail_string()));

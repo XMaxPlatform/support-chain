@@ -35,21 +35,23 @@ namespace Chain {
 	struct block_pack : public block_raw
 	{
 		block_pack()
-			: block(std::make_shared<signed_block>())
 		{
 		}
 
 		signed_block_ptr	block;
 
-		void setup(const block_pack& pre_pack, chain_timestamp when, account_name builder, const builder_rule& rule);
-		void setup();
+		void init_default();
+		void init_by_pre_pack(const block_pack& pre_pack, chain_timestamp when, account_name builder, const builder_rule& rule);
+		void init_by_block(signed_block_ptr b);
+
+
 	};
 
 	using block_pack_ptr = std::shared_ptr<block_pack>;
 }
 }
 
-FC_REFLECT(Xmaxplatform::Chain::block_raw, (block_id)(new_header))
+FC_REFLECT(Xmaxplatform::Chain::block_raw, (block_num)(block_id)(new_header)(verifiers)(confirmations)(last_block_num)(last_confired_num)(last_confired_id))
 
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::block_pack, (Xmaxplatform::Chain::block_raw), (block))
 

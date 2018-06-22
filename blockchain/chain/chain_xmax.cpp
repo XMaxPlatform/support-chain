@@ -87,6 +87,7 @@ namespace Xmaxplatform { namespace Chain {
 		{
 			building_block.reset();
 			block_db.flush();
+			fork_db.close();
 		}
 
 		xmax_type_merkle_root calculate_merkle_root() const
@@ -159,7 +160,7 @@ namespace Xmaxplatform { namespace Chain {
 		void chain_xmax::first_initialize(chain_init& initer)
 		{
 			try {
-
+				ilog("chain_xmax first initialize.");
 				const fc::time_point init_point = initer.get_chain_init_time();;
 				const chain_timestamp init_stamp = chain_timestamp::from(init_point);
 				const chain_timestamp pre_stamp = init_stamp - chain_timestamp::create(1);
@@ -201,7 +202,7 @@ namespace Xmaxplatform { namespace Chain {
 
 				// default head, default block, the block must match the new header.
 				_context->block_head = std::make_shared<block_pack>();
-				_context->block_head->setup();
+				_context->block_head->init_default();
 
 				_context->fork_db.add_block(_context->block_head);
 			} FC_CAPTURE_AND_RETHROW()
@@ -209,13 +210,35 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::initialize_impl(chain_init& initer)
 		{
-			block_pack_ptr head = _context->fork_db.get_head();
-			if (!head)
+			ilog("chain_xmax first initialize.");
+			block_pack_ptr pack_head = _context->fork_db.get_head();
+			if (!pack_head)
 			{
-				elog("No head block in fork db.");
+				wlog("No head block in fork db, try to fix...");
+
+				signed_block_ptr head = _context->chain_log.get_head();
+				pack_head = std::make_shared<block_pack>();
+				pack_head->init_by_block(head);
+				_context->fork_db.add_block(pack_head);
 			}
 
-			_context->block_head = head;
+			_context->block_head = pack_head;
+
+			int64_t revision = _context->block_db.revision();
+
+			ilog("block db revision: ${revision}", ("revision", revision));
+
+			int64_t block_num = (int64_t)_context->block_head->block_num;
+
+			FC_ASSERT(block_num <= revision, "Error: block_num > db revision.");
+
+			if (block_num != revision)
+			{
+				wlog("block_num != revision, try to roll-back the db revision");
+
+				_context->block_db.set_revision(block_num);
+			}
+
 		}
 
         chain_xmax::chain_xmax(chain_init& init, const xmax_config& config, const finalize_block_func& finalize_func)
@@ -233,7 +256,6 @@ namespace Xmaxplatform { namespace Chain {
 
         chain_xmax::~chain_xmax() {
 
-            _context->block_db.flush();
         }
 
         const static_config_object& chain_xmax::get_static_config()const {
@@ -612,7 +634,7 @@ namespace Xmaxplatform { namespace Chain {
 
 				const auto& rule = _get_verifiers(get_static_config(), delta_slot);
 
-				_context->building_block->pack->setup(*_context->block_head, when, current_builder.builder_name, rule);
+				_context->building_block->pack->init_by_pre_pack(*_context->block_head, when, current_builder.builder_name, rule);
 
 				pending_undo.cancel();
 

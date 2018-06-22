@@ -32,26 +32,42 @@ namespace Chain {
 		return confirmations.size() >= minconf;
 	}
 
-
-	void block_pack::setup(const block_pack& pre_pack, chain_timestamp when, account_name builder, const builder_rule& rule)
+	void block_pack::init_default()
 	{
+		block = std::make_shared<signed_block>();
+		static_cast<block_header&>(*block) = new_header;
+
+		block_num = new_header.block_num();
+		block_id = new_header.id();
+	}
+
+	void block_pack::init_by_pre_pack(const block_pack& pre_pack, chain_timestamp when, account_name builder, const builder_rule& rule)
+	{
+		block = std::make_shared<signed_block>();
+
+		new_header.previous = pre_pack.block_id;
+		new_header.timestamp = when;
+		new_header.builder = builder;
+
+		verifiers = rule;
+
 		block_num = pre_pack.block_num + 1;
 		last_block_num = pre_pack.last_block_num;
 		last_confired_num = pre_pack.last_confired_num;
 		last_confired_id = pre_pack.last_confired_id;
 
-		// build block.
-		new_header.previous = pre_pack.block_id;
-		new_header.timestamp = when;
-		new_header.builder = builder;
+
 	}
 
-	void block_pack::setup()
+	void block_pack::init_by_block(signed_block_ptr b)
 	{
-		static_cast<block_header&>(*block) = new_header;
+		block = b;
+		new_header = static_cast<signed_block_header&>(*block);
 
-		block_num = new_header.block_num();
-		block_id = new_header.id();
+		block_num = b->block_num();
+		last_block_num = block_num;
+		last_confired_num = block_num;
+		last_confired_id = block->id();
 	}
 
 }

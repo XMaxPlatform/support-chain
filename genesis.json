@@ -11,175 +11,219 @@
   "immutable_parameters": {
     "min_producer_count": 21
   },
-  "initial_accounts": [{
-    "name": "testera",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerb",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerc",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerd",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testere",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerf",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerg",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerh",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testeri",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerj",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerk",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerl",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerm",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testern",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testero",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerp",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerq",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testerr",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testers",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testert",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  },{
-    "name": "testeru",
-    "owner_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ",
-    "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
-    "xmx_token": "1000000.0000 XMX"
-  }],
-  "initial_builders": [{
-    "owner_name": "testera",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerb",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerc",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerd",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testere",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerf",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerg",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerh",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testeri",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerj",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerk",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerl",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerm",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testern",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testero",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerp",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerq",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testerr",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testers",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testert",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  },{
-    "owner_name": "testeru",
-    "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
-  }],
+  "initial_accounts": [
+    {
+      "name": "testera",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerb",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerc",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerd",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testere",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerf",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerg",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerh",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testeri",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerj",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerk",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerl",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerm",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testern",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testero",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerp",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerq",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testerr",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testers",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testert",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    },
+    {
+      "name": "testeru",
+      "owner_key": "XMX5Wgr3AkX9k1hLjymep9snY2AwvXDAVJBTEQw38t49A8RCR2H3j",
+      "active_key": "XMX7zXBwWFHgk9ovzZtUf5y3FK6Sk85biSbZgFTWTcnZewHaXUSCT",
+      "xmx_token": "1000000.0000 XMX"
+    }
+  ],
+  "initial_builders": [
+    {
+      "owner_name": "testera",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerb",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerc",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerd",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testere",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerf",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerg",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerh",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testeri",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerj",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerk",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerl",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerm",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testern",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testero",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerp",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerq",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testerr",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testers",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testert",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    },
+    {
+      "owner_name": "testeru",
+      "block_signing_key": "XMX5rZ2GtpgZLSVAeSNyB41eS4J8bguqoTCtPG9BtoqmpX9wrj9VJ"
+    }
+  ],
   "initial_chain_id": "0000000000000000000000000000000000000000000000000000000000000000"
 }

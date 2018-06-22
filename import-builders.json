@@ -1,5 +1,5 @@
 {
-  "initial_builders": [
+  "import_builders": [
     {
       "builder_name": "testera",
       "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
@@ -64,7 +64,7 @@
       "builder_name": "testerp",
       "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
     },
-        {
+    {
       "builder_name": "testerq",
       "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
     },
@@ -78,11 +78,11 @@
     },
     {
       "builder_name": "testert",
-      "sign_private_key" : "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
     },
-                {
+    {
       "builder_name": "testeru",
-      "sign_private_key" : "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
+      "sign_private_key": "5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN"
     }
   ]
 }
