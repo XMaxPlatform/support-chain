@@ -168,6 +168,8 @@ namespace Xmaxplatform { namespace Chain {
 				xmax_builder_infos list;
 				list.push_back(builder_info(Config::xmax_contract_name, Config::xmax_build_public_key));
 
+
+				auto first_session = _context->block_db.start_undo_session(true);
 				// Create global properties
 				_context->block_db.create<static_config_object>([&](static_config_object &p) {
 					p.setup = initer.get_blockchain_setup();
@@ -205,6 +207,10 @@ namespace Xmaxplatform { namespace Chain {
 				_context->block_head->init_default();
 				_context->chain_log.append_block(_context->block_head->block);
 				//_context->fork_db.add_block(_context->block_head);
+
+				first_session.push();
+				uint64_t rev = first_session.revision();
+				_context->block_db.commit(rev);
 			} FC_CAPTURE_AND_RETHROW()
 		}
 

@@ -180,16 +180,27 @@ namespace Chain {
 			fc::read_file_contents(abs_path, content);
 
 			fc::datastream<const char*> ds(content.data(), content.size());
-			fork_db_head head; 
-			fc::raw::unpack(ds, head);
-			for (uint32_t i = 0, n = head.size; i < n; ++i) {
-				block_pack s;
-				fc::raw::unpack(ds, s);
 
-				auto result = _context->packs.insert(std::make_shared<block_pack>(std::move(s)));
+
+			try
+			{
+				fork_db_head head;
+				fc::raw::unpack(ds, head);
+				for (uint32_t i = 0, n = head.size; i < n; ++i) {
+					block_pack s;
+					fc::raw::unpack(ds, s);
+
+					auto result = _context->packs.insert(std::make_shared<block_pack>(std::move(s)));
+				}
+				_context->head = get_block(head.head_id);
+
 			}
+			catch (const fc::out_of_range_exception& e)
+			{
+				elog("${e}", ("e", e.to_detail_string()));
 
-			_context->head = get_block(head.head_id);
+				elog("dirty fork db file.");
+			}
 
 			fc::remove(abs_path);
 		}

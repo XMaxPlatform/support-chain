@@ -63,11 +63,11 @@ namespace Chain {
 	{
 		block = b;
 		new_header = static_cast<signed_block_header&>(*block);
-
+		block_id = b->id();
 		block_num = b->block_num();
 		last_block_num = block_num;
 		last_confired_num = block_num;
-		last_confired_id = block->id();
+		last_confired_id = block_id;
 	}
 
 }

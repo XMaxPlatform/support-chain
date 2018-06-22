@@ -8,7 +8,7 @@
 
 #define LOG_READ  (std::ios::in | std::ios::binary)
 #define LOG_WRITE (std::ios::out | std::ios::binary | std::ios::app)
-
+#define LOG_READ_WRITE (std::ios::in | std::ios::out | std::ios::binary | std::ios::app)
 
 namespace block_detail
 {
@@ -52,12 +52,12 @@ namespace block_detail
 		{
 		case block_detail::IO_Read:
 		{
-			stream.seekp(pos, dir);
+			stream.seekg(pos, dir);
 		}
 			break;
 		case block_detail::IO_Write:
 		{
-			stream.seekg(pos, dir);
+			stream.seekp(pos, dir);
 		}
 			break;
 		default:
@@ -77,15 +77,15 @@ namespace block_detail
 
 	static void to_last_block_desc(std::fstream& stream, IO_Code code)
 	{
-		stream_seek(stream, sizeof(block_end_eof_type) + sizeof(block_desc), std::ios::end, code);
+		stream_seek(stream, -sizeof(block_end_eof_type) - sizeof(block_desc), std::ios::end, code);
 	}
 	static void to_block_index(std::fstream& stream, IO_Code code)
 	{
-		stream_seek(stream, sizeof(block_index), std::ios::end, code);
+		stream_seek(stream, -sizeof(block_index), std::ios::end, code);
 	}
 	static void to_end_eof(std::fstream& stream, IO_Code code)
 	{
-		stream_seek(stream, sizeof(block_end_eof_type), std::ios::end, code);
+		stream_seek(stream, -sizeof(block_end_eof_type), std::ios::end, code);
 	}
 
 	static void read_eof(std::fstream& stream, block_end_eof_type& eof)
@@ -121,18 +121,19 @@ namespace block_detail
 	{
 		auto data = fc::raw::pack(*blockptr);
 
-		block_stream.seekg(0, std::ios::end);
-		uint64_t pos = block_stream.tellg();
+		block_detail::stream_end(block_stream, IO_Write);
+		block_detail::stream_end(index_stream, IO_Write);
+
+		uint64_t pos = block_stream.tellp();
+		uint64_t idx_pos = index_stream.tellp();
 
 		block_desc desc;
-		block_index index;
 		desc.num = blockptr->block_num();
 		desc.pos = pos;
 		desc.size = data.size();
 
+		block_index index;
 		index.pos = pos;
-
-		uint64_t idx_pos = index_stream.tellp();
 
 		FC_ASSERT(idx_pos == sizeof(block_index) * (desc.num - 1),
 			"Append to index file occuring at wrong position.",
@@ -140,15 +141,12 @@ namespace block_detail
 			("expected", (desc.num - 1) * sizeof(uint64_t)));
 
 
-		block_stream.seekg(desc.pos);
+		block_stream.seekp(desc.pos);
 
 		block_stream.write(data.data(), data.size());
 		write_block_desc(block_stream, desc);
-
 		block_stream.flush();
-
 		write_eof(block_stream);
-
 		block_stream.flush();
 
 		write_block_index(index_stream, index);
@@ -169,7 +167,7 @@ namespace block_detail
 
 static void open_file_stream(const fc::path& file, std::fstream& stream)
 {
-	stream.open(file.generic_string().c_str(), LOG_WRITE);
+	stream.open(file.generic_string().c_str(), LOG_READ_WRITE);
 }
 
 static void clear_file_stream(const fc::path& file, std::fstream& stream)
@@ -246,7 +244,6 @@ namespace Xmaxplatform { namespace Chain {
 				//fc::raw::pack(
 				// check match between index and log.
 				// empty now.
-
 				block_detail::to_end_eof(block_stream, block_detail::IO_Read);
 				block_detail::block_end_eof_type eof;
 				block_detail::read_eof(block_stream, eof);
