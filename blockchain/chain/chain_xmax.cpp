@@ -225,7 +225,7 @@ namespace Xmaxplatform { namespace Chain {
 				signed_block_ptr head = _context->chain_log.get_head();
 				pack_head = std::make_shared<block_pack>();
 				pack_head->init_by_block(head);
-				_context->fork_db.add_block(pack_head);
+				//_context->fork_db.add_block(pack_head);
 			}
 
 			_context->block_head = pack_head;
@@ -241,10 +241,10 @@ namespace Xmaxplatform { namespace Chain {
 			if (block_num != revision)
 			{
 				wlog("block_num != revision, try to roll-back the db revision");
-
+				_context->block_db.undo_all();
 				_context->block_db.set_revision(block_num);
 			}
-
+			_context->last_irreversible_block_num = revision;
 		}
 
         chain_xmax::chain_xmax(chain_init& init, const xmax_config& config, const finalize_block_func& finalize_func)
@@ -851,10 +851,10 @@ namespace Xmaxplatform { namespace Chain {
 
 			_context->last_irreversible_block_num = block_num;
 
-			_context->block_db.commit(block_num);
-
 			_context->chain_log.append_block(pack->block);
 
+			_context->block_db.commit(block_num);
+			_context->block_db.flush();
 		}
 
 		void chain_xmax::on_irreversible(block_pack_ptr pack)
