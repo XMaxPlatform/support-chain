@@ -62,6 +62,8 @@ FIND_PACKAGE(Boost 1.66 REQUIRED COMPONENTS
 	
 	)
 
+find_package(MongoDB)
+
 IF( WIN32 )
 
     message( STATUS "Configuring XMax on WIN32")
