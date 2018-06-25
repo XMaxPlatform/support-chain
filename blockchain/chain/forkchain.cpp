@@ -231,7 +231,6 @@ namespace Chain {
 		close();
 	}
 
-
 	void forkdatabase::add_block(block_pack_ptr block_pack)
 	{
 		_context->add_block(block_pack);

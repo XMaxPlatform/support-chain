@@ -38,6 +38,8 @@ private:
 	void confirmation_block_self();
     block_build_condition next_block_impl();
     block_build_condition build_block(fc::mutable_variant_object& capture);
+
+	bool recieve_block(signed_block_ptr block);
 private:
 	Baseapp::bfs::path _builders_file;
 	std::map<Chain::public_key_type, Chain::private_key_type> _builder_keys;
@@ -299,6 +301,35 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
         return block_build_condition::generated;
     }
 
+	bool blockbuilder_plugin_impl::recieve_block(signed_block_ptr block)
+	{
+		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
+
+		auto head = chain.get_head_block();
+
+		//if ((head->block_num + 1) != block->block_num())
+		//{
+		//	ilog("not my turn to build block.");
+		//	return false;
+		//}
+
+		uint32_t order_slot = chain.get_order_slot_at_time(block->timestamp);
+
+		const builder_rule& verifiers = chain.get_verifiers_by_order(order_slot);
+
+
+		for (const auto& it : verifiers.builders)
+		{
+			auto private_key = _builder_keys.find(it.block_signing_key);
+			if (private_key == _builder_keys.end())
+			{
+				chain.confirm_block(block, it.builder_name, private_key->second);
+			}
+		}
+
+
+		return false;
+	}
 
 	void blockbuilder_plugin_impl::confirmation_block_self()
 	{

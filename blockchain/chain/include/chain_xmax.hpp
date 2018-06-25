@@ -73,7 +73,10 @@ namespace Xmaxplatform { namespace Chain {
 	   const builder_info&         get_block_builder(uint32_t delta_slot) const;
 	   const builder_info&         get_order_builder(uint32_t order_slot) const;
 	   const builder_object*	find_builder_object(account_name builder_name) const;
+	   const shared_builder_rule& get_verifiers_by_order(uint32_t order_slot) const;
+
 	   uint32_t				get_delta_slot_at_time(chain_timestamp when) const;
+	   uint32_t				get_order_slot_at_time(chain_timestamp when) const;
        chain_timestamp		get_delta_slot_time(uint32_t delta_slot) const;
 
 	   const Basechain::database& get_database() const;
@@ -105,11 +108,19 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void _start_build(chain_timestamp when);
 
-       void _build_block(const private_key_type& sign_private_key);
+       void _generate_block();
+
+	   void _sign_block(const private_key_type& sign_private_key);
+
+	   void _broadcast_block(const signed_block_ptr next_block);
+
+	   void _validate_block(const signed_block_ptr next_block, const private_key_type& validate_private_key);
+
+	   void _broadcast_confirmation(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key);
+
+	   void _final_block();
 
 	   void _commit_block();
-
-       void _apply_block(const signed_block& next_block);
 
 	   void _update_final_state(const signed_block& b);
 
@@ -170,6 +181,8 @@ namespace Xmaxplatform { namespace Chain {
                chain_timestamp when,
 			   const private_key_type& sign_private_key
        );
+
+	   void confirm_block(const signed_block_ptr next_block, const account_name account, const private_key_type& validate_private_key);
 
        void apply_block(const signed_block& next_block);
 

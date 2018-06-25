@@ -183,7 +183,7 @@ namespace Xmaxplatform { namespace Chain {
 					p.state_time = pre_stamp.time_point();
 					p.total_slot = 0;
 					p.block_builder = empty_name;
-					p.round_begin_time = chain_timestamp::zero_timestamp;
+					//p.round_begin_time = chain_timestamp::zero_timestamp;
 					p.round_slot = Config::blocks_per_round;
 					p.builders_elect_state = elect_state::elect_new_builders;
 				});
@@ -296,9 +296,9 @@ namespace Xmaxplatform { namespace Chain {
 			return _context->block_head;
 		}
 
-		const shared_builder_rule& _get_verifiers(const static_config_object& config, uint32_t index)
+		const shared_builder_rule& _get_verifiers(const static_config_object& config, uint32_t order_slot)
 		{
-			if (index < Config::blocks_per_round || config.next_builders.is_empty())
+			if (order_slot < Config::blocks_per_round || config.next_builders.is_empty())
 			{
 				return config.current_builders;
 			}
@@ -327,11 +327,10 @@ namespace Xmaxplatform { namespace Chain {
 		{
 			asset(delta_slot >= 0);
 			const dynamic_states_object& states = get_dynamic_states();
-			const static_config_object& config = get_static_config();
 
-			uint32_t slot = states.round_slot + delta_slot;
+			uint32_t order_slot = states.round_slot + delta_slot;
 
-			return _get_builder(config, slot);
+			return get_order_builder(order_slot);
 		}
 
 		const builder_info& chain_xmax::get_order_builder(uint32_t order_slot) const
@@ -355,13 +354,23 @@ namespace Xmaxplatform { namespace Chain {
 			chain_timestamp sub = when - first_slot_time;
 			return sub.get_stamp() + 1;
 		}
+
+		uint32_t chain_xmax::get_order_slot_at_time(chain_timestamp when) const
+		{
+			uint32_t delta = get_delta_slot_at_time(when);
+
+			const dynamic_states_object& states = get_dynamic_states();
+
+			return states.round_slot + delta;
+		}
+
+		const shared_builder_rule& chain_xmax::get_verifiers_by_order(uint32_t order_slot) const
+		{
+			return _get_verifiers(get_static_config(), order_slot);
+		}
+
         chain_timestamp chain_xmax::get_delta_slot_time(uint32_t delta_slot) const
         {
-            if (0 == delta_slot)
-            {
-				return chain_timestamp::zero_timestamp;
-            }
-
 			chain_timestamp head_block_abs_slot = chain_timestamp::from(head_block_time());
 			head_block_abs_slot += chain_timestamp::create(delta_slot);
 			return head_block_abs_slot;
@@ -588,7 +597,11 @@ namespace Xmaxplatform { namespace Chain {
 
 			_start_build(when);
 
-			_build_block(sign_private_key);
+			_generate_block();
+
+			_sign_block(sign_private_key);
+
+			_final_block();
 
 			auto exec_stop = std::chrono::high_resolution_clock::now();
 			auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_stop - exec_start);
@@ -603,9 +616,43 @@ namespace Xmaxplatform { namespace Chain {
 			);
 
 			_commit_block();
+		}
 
-			// tmp code irreversible immediately
-			//_irreversible_block(_context->building_block->pack->block);
+		void chain_xmax::confirm_block(const signed_block_ptr next_block, const account_name account, const private_key_type& validate_private_key)
+		{
+			FC_ASSERT(_context->block_head->block_id == next_block->previous, "head block id != previous id of next mblock");
+
+			FC_ASSERT(_context->block_head->block_num + 1 == next_block->block_num(), "head block number + 1 != next block number");
+
+			auto exec_start = std::chrono::high_resolution_clock::now();
+			_abort_build();
+
+			_start_build(next_block->timestamp);
+
+			_generate_block();
+
+			_validate_block(next_block, validate_private_key);
+
+			_final_block();
+
+			_commit_block();
+
+			_broadcast_confirmation(_context->building_block->pack->block_id, account, validate_private_key);
+		}
+
+
+		void chain_xmax::apply_block(const signed_block& next_block) {
+			try {
+
+				FC_ASSERT(next_block.transaction_merkle_root == next_block.calculate_merkle_root(), "action merkle root does not match");
+
+				const builder_object* builder = find_builder_object(next_block.builder);
+
+				FC_ASSERT(next_block.is_signer_valid(builder->signing_key), "bad block.");
+
+				_commit_block();
+
+			} FC_CAPTURE_AND_RETHROW((next_block.block_num()))
 		}
 
 		void chain_xmax::_abort_build()
@@ -621,9 +668,9 @@ namespace Xmaxplatform { namespace Chain {
 			FC_ASSERT(!_context->building_block);
 			//check properties.
 			FC_ASSERT(head_block_time() < when.time_point(), "block must be generated at a timestamp after the head block time");
-			//delta slot
-			uint32_t delta_slot = get_delta_slot_at_time(when);
-			const builder_info& current_builder = get_block_builder(delta_slot);
+
+			uint32_t order_slot = get_order_slot_at_time(when);
+			const builder_info& current_builder = get_order_builder(order_slot);
 
 			auto pending_undo = fc::make_scoped_exit([&]() {
 				_context->building_block.reset();
@@ -637,7 +684,7 @@ namespace Xmaxplatform { namespace Chain {
 
 				block_pack& pack = *_context->building_block->pack;
 
-				const auto& rule = _get_verifiers(get_static_config(), delta_slot);
+				const auto& rule = _get_verifiers(get_static_config(), order_slot);
 
 				_context->building_block->pack->init_by_pre_pack(*_context->block_head, when, current_builder.builder_name, rule);
 
@@ -646,10 +693,11 @@ namespace Xmaxplatform { namespace Chain {
 			} FC_CAPTURE_AND_RETHROW((current_builder.builder_name))
 		}
 
-        void chain_xmax::_build_block(const private_key_type& sign_private_key) {
+        void chain_xmax::_generate_block() {
 
 			FC_ASSERT(_context->building_block);
             try {
+				_context->building_block->pack->main_chain = true;
 
 				signed_block_header& building_header = _context->building_block->pack->new_header;
 
@@ -679,22 +727,68 @@ namespace Xmaxplatform { namespace Chain {
 				// merkle
 				building_header.transaction_merkle_root = _context->calculate_merkle_root();
 
-				building_header.sign(sign_private_key);
-
-				_context->building_block->pack->block_id = building_header.id();
-
-				// make final block from block pack.
-				_context->building_block->pack->block = std::make_shared<signed_block>();
-
-				signed_block_header* final_block = _context->building_block->pack->block.get();
-
-				(*final_block) = building_header;
-
-				_update_final_state(*_context->building_block->pack->block);
-
             } FC_CAPTURE_AND_RETHROW( (_context->building_block->pack->new_header.builder) )
 		}
 
+		void chain_xmax::_sign_block(const private_key_type& sign_private_key)
+		{
+			try {
+				signed_block_header& building_header = _context->building_block->pack->new_header;
+				building_header.sign(sign_private_key);
+				_context->building_block->pack->block_id = building_header.id();
+			} FC_CAPTURE_AND_RETHROW((_context->building_block->pack->new_header.builder))
+		}
+
+		void chain_xmax::_validate_block(const signed_block_ptr next_block, const private_key_type& validate_private_key)
+		{
+			try {
+
+				//set builder_signature first.
+				_context->building_block->pack->new_header.builder_signature = next_block->builder_signature;
+				// validate id
+				const xmax_type_block_id v_id = _context->building_block->pack->new_header.id();
+
+				const xmax_type_block_id id = next_block->id();
+
+				FC_ASSERT(v_id == id, "bad block");
+
+			} FC_CAPTURE_AND_RETHROW((next_block))
+		}
+
+		void chain_xmax::_broadcast_confirmation(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key)
+		{
+			block_confirmation conf;
+			conf.block_id = id;
+			conf.verifier = account;
+
+			conf.sign(validate_private_key);
+
+			push_confirmation(conf);
+
+			// broadcast conf
+			// empty now.
+		}
+
+		void chain_xmax::_broadcast_block(const signed_block_ptr next_block)
+		{
+			// empty..
+		}
+
+		void chain_xmax::_final_block()
+		{
+			signed_block_header& building_header = _context->building_block->pack->new_header;
+
+			// make final block from block pack.
+			_context->building_block->pack->block = std::make_shared<signed_block>();
+
+			signed_block_header* final_block = _context->building_block->pack->block.get();
+
+			(*final_block) = building_header;
+
+			_update_final_state(*_context->building_block->pack->block);
+
+			_context->building_block->push_block();
+		}
 
 		void chain_xmax::_commit_block() {
 
@@ -705,37 +799,12 @@ namespace Xmaxplatform { namespace Chain {
 
 				_context->fork_db.add_block(_context->building_block->pack);
 				_context->block_head = _context->fork_db.get_head();
-				block_summary(*new_block);
+				//block_summary(*new_block);
 
-				_context->building_block->push_block();
+
 
 			} FC_CAPTURE_AND_RETHROW((new_block->block_num()))
 		
-		}
-
-        void chain_xmax::apply_block(const signed_block& next_block) {
-
-			_abort_build();
-			_apply_block(next_block);
-
-        }
-
-        void chain_xmax::_apply_block(const signed_block& next_block) { 
-			try {
-
-				FC_ASSERT(next_block.transaction_merkle_root == next_block.calculate_merkle_root(), "action merkle root does not match");
-
-				const dynamic_states_object& dy_state = get_dynamic_states();
-				if (elect_state::elect_new_builders == dy_state.builders_elect_state)
-				{
-					const static_config_object& config = get_static_config();
-					FC_ASSERT(next_block.next_builders.valid(), "empty builder list.");
-				}
-				
-
-				_commit_block();
-
-            } FC_CAPTURE_AND_RETHROW( (next_block.block_num()) ) 
 		}
 
 		void chain_xmax::_update_final_state(const signed_block& last_block)
@@ -747,7 +816,7 @@ namespace Xmaxplatform { namespace Chain {
 
 			elect_state builder_elect_state = dy_state.builders_elect_state;
 
-			chain_timestamp round_begin_time = dy_state.round_begin_time;
+			//chain_timestamp round_begin_time = dy_state.round_begin_time;
 
 			uint32_t delta_slot = get_delta_slot_at_time(current_block_time);
 
@@ -805,8 +874,7 @@ namespace Xmaxplatform { namespace Chain {
 					//// new builders state
 
 					current_round_slot = current_round_slot % Config::blocks_per_round;
-					//chain_timestamp delta_time = chain_timestamp::create(current_round_slot);
-					//round_begin_time = current_block_time - delta_time;
+					//round_begin_time = current_block_time - chain_timestamp::create(current_round_slot);
 
 				}
 			}
@@ -826,7 +894,7 @@ namespace Xmaxplatform { namespace Chain {
                 dgp.head_block_id = last_block.id();
                 dgp.state_time = last_block.timestamp.time_point();
                 dgp.block_builder = last_block.builder;
-				dgp.round_begin_time = round_begin_time;
+				//dgp.round_begin_time = round_begin_time;
 				dgp.total_slot = total_slot;
 				dgp.round_slot = current_round_slot;
 				dgp.builders_elect_state = builder_elect_state;

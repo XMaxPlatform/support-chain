@@ -17,9 +17,10 @@ namespace Chain {
 		builder_rule						verifiers;
 		vector<block_confirmation>			confirmations;
 
-		uint32_t last_block_num = 0;
-		uint32_t last_confired_num = 0;
-		xmax_type_block_id last_confired_id;
+		bool								main_chain = false;
+		uint32_t							last_block_num = 0;
+		uint32_t							last_confired_num = 0;
+		xmax_type_block_id					last_confired_id;
 
 		const xmax_type_block_id& prev_id() const
 		{

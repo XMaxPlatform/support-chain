@@ -33,7 +33,7 @@ namespace Xmaxplatform { namespace Chain {
 		fc::time_point          state_time;
 		uint32_t				total_slot;
 		account_name            block_builder;
-		chain_timestamp			round_begin_time; // the round begin time.
+		//chain_timestamp			round_begin_time; // the round begin time.
 		uint32_t				round_slot;
 
 		elect_state				builders_elect_state;
