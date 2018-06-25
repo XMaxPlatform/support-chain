@@ -602,7 +602,6 @@ namespace Xmaxplatform { namespace Chain {
 				("extm", exec_ms.count())
 			);
 
-			// temp process. commit impl.
 			_commit_block();
 
 			// tmp code irreversible immediately
@@ -734,9 +733,7 @@ namespace Xmaxplatform { namespace Chain {
 				}
 				
 
-                _update_final_state(next_block);
-
-				block_summary(next_block);
+				_commit_block();
 
             } FC_CAPTURE_AND_RETHROW( (next_block.block_num()) ) 
 		}
