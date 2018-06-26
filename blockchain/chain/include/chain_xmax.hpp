@@ -104,26 +104,19 @@ namespace Xmaxplatform { namespace Chain {
        void initialize_chain(chain_init& initer);
 	   void first_initialize(chain_init& initer);
 	   void initialize_impl(chain_init& initer);
+
 	   void _abort_build();
-
 	   void _start_build(chain_timestamp when);
-
        void _generate_block();
-
 	   void _sign_block(const private_key_type& sign_private_key);
-
 	   void _broadcast_block(const signed_block_ptr next_block);
-
-	   void _validate_block(const signed_block_ptr next_block, const private_key_type& validate_private_key);
-
+	   void _validate_block(const signed_block_ptr next_block);
 	   void _broadcast_confirmation(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key);
-
 	   void _final_block();
-
 	   void _commit_block();
 
+	   void _validate_block_desc(signed_block_ptr block);
 	   void _update_final_state(const signed_block& b);
-
 	   void _irreversible_block(const block_pack_ptr& pack);
 	 // void rate_limit_message(const message& message);
       void process_message(const transaction& trx, account_name code, const message_xmax& message,
@@ -182,9 +175,9 @@ namespace Xmaxplatform { namespace Chain {
 			   const private_key_type& sign_private_key
        );
 
-	   void confirm_block(const signed_block_ptr next_block, const account_name account, const private_key_type& validate_private_key);
+	   void confirm_block(const signed_block_ptr next_block);
 
-       void apply_block(const signed_block& next_block);
+	   void broadcast_confirmation(account_name account, const private_key_type& validate_private_key);
 
        void set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v );
 

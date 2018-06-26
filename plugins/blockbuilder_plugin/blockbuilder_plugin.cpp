@@ -39,10 +39,11 @@ private:
     block_build_condition next_block_impl();
     block_build_condition build_block(fc::mutable_variant_object& capture);
 
-	bool recieve_block(signed_block_ptr block);
+	void recieve_block(signed_block_ptr block);
 private:
 	Baseapp::bfs::path _builders_file;
-	std::map<Chain::public_key_type, Chain::private_key_type> _builder_keys;
+	typedef std::map<Chain::public_key_type, Chain::private_key_type> keymap;
+	keymap _builder_keys;
 	std::set<account_name> _builders;
 };
 
@@ -301,7 +302,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
         return block_build_condition::generated;
     }
 
-	bool blockbuilder_plugin_impl::recieve_block(signed_block_ptr block)
+	void blockbuilder_plugin_impl::recieve_block(signed_block_ptr block)
 	{
 		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
 
@@ -318,17 +319,27 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 		const builder_rule& verifiers = chain.get_verifiers_by_order(order_slot);
 
 
+		std::vector<std::pair<account_name, private_key_type>> keys;
+
 		for (const auto& it : verifiers.builders)
 		{
 			auto private_key = _builder_keys.find(it.block_signing_key);
-			if (private_key == _builder_keys.end())
+			if (private_key != _builder_keys.end())
 			{
-				chain.confirm_block(block, it.builder_name, private_key->second);
+				keys.push_back(std::make_pair(it.builder_name, private_key->second));
 			}
 		}
 
+		chain.confirm_block(block);
 
-		return false;
+		if (keys.size())
+		{
+			for (const auto& key : keys)
+			{
+				chain.broadcast_confirmation(key.first, key.second);
+			}
+		}
+
 	}
 
 	void blockbuilder_plugin_impl::confirmation_block_self()

@@ -618,11 +618,9 @@ namespace Xmaxplatform { namespace Chain {
 			_commit_block();
 		}
 
-		void chain_xmax::confirm_block(const signed_block_ptr next_block, const account_name account, const private_key_type& validate_private_key)
+		void chain_xmax::confirm_block(const signed_block_ptr next_block)
 		{
-			FC_ASSERT(_context->block_head->block_id == next_block->previous, "head block id != previous id of next mblock");
-
-			FC_ASSERT(_context->block_head->block_num + 1 == next_block->block_num(), "head block number + 1 != next block number");
+			_validate_block_desc(next_block);
 
 			auto exec_start = std::chrono::high_resolution_clock::now();
 			_abort_build();
@@ -631,28 +629,16 @@ namespace Xmaxplatform { namespace Chain {
 
 			_generate_block();
 
-			_validate_block(next_block, validate_private_key);
+			_validate_block(next_block);
 
 			_final_block();
 
 			_commit_block();
-
-			_broadcast_confirmation(_context->building_block->pack->block_id, account, validate_private_key);
 		}
 
-
-		void chain_xmax::apply_block(const signed_block& next_block) {
-			try {
-
-				FC_ASSERT(next_block.transaction_merkle_root == next_block.calculate_merkle_root(), "action merkle root does not match");
-
-				const builder_object* builder = find_builder_object(next_block.builder);
-
-				FC_ASSERT(next_block.is_signer_valid(builder->signing_key), "bad block.");
-
-				_commit_block();
-
-			} FC_CAPTURE_AND_RETHROW((next_block.block_num()))
+		void chain_xmax::broadcast_confirmation(account_name account, const private_key_type& validate_private_key)
+		{
+			_broadcast_confirmation(_context->building_block->pack->block_id, account, validate_private_key);
 		}
 
 		void chain_xmax::_abort_build()
@@ -691,6 +677,19 @@ namespace Xmaxplatform { namespace Chain {
 				pending_undo.cancel();
 
 			} FC_CAPTURE_AND_RETHROW((current_builder.builder_name))
+		}
+
+		void chain_xmax::_validate_block_desc(signed_block_ptr block)
+		{
+			FC_ASSERT(_context->block_head->block_id == block->previous, "head block id != previous id of next mblock");
+
+			FC_ASSERT(_context->block_head->block_num + 1 == block->block_num(), "head block number + 1 != next block number");
+
+			FC_ASSERT(block->transaction_merkle_root == block->calculate_merkle_root(), "action merkle root does not match");		
+			
+			const builder_object* builder = find_builder_object(block->builder);
+
+			FC_ASSERT(block->is_signer_valid(builder->signing_key), "bad block.");
 		}
 
         void chain_xmax::_generate_block() {
@@ -739,7 +738,7 @@ namespace Xmaxplatform { namespace Chain {
 			} FC_CAPTURE_AND_RETHROW((_context->building_block->pack->new_header.builder))
 		}
 
-		void chain_xmax::_validate_block(const signed_block_ptr next_block, const private_key_type& validate_private_key)
+		void chain_xmax::_validate_block(const signed_block_ptr next_block)
 		{
 			try {
 
