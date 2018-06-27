@@ -217,12 +217,11 @@ namespace Xmaxplatform { namespace Chain {
 				_make_fianl_block();
 				_final_block();
 
-				_context->chain_log.append_block(_context->block_head->block);
-
+				uint32_t block_num = _context->block_head->block_num;
+				_context->chain_log.append_block(_context->block_head->block);				
 				_context->building_block->push_db();
-				uint64_t rev = _context->building_block->db_session.revision();
-				_context->block_db.commit(rev);
-
+				_context->block_db.commit(block_num);
+				_context->block_db.set_revision(block_num);
 
 			} FC_CAPTURE_AND_RETHROW()
 		}
