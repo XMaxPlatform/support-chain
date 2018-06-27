@@ -6,6 +6,7 @@
 #include <import_builder_state.hpp>
 #include <blockbuilder_plugin.hpp>
 #include <blockchain_plugin.hpp>
+#include <chainnet_plugin.hpp>
 #include <block.hpp>
 
 #include <key_conversion.hpp>
@@ -29,6 +30,8 @@ public:
 	void set_builders_file(const Baseapp::bfs::path& file_path);
 
 	void init_builders();
+
+	void recieve_block(signed_block_ptr block);
 private: 
 
 	void start_check();
@@ -39,7 +42,6 @@ private:
     block_build_condition next_block_impl();
     block_build_condition build_block(fc::mutable_variant_object& capture);
 
-	void recieve_block(signed_block_ptr block);
 private:
 	Baseapp::bfs::path _builders_file;
 	typedef std::map<Chain::public_key_type, Chain::private_key_type> keymap;
@@ -297,8 +299,9 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
 		chain.build_block(now_timestamp, private_key->second);
 
-        //TODO
-        //broadcast
+       
+		chainnet_plugin& netPlugin = app().get_plugin<chainnet_plugin>();
+		netPlugin.broadcast_block( chain.get_signedblock() );
         return block_build_condition::generated;
     }
 
@@ -307,12 +310,6 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
 
 		auto head = chain.get_head_block();
-
-		//if ((head->block_num + 1) != block->block_num())
-		//{
-		//	ilog("not my turn to build block.");
-		//	return false;
-		//}
 
 		uint32_t order_slot = chain.get_order_slot_at_time(block->timestamp);
 
@@ -334,9 +331,13 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
 		if (keys.size())
 		{
+			chainnet_plugin& netPlugin = app().get_plugin<chainnet_plugin>();
+			broadcast_confirm_func confirm_func = std::bind(&chainnet_plugin::broadcast_confirm, std::ref(netPlugin), std::placeholders::_1);
+
 			for (const auto& key : keys)
 			{
-				chain.broadcast_confirmation(key.first, key.second);
+				chain.broadcast_confirmation(key.first, key.second, confirm_func);
+
 			}
 		}
 
@@ -373,6 +374,19 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
 		}
 
+	}
+
+	void blockbuilder_plugin::on_recv_message(const signed_block &msg)
+	{
+		signed_block_ptr pblock = std::make_shared<signed_block>();
+		*pblock = msg;
+		my->recieve_block(pblock);
+	}
+
+	void blockbuilder_plugin::on_recv_message(const block_confirmation& msg)
+	{
+		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
+		chain.push_confirmation(msg);
 	}
 
 } // namespace Xmaxplatform
