@@ -25,6 +25,7 @@ namespace Xmaxplatform {
         void plugin_shutdown();
 
         void   broadcast_block(const Chain::signed_block &sb);
+		void   broadcast_confirm(const Chain::block_confirmation& confirm);
 
 		Chain::string                       connect( const Chain::string& endpoint );
 		Chain::string                       disconnect( const Chain::string& endpoint );

@@ -34,6 +34,8 @@ namespace Xmaxplatform { namespace Chain {
    class builder_object;
    class chain_context;
 
+   using broadcast_confirm_func = std::function<void(const Chain::block_confirmation&)>;
+
    class chain_xmax {
 
    public:
@@ -96,6 +98,9 @@ namespace Xmaxplatform { namespace Chain {
 	   void push_confirmation(const block_confirmation& conf);
 
 	   flat_set<public_key_type> get_required_keys(const signed_transaction& transaction, const flat_set<public_key_type>& candidateKeys)const;
+
+	   const signed_block& get_signedblock() const;
+
    private:
 
 	   std::unique_ptr<chain_context>   _context;
@@ -109,9 +114,8 @@ namespace Xmaxplatform { namespace Chain {
 	   void _start_build(chain_timestamp when);
        void _generate_block();
 	   void _sign_block(const private_key_type& sign_private_key);
-	   void _broadcast_block(const signed_block_ptr next_block);
 	   void _validate_block(const signed_block_ptr next_block);
-	   void _broadcast_confirmation(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key);
+	   void _broadcast_confirmation(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func);
 	   void _final_block();
 	   void _commit_block();
 
@@ -177,12 +181,11 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void confirm_block(const signed_block_ptr next_block);
 
-	   void broadcast_confirmation(account_name account, const private_key_type& validate_private_key);
+	   void broadcast_confirmation(account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func);
 
        void set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v );
 
 	   void on_irreversible(block_pack_ptr pack);
-
 
    };
 

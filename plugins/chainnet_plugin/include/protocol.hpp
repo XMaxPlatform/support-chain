@@ -158,8 +158,9 @@ namespace Xmaxplatform {
                                       request_message,
                                       sync_request_message,
                                       block_summary_message,
-	   Chain::signed_transaction,
-                                      signed_block>;
+									  Chain::signed_transaction,
+                                      signed_block,
+									  block_confirmation>;
 
 } // namespace Xmaxplatform
 

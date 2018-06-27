@@ -207,6 +207,8 @@ namespace Xmaxplatform {
 		void reset();
 		void close();
 		void send_handshake();
+		void send_signedblock(const Chain::signed_block &sb);
+		void send_blockconfirm(const Chain::block_confirmation& confirm);
 
 		/** \name Peer Timestamps
 		*  Time message handling

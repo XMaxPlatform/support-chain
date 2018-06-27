@@ -177,6 +177,7 @@ namespace Xmaxplatform {
 
       static void transaction_ready( const Chain::signed_transaction& txn);
       void broadcast_block_impl( const signed_block &sb);
+	  void broadcast_block_confirm_impl( const block_confirmation& confirm );
 
       bool is_valid( const handshake_message &msg);
 
@@ -203,6 +204,7 @@ namespace Xmaxplatform {
       void handle_message( connection_ptr c, const block_summary_message &msg);
       void handle_message( connection_ptr c, const Chain::signed_transaction &msg);
       void handle_message( connection_ptr c, const signed_block &msg);
+	  void handle_message(connection_ptr c, const block_confirmation &msg);
 
       void start_conn_timer( );
       void start_txn_timer( );
@@ -753,6 +755,12 @@ namespace Xmaxplatform {
 
    void chainnet_plugin_impl::handle_message( connection_ptr c, const signed_block &msg) {
 		//TODO
+	   app().get_plugin<blockbuilder_plugin>().on_recv_message(msg);
+   }
+
+   void chainnet_plugin_impl::handle_message(connection_ptr c, const block_confirmation &msg)
+   {
+
    }
 
    void chainnet_plugin_impl::start_conn_timer( ) {
@@ -860,7 +868,18 @@ namespace Xmaxplatform {
    }
 
    void chainnet_plugin_impl::broadcast_block_impl( const Chain::signed_block &sb) {
-	   //TODO
+	   for (auto con : connections)
+	   {
+		   con->send_signedblock(sb);
+	   }
+   }
+
+   void chainnet_plugin_impl::broadcast_block_confirm_impl(const block_confirmation& confirm)
+   {
+	   for (auto con : connections)
+	   {
+		   con->send_blockconfirm(confirm);
+	   }
    }
 
    bool chainnet_plugin_impl::authenticate_peer(const handshake_message& msg) const {
@@ -1068,6 +1087,11 @@ namespace Xmaxplatform {
    void chainnet_plugin::broadcast_block( const Chain::signed_block &sb) {
       fc_dlog(my->logger, "broadcasting block #${num}",("num",sb.block_num()) );
       my->broadcast_block_impl( sb);
+   }
+
+   void chainnet_plugin::broadcast_confirm(const Chain::block_confirmation& confirm)
+   {
+	   my->broadcast_block_confirm_impl(confirm);
    }
 
    size_t chainnet_plugin::num_peers() const {

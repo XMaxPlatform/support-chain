@@ -129,6 +129,17 @@ namespace Xmaxplatform {
 		msg_enqueue(last_handshake_sent);
 	}
 
+	void connection_xmax::send_signedblock(const Chain::signed_block &sb)
+	{
+		fc_dlog(logger, "send signedblock to ${ep}\n", ("ep", peer_addr));
+		msg_enqueue(sb);
+	}
+
+	void connection_xmax::send_blockconfirm(const Chain::block_confirmation& confirm)
+	{
+
+	}
+
 	char* connection_xmax::convert_tstamp(const tstamp& t)
 	{
 		const long long NsecPerSec{ 1000000000 };

@@ -636,9 +636,9 @@ namespace Xmaxplatform { namespace Chain {
 			_commit_block();
 		}
 
-		void chain_xmax::broadcast_confirmation(account_name account, const private_key_type& validate_private_key)
+		void chain_xmax::broadcast_confirmation(account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func)
 		{
-			_broadcast_confirmation(_context->building_block->pack->block_id, account, validate_private_key);
+			_broadcast_confirmation(_context->building_block->pack->block_id, account, validate_private_key, confirm_func);
 		}
 
 		void chain_xmax::_abort_build()
@@ -754,7 +754,7 @@ namespace Xmaxplatform { namespace Chain {
 			} FC_CAPTURE_AND_RETHROW((next_block))
 		}
 
-		void chain_xmax::_broadcast_confirmation(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key)
+		void chain_xmax::_broadcast_confirmation(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func)
 		{
 			block_confirmation conf;
 			conf.block_id = id;
@@ -764,13 +764,7 @@ namespace Xmaxplatform { namespace Chain {
 
 			push_confirmation(conf);
 
-			// broadcast conf
-			// empty now.
-		}
-
-		void chain_xmax::_broadcast_block(const signed_block_ptr next_block)
-		{
-			// empty..
+			confirm_func(conf);
 		}
 
 		void chain_xmax::_final_block()
@@ -1193,6 +1187,12 @@ namespace Xmaxplatform { namespace Chain {
 			auto account = _context->block_db.find<account_object, by_name>(name);
 			FC_ASSERT(account != nullptr, "Account not found: ${name}", ("name", name));
 		}
+
+		const signed_block& chain_xmax::get_signedblock() const
+		{
+			return *_context->building_block->pack->block;
+		}
+
 
 		chain_init::~chain_init() {}
 

@@ -33,6 +33,10 @@ public:
    void plugin_shutdown();
 
    bool import_key(const account_name& builder, const Basetypes::string& private_key);
+
+   void on_recv_message(const Chain::signed_block &msg);
+   void on_recv_message(const Chain::block_confirmation& msg);
+
 public:
 
 private:
