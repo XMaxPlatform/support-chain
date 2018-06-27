@@ -549,10 +549,8 @@ namespace Xmaxplatform { namespace Chain {
 		Xmaxplatform::Chain::processed_transaction chain_xmax::push_transaction(const signed_transaction& trx, uint32_t skip /*= skip_nothing*/)
 		{
 			try {
-				return _context->with_skip_flags(skip | Config::pushed_transaction, [&]() {
-					transaction_request_ptr request = std::make_shared<transaction_request>(trx);
-					return _push_transaction(request);
-				});
+				transaction_request_ptr request = std::make_shared<transaction_request>(trx);
+				return _push_transaction(request);
 			} FC_CAPTURE_AND_RETHROW((trx))
 		}
 
