@@ -41,4 +41,4 @@ add_custom_command(OUTPUT "${GEN_TYPES_HEADER}"
 			DEPENDS types.xmax types_generator
 			)
 
-add_custom_target(generateTypesHeader ALL DEPENDS ${GEN_TYPES_HEADER}) 			
+add_custom_target(generateTypesHeader ALL DEPENDS ${GEN_TYPES_HEADER} SOURCES types.xmax) 			
