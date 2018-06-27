@@ -569,7 +569,7 @@ namespace Xmaxplatform {
 
 		   if (peer_liblock <= liblock_num && peer_liblock > 0) {
 			   try {
-				   xmax_type_block_id peer_lib_id = cc.get_blockid_from_num(peer_liblock);
+				   xmax_type_block_id peer_lib_id = cc.block_id_from_num(peer_liblock);
 				   on_fork = (msg.last_irreversible_block_id != peer_lib_id);
 			   }
 			   catch (const unknown_block_exception &ex) {
@@ -1200,8 +1200,8 @@ namespace Xmaxplatform {
 	   try {
 		   lib_num = cc.last_irreversible_block_num();
 		   if (lib_num != 0)
-			   lib_id = cc.get_blockid_from_num(lib_num);
-		   head_id = cc.get_blockid_from_num(head_num);
+			   lib_id = cc.block_id_from_num(lib_num);
+		   head_id = cc.block_id_from_num(head_num);
 	   }
 	   catch (const assert_exception &ex) {
 		   elog("unable to retrieve block info: ${n} for ${p}", ("n", ex.to_string())("p", peer_name()));
@@ -1217,7 +1217,7 @@ namespace Xmaxplatform {
 	   xmax_type_block_id null_id;
 	   for (auto bid = head_id; bid != null_id && bid != lib_id; ) {
 		   try {
-			   optional<signed_block> b = cc.get_block_from_id(bid);
+			   optional<signed_block> b = *cc.block_from_id(bid);
 			   if (b) {
 				   bid = b->previous;
 				   bstack.push_back(b);
@@ -1249,7 +1249,7 @@ namespace Xmaxplatform {
 	   for (auto &blkid : ids) {
 		   ++count;
 		   try {
-			   optional<signed_block> b = cc.get_block_from_id(blkid);
+			   optional<signed_block> b = *cc.block_from_id(blkid);
 			   if (b) {
 				   fc_dlog(logger, "get block from id at num ${n}", ("n", b->block_num()));
 				   msg_enqueue(*b);
@@ -1261,7 +1261,7 @@ namespace Xmaxplatform {
 			   }
 		   }
 		   catch (const assert_exception &ex) {
-			   elog("caught assert on get_block_from_id, ${ex}, id ${id} on block ${c} of ${s} for ${p}",
+			   elog("caught assert on block_from_id, ${ex}, id ${id} on block ${c} of ${s} for ${p}",
 				   ("ex", ex.to_string())("id", blkid)("c", count)("s", ids.size())("p", peer_name()));
 			   break;
 		   }
@@ -1455,7 +1455,7 @@ namespace Xmaxplatform {
 	   handshake.last_irreversible_block_num = cx.last_irreversible_block_num();
 	   if (handshake.last_irreversible_block_num) {
 		   try {
-			   handshake.last_irreversible_block_id = cx.get_blockid_from_num(handshake.last_irreversible_block_num);
+			   handshake.last_irreversible_block_id = cx.block_id_from_num(handshake.last_irreversible_block_num);
 		   }
 		   catch (const unknown_block_exception &ex) {
 			   handshake.last_irreversible_block_num = 0;
@@ -1463,7 +1463,7 @@ namespace Xmaxplatform {
 	   }
 	   if (handshake.head_num) {
 		   try {
-			   handshake.head_id = cx.get_blockid_from_num(handshake.head_num);
+			   handshake.head_id = cx.block_id_from_num(handshake.head_num);
 		   }
 		   catch (const unknown_block_exception &ex) {
 			   handshake.head_num = 0;

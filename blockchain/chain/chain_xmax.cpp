@@ -163,13 +163,15 @@ namespace Xmaxplatform { namespace Chain {
 				ilog("chain_xmax first initialize.");
 				const fc::time_point init_point = initer.get_chain_init_time();;
 				const chain_timestamp init_stamp = chain_timestamp::from(init_point);
-				const chain_timestamp pre_stamp = init_stamp - chain_timestamp::create(1);
+				//const chain_timestamp pre_stamp = init_stamp - chain_timestamp::create(1);
+
+				_context->building_block = _context->block_db.start_undo_session(true);
+
+				// block genesis db.
 
 				xmax_builder_infos list;
 				list.push_back(builder_info(Config::xmax_contract_name, Config::xmax_build_public_key));
 
-
-				auto first_session = _context->block_db.start_undo_session(true);
 				// Create global properties
 				_context->block_db.create<static_config_object>([&](static_config_object &p) {
 					p.setup = initer.get_blockchain_setup();
@@ -180,7 +182,7 @@ namespace Xmaxplatform { namespace Chain {
 				_context->block_db.create<dynamic_states_object>([&](dynamic_states_object &p) {
 					p.head_block_number = 0;
 					p.head_block_id = xmax_type_block_id();
-					p.state_time = pre_stamp.time_point();
+					p.state_time = init_stamp.time_point();
 					p.total_slot = 0;
 					p.block_builder = empty_name;
 					//p.round_begin_time = chain_timestamp::zero_timestamp;
@@ -191,6 +193,13 @@ namespace Xmaxplatform { namespace Chain {
 				for (int i = 0; i < 0x10000; i++)
 					_context->block_db.create<block_summary_object>([&](block_summary_object&) {});
 
+				// start build.
+				_context->building_block->pack = std::make_shared<block_pack>();
+				_context->building_block->pack->init_default(init_stamp, Config::xmax_contract_name);
+
+				_context->block_head = _context->building_block->pack;
+
+				// genesis message.
 				auto messages = initer.prepare_data(*this, _context->block_db);
 				std::for_each(messages.begin(), messages.end(), [&](const message_xmax& m) {
 					message_output output;
@@ -202,15 +211,19 @@ namespace Xmaxplatform { namespace Chain {
 					trx.messages.push_back(m);
 				});
 
-				// default head, default block, the block must match the new header.
-				_context->block_head = std::make_shared<block_pack>();
-				_context->block_head->init_default();
-				_context->chain_log.append_block(_context->block_head->block);
-				//_context->fork_db.add_block(_context->block_head);
 
-				first_session.push();
-				uint64_t rev = first_session.revision();
+				_generate_block();
+				_sign_block(Config::xmax_build_private_key);
+				_make_fianl_block();
+				_final_block();
+
+				_context->chain_log.append_block(_context->block_head->block);
+
+				_context->building_block->push_db();
+				uint64_t rev = _context->building_block->db_session.revision();
 				_context->block_db.commit(rev);
+
+
 			} FC_CAPTURE_AND_RETHROW()
 		}
 
@@ -224,7 +237,7 @@ namespace Xmaxplatform { namespace Chain {
 
 				signed_block_ptr head = _context->chain_log.get_head();
 				pack_head = std::make_shared<block_pack>();
-				pack_head->init_by_block(head);
+				pack_head->init_by_block(head, true);
 				//_context->fork_db.add_block(pack_head);
 			}
 
@@ -273,12 +286,12 @@ namespace Xmaxplatform { namespace Chain {
         }
 
         time chain_xmax::head_block_time() const {
-            return get_dynamic_states().state_time;
+			return  _context->block_head->new_header.timestamp.time_point();
         }
 
 		uint32_t chain_xmax::head_block_num() const
 		{
-			return get_dynamic_states().head_block_number;
+			return _context->block_head->block_num;
 		}
 
 		uint32_t chain_xmax::last_irreversible_block_num() const
@@ -288,14 +301,51 @@ namespace Xmaxplatform { namespace Chain {
 
 		Xmaxplatform::Chain::xmax_type_block_id chain_xmax::head_block_id() const
 		{
-			return get_dynamic_states().head_block_id;
+			return  _context->block_head->block_id;
 		}
 
-		block_pack_ptr chain_xmax::get_head_block() const
+		signed_block_ptr chain_xmax::block_from_num(uint32_t num) const
+		{
+			try {
+				block_pack_ptr pack = _context->fork_db.get_main_block_by_num(num);
+				if (pack)
+				{
+					return pack->block;
+				}
+				signed_block_ptr block = _context->chain_log.read_by_num(num);
+
+				FC_ASSERT(block->block_num() == num, "Wrong block was read from block log.");
+
+				return block;
+
+			} FC_LOG_AND_RETHROW()
+		}
+		signed_block_ptr chain_xmax::block_from_id(xmax_type_block_id id) const
+		{
+			try {
+				// empty now. fill later.
+				return signed_block_ptr();
+			}FC_LOG_AND_RETHROW()
+		}
+		xmax_type_block_id chain_xmax::block_id_from_num(uint32_t num) const
+		{
+			if (auto ptr = block_from_num(num))
+			{
+				return ptr->id();
+			}
+			return empty_chain_id;
+		}
+
+
+
+		signed_block_ptr chain_xmax::head_block() const
+		{
+			return _context->block_head->block;
+		}
+		block_pack_ptr chain_xmax::head_block_pack() const
 		{
 			return _context->block_head;
 		}
-
 		const shared_builder_rule& _get_verifiers(const static_config_object& config, uint32_t order_slot)
 		{
 			if (order_slot < Config::blocks_per_round || config.next_builders.is_empty())
@@ -765,20 +815,24 @@ namespace Xmaxplatform { namespace Chain {
 			confirm_func(conf);
 		}
 
-		void chain_xmax::_final_block()
+		void chain_xmax::_make_fianl_block()
 		{
 			signed_block_header& building_header = _context->building_block->pack->new_header;
-
 			// make final block from block pack.
 			_context->building_block->pack->block = std::make_shared<signed_block>();
 
 			signed_block_header* final_block = _context->building_block->pack->block.get();
 
 			(*final_block) = building_header;
+		}
+
+		void chain_xmax::_final_block()
+		{
+			_make_fianl_block();
 
 			_update_final_state(*_context->building_block->pack->block);
 
-			_context->building_block->push_block();
+			_context->building_block->push_db();
 		}
 
 		void chain_xmax::_commit_block() {
@@ -1085,28 +1139,6 @@ namespace Xmaxplatform { namespace Chain {
 		void chain_xmax::check_transaction_authorization(const signed_transaction& trx, bool allow_unused_signatures /*= false*/) const
 		{
 			//TODO
-		}
-
-		xmax_type_block_id              chain_xmax::get_blockid_from_num(uint32_t block_num)const
-		{
-			try {
-				if (const auto& block = get_block_from_num(block_num))
-					return block->id();
-
-				FC_THROW_EXCEPTION(unknown_block_exception, "Could not find block");
-			} FC_CAPTURE_AND_RETHROW((block_num))
-		}
-
-		optional<signed_block>			chain_xmax::get_block_from_id(const xmax_type_block_id& id)const
-		{			
-
-			const auto& block_obj = _context->block_db.get<block_object, by_blk_id>(id);
-			return block_obj.block;
-		}
-		optional<signed_block>      chain_xmax::get_block_from_num(uint32_t num)const
-		{
-			const auto& block_obj = _context->block_db.get<block_object, by_blk_num>(num);
-			return block_obj.block;
 		}
 
 		void chain_xmax::block_summary(const signed_block& next_block)

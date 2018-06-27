@@ -39,11 +39,11 @@ namespace Chain {
 		{
 		}
 
-		signed_block_ptr	block;
+		signed_block_ptr block;
 
-		void init_default();
+		void init_default(chain_timestamp time, account_name builder);
 		void init_by_pre_pack(const block_pack& pre_pack, chain_timestamp when, account_name builder, const builder_rule& rule);
-		void init_by_block(signed_block_ptr b);
+		void init_by_block(signed_block_ptr b, bool confirmed);
 
 
 	};

@@ -208,7 +208,7 @@ namespace Xmaxplatform {
 			sync_requested.reset();
 		}
 		try {
-			fc::optional<signed_block> sb = cc.get_block_from_num(num);
+			fc::optional<signed_block> sb = *cc.block_from_num(num);
 			if (sb) {
 				msg_enqueue(*sb, trigger_send);
 				return true;

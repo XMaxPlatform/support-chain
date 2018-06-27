@@ -31,10 +31,13 @@ namespace block_detail
 
 	struct block_index
 	{
+		xmax_type_block_id id;
+		uint64_t num;
 		uint64_t pos;
 
 		block_index()
 			: pos(0)
+			, num(0)
 		{
 
 		}
@@ -79,7 +82,8 @@ namespace block_detail
 	{
 		stream_seek(stream, -sizeof(block_end_eof_type) - sizeof(block_desc), std::ios::end, code);
 	}
-	static void to_block_index(std::fstream& stream, IO_Code code)
+
+	static void to_last_block_index(std::fstream& stream, IO_Code code)
 	{
 		stream_seek(stream, -sizeof(block_index), std::ios::end, code);
 	}
@@ -120,6 +124,8 @@ namespace block_detail
 	static uint64_t write_block(std::fstream& block_stream, std::fstream& index_stream, const signed_block_ptr& blockptr)
 	{
 		auto data = fc::raw::pack(*blockptr);
+		uint32_t num = blockptr->block_num();
+		xmax_type_block_id id = blockptr->id();
 
 		block_detail::stream_end(block_stream, IO_Write);
 		block_detail::stream_end(index_stream, IO_Write);
@@ -128,12 +134,14 @@ namespace block_detail
 		uint64_t idx_pos = index_stream.tellp();
 
 		block_desc desc;
-		desc.num = blockptr->block_num();
+		desc.num = num;
 		desc.pos = pos;
 		desc.size = data.size();
 
 		block_index index;
 		index.pos = pos;
+		index.num = num;
+		index.id = id;
 
 		FC_ASSERT(idx_pos == sizeof(block_index) * (desc.num - 1),
 			"Append to index file occuring at wrong position.",
@@ -155,9 +163,9 @@ namespace block_detail
 		return pos;
 	}
 
-	static signed_block_ptr read_block(std::fstream& stream, block_desc& desc)
+	static signed_block_ptr read_block(std::fstream& stream, uint64_t pos)
 	{
-		stream_seek(stream, desc.pos, IO_Read);
+		stream_seek(stream, pos, IO_Read);
 		signed_block_ptr block_ptr = std::make_shared<signed_block>();
 
 		fc::raw::unpack(stream, block_ptr);
@@ -251,7 +259,7 @@ namespace Xmaxplatform { namespace Chain {
 				FC_ASSERT(eof == block_detail::block_end_eof, "Block log is corrupted");
 
 				block_detail::to_last_block_desc(block_stream, block_detail::IO_Read);
-				block_detail::to_block_index(index_stream, block_detail::IO_Read);
+				block_detail::to_last_block_index(index_stream, block_detail::IO_Read);
 
 				block_detail::block_desc desc;
 				block_detail::block_index index;
@@ -285,10 +293,37 @@ namespace Xmaxplatform { namespace Chain {
 
 			block_detail::read_block_desc(stream, desc);
 
-			return block_detail::read_block(stream, desc);
+			return read_block_impl(desc.pos);
+		}
+		signed_block_ptr read_block_impl(uint64_t pos) const
+		{
+			std::fstream& stream = const_cast<std::fstream&>(block_stream);
+			return block_detail::read_block(stream, pos);
 		}
 
+		signed_block_ptr read_block(uint32_t num) const
+		{
+			std::fstream& idxstream = const_cast<std::fstream&>(index_stream);
 
+			block_detail::to_last_block_index(idxstream, block_detail::IO_Read);
+
+			block_detail::block_index last_idx;
+			block_detail::read_block_index(idxstream, last_idx);
+
+			if (last_idx.num < num)
+			{
+				uint64_t bias = sizeof(block_detail::block_index) * (num - last_idx.num);
+				block_detail::block_index idx;
+				block_detail::stream_seek(idxstream, -bias, std::ios::end, block_detail::IO_Read);
+				block_detail::read_block_index(idxstream, idx);
+				return read_block_impl(idx.pos);
+			}
+			else if (last_idx.num == num)
+			{
+				read_block_impl(last_idx.pos);
+			}
+			return signed_block_ptr();
+		}
 	};
 
 
@@ -312,6 +347,11 @@ namespace Xmaxplatform { namespace Chain {
 	signed_block_ptr chain_stream::get_head() const
 	{
 		return stream_impl->head_block;
+	}
+
+	signed_block_ptr chain_stream::read_by_num(uint32_t num) const
+	{
+		return stream_impl->read_block(num);
 	}
 }
 }

@@ -309,8 +309,6 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 	{
 		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
 
-		auto head = chain.get_head_block();
-
 		uint32_t order_slot = chain.get_order_slot_at_time(block->timestamp);
 
 		const builder_rule& verifiers = chain.get_verifiers_by_order(order_slot);
@@ -346,7 +344,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 	void blockbuilder_plugin_impl::confirmation_block_self()
 	{
 		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
-		block_pack_ptr pack_ptr = chain.get_head_block();
+		block_pack_ptr pack_ptr = chain.head_block_pack();
 
 		if (!pack_ptr)
 		{

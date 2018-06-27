@@ -211,14 +211,14 @@ namespace Chain_APIs{
 	//--------------------------------------------------
 	Xmaxplatform::Chain_APIs::read_only::get_block_results read_only::get_block(const get_block_params& params) const {
 		try {
-			if (auto block = _chain.get_block_from_id(fc::json::from_string(params.block_num_or_id).as<Chain::xmax_type_block_id>()))
+			if (auto block = _chain.block_from_id(fc::json::from_string(params.block_num_or_id).as<Chain::xmax_type_block_id>()))
 				return *block;
 		}
 		catch (fc::bad_cast_exception) {/* do nothing */ }
 		catch (std::out_of_range) {/* do nothing */ }
 
 		try {
-			if (auto block = _chain.get_block_from_num(fc::to_uint64(params.block_num_or_id)))
+			if (auto block = _chain.block_from_num(fc::to_uint64(params.block_num_or_id)))
 				return *block;
 		}
 		catch (fc::bad_cast_exception) {/* do nothing */ }

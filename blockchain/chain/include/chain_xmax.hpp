@@ -66,11 +66,17 @@ namespace Xmaxplatform { namespace Chain {
        const static_config_object&          get_static_config()const;
        const dynamic_states_object&         get_dynamic_states()const;
 
-       time             head_block_time() const;
-	   uint32_t			head_block_num() const;
-	   uint32_t			last_irreversible_block_num() const;
-	   xmax_type_block_id    head_block_id()const;
-	   block_pack_ptr get_head_block() const;
+	   signed_block_ptr		head_block() const;
+	   block_pack_ptr		head_block_pack() const;
+
+       time					head_block_time() const;
+	   uint32_t				head_block_num() const;
+	   xmax_type_block_id	head_block_id()const;
+	   uint32_t				last_irreversible_block_num() const;
+
+	   signed_block_ptr		block_from_num(uint32_t num) const;
+	   signed_block_ptr		block_from_id(xmax_type_block_id id) const;
+	   xmax_type_block_id	block_id_from_num(uint32_t num) const;
 
 	   const builder_info&         get_block_builder(uint32_t delta_slot) const;
 	   const builder_info&         get_order_builder(uint32_t order_slot) const;
@@ -114,6 +120,7 @@ namespace Xmaxplatform { namespace Chain {
 	   void _start_build(chain_timestamp when);
        void _generate_block();
 	   void _sign_block(const private_key_type& sign_private_key);
+	   void _make_fianl_block();
 	   void _validate_block(const signed_block_ptr next_block);
 	   void _broadcast_confirmation(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func);
 	   void _final_block();
@@ -170,9 +177,6 @@ namespace Xmaxplatform { namespace Chain {
 	   }
 
    public:
-	   xmax_type_block_id               get_blockid_from_num(uint32_t block_num)const;
-	   optional<signed_block>			get_block_from_id(const xmax_type_block_id& id)const;
-	   optional<signed_block>      get_block_from_num(uint32_t num)const;
 
        void build_block(
                chain_timestamp when,

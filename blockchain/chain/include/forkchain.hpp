@@ -27,6 +27,8 @@ namespace Chain {
 
 		block_pack_ptr get_block(xmax_type_block_id block_id) const;
 
+		block_pack_ptr get_main_block_by_num(uint32_t num) const;
+
 		block_pack_ptr get_head() const;
 
 		template<typename T, typename F>

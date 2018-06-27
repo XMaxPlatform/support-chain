@@ -20,6 +20,8 @@ namespace Xmaxplatform { namespace Chain {
 
 		signed_block_ptr get_head() const;
 
+		signed_block_ptr read_by_num(uint32_t num) const;
+
 	private:
 		std::unique_ptr<chain_stream_impl> stream_impl;
 

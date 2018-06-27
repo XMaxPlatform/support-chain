@@ -41,7 +41,7 @@ namespace Chain {
 	using boost::multi_index_container;
 
 	struct by_block_id;
-	struct by_oldest_block;
+	struct by_number;
 	struct by_pre_id;
 	struct by_longest_num;
 
@@ -50,11 +50,12 @@ namespace Chain {
 		indexed_by<
 			hashed_unique< tag<by_block_id>, member<block_raw, xmax_type_block_id, &block_raw::block_id>, std::hash<xmax_type_block_id> >,
 			ordered_non_unique< tag<by_pre_id>, const_mem_fun<block_raw, const xmax_type_block_id&, &block_raw::prev_id> >,
-			ordered_non_unique < tag<by_oldest_block>,
+			ordered_non_unique < tag<by_number>,
 				composite_key< block_raw,
-					member<block_raw, uint32_t, &block_raw::block_num>
+					member<block_raw, uint32_t, &block_raw::block_num>,
+					member<block_raw, bool, &block_raw::main_chain>
 				>,
-				composite_key_compare< std::less<uint32_t> >
+				composite_key_compare< std::less<uint32_t>, std::greater<bool>  >
 			>,
 			ordered_non_unique< tag<by_longest_num>,
 				composite_key<block_raw,
@@ -81,6 +82,18 @@ namespace Chain {
 				return *itr;
 			return block_pack_ptr();
 		}
+
+		block_pack_ptr get_main_block_by_num(uint32_t num) const
+		{
+			auto& idx = packs.get<by_number>();
+			const auto first = idx.lower_bound(num);
+
+			if (first == idx.end() || (*first)->block_num != num || (*first)->main_chain != true)
+				return block_pack_ptr(); //block not found.
+
+			return *first;
+		}
+
 		void add_block(block_pack_ptr block_pack)
 		{
 			auto result = packs.insert(block_pack);
@@ -90,8 +103,10 @@ namespace Chain {
 
 			head = *packs.get<by_longest_num>().begin();
 
-			auto oldest = *packs.get<by_oldest_block>().begin();
-			// check update confirmed block.
+			auto oldest = *packs.get<by_number>().begin();
+
+
+			// check confirmed block data and update.
 
 			if (oldest->block_num < head->last_confired_num)
 			{
@@ -130,11 +145,11 @@ namespace Chain {
 			};
 		}
 
-		void on_last_confirmed_grow(xmax_type_block_id last_confirmed_id,uint32_t last_confirmed_num)
+		void on_last_confirmed_grow(xmax_type_block_id last_confirmed_id, uint32_t last_confirmed_num)
 		{
 			std::vector<xmax_type_block_id> remlist;
 			std::vector<xmax_type_block_id> confiremdlist;
-			auto& idx = packs.get<by_oldest_block>();
+			auto& idx = packs.get<by_number>();
 
 			auto it = idx.begin();
 			for (auto it = idx.begin(); (it != idx.end() && (*it)->block_num < last_confirmed_num); ++it)
@@ -146,6 +161,9 @@ namespace Chain {
 				}
 			}
 
+			confiremdlist.push_back(last_confirmed_id);
+			remlist.push_back(last_confirmed_id);
+
 			for (auto& it : confiremdlist)
 			{
 				auto ptr = get_block(it);
@@ -153,6 +171,7 @@ namespace Chain {
 				irreversible(ptr);
 			}
 
+			// remove all confirmed block and bad fork block.
 			for (auto& it : remlist)
 			{
 				auto itr = packs.find(it);
@@ -256,6 +275,11 @@ namespace Chain {
 	block_pack_ptr forkdatabase::get_block(xmax_type_block_id block_id) const
 	{
 		return _context->get_block(block_id);
+	}
+
+	block_pack_ptr forkdatabase::get_main_block_by_num(uint32_t num) const
+	{
+		return _context->get_main_block_by_num(num);
 	}
 
 	block_pack_ptr forkdatabase::get_head() const

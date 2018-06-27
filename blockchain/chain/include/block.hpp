@@ -69,7 +69,7 @@ namespace Xmaxplatform { namespace Chain {
 
     } } // Xmaxplatform::Chain
 
-FC_REFLECT(Xmaxplatform::Chain::block_header, (previous)(timestamp)(transaction_merkle_root)(builder))
+FC_REFLECT(Xmaxplatform::Chain::block_header, (previous)(timestamp)(transaction_merkle_root)(builder)(next_builders))
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block_header, (Xmaxplatform::Chain::block_header), (builder_signature))
 FC_REFLECT(Xmaxplatform::Chain::thread, )
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block, (Xmaxplatform::Chain::signed_block_header), (threads))

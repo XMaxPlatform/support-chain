@@ -21,7 +21,7 @@ namespace Xmaxplatform { namespace Chain {
 		database::session					db_session;
 		block_pack_ptr						pack;
 
-		void push_block()
+		void push_db()
 		{
 			db_session.push();
 		}
