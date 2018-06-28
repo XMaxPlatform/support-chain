@@ -33,6 +33,11 @@ void handle_xmax_unregbuilder(Chain::message_context_xmax& context);
 void handle_xmax_regproxy(Chain::message_context_xmax& context);
 void handle_xmax_unregproxy(Chain::message_context_xmax& context);
 
+//ERC20, ERC721 Relative interfaces
+void handle_xmax_issuetoken(Chain::message_context_xmax& context);
+void handle_xmax_revoketoken(Chain::message_context_xmax& context);
+
+
 } // namespace Native_contract
 } // namespace Xmaxplatform
 
