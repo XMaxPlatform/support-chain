@@ -66,7 +66,7 @@ namespace Xmaxplatform { namespace Chain {
 
 		map< account_name, map<handler_key, msg_handler> >  message_handlers;
 
-		map<xmax_type_transaction_id, transaction_request_ptr>         cached_transactions; // if transactions pushed in noblock time, it will be cache.
+		vector<transaction_request_ptr>         pending_transactions;
 
 
 		chain_context(const chain_xmax::xmax_config& _config, uint32_t _txn_depth_limit)
@@ -607,37 +607,19 @@ namespace Xmaxplatform { namespace Chain {
 		Xmaxplatform::Chain::processed_transaction chain_xmax::_push_transaction(transaction_request_ptr request)
 		{
 
-			//FC_ASSERT(_context->pending_transactions.size() < 1000, "too many pending transactions, try again later");
+			FC_ASSERT(_context->pending_transactions.size() < 1000, "too many pending transactions, try again later");
 
 			auto temp_session = _context->block_db.start_undo_session(true);
 			validate_referenced_accounts(request->signed_trx);
 			check_transaction_authorization(request->signed_trx);
 			auto pt = apply_transaction(request->signed_trx);
-			//_context->pending_transactions.push_back(request);
+			_context->pending_transactions.push_back(request);
 
 			temp_session.squash();
 
 			on_pending_transaction(request->signed_trx);
 
 			return pt;
-		}
-
-		transaction_response_ptr chain_xmax::push_transaction(transaction_request_ptr request)
-		{
-			try {
-				validate_referenced_accounts(request->signed_trx);
-				check_transaction_authorization(request->signed_trx);
-
-				if (!_context->building_block.valid())
-				{
-					_context->cached_transactions[request->signed_trx.id()] = request;
-					return std::make_shared<transaction_response>();
-				}
-
-				message_context_xmax xmax_ctx(*this, _context->block_db, trx, message, code);
-
-
-			} FC_CAPTURE_AND_RETHROW((request))
 		}
 		
 		void chain_xmax::push_confirmation(const block_confirmation& conf)
