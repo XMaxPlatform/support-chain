@@ -40,6 +40,7 @@ namespace Chain {
 		}
 
 		signed_block_ptr block;
+		vector<transaction_request_ptr>	requests;
 
 		void init_default(chain_timestamp time, account_name builder);
 		void init_by_pre_pack(const block_pack& pre_pack, chain_timestamp when, account_name builder, const builder_rule& rule);
