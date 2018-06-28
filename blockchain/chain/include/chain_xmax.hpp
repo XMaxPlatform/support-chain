@@ -22,6 +22,7 @@
 #include <objects/account_object.hpp>
 #include <transaction.hpp>
 #include <transaction_request.hpp>
+#include <transaction_response.hpp>
 #include <message_context_xmax.hpp>
 
 namespace Xmaxplatform { namespace Chain {
@@ -100,6 +101,8 @@ namespace Xmaxplatform { namespace Chain {
 
 	   processed_transaction push_transaction(const signed_transaction& trx, uint32_t skip = Config::skip_nothing);
 	   processed_transaction _push_transaction(transaction_request_ptr request);
+
+	   transaction_response_ptr push_transaction(transaction_request_ptr request);
 
 	   void push_confirmation(const block_confirmation& conf);
 
