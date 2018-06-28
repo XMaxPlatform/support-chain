@@ -220,6 +220,7 @@ namespace Xmaxplatform { namespace Chain {
 				uint32_t block_num = _context->block_head->block_num;
 				_context->chain_log.append_block(_context->block_head->block);				
 				_context->building_block->push_db();
+				_context->building_block.reset();
 				_context->block_db.commit(block_num);
 				_context->block_db.set_revision(block_num);
 
@@ -831,7 +832,7 @@ namespace Xmaxplatform { namespace Chain {
 
 			_update_final_state(*_context->building_block->pack->block);
 
-			_context->building_block->push_db();
+			block_summary(*_context->building_block->pack->block);
 		}
 
 		void chain_xmax::_commit_block() {
@@ -843,9 +844,9 @@ namespace Xmaxplatform { namespace Chain {
 
 				_context->fork_db.add_block(_context->building_block->pack);
 				_context->block_head = _context->fork_db.get_head();
-				//block_summary(*new_block);
 
-
+				_context->building_block->push_db();
+				_context->building_block.reset();
 
 			} FC_CAPTURE_AND_RETHROW((new_block->block_num()))
 		
@@ -1216,12 +1217,6 @@ namespace Xmaxplatform { namespace Chain {
 			auto account = _context->block_db.find<account_object, by_name>(name);
 			FC_ASSERT(account != nullptr, "Account not found: ${name}", ("name", name));
 		}
-
-		const signed_block& chain_xmax::get_signedblock() const
-		{
-			return *_context->building_block->pack->block;
-		}
-
 
 		chain_init::~chain_init() {}
 

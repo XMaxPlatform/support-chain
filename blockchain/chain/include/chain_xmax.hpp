@@ -105,8 +105,6 @@ namespace Xmaxplatform { namespace Chain {
 
 	   flat_set<public_key_type> get_required_keys(const signed_transaction& transaction, const flat_set<public_key_type>& candidateKeys)const;
 
-	   const signed_block& get_signedblock() const;
-
    private:
 
 	   std::unique_ptr<chain_context>   _context;

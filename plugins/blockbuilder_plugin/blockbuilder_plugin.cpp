@@ -301,7 +301,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
        
 		chainnet_plugin& netPlugin = app().get_plugin<chainnet_plugin>();
-		netPlugin.broadcast_block( chain.get_signedblock() );
+		netPlugin.broadcast_block( *chain.head_block() );
         return block_build_condition::generated;
     }
 
