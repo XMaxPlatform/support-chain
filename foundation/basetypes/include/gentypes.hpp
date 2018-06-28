@@ -632,6 +632,80 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
+    struct issue_token_erc20 { 
+        issue_token_erc20() = default;
+        issue_token_erc20(const account_name& creator, const authority& owner, const authority& active, const authority& recovery, const asset_symbol& name, const asset& total_balance)
+           : creator(creator), owner(owner), active(active), recovery(recovery), name(name), total_balance(total_balance) {}
+
+        account_name                     creator;
+        authority                        owner;
+        authority                        active;
+        authority                        recovery;
+        asset_symbol                     name;
+        asset                            total_balance;
+    };
+
+    template<> struct get_struct<issue_token_erc20> { 
+        static const struct_t& type() { 
+           static struct_t result = { "issue_token_erc20", "", {
+                {"creator", "account_name"},
+                {"owner", "authority"},
+                {"active", "authority"},
+                {"recovery", "authority"},
+                {"name", "asset_symbol"},
+                {"total_balance", "asset"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct issue_token_erc721 { 
+        issue_token_erc721() = default;
+        issue_token_erc721(const account_name& creator, const authority& owner, const authority& active, const authority& recovery, const asset_symbol& name)
+           : creator(creator), owner(owner), active(active), recovery(recovery), name(name) {}
+
+        account_name                     creator;
+        authority                        owner;
+        authority                        active;
+        authority                        recovery;
+        asset_symbol                     name;
+    };
+
+    template<> struct get_struct<issue_token_erc721> { 
+        static const struct_t& type() { 
+           static struct_t result = { "issue_token_erc721", "", {
+                {"creator", "account_name"},
+                {"owner", "authority"},
+                {"active", "authority"},
+                {"recovery", "authority"},
+                {"name", "asset_symbol"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct revoke_token { 
+        revoke_token() = default;
+        revoke_token(const asset_symbol& name, const permission_name& permission)
+           : name(name), permission(permission) {}
+
+        asset_symbol                     name;
+        permission_name                  permission;
+    };
+
+    template<> struct get_struct<revoke_token> { 
+        static const struct_t& type() { 
+           static struct_t result = { "revoke_token", "", {
+                {"name", "asset_symbol"},
+                {"permission", "permission_name"},
+              }
+           };
+           return result;
+         }
+    };
+
 }} // namespace Xmaxplatform::Basetypes
 FC_REFLECT( Xmaxplatform::Basetypes::account_permission               , (account)(permission) )
 FC_REFLECT( Xmaxplatform::Basetypes::message                          , (code)(type)(authorization)(data) )
@@ -661,3 +735,6 @@ FC_REFLECT( Xmaxplatform::Basetypes::regbuilder                       , (builder
 FC_REFLECT( Xmaxplatform::Basetypes::unregbuilder                     , (builder) )
 FC_REFLECT( Xmaxplatform::Basetypes::regproxy                         , (proxy) )
 FC_REFLECT( Xmaxplatform::Basetypes::unregproxy                       , (proxy) )
+FC_REFLECT( Xmaxplatform::Basetypes::issue_token_erc20                , (creator)(owner)(active)(recovery)(name)(total_balance) )
+FC_REFLECT( Xmaxplatform::Basetypes::issue_token_erc721               , (creator)(owner)(active)(recovery)(name) )
+FC_REFLECT( Xmaxplatform::Basetypes::revoke_token                     , (name)(permission) )
