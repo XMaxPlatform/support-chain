@@ -233,6 +233,20 @@ void handle_xmax_regproxy(message_context_xmax& context)    {
 void handle_xmax_unregproxy(message_context_xmax& context)    {
     xmax_voting::unreg_proxy(context);
 }
-    } // namespace Native
+
+
+//--------------------------------------------------
+void handle_xmax_issuetoken(Chain::message_context_xmax& context)
+{
+
+}
+
+//--------------------------------------------------
+void handle_xmax_revoketoken(Chain::message_context_xmax& context)
+{
+
+}
+
+	} // namespace Native
 } // namespace Xmaxplatform
 
