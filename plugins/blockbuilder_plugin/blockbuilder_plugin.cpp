@@ -387,4 +387,11 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 		chain.push_confirmation(msg);
 	}
 
+	Chain::vector<Chain::signed_block> blockbuilder_plugin::get_sync_blocklist(const Chain::xmax_type_transaction_id& lastid)
+	{
+		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
+		std::vector<signed_block> blocklist = chain.get_syncblock_fromid(lastid);		
+		return blocklist;
+	}
+
 } // namespace Xmaxplatform

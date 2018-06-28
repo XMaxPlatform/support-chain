@@ -151,6 +151,11 @@ namespace Xmaxplatform {
       uint32_t end_block;
    };
 
+   struct request_block_message 
+   {
+	   xmax_type_transaction_id  last_irreversible_block_id;
+   };
+
    using net_message = static_variant<handshake_message,
                                       leave_message,
                                       time_message,
@@ -160,26 +165,29 @@ namespace Xmaxplatform {
                                       block_summary_message,
 									  Chain::signed_transaction,
                                       signed_block,
-									  block_confirmation>;
+									  signed_block_list,
+									  block_confirmation,
+									  request_block_message>;
 
 } // namespace Xmaxplatform
 
-FC_REFLECT(Xmaxplatform::select_ids<fc::sha256>, (mode)(pending)(ids) )
+FC_REFLECT(Xmaxplatform::select_ids<fc::sha256>, (mode)(pending)(ids))
 FC_REFLECT(Xmaxplatform::handshake_message,
-            (network_version)(chain_id)(node_id)(key)
-            (time)(token)(sig)(p2p_address)
-            (last_irreversible_block_num)(last_irreversible_block_id)
-            (head_num)(head_id)
-            (os)(agent)(generation) )
-FC_REFLECT(Xmaxplatform::leave_message, (reason)(node_id) )
-FC_REFLECT(Xmaxplatform::time_message, (org)(rec)(xmt)(dst) )
-FC_REFLECT(Xmaxplatform::processed_trans_summary, (id)(outmsgs) )
-FC_REFLECT(Xmaxplatform::thread_ids, (gen_trx)(user_trx) )
-FC_REFLECT(Xmaxplatform::block_summary_message, (block_header)(trx_ids) )
-FC_REFLECT(Xmaxplatform::notice_message, (known_trx)(known_blocks) )
-FC_REFLECT(Xmaxplatform::request_message, (req_trx)(req_blocks) )
-FC_REFLECT(Xmaxplatform::sync_request_message, (start_block)(end_block) )
-
+(network_version)(chain_id)(node_id)(key)
+(time)(token)(sig)(p2p_address)
+(last_irreversible_block_num)(last_irreversible_block_id)
+(head_num)(head_id)
+(os)(agent)(generation))
+FC_REFLECT(Xmaxplatform::leave_message, (reason)(node_id))
+FC_REFLECT(Xmaxplatform::time_message, (org)(rec)(xmt)(dst))
+FC_REFLECT(Xmaxplatform::processed_trans_summary, (id)(outmsgs))
+FC_REFLECT(Xmaxplatform::thread_ids, (gen_trx)(user_trx))
+FC_REFLECT(Xmaxplatform::block_summary_message, (block_header)(trx_ids))
+FC_REFLECT(Xmaxplatform::notice_message, (known_trx)(known_blocks))
+FC_REFLECT(Xmaxplatform::request_message, (req_trx)(req_blocks))
+FC_REFLECT(Xmaxplatform::sync_request_message, (start_block)(end_block))
+FC_REFLECT(Xmaxplatform::signed_block_list, (blockList));
+FC_REFLECT(Xmaxplatform::request_block_message, (last_irreversible_block_id));
 /**
  *
 Goals of Network Code

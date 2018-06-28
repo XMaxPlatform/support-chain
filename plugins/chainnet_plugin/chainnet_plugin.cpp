@@ -205,6 +205,8 @@ namespace Xmaxplatform {
       void handle_message( connection_ptr c, const Chain::signed_transaction &msg);
       void handle_message( connection_ptr c, const signed_block &msg);
 	  void handle_message(connection_ptr c, const block_confirmation &msg);
+	  void handle_message(connection_ptr c, const signed_block_list &msg);
+	  void handle_message(connection_ptr c, const request_block_message &msg);
 
       void start_conn_timer( );
       void start_txn_timer( );
@@ -568,8 +570,9 @@ namespace Xmaxplatform {
 		   fc_dlog(logger, "liblock_num = ${ln} peer_liblock = ${pl}", ("ln", liblock_num)("pl", peer_liblock));
 
 		   if (peer_liblock <= liblock_num && peer_liblock > 0) {
+			   xmax_type_block_id peer_lib_id;
 			   try {
-				   xmax_type_block_id peer_lib_id = cc.block_id_from_num(peer_liblock);
+				   peer_lib_id = cc.block_id_from_num(peer_liblock);
 				   on_fork = (msg.last_irreversible_block_id != peer_lib_id);
 			   }
 			   catch (const unknown_block_exception &ex) {
@@ -582,7 +585,9 @@ namespace Xmaxplatform {
 			   }
 			   if (on_fork) {
 				   elog("Peer chain is forked");
-				   c->msg_enqueue(leave_message(forked));
+				   request_block_message rbm;
+				   rbm.last_irreversible_block_id = peer_lib_id;
+				   c->msg_enqueue(rbm);
 				   return;
 			   }
 		   }
@@ -763,6 +768,23 @@ namespace Xmaxplatform {
 
    }
 
+   void chainnet_plugin_impl::handle_message(connection_ptr c, const signed_block_list &msg)
+   {
+	   for (const signed_block sb : msg.blockList)
+	   {
+		   app().get_plugin<blockbuilder_plugin>().on_recv_message(sb);
+	   }
+   }
+
+   void chainnet_plugin_impl::handle_message(connection_ptr c, const request_block_message &msg)
+   {
+	   Chain::vector<Chain::signed_block> blockList = app().get_plugin<blockbuilder_plugin>().get_sync_blocklist(msg.last_irreversible_block_id);
+	   signed_block_list sblist;
+	   sblist.blockList = std::move(blockList);
+	   c->send_signedblocklist(sblist);
+   }
+
+
    void chainnet_plugin_impl::start_conn_timer( ) {
       connector_check->expires_from_now( connector_period);
       connector_check->async_wait( [&](boost::system::error_code ec) {
@@ -882,6 +904,7 @@ namespace Xmaxplatform {
 	   }
    }
 
+  
    bool chainnet_plugin_impl::authenticate_peer(const handshake_message& msg) const {
       //TODO
       return true;
@@ -1086,7 +1109,7 @@ namespace Xmaxplatform {
 
    void chainnet_plugin::broadcast_block( const Chain::signed_block &sb) {
       fc_dlog(my->logger, "broadcasting block #${num}",("num",sb.block_num()) );
-      my->broadcast_block_impl( sb);
+      my->broadcast_block_impl(sb);
    }
 
    void chainnet_plugin::broadcast_confirm(const Chain::block_confirmation& confirm)

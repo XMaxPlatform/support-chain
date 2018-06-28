@@ -1218,6 +1218,32 @@ namespace Xmaxplatform { namespace Chain {
 			FC_ASSERT(account != nullptr, "Account not found: ${name}", ("name", name));
 		}
 
+
+		vector<signed_block> chain_xmax::get_syncblock_fromid(const Chain::xmax_type_transaction_id& lastid)
+		{
+			vector<signed_block> blockList;
+			uint32_t currNum = _context->block_head->block_num;
+			do 
+			{	
+				xmax_type_block_id currId = block_id_from_num(currNum);
+				if (currId != lastid)
+				{
+					signed_block_ptr pSb = block_from_num(currNum);
+					blockList.push_back(*pSb);
+				}
+				else
+				{
+					break;
+				}
+			} while (currNum--);
+
+			FC_ASSERT(blockList.size() > 0);
+
+			return blockList;
+			
+		}
+
+
 		chain_init::~chain_init() {}
 
 } }
