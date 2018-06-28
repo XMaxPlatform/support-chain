@@ -209,6 +209,7 @@ namespace Xmaxplatform {
 		void send_handshake();
 		void send_signedblock(const Chain::signed_block &sb);
 		void send_blockconfirm(const Chain::block_confirmation& confirm);
+		void send_signedblocklist(const Chain::signed_block_list& blockList);
 
 		/** \name Peer Timestamps
 		*  Time message handling

@@ -47,6 +47,12 @@ namespace Xmaxplatform { namespace Chain {
             xmax_type_merkle_root calculate_merkle_root() const;
             vector<vector<thread>> threads;
         };
+
+		struct signed_block_list
+		{
+			Chain::vector<signed_block>	blockList;
+		};
+
 		using signed_block_ptr = std::shared_ptr<signed_block>;
 
 		struct block_confirmation_header

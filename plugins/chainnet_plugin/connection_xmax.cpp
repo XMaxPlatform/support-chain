@@ -140,6 +140,12 @@ namespace Xmaxplatform {
 
 	}
 
+	void connection_xmax::send_signedblocklist(const Chain::signed_block_list& blockList)
+	{
+		fc_dlog(logger, "send signedblocklist to ${ep}\n", ("ep", peer_addr));
+		msg_enqueue(blockList);
+	}
+
 	char* connection_xmax::convert_tstamp(const tstamp& t)
 	{
 		const long long NsecPerSec{ 1000000000 };
