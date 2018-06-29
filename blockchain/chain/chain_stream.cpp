@@ -320,7 +320,7 @@ namespace Xmaxplatform { namespace Chain {
 			}
 			else if (last_idx.num == num)
 			{
-				read_block_impl(last_idx.pos);
+				return read_block_impl(last_idx.pos);
 			}
 			return signed_block_ptr();
 		}
