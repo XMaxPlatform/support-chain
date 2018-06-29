@@ -306,15 +306,15 @@ namespace Xmaxplatform { namespace Chain {
 			std::fstream& idxstream = const_cast<std::fstream&>(index_stream);
 
 			block_detail::to_last_block_index(idxstream, block_detail::IO_Read);
-
 			block_detail::block_index last_idx;
 			block_detail::read_block_index(idxstream, last_idx);
 
 			if (last_idx.num > num)
 			{
-				uint64_t bias = sizeof(block_detail::block_index) * (num - last_idx.num);
+				block_detail::to_last_block_index(idxstream, block_detail::IO_Read);
+				uint64_t bias = sizeof(block_detail::block_index) * (last_idx.num - num);
 				block_detail::block_index idx;
-				block_detail::stream_seek(idxstream, -bias, std::ios::end, block_detail::IO_Read);
+				block_detail::stream_seek(idxstream, -bias, std::ios::cur, block_detail::IO_Read);
 				block_detail::read_block_index(idxstream, idx);
 				return read_block_impl(idx.pos);
 			}
