@@ -159,6 +159,7 @@ add_subdirectory( blockchain )
 add_subdirectory( plugins )
 add_subdirectory( launch )
 add_subdirectory( contracts_cpp )
+add_subdirectory( tests )
 
 if(WIN32 AND NOT ("${OPENSSL_ROOT_DIR}" STREQUAL ""))    
 
