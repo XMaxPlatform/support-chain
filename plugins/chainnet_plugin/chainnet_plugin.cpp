@@ -238,6 +238,10 @@ namespace Xmaxplatform {
 
       static const fc::string logger_name;
       static fc::logger logger;
+
+	protected:
+	   void _send_blocklist_impl(connection_ptr c, const request_block_message &msg);
+
    };
 
    template<class enum_type, class=typename std::enable_if<std::is_enum<enum_type>::value>::type>
@@ -566,34 +570,19 @@ namespace Xmaxplatform {
 			   return;
 		   }
 
-		   bool on_fork = false;
 		   fc_dlog(logger, "liblock_num = ${ln} peer_liblock = ${pl}", ("ln", liblock_num)("pl", peer_liblock));
 
-		   if (peer_liblock <= liblock_num && peer_liblock > 0) {
-			   xmax_type_block_id peer_lib_id;
+		   if (peer_liblock < liblock_num) {
 			   try {
-				   peer_lib_id = cc.block_id_from_num(peer_liblock);
-				   on_fork = (msg.last_irreversible_block_id != peer_lib_id);
+				   request_block_message rbm;
+				   rbm.last_irreversible_block_num = peer_liblock;
+				   _send_blocklist_impl(c, rbm);
 			   }
 			   catch (const unknown_block_exception &ex) {
 				   wlog("peer last irreversible block ${pl} is unknown", ("pl", peer_liblock));
-				   on_fork = true;
 			   }
 			   catch (...) {
 				   wlog("caught an exception getting block id for ${pl}", ("pl", peer_liblock));
-				   on_fork = true;
-			   }
-			   if (on_fork) {
-				   elog("Peer chain is forked");
-
-				   if (msg.last_irreversible_block_num > cc.last_irreversible_block_num())
-				   {
-					   request_block_message rbm;
-					   rbm.last_irreversible_block_id = peer_lib_id;
-					   c->msg_enqueue(rbm);
-					   return;
-				   }
-				  
 			   }
 		   }
 
@@ -783,12 +772,16 @@ namespace Xmaxplatform {
 
    void chainnet_plugin_impl::handle_message(connection_ptr c, const request_block_message &msg)
    {
-	   Chain::vector<Chain::signed_block> blockList = app().get_plugin<blockbuilder_plugin>().get_sync_blocklist(msg.last_irreversible_block_id);
+	   _send_blocklist_impl(c, msg);
+   }
+
+   void chainnet_plugin_impl::_send_blocklist_impl(connection_ptr c, const request_block_message &msg)
+   {
+	   Chain::vector<Chain::signed_block> blockList = app().get_plugin<blockbuilder_plugin>().get_sync_blocklist(msg.last_irreversible_block_num);
 	   signed_block_list sblist;
 	   sblist.blockList = std::move(blockList);
 	   c->send_signedblocklist(sblist);
    }
-
 
    void chainnet_plugin_impl::start_conn_timer( ) {
       connector_check->expires_from_now( connector_period);

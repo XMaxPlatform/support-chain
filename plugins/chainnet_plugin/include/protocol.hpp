@@ -153,7 +153,7 @@ namespace Xmaxplatform {
 
    struct request_block_message 
    {
-	   xmax_type_transaction_id  last_irreversible_block_id;
+	   uint32_t  last_irreversible_block_num;
    };
 
    using net_message = static_variant<handshake_message,
@@ -187,7 +187,7 @@ FC_REFLECT(Xmaxplatform::notice_message, (known_trx)(known_blocks))
 FC_REFLECT(Xmaxplatform::request_message, (req_trx)(req_blocks))
 FC_REFLECT(Xmaxplatform::sync_request_message, (start_block)(end_block))
 FC_REFLECT(Xmaxplatform::signed_block_list, (blockList));
-FC_REFLECT(Xmaxplatform::request_block_message, (last_irreversible_block_id));
+FC_REFLECT(Xmaxplatform::request_block_message, (last_irreversible_block_num));
 /**
  *
 Goals of Network Code

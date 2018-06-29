@@ -37,7 +37,7 @@ public:
    void on_recv_message(const Chain::signed_block &msg);
    void on_recv_message(const Chain::block_confirmation& msg);
 
-   Chain::vector<Chain::signed_block> get_sync_blocklist(const Chain::xmax_type_transaction_id& lastid);
+   Chain::vector<Chain::signed_block> get_sync_blocklist(const uint32_t& lastnum);
 
 public:
 
