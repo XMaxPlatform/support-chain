@@ -585,10 +585,15 @@ namespace Xmaxplatform {
 			   }
 			   if (on_fork) {
 				   elog("Peer chain is forked");
-				   request_block_message rbm;
-				   rbm.last_irreversible_block_id = peer_lib_id;
-				   c->msg_enqueue(rbm);
-				   return;
+
+				   if (msg.last_irreversible_block_num > cc.last_irreversible_block_num())
+				   {
+					   request_block_message rbm;
+					   rbm.last_irreversible_block_id = peer_lib_id;
+					   c->msg_enqueue(rbm);
+					   return;
+				   }
+				  
 			   }
 		   }
 
@@ -892,7 +897,10 @@ namespace Xmaxplatform {
    void chainnet_plugin_impl::broadcast_block_impl( const Chain::signed_block &sb) {
 	   for (auto con : connections)
 	   {
-		   con->send_signedblock(sb);
+		   if (con->sent_handshake_count > 0)
+		   {
+			   con->send_signedblock(sb);
+		   }		   
 	   }
    }
 
