@@ -310,7 +310,7 @@ namespace Xmaxplatform { namespace Chain {
 			block_detail::block_index last_idx;
 			block_detail::read_block_index(idxstream, last_idx);
 
-			if (last_idx.num < num)
+			if (last_idx.num > num)
 			{
 				uint64_t bias = sizeof(block_detail::block_index) * (num - last_idx.num);
 				block_detail::block_index idx;
