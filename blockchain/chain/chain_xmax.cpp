@@ -799,6 +799,8 @@ namespace Xmaxplatform { namespace Chain {
 
 				FC_ASSERT(v_id == id, "bad block");
 
+				_context->building_block->pack->block_id = v_id;
+
 			} FC_CAPTURE_AND_RETHROW((next_block))
 		}
 
