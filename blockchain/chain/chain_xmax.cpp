@@ -1219,14 +1219,14 @@ namespace Xmaxplatform { namespace Chain {
 		}
 
 
-		vector<signed_block> chain_xmax::get_syncblock_fromid(const Chain::xmax_type_transaction_id& lastid)
+		vector<signed_block> chain_xmax::get_syncblock_from_lastnum(const uint32_t& lastnum)
 		{
 			vector<signed_block> blockList;
 			uint32_t currNum = _context->block_head->block_num;
 			do 
 			{	
-				xmax_type_block_id currId = block_id_from_num(currNum);
-				if (currId != lastid)
+	
+				if (lastnum < currNum)
 				{
 					signed_block_ptr pSb = block_from_num(currNum);
 					blockList.push_back(*pSb);
