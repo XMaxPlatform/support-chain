@@ -313,8 +313,8 @@ namespace Xmaxplatform { namespace Chain {
 					return pack->block;
 				}
 				signed_block_ptr block = _context->chain_log.read_by_num(num);
-
-				FC_ASSERT(block->block_num() == num, "Wrong block was read from block log.");
+				uint32_t blockNum = block->block_num();
+				FC_ASSERT(blockNum == num, "Wrong block was read from block log.");
 
 				return block;
 
@@ -1223,19 +1223,21 @@ namespace Xmaxplatform { namespace Chain {
 		{
 			vector<signed_block> blockList;
 			uint32_t currNum = _context->block_head->block_num;
-			do 
+			blockList.reserve(currNum - lastnum + 1);
+			while (currNum)
 			{	
 	
 				if (lastnum < currNum)
 				{
 					signed_block_ptr pSb = block_from_num(currNum);
-					blockList.push_back(*pSb);
+					blockList.insert(blockList.begin(), *pSb);
+					currNum--;
 				}
 				else
 				{
 					break;
 				}
-			} while (currNum--);
+			}
 
 			FC_ASSERT(blockList.size() > 0);
 
