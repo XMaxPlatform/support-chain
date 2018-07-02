@@ -19,12 +19,25 @@ namespace Chain {
 		transaction_context_xmax(chain_xmax& _chain, const signed_transaction& _trx, fc::time_point _start = fc::time_point::now());
 
 
+		void exec();
+
 	public:
+
+		inline transaction_response_ptr get_response() const
+		{
+			return response;
+		}
+	protected:
+
+		void exec_message(const Basetypes::message& msg);
+
 		chain_xmax&						chain;
 		const signed_transaction&		trx;
 
 		database::session			dbsession;
 		fc::time_point	start_time;
+
+		transaction_response_ptr response;
 	};
 }
 }
