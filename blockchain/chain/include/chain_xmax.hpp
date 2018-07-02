@@ -192,6 +192,8 @@ namespace Xmaxplatform { namespace Chain {
 
        void set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v );
 
+	   msg_handler find_message_handler(const account_name& contract, const account_name& scope);
+
 	   void on_irreversible(block_pack_ptr pack);
 
    };

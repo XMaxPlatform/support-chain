@@ -39,6 +39,7 @@
 #include <objects/xmx_token_object.hpp>
 #include <objects/builder_object.hpp>
 #include <objects/block_object.hpp>
+#include <transaction_context_xmax.hpp>
 #include <pending_block.hpp>
 #include <chain_stream.hpp>
 
@@ -621,6 +622,31 @@ namespace Xmaxplatform { namespace Chain {
 
 			return pt;
 		}
+
+		transaction_response_ptr chain_xmax::push_transaction(transaction_request_ptr request)
+		{
+			validate_expiration(request->signed_trx);
+			validate_tapos(request->signed_trx);
+			validate_referenced_accounts(request->signed_trx);
+			validate_uniqueness(request->signed_trx);
+
+			if (!_context->building_block.valid())
+			{
+				_context->pending_transactions.push_back(request);
+				return std::make_shared<transaction_response>();
+			}
+			transaction_response_ptr response;
+			try {
+				transaction_context_xmax Impl(*this, request->signed_trx);
+
+				Impl.exec();
+
+				response = Impl.get_response();
+			}
+			FC_CAPTURE_AND_RETHROW((response));
+
+			return response;
+		}
 		
 		void chain_xmax::push_confirmation(const block_confirmation& conf)
 		{
@@ -982,6 +1008,21 @@ namespace Xmaxplatform { namespace Chain {
         void chain_xmax::set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v ) {
 			_context->message_handlers[contract][std::make_pair(scope,action)] = v;
         }
+
+		msg_handler chain_xmax::find_message_handler(const account_name& contract, const account_name& scope)
+		{
+			/// context.code => the execution namespace
+			/// message.code / message.type => Event
+			auto contract_handlers_itr = _context->message_handlers.find(contract);
+			if (contract_handlers_itr != _context->message_handlers.end()) {
+				auto message_handler_itr = contract_handlers_itr->second.find({ contract, scope });
+				if (message_handler_itr != contract_handlers_itr->second.end()) {				
+					return message_handler_itr->second;
+				}
+			}
+
+			return msg_handler();
+		}
 
         void chain_xmax::process_message(const transaction& trx, account_name code,
                                          const message_xmax& message, message_output& output,
