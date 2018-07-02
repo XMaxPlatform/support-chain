@@ -2,6 +2,8 @@
 *  @file
 *  @copyright defined in xmax/LICENSE
 */
+
+#include <chain_xmax.hpp>
 #include <transaction_context_xmax.hpp>
 
 namespace Xmaxplatform {
@@ -11,6 +13,7 @@ namespace Chain {
 		: chain(_chain)
 		, trx(_trx)
 		, start_time(_start)
+		, dbsession(_chain.get_mutable_database().start_undo_session(true))
 	{
 
 	}

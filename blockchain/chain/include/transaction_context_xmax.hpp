@@ -11,7 +11,7 @@ namespace Chain {
 	class chain_xmax;
 	class signed_transaction;
 
-	using session = Basechain::database::session;
+	using Basechain::database;
 
 	class transaction_context_xmax
 	{
@@ -23,7 +23,7 @@ namespace Chain {
 		chain_xmax&						chain;
 		const signed_transaction&		trx;
 
-		session			db_session;
+		database::session			dbsession;
 		fc::time_point	start_time;
 	};
 }

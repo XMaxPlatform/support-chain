@@ -108,7 +108,7 @@ namespace Xmaxplatform { namespace Chain {
 
 	   flat_set<public_key_type> get_required_keys(const signed_transaction& transaction, const flat_set<public_key_type>& candidateKeys)const;
 
-	   vector<signed_block>	get_syncblock_fromid(const Chain::xmax_type_transaction_id& lastid);
+	   vector<signed_block>	get_syncblock_from_lastnum(const uint32_t& lastnum);
 
    private:
 
