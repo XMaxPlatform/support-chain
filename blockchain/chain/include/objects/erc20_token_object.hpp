@@ -49,10 +49,10 @@ namespace Xmaxplatform {
 			member<erc20_token_object, erc20_token_object::id_type, &erc20_token_object::id>
 			>,
 			ordered_unique<tag<by_token_and_owner>,
-			composite_key<
-			erc20_token_object,
-			member<erc20_token_object, Basetypes::asset_symbol, &erc20_token_object::token_name>,
-			member<erc20_token_object, Basetypes::account_name, &erc20_token_object::owner_name>
+				composite_key<
+				erc20_token_object,
+				member<erc20_token_object, Basetypes::asset_symbol, &erc20_token_object::token_name>,
+				member<erc20_token_object, Basetypes::account_name, &erc20_token_object::owner_name>
 			>
 			>
 			>
