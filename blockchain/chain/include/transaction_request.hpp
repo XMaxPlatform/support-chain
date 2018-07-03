@@ -13,6 +13,10 @@ namespace Xmaxplatform { namespace Chain {
 	public:
 		signed_transaction signed_trx;
 
+		transaction_request(signed_transaction&& trx)
+			: signed_trx(std::forward<signed_transaction>(trx)) {
+
+		}
 
 		transaction_request(const signed_transaction& trx) 
 		: signed_trx(trx) {

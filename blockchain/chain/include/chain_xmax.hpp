@@ -143,6 +143,8 @@ namespace Xmaxplatform { namespace Chain {
 	   typename T::processed apply_transaction(const T& trx);
 	   template<typename T>
 	   typename T::processed process_transaction(const T& trx, int depth, const fc::time_point& start_time);
+	   
+	   transaction_response_ptr apply_transaction_impl(transaction_request_ptr request);
 
 	   void process_confirmation(const block_confirmation& conf);
 
