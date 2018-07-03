@@ -61,6 +61,19 @@ if(WIN32)
 		message(STATUS "use v8 vm")
 		add_definitions(-DUSE_V8)
 	endif()	
+
+
+	
+
+	list(APPEND PLATFORM_SPECIFIC_LIBS 
+		${Secp256k1_LIBRARY_DIR}/gmp.lib
+		${Secp256k1_LIBRARY_DIR}/secp256k1.lib
+		${OPENSSL_LIBRARY_DIR}/libcrypto.lib
+		${OPENSSL_LIBRARY_DIR}/openssl.lib
+		Userenv
+	)
+
+
 	
 	message(STATUS "-------------- Window config end -----------")
 	
