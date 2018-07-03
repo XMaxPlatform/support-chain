@@ -30,16 +30,14 @@
 #include <deque>
 #include <cstdint>
 
-#define OBJECT_CCTOR1(NAME) \
-    NAME() = delete; \
-    public: \
+#define OBJECT_CCTOR1(NAME) public: \
+	NAME() = default; \
     template<typename Constructor, typename Allocator> \
     NAME(Constructor&& c, Basechain::allocator<Allocator>) \
     { c(*this); }
 #define OBJECT_CCTOR2_MACRO(x, y, field) ,field(a)
-#define OBJECT_CCTOR2(NAME, FIELDS) \
-    NAME() = delete; \
-    public: \
+#define OBJECT_CCTOR2(NAME, FIELDS) public:\
+	NAME() = default; \
     template<typename Constructor, typename Allocator> \
     NAME(Constructor&& c, Basechain::allocator<Allocator> a) \
     : id(0) BOOST_PP_SEQ_FOR_EACH(OBJECT_CCTOR2_MACRO, _, FIELDS) \
