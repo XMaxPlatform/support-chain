@@ -21,6 +21,8 @@ namespace Chain {
 
 		void exec();
 
+		void squash();
+
 	public:
 
 		inline transaction_response_ptr get_response() const
@@ -29,7 +31,7 @@ namespace Chain {
 		}
 	protected:
 
-		void exec_message(const Basetypes::message& msg);
+		void exec_message(const Chain::message_xmax& msg);
 
 		chain_xmax&						chain;
 		const signed_transaction&		trx;

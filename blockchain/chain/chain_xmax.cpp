@@ -195,18 +195,20 @@ namespace Xmaxplatform { namespace Chain {
 				for (int i = 0; i < 0x10000; i++)
 					_context->block_db.create<block_summary_object>([&](block_summary_object&) {});
 
-				// genesis message.
-				auto messages = initer.prepare_data(*this, _context->block_db);
-				std::for_each(messages.begin(), messages.end(), [&](const message_xmax& m) {
-					message_output output;
-					processed_transaction trx; /// dummy transaction required for scope validation
-					std::sort(trx.scope.begin(), trx.scope.end());
+				// make genesis message.
+				{			
+					auto messages = initer.prepare_data(*this, _context->block_db);
 
-					process_message(trx, m.code, m, output);
+					signed_transaction signed_trx;
 
-					trx.messages.push_back(m);
-				});
+					std::for_each(messages.begin(), messages.end(), [&](const message_xmax& m) {
 
+						signed_trx.messages.push_back(m);
+					});
+
+					transaction_request_ptr request = std::make_shared<transaction_request>(std::move(signed_trx));
+					apply_transaction_impl(request);
+				}
 
 				_generate_block();
 				_sign_block(Config::xmax_build_private_key);
@@ -630,6 +632,12 @@ namespace Xmaxplatform { namespace Chain {
 				_context->pending_transactions.push_back(request);
 				return std::make_shared<transaction_response>();
 			}
+
+			return apply_transaction_impl(request);
+		}
+
+		transaction_response_ptr chain_xmax::apply_transaction_impl(transaction_request_ptr request)
+		{
 			transaction_response_ptr response;
 			try {
 				transaction_context_xmax Impl(*this, request->signed_trx);
@@ -639,9 +647,9 @@ namespace Xmaxplatform { namespace Chain {
 				record_transaction(request->signed_trx);
 
 				response = Impl.get_response();
+				Impl.squash();
 			}
 			FC_CAPTURE_AND_RETHROW((response));
-
 			return response;
 		}
 		

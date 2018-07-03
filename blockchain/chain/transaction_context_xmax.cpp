@@ -27,7 +27,12 @@ namespace Chain {
 		}
 	}
 
-	void transaction_context_xmax::exec_message(const Basetypes::message& msg)
+	void transaction_context_xmax::squash()
+	{
+		dbsession.squash();
+	}
+
+	void transaction_context_xmax::exec_message(const Chain::message_xmax& msg)
 	{
 		message_context_xmax xmax_ctx(chain, chain.get_mutable_database(), trx, msg, msg.code);
 
