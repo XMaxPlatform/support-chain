@@ -6,6 +6,9 @@
 #include <fc/exception/exception.hpp>
 #include <basetypes.hpp>
 
+
+#define MAKE_TOKEN_NAME(C1, C2, C3) (int64_t(4) | (uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24))
+
 /// xmax with 4 digits of precision
 #define XMX_SYMBOL  (int64_t(4) | (uint64_t('X') << 8) | (uint64_t('M') << 16) | (uint64_t('X') << 24))
 
