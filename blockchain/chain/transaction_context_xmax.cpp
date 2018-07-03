@@ -53,8 +53,6 @@ namespace Chain {
 				}
 
 			}
-
-
 		} FC_CAPTURE_AND_RETHROW((xmax_ctx.msg))
 	}
 }

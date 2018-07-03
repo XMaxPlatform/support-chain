@@ -166,7 +166,8 @@ namespace Xmaxplatform { namespace Chain {
 				const chain_timestamp init_stamp = chain_timestamp::from(init_point);
 				//const chain_timestamp pre_stamp = init_stamp - chain_timestamp::create(1);
 
-				_context->building_block = _context->block_db.start_undo_session(true);
+
+				_Start_first_build(init_stamp);
 
 				// block genesis db.
 
@@ -193,12 +194,6 @@ namespace Xmaxplatform { namespace Chain {
 
 				for (int i = 0; i < 0x10000; i++)
 					_context->block_db.create<block_summary_object>([&](block_summary_object&) {});
-
-				// start build.
-				_context->building_block->pack = std::make_shared<block_pack>();
-				_context->building_block->pack->init_default(init_stamp, Config::xmax_contract_name);
-
-				_context->block_head = _context->building_block->pack;
 
 				// genesis message.
 				auto messages = initer.prepare_data(*this, _context->block_db);
@@ -641,6 +636,8 @@ namespace Xmaxplatform { namespace Chain {
 
 				Impl.exec();
 
+				record_transaction(request->signed_trx);
+
 				response = Impl.get_response();
 			}
 			FC_CAPTURE_AND_RETHROW((response));
@@ -721,6 +718,17 @@ namespace Xmaxplatform { namespace Chain {
 			{
 				_context->building_block.reset();
 			}
+		}
+
+		void chain_xmax::_Start_first_build(chain_timestamp when)
+		{
+			_context->building_block = _context->block_db.start_undo_session(true);
+
+			// start build.
+			_context->building_block->pack = std::make_shared<block_pack>();
+			_context->building_block->pack->init_default(when, Config::xmax_contract_name);
+
+			_context->block_head = _context->building_block->pack;
 		}
 
 		void chain_xmax::_start_build(chain_timestamp when)

@@ -121,6 +121,7 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void _abort_build();
 	   void _start_build(chain_timestamp when);
+	   void _Start_first_build(chain_timestamp init_stamp);
        void _generate_block();
 	   void _sign_block(const private_key_type& sign_private_key);
 	   void _make_fianl_block();
