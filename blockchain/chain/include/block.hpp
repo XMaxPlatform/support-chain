@@ -49,7 +49,7 @@ namespace Xmaxplatform { namespace Chain {
 				applied = 0,
 				failure = 1,
 			};
-			uint64_t								receipt_num;
+			uint64_t								receipt_idx;
 			fc::enum_type<uint8_t, result_code>		result;
 		};
 

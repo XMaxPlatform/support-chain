@@ -33,7 +33,7 @@ namespace Xmaxplatform { namespace Chain {
 	{
 		OBJECT_CCTOR(global_msg_status_object)
 
-			id_type id;
+		id_type id;
 
 		uint64_t counter;
 	};

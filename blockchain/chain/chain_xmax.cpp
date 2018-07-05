@@ -39,6 +39,7 @@
 #include <objects/xmx_token_object.hpp>
 #include <objects/builder_object.hpp>
 #include <objects/block_object.hpp>
+#include <objects/global_status_objects.hpp>
 #include <objects/erc20_token_object.hpp>
 #include <transaction_context_xmax.hpp>
 #include <pending_block.hpp>
@@ -142,6 +143,9 @@ namespace Xmaxplatform { namespace Chain {
 			_context->block_db.add_index<builder_multi_index>();
 			_context->block_db.add_index<resource_token_multi_index>();
 
+			_context->block_db.add_index<global_trx_status_index>();
+			_context->block_db.add_index<global_msg_status_index>();
+
 			_context->block_db.add_index<erc20_token_multi_index>();
 
         }
@@ -193,6 +197,13 @@ namespace Xmaxplatform { namespace Chain {
 					//p.round_begin_time = chain_timestamp::zero_timestamp;
 					p.round_slot = Config::blocks_per_round;
 					p.builders_elect_state = elect_state::elect_new_builders;
+				});
+
+				_context->block_db.create<global_trx_status_object>([](global_trx_status_object &obj) {
+					obj.counter = 0;
+				});
+				_context->block_db.create<global_msg_status_object>([](global_msg_status_object &obj) {
+					obj.counter = 0;
 				});
 
 				for (int i = 0; i < 0x10000; i++)
@@ -651,22 +662,42 @@ namespace Xmaxplatform { namespace Chain {
 
 				response = Impl.get_response();
 
-				block_pack& block_pk = *_context->building_block->pack;
-
-
-				block_pk.block->receipts.emplace_back(transaction_receipt(transaction_package(request->signed_trx)));
-
-				transaction_receipt& receipt = block_pk.block->receipts.back();
-
-				receipt.result = transaction_receipt::applied;
-
-				response->receipt = receipt;
+				response->receipt = apply_transaction_receipt(request->signed_trx);
 
 				Impl.squash();
 				_context->building_block->pack->transactions.push_back(request);
 			}
 			FC_CAPTURE_AND_RETHROW((response));
 			return response;
+		}
+
+
+
+		transaction_receipt& chain_xmax::apply_transaction_receipt(const signed_transaction& trx)
+		{
+			block_pack& block_pk = *_context->building_block->pack;
+
+			block_pk.block->receipts.emplace_back(transaction_receipt(transaction_package(trx)));
+
+			transaction_receipt& receipt = block_pk.block->receipts.back();
+			uint64_t idx = 0;
+			{
+				const auto& gobj = _context->block_db.get<global_trx_status_object>();
+				idx = gobj.counter;
+
+				_context->block_db.modify<global_trx_status_object>(gobj,
+					[&](global_trx_status_object& obj) {
+					obj.counter = idx = 1;
+				});
+			}
+
+
+			receipt.receipt_idx = idx;
+
+
+
+			receipt.result = transaction_receipt::applied;
+			return receipt;
 		}
 		
 		void chain_xmax::push_confirmation(const block_confirmation& conf)
