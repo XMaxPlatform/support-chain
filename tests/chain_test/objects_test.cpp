@@ -34,7 +34,7 @@ namespace {
 		obj.id = id;
 		obj.token_name = asset_symbol(MAKE_TOKEN_NAME(token_name[0], token_name[1], token_name[2]));
 		obj.owner_name = xmax::string_to_name(owner_name.c_str());
-		obj.xmx_token = amount;
+		obj.token_amount = amount;
 		tbl.get<by_token_and_owner>().insert(obj);
 	}
 
@@ -73,25 +73,25 @@ BOOST_AUTO_TEST_CASE(erc20_test_index) {
 	BOOST_ASSERT(it != tbl.get<by_token_and_owner>().end());
 	auto& obj = *it;
 	BOOST_CHECK(obj.id == erc20_token_object::id_type(1));
-	BOOST_CHECK(obj.xmx_token == 12345);
+	BOOST_CHECK(obj.token_amount == 12345);
 
 	auto it2 = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TST", "testerb"));
 	BOOST_ASSERT(it2 != tbl.get<by_token_and_owner>().end());
 	auto& obj2 = *it2;
 	BOOST_CHECK(obj2.id == erc20_token_object::id_type(2));
-	BOOST_CHECK(obj2.xmx_token == 54321);
+	BOOST_CHECK(obj2.token_amount == 54321);
 
 	auto it3 = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TSA", "testera"));
 	BOOST_ASSERT(it3 != tbl.get<by_token_and_owner>().end());
 	auto& obj3 = *it3;
 	BOOST_CHECK(obj3.id == erc20_token_object::id_type(3));
-	BOOST_CHECK(obj3.xmx_token == 13579);
+	BOOST_CHECK(obj3.token_amount == 13579);
 
 	auto it4 = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TSA", "testerb"));
 	BOOST_ASSERT(it4 != tbl.get<by_token_and_owner>().end());
 	auto& obj4 = *it4;
 	BOOST_CHECK(obj4.id == erc20_token_object::id_type(4));
-	BOOST_CHECK(obj4.xmx_token == 24680);
+	BOOST_CHECK(obj4.token_amount == 24680);
 }
 
 

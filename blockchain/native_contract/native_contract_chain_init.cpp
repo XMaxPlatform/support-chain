@@ -44,6 +44,10 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
     SET_APP_HANDLER( xmax, xmax, regproxy, Xmaxplatform );
     SET_APP_HANDLER( xmax, xmax, unregproxy, Xmaxplatform );
 	SET_APP_HANDLER(xmax, xmax, setcode, Xmaxplatform);
+	SET_APP_HANDLER(xmax, xmax, issueerc2o, Xmaxplatform);
+	SET_APP_HANDLER(xmax, xmax, issueerc721, Xmaxplatform);
+	SET_APP_HANDLER(xmax, xmax, revoketoken, Xmaxplatform);
+
 #ifdef USE_V8
 	SET_APP_HANDLER(xmax, xmax, setjscode, Xmaxplatform);
 #endif
@@ -65,6 +69,9 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 	xmax_abi.actions.push_back(Types::action{ name("unregbuilder"), "unregbuilder" });
 	xmax_abi.actions.push_back(Types::action{ name("regproxy"), "regproxy" });
 	xmax_abi.actions.push_back(Types::action{ name("unregproxy"), "unregproxy" });
+	xmax_abi.actions.push_back(Types::action{ name("issueerc2o"), "issueerc2o" });
+	xmax_abi.actions.push_back(Types::action{ name("issueerc721"), "issueerc721" });
+	xmax_abi.actions.push_back(Types::action{ name("revoketoken"), "revoketoken" });
 
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transfer>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::addaccount>::type());
@@ -76,6 +83,9 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unregbuilder>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::regproxy>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unregproxy>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc2o>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc721>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::revoketoken>::type());
 
 
    return xmax_abi;

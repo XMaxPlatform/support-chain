@@ -39,6 +39,7 @@
 #include <objects/xmx_token_object.hpp>
 #include <objects/builder_object.hpp>
 #include <objects/block_object.hpp>
+#include <objects/erc20_token_object.hpp>
 #include <transaction_context_xmax.hpp>
 #include <pending_block.hpp>
 #include <chain_stream.hpp>
@@ -140,6 +141,8 @@ namespace Xmaxplatform { namespace Chain {
 			_context->block_db.add_index<builder_info_index>();
 			_context->block_db.add_index<builder_multi_index>();
 			_context->block_db.add_index<resource_token_multi_index>();
+
+			_context->block_db.add_index<erc20_token_multi_index>();
 
         }
 

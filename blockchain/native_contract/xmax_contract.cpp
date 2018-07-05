@@ -14,6 +14,8 @@
 #include <objects/resource_token_object.hpp>
 #include <objects/chain_object_table.hpp>
 #include <objects/static_config_object.hpp>
+#include <objects/erc20_token_object.hpp>
+#include <objects/object_utility.hpp>
 #include <xmax_voting.hpp>
 #include <vm_xmax.hpp>
 
@@ -22,6 +24,8 @@
 #ifdef USE_V8
 #include <jsvm_xmax.h>
 #endif
+
+
 
 namespace Xmaxplatform {
     namespace Native_contract {
@@ -236,52 +240,49 @@ void handle_xmax_unregproxy(message_context_xmax& context)    {
 
 
 //--------------------------------------------------
-void handle_xmax_issue_token_erc20(Chain::message_context_xmax& context) {
+void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
 	auto& db = context.mutable_db;
-	auto issue_erc20 = context.msg.as<Types::issue_token_erc20>();
+	auto issue_erc20 = context.msg.as<Types::issueerc2o>();
 
 	//Check existence
-	auto existing_account = db.find<account_object, by_name>(issue_erc20.name);
+	auto existing_account = db.find<account_object, by_name>(issue_erc20.token_name);
 	XMAX_ASSERT(existing_account == nullptr, account_name_exists_exception,
 		"Cannot create ERC20 token account named ${name}, as that name is already taken",
-		("name", issue_erc20.name));
+		("name", issue_erc20.token_name));
 
 	//Create token account
 	const auto& token_account = db.create<account_object>([&issue_erc20, &context](account_object& a) {
-		a.name = issue_erc20.name;
+		a.name = issue_erc20.token_name;
 		a.creation_date = context.current_time();
 	});
-
-	//const auto& creatorToken = context.mutable_db.get<xmx_token_object, by_owner_name>(issue_erc20.creator);
-
-	//XMAX_ASSERT(creatorToken.xmx_token >= create.deposit.amount, message_validate_exception,
-	//	"Creator '${c}' has insufficient funds to make account creation deposit of ${a}",
-	//	("c", create.creator)("a", create.deposit));
-
-	//context.mutable_db.modify(creatorToken, [&create](xmx_token_object& b) {
-	//	b.xmx_token -= create.deposit.amount;
-	//});
-
-	//context.mutable_db.create<xmx_token_object>([&create](xmx_token_object& b) {
-	//	b.owner_name = create.name;
-	//	b.xmx_token = 0; //create.deposit.amount; TODO: make sure we credit this in @staked
-	//});
-
 	
+	
+	auto erc20_index = MakeErcTokenIndex(issue_erc20.token_name, issue_erc20.creator);
+	bool not_exist = db.find<erc20_token_object, by_token_and_owner>(erc20_index) == nullptr;
+	XMAX_ASSERT(not_exist,
+		message_validate_exception,
+		"Erc20 token:'${t}' already exist with Owner Name: ${o}",
+		("t", issue_erc20.owner)("o", issue_erc20.token_name));
 
-	//Set account total balacne
+	db.create<erc20_token_object>([&issue_erc20](erc20_token_object& tok) {		
+		tok.token_name = issue_erc20.token_name;
+		tok.owner_name = issue_erc20.creator;
+		tok.token_amount = issue_erc20.total_balance.amount;		
+	});
 
 
 }
 
 
 //--------------------------------------------------
-void handle_xmax_issue_token_erc721(Chain::message_context_xmax& context) {
+void handle_xmax_issueerc721(Chain::message_context_xmax& context) {
 
 }
 
+
 //--------------------------------------------------
-void handle_xmax_revoketoken(Chain::message_context_xmax& context) {
+void handle_xmax_revoketoken(Chain::message_context_xmax& context)
+{
 
 }
 
