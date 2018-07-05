@@ -157,6 +157,9 @@ namespace Xmaxplatform { namespace Chain {
 			rate_limiting_object_type,
 			block_object_type,
 			erc20_token_object_type,
+			account_status_object_type,
+			global_trx_status_object_type,
+			global_msg_status_object_type,
             OBJECT_TYPE_COUNT ///< Sentry value which contains the number of different object types
         };
    

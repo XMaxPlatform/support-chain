@@ -4,6 +4,7 @@
 */
 #pragma once
 #include <blockchain_types.hpp>
+#include <transaction.hpp>
 namespace Xmaxplatform {
 namespace Chain {
 	
@@ -18,6 +19,8 @@ namespace Chain {
 	class transaction_response
 	{
 	public:
+		fc::optional<transaction_receipt_header> receipt;
+
 		std::vector<message_response> message_responses;
 	};
 

@@ -647,7 +647,20 @@ namespace Xmaxplatform { namespace Chain {
 				record_transaction(request->signed_trx);
 
 				response = Impl.get_response();
+
+				block_pack& block_pk = *_context->building_block->pack;
+
+
+				block_pk.block->receipts.emplace_back(transaction_receipt(transaction_package(request->signed_trx)));
+
+				transaction_receipt& receipt = block_pk.block->receipts.back();
+
+				receipt.result = transaction_receipt::applied;
+
+				response->receipt = receipt;
+
 				Impl.squash();
+				_context->building_block->pack->transactions.push_back(request);
 			}
 			FC_CAPTURE_AND_RETHROW((response));
 			return response;
@@ -695,6 +708,8 @@ namespace Xmaxplatform { namespace Chain {
 			);
 
 			_commit_block();
+
+			_context->pending_transactions.clear();
 		}
 
 		void chain_xmax::confirm_block(const signed_block_ptr next_block)

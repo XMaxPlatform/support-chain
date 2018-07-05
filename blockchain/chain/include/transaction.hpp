@@ -154,10 +154,25 @@ namespace Xmaxplatform { namespace Chain {
       vector<message_output> output;
    };
 
+
+   struct transaction_package
+   {
+	   transaction_package(const signed_transaction& trx)
+		   : body(trx)
+	   {
+
+	   }
+
+
+	   signed_transaction body;
+   };
+
 } } // Xmaxplatform::Chain
 
 FC_REFLECT(Xmaxplatform::Chain::generated_transaction, (id))
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_transaction, (Xmaxplatform::Basetypes::signed_transaction), )
+FC_REFLECT(Xmaxplatform::Chain::transaction_package, (body))
+
 FC_REFLECT(Xmaxplatform::Chain::message_output, (notify)(inline_trx)(deferred_trxs) )
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::processed_transaction, (Xmaxplatform::Basetypes::signed_transaction), (output) )
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::pending_inline_transaction, (Xmaxplatform::Basetypes::transaction), )
