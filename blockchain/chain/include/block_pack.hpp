@@ -5,6 +5,7 @@
 #pragma once
 
 #include <block.hpp>
+#include <transaction_request.hpp>
 
 namespace Xmaxplatform {
 namespace Chain {
@@ -40,6 +41,8 @@ namespace Chain {
 		}
 
 		signed_block_ptr block;
+		vector<transaction_request_ptr> transactions;
+
 
 		void init_default(chain_timestamp time, account_name builder);
 		void init_by_pre_pack(const block_pack& pre_pack, chain_timestamp when, account_name builder, const builder_rule& rule);

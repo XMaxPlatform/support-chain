@@ -21,6 +21,8 @@ namespace Chain {
 
 	void transaction_context_xmax::exec()
 	{
+		response = std::make_shared<transaction_response>();
+
 		for (const auto& msg : trx.messages)
 		{
 			exec_message(msg);
