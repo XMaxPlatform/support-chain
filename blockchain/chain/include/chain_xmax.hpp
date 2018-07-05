@@ -146,6 +146,8 @@ namespace Xmaxplatform { namespace Chain {
 	   
 	   transaction_response_ptr apply_transaction_impl(transaction_request_ptr request);
 
+	   transaction_receipt& apply_transaction_receipt(const signed_transaction& trx);
+
 	   void process_confirmation(const block_confirmation& conf);
 
 	   void require_account(const account_name& name) const;
