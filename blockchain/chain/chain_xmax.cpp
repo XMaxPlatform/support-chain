@@ -662,6 +662,7 @@ namespace Xmaxplatform { namespace Chain {
 				response->receipt = apply_transaction_receipt(request->signed_trx);
 
 				Impl.squash();
+				fc::move_append(_context->building_block->message_receipts, std::move(Impl.get_message_receipts()));
 				_context->building_block->pack->transactions.push_back(request);
 			}
 			FC_CAPTURE_AND_RETHROW((response));
@@ -679,15 +680,12 @@ namespace Xmaxplatform { namespace Chain {
 			transaction_receipt& receipt = block_pk.block->receipts.back();
 			uint64_t idx = 0;
 			{
-				const auto& gobj = _context->block_db.get<global_trx_status_object>();
-				idx = gobj.counter;
-
-				_context->block_db.modify<global_trx_status_object>(gobj,
-					[&](global_trx_status_object& obj) {
-					obj.counter = idx = 1;
+				const auto& obj = _context->block_db.get<global_trx_status_object>();
+				_context->block_db.modify(obj, [&](auto& mrs) {
+					++mrs.counter;
 				});
+				idx = obj.counter;
 			}
-
 
 			receipt.receipt_idx = idx;
 
@@ -1091,31 +1089,31 @@ namespace Xmaxplatform { namespace Chain {
                                          message_context_xmax* parent_context, int depth,
                                          const fc::time_point& start_time ) {
 
-            auto us_duration = (fc::time_point::now() - start_time).count();
+   //         auto us_duration = (fc::time_point::now() - start_time).count();
 
-            message_context_xmax xmax_ctx(*this, _context->block_db, trx, message, code);
-            apply_message(xmax_ctx);
+   //         message_context_xmax xmax_ctx(*this, _context->block_db, trx, message, code);
+   //         apply_message(xmax_ctx);
 
-			for (auto& event_output : xmax_ctx.events)
-			{
-				output.events.push_back(std::move(event_output));
-			}
+			//for (auto& event_output : xmax_ctx.events)
+			//{
+			//	output.events.push_back(std::move(event_output));
+			//}
 
-            output.notify.reserve( xmax_ctx.notified.size() );
+   //         output.notify.reserve( xmax_ctx.notified.size() );
 
-            for( uint32_t i = 0; i < xmax_ctx.notified.size(); ++i ) {
-                try {
-                    auto notify_code = xmax_ctx.notified[i];
-                    output.notify.push_back( {notify_code} );
-                    process_message(trx, notify_code, message, output.notify.back().output, &xmax_ctx, depth + 1, start_time );
-                } FC_CAPTURE_AND_RETHROW((xmax_ctx.notified[i]))
-            }
+   //         for( uint32_t i = 0; i < xmax_ctx.notified.size(); ++i ) {
+   //             try {
+   //                 auto notify_code = xmax_ctx.notified[i];
+   //                 output.notify.push_back( {notify_code} );
+   //                 process_message(trx, notify_code, message, output.notify.back().output, &xmax_ctx, depth + 1, start_time );
+   //             } FC_CAPTURE_AND_RETHROW((xmax_ctx.notified[i]))
+   //         }
 
-            // combine inline messages and process
-            if (xmax_ctx.inline_messages.size() > 0) {
-                output.inline_trx = inline_transaction(trx);
-                (*output.inline_trx).messages = std::move(xmax_ctx.inline_messages);
-            }
+   //         // combine inline messages and process
+   //         if (xmax_ctx.inline_messages.size() > 0) {
+   //             output.inline_trx = inline_transaction(trx);
+   //             (*output.inline_trx).messages = std::move(xmax_ctx.inline_messages);
+   //         }
 
 
         }

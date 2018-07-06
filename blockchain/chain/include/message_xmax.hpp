@@ -41,7 +41,15 @@ struct message_xmax : public Basetypes::message {
 };
 
 
+struct message_receipt
+{
+	account_name			to_code; // account name of contract code.
+	xmax_type_message_id	message_id;
+	uint64_t				message_idx;
+};
+
 
 } } // namespace Xmaxplatform::Chain
 
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::message_xmax, (Xmaxplatform::Basetypes::message), )
+FC_REFLECT(Xmaxplatform::Chain::message_receipt, (to_code)(message_id)(message_idx))
