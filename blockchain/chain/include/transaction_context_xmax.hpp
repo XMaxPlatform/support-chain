@@ -24,19 +24,18 @@ namespace Chain {
 
 		void squash();
 
+
 	public:
 
 		inline transaction_response_ptr get_response() const
 		{
 			return response;
 		}
-		inline std::vector<message_receipt>& get_message_receipts()
-		{
-			return msg_receipts;
-		}
+
+		std::vector<message_receipt> msg_receipts;
 	protected:
 
-		void exec_message(const Basetypes::message& msg, int32_t msg_depth);
+		void exec_message(const Basetypes::message & msg, uint32_t apply_depth);
 		message_response exec_one_message(message_context_xmax& context);
 
 		chain_xmax&						chain;
@@ -47,7 +46,7 @@ namespace Chain {
 
 		transaction_response_ptr response;
 
-		std::vector<message_receipt> msg_receipts;
+
 	};
 }
 }
