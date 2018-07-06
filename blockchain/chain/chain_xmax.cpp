@@ -665,7 +665,7 @@ namespace Xmaxplatform { namespace Chain {
 				response->receipt = apply_transaction_receipt(request->signed_trx);
 
 				Impl.squash();
-				fc::move_append(_context->building_block->message_receipts, std::move(Impl.get_message_receipts()));
+				fc::move_append(_context->building_block->message_receipts, std::move(Impl.msg_receipts));
 				_context->building_block->pack->transactions.push_back(request);
 			}
 			FC_CAPTURE_AND_RETHROW((response));

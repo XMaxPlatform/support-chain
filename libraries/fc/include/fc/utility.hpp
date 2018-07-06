@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <new>
+#include <vector>
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4482) // nonstandard extension used enum Name::Val, standard in C++11
