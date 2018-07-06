@@ -130,6 +130,7 @@ namespace Xmaxplatform { namespace Chain {
    using xmax_type_block_id = fc::sha256;
    using xmax_type_merkle_root = fc::sha256;
    using xmax_type_transaction_id = fc::sha256;
+   using xmax_type_message_id = fc::sha256;
    using xmax_type_summary = fc::sha256;
    using xmax_type_generated_transaction_id = fc::sha256;
    using xmax_type_signature = fc::ecc::compact_signature;

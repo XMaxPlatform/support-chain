@@ -2,10 +2,11 @@
 *  @file
 *  @copyright defined in xmax/LICENSE
 */
-
+#include <blockchain_exceptions.hpp>
 #include <chain_xmax.hpp>
 #include <vm_xmax.hpp>
 #include <transaction_context_xmax.hpp>
+#include <objects/global_status_objects.hpp>
 
 namespace Xmaxplatform {
 namespace Chain {
@@ -25,7 +26,7 @@ namespace Chain {
 
 		for (const auto& msg : trx.messages)
 		{
-			exec_message(msg);
+			exec_message(msg, 0);
 		}
 	}
 
@@ -34,25 +35,41 @@ namespace Chain {
 		dbsession.squash();
 	}
 
-	void transaction_context_xmax::exec_message(const Chain::message_xmax& msg)
+	void transaction_context_xmax::exec_message(const Basetypes::message& msg, uint32_t apply_depth)
 	{
-		message_context_xmax xmax_ctx(chain, chain.get_mutable_database(), trx, msg, msg.code);
 
+		XMAX_ASSERT(apply_depth < Config::max_message_apply_depth,
+			transaction_exception, "inline action recursion depth reached");
+
+		message_context_xmax xmax_ctx(chain, chain.get_mutable_database(), trx, msg, msg.code, apply_depth);
+
+		message_response res = exec_one_message(xmax_ctx);
+
+		response->message_responses.emplace_back(std::move(res));
+
+		for (const auto& it : xmax_ctx.inline_messages)
+		{
+			exec_message(it, apply_depth + 1);
+		}
+	}
+
+	message_response transaction_context_xmax::exec_one_message(message_context_xmax& context)
+	{
 		try {
 			
-			auto handler = chain.find_message_handler(xmax_ctx.code, xmax_ctx.msg.type);
+			auto handler = chain.find_message_handler(context.code, context.msg.type);
 			if (handler)
 			{
-				handler(xmax_ctx);
+				handler(context);
 			}
 			else
 			{
-				const auto& recipient = xmax_ctx.db.get<account_object, by_name>(xmax_ctx.code);
+				const auto& recipient = context.db.get<account_object, by_name>(context.code);
 				if (recipient.code.size()) {
-					idump((xmax_ctx.code)(xmax_ctx.msg.type));
+					idump((context.code)(context.msg.type));
 					const uint32_t execution_time = 10000;//TODO
 					try {
-						vm_xmax::get().apply(xmax_ctx, execution_time, true);
+						vm_xmax::get().apply(context, execution_time, true);
 					}
 					catch (const fc::exception &ex) {
 
@@ -60,7 +77,29 @@ namespace Chain {
 				}
 
 			}
-		} FC_CAPTURE_AND_RETHROW((xmax_ctx.msg))
+		} FC_CAPTURE_AND_RETHROW((context.msg))
+
+		uint64_t idx = 0;
+		{
+			const auto& obj = context.mutable_db.get<global_msg_status_object>();
+			context.mutable_db.modify(obj, [&](auto& mrs) {
+				++mrs.counter;
+			});
+			idx = obj.counter;
+		}
+		message_receipt receipt;
+		receipt.to_code = context.code;
+		receipt.message_idx = idx;
+		receipt.message_id = xmax_type_message_id::hash(context.msg);
+
+		msg_receipts.push_back(receipt);
+
+		message_response msg;
+		msg.msg_receipt = receipt;
+		msg.msg_body = context.msg;
+		msg.owner_id = trx.id();
+
+		return msg;
 	}
 }
 }
