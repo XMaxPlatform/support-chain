@@ -37,10 +37,13 @@
     { c(*this); }
 #define OBJECT_CCTOR2_MACRO(x, y, field) ,field(a)
 #define OBJECT_CCTOR2(NAME, FIELDS) public:\
-	NAME() = default; \
+	 template<typename Allocator> \
+    NAME(Basechain::allocator<Allocator> a) \
+    :id(0) BOOST_PP_SEQ_FOR_EACH(OBJECT_CCTOR2_MACRO, _, FIELDS) \
+    {  }\
     template<typename Constructor, typename Allocator> \
     NAME(Constructor&& c, Basechain::allocator<Allocator> a) \
-    : id(0) BOOST_PP_SEQ_FOR_EACH(OBJECT_CCTOR2_MACRO, _, FIELDS) \
+    :id(0) BOOST_PP_SEQ_FOR_EACH(OBJECT_CCTOR2_MACRO, _, FIELDS) \
     { c(*this); }
 
 #if WIN32
@@ -132,6 +135,7 @@ namespace Xmaxplatform { namespace Chain {
    using xmax_type_signature = fc::ecc::compact_signature;
    using xmax_type_weight = uint16_t;
    using bytes = Basetypes::bytes;
+   using xmax_erc721_id = fc::sha256;
 
    using public_key_type = Xmaxplatform::Basetypes::public_key;
 
@@ -157,6 +161,8 @@ namespace Xmaxplatform { namespace Chain {
 			rate_limiting_object_type,
 			block_object_type,
 			erc20_token_object_type,
+			erc721_token_object_type,
+			erc721_token_account_object_type,
             OBJECT_TYPE_COUNT ///< Sentry value which contains the number of different object types
         };
    
