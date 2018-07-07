@@ -19,5 +19,9 @@ namespace Xmaxplatform { namespace Chain {
 		return std::make_tuple(token_name, owner_name);
 	}
 
+	inline auto MakeErc721TokenIndexById(Xmaxplatform::Basetypes::asset_symbol token_name, const Xmaxplatform::Chain::xmax_erc721_id& token_id) {
+		return std::make_tuple(token_name, token_id);
+	}
+
 }//namespace Chain	
 } //namespace Xmaxplatform
