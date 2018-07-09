@@ -11,7 +11,6 @@
 #include <chain_xmax.hpp>
 #include <vm_native_interface.hpp>
 #include <objects/key_value_object.hpp>
-#include <objects/account_object.hpp>
 #include <objects/xmx_token_object.hpp>
 #include <abi_serializer.hpp>
 #include <chrono>
@@ -34,6 +33,8 @@ namespace Xmaxplatform {
 		{
 
 		}
+
+
 
 		jsvm_xmax::key_type jsvm_xmax::to_key_type(const Basetypes::type_name& type_name)
 		{
@@ -114,9 +115,7 @@ namespace Xmaxplatform {
 		
 		v8::Object* CallBackCheck(int args_length, v8::Object** args_object, v8::Isolate* isolate) {
 			void* arg1 = *(reinterpret_cast<v8::Object**>(reinterpret_cast<intptr_t>(args_object) - 1 * sizeof(int)));
-
 			int value = (int)arg1;
-			//ScriptMoudle::GetInstance().StoreInstrunction(value);
 			jsvm_xmax::get().StoreInstruction(value);
 			return args_object[0];
 		}
@@ -194,13 +193,17 @@ namespace Xmaxplatform {
 		void jsvm_xmax::load(const account_name& name, const Basechain::database& db)
 		{
 			const auto& recipient = db.get<account_object, by_name>(name);
-			
+			LoadScript(recipient);
+		}
+
+		void jsvm_xmax::LoadScript(const account_object& recipient)
+		{
+			account_name name = recipient.name;
 			auto& state = instances[name];
 
-
 			if (state.code_version != recipient.code_version) {
- 				
- 				state.code_version = fc::sha256();
+
+				state.code_version = fc::sha256();
 				state.table_key_types.clear();
 
 				if (!state.current_context.IsEmpty())
@@ -212,14 +215,14 @@ namespace Xmaxplatform {
 					ExitJsContext(m_pIsolate, current_state->current_context);
 
 				EnterJsContext(m_pIsolate, state.current_context);
-				
+
 
 				message_context_xmax& msg_contxt = *jsvm_xmax::get().current_message_context;
 				const auto& recipient = msg_contxt.db.get<account_object, by_name>(msg_contxt.code);
 
 				state.current_script = CompileJsCode(m_pIsolate, state.current_context.Get(m_pIsolate), (char*)recipient.code.data());
 				current_state = &state;
-				
+
 				try
 				{
 					const auto init_time = fc::time_point::now();
@@ -246,21 +249,20 @@ namespace Xmaxplatform {
 					std::cerr << exception.message << std::endl;
 					throw;
 				}
-				
+
 				table_key_types = &state.table_key_types;
 				tables_fixed = state.tables_fixed;
 				table_storage = 0;
 			}
-			else if(current_state!=&state)
+			else if (current_state != &state)
 			{
 				if (!current_state->current_context.IsEmpty())
 					ExitJsContext(m_pIsolate, current_state->current_context);
 
 				EnterJsContext(m_pIsolate, state.current_context);
-				current_state = &state;		
+				current_state = &state;
 			}
 		}
-
 	}
 }
 
