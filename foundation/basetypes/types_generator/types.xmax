@@ -163,7 +163,7 @@ struct issueerc2o
    token_name	asset_symbol
    total_balance	asset
 
-struct issueerc721
+struct issueerc21
 	creator	account_name
 	owner     authority
 	active    authority

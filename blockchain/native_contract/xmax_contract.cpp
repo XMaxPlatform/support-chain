@@ -275,7 +275,7 @@ void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
 
 
 //--------------------------------------------------
-void handle_xmax_issueerc721(Chain::message_context_xmax& context) {
+void handle_xmax_issueerc21(Chain::message_context_xmax& context) {
 
 }
 

@@ -660,9 +660,9 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
-    struct issueerc721 { 
-        issueerc721() = default;
-        issueerc721(const account_name& creator, const authority& owner, const authority& active, const authority& recovery, const asset_symbol& token_name)
+    struct issueerc21 { 
+        issueerc21() = default;
+        issueerc21(const account_name& creator, const authority& owner, const authority& active, const authority& recovery, const asset_symbol& token_name)
            : creator(creator), owner(owner), active(active), recovery(recovery), token_name(token_name) {}
 
         account_name                     creator;
@@ -672,9 +672,9 @@ namespace Xmaxplatform { namespace Basetypes {
         asset_symbol                     token_name;
     };
 
-    template<> struct get_struct<issueerc721> { 
+    template<> struct get_struct<issueerc21> { 
         static const struct_t& type() { 
-           static struct_t result = { "issueerc721", "", {
+           static struct_t result = { "issueerc21", "", {
                 {"creator", "account_name"},
                 {"owner", "authority"},
                 {"active", "authority"},
@@ -736,5 +736,5 @@ FC_REFLECT( Xmaxplatform::Basetypes::unregbuilder                     , (builder
 FC_REFLECT( Xmaxplatform::Basetypes::regproxy                         , (proxy) )
 FC_REFLECT( Xmaxplatform::Basetypes::unregproxy                       , (proxy) )
 FC_REFLECT( Xmaxplatform::Basetypes::issueerc2o                       , (creator)(owner)(active)(recovery)(token_name)(total_balance) )
-FC_REFLECT( Xmaxplatform::Basetypes::issueerc721                      , (creator)(owner)(active)(recovery)(token_name) )
+FC_REFLECT( Xmaxplatform::Basetypes::issueerc21                       , (creator)(owner)(active)(recovery)(token_name) )
 FC_REFLECT( Xmaxplatform::Basetypes::revoketoken                      , (token_name)(permission) )
