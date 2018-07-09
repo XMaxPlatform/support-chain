@@ -3,33 +3,41 @@
 #include <map>
 #include <libplatform/libplatform.h>
 #include <v8.h>
-using namespace v8;
+
 namespace Xmaxplatform {
 
 	namespace Chain {
+
+		using PersistentCpyableContext = v8::Persistent<v8::Context, v8::CopyablePersistentTraits<v8::Context>> ;
 		
-		typedef std::function<void(const HandleScope&, const Local<ObjectTemplate>&, const Local<Context>&, const Context::Scope&)> DoWorkInJsCtx;
+		typedef std::function<void( const v8::Local<v8::ObjectTemplate>&, const v8::Local<v8::Context>&, const v8::Context::Scope&)> DoWorkInJsCtx;
 
-		typedef std::map<std::string, Local<FunctionTemplate>> JsFooBindMap;
+		typedef std::map<std::string, v8::Local<v8::FunctionTemplate>> JsFooBindMap;
 		
-		void EnterJsContext(Isolate* pIsolate,DoWorkInJsCtx dowork);
+		void EnterJsContext(v8::Isolate* pIsolate,v8::Local<v8::ObjectTemplate>& global,DoWorkInJsCtx dowork);
 
-		void BindJsFoos(Isolate* pIsolate,const Local<ObjectTemplate>& fooGlobal, const JsFooBindMap& foosToBind);
+		PersistentCpyableContext CreateJsContext(v8::Isolate* pIsolate, v8::Local<v8::ObjectTemplate>& global);
 
-		void CompileJsCode(Isolate* pIsolate, const Local<Context>& context,char* jsCode);
+		void EnterJsContext(v8::Isolate* pIsolate, v8::Persistent<v8::Context, v8::CopyablePersistentTraits<v8::Context>>& context);
 
-		Handle<v8::Value> CallJsFoo(Isolate* pIsolate, const Local<Context>& context, const char* fooname, unsigned int argc,Handle<v8::Value>* params);
+		void ExitJsContext(v8::Isolate* pIsolate, v8::Persistent<v8::Context, v8::CopyablePersistentTraits<v8::Context>>& context);
 
-		Handle<v8::Value> I64Cpp2JS(Isolate* isolate, const Local<Context>& context, int64_t v);
+		void BindJsFoos(v8::Isolate* pIsolate,const v8::Local<v8::ObjectTemplate>& fooGlobal, const JsFooBindMap& foosToBind);
+
+		v8::Local<v8::Script> CompileJsCode(v8::Isolate* pIsolate, const v8::Local<v8::Context>& context,char* jsCode);
+
+		v8::Handle<v8::Value> CallJsFoo(v8::Isolate* pIsolate, const v8::Local<v8::Context>& context, const char* fooname, unsigned int argc, v8::Handle<v8::Value>* params);
+
+		v8::Handle<v8::Value> I64Cpp2JS(v8::Isolate* isolate, const v8::Local<v8::Context>& context, int64_t v);
 
 		namespace FooBind
 		{
-			void exportFoo(const FunctionCallbackInfo<v8::Value>& args);
+			void exportFoo(const v8::FunctionCallbackInfo<v8::Value>& args);
 
-			inline JsFooBindMap GetBindFoos(Isolate* pIsolate)
+			inline JsFooBindMap GetBindFoos(v8::Isolate* pIsolate)
 			{
 #define bindfoo(fooname)\
-	ret.insert(std::pair<std::string, Local<FunctionTemplate>>(#fooname, v8::FunctionTemplate::New(pIsolate, fooname)))
+	ret.insert(std::pair<std::string, v8::Local<v8::FunctionTemplate>>(#fooname, v8::FunctionTemplate::New(pIsolate, fooname)))
 
 				JsFooBindMap ret;
 				bindfoo(exportFoo);

@@ -20,6 +20,11 @@
 #include <contractutil_plugin.hpp>
 #include <mongodb_plugin.hpp>
 
+#ifdef USE_V8
+#include "jsvm_xmax.h"
+#endif
+
+
 using namespace Baseapp;
 
 namespace fc {
@@ -52,12 +57,27 @@ int main(int argc, char** argv)
 
 		regist_plugins();
 
-		if (!app().init<Xmaxplatform::blockchain_plugin>(argc, argv))
-			return -1;
-		initialize_logging();
-		ilog("xmaxrun init success!");
-		app().startup();
-		app().exec();
+#ifdef USE_V8
+		Xmaxplatform::Chain::jsvm_xmax::get().V8EnvInit();
+		{
+			v8::Isolate::Scope isolate_scope(Xmaxplatform::Chain::jsvm_xmax::get().V8GetIsolate());
+			// Create a stack-allocated handle scope.
+			v8::HandleScope handle_scope(Xmaxplatform::Chain::jsvm_xmax::get().V8GetIsolate());
+			v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(Xmaxplatform::Chain::jsvm_xmax::get().V8GetIsolate());
+			Xmaxplatform::Chain::jsvm_xmax::get().V8SetupGlobalObjTemplate(&global);
+#endif
+
+			if (!app().init<Xmaxplatform::blockchain_plugin>(argc, argv))
+				return -1;
+			initialize_logging();
+			ilog("xmaxrun init success!");
+			app().startup();
+			app().exec();
+
+#ifdef USE_V8
+		}
+		Xmaxplatform::Chain::jsvm_xmax::get().V8EnvDiscard();
+#endif
 
 	}
 	catch (const fc::exception& e) {
