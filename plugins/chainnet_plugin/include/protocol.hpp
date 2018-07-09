@@ -156,6 +156,16 @@ namespace Xmaxplatform {
 	   uint32_t  last_irreversible_block_num;
    };
 
+   struct connecting_nodes_message
+   {
+	   Chain::vector<Chain::string> endingPointList;
+	   bool isEmpty() const
+	   {
+		   return endingPointList.empty();
+	   }
+   };
+
+
    using net_message = static_variant<handshake_message,
                                       leave_message,
                                       time_message,
@@ -167,7 +177,8 @@ namespace Xmaxplatform {
                                       signed_block,
 									  signed_block_list,
 									  block_confirmation,
-									  request_block_message>;
+									  request_block_message,
+									  connecting_nodes_message>;
 
 } // namespace Xmaxplatform
 
@@ -188,6 +199,7 @@ FC_REFLECT(Xmaxplatform::request_message, (req_trx)(req_blocks))
 FC_REFLECT(Xmaxplatform::sync_request_message, (start_block)(end_block))
 FC_REFLECT(Xmaxplatform::signed_block_list, (blockList));
 FC_REFLECT(Xmaxplatform::request_block_message, (last_irreversible_block_num));
+FC_REFLECT(Xmaxplatform::connecting_nodes_message, (endingPointList));
 /**
  *
 Goals of Network Code

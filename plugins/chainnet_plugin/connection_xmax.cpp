@@ -271,4 +271,21 @@ namespace Xmaxplatform {
 		}
 	}
 
+	std::string connection_xmax::get_connecting_endpoint()
+	{
+		std::string host;
+		if (socket != nullptr)
+		{
+			std::string ip = socket->remote_endpoint().address().to_string();
+			std::string port =  std::to_string(socket->remote_endpoint().port());
+			host = ip + ":" + port;
+		}
+
+		return host;
+	}
+
+	void connection_xmax::send_connection_iplist(const connecting_nodes_message& msg)
+	{
+		enqueue(msg);
+	}
 }

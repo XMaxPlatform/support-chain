@@ -163,6 +163,8 @@ namespace Xmaxplatform {
 
       shared_ptr<tcp::resolver>     resolver;
 
+
+	  Chain::string connectImpl(const Chain::string& endPoint);
       void connect( connection_ptr c );
       void connect( connection_ptr c, tcp::resolver::iterator endpoint_itr );
       void start_session( connection_ptr c );
@@ -207,11 +209,14 @@ namespace Xmaxplatform {
 	  void handle_message(connection_ptr c, const block_confirmation &msg);
 	  void handle_message(connection_ptr c, const signed_block_list &msg);
 	  void handle_message(connection_ptr c, const request_block_message &msg);
+	  void handle_message(connection_ptr c, const connecting_nodes_message& msg);
 
       void start_conn_timer( );
       void start_txn_timer( );
       void start_monitors( );
 
+	  void broadcast_connectingip(connection_ptr cp);
+		
       void expire_txns( );
       void connection_monitor( );
       /** \name Peer Timestamps
@@ -273,6 +278,18 @@ namespace Xmaxplatform {
    const fc::string connection_xmax::logger_name("connection_xmax");
    fc::logger connection_xmax::logger(connection_xmax::logger_name);
 
+   Chain::string chainnet_plugin_impl::connectImpl(const Chain::string& endPoint)
+   {
+	   if (this->find_connection(endPoint))
+		   return "already connected";
+
+	   connection_ptr c = std::make_shared<connection_xmax>(endPoint);
+	   fc_dlog(this->logger, "adding new connection to the list");
+	   this->connections.insert(c);
+	   fc_dlog(this->logger, "calling active connector");
+	   this->connect(c);
+	   return "added connection";
+   }
 
    void chainnet_plugin_impl::connect( connection_ptr c ) {
       if( c->no_retry != leave_reason::no_reason) {
@@ -363,6 +380,8 @@ namespace Xmaxplatform {
                   connection_ptr c = std::make_shared<connection_xmax>( socket );
                   connections.insert( c );
                   start_session( c );
+				  broadcast_connectingip(c);
+
                } else {
                   elog( "Error max_client_count ${m} exceeded",
                         ( "m", max_client_count) );
@@ -775,6 +794,14 @@ namespace Xmaxplatform {
 	   _send_blocklist_impl(c, msg);
    }
 
+   void chainnet_plugin_impl::handle_message(connection_ptr c, const connecting_nodes_message& msg)
+   {
+		for (const Chain::string& ep : msg.endingPointList)
+		{
+			connectImpl(ep);
+		}
+   }
+
    void chainnet_plugin_impl::_send_blocklist_impl(connection_ptr c, const request_block_message &msg)
    {
 	   Chain::vector<Chain::signed_block> blockList = app().get_plugin<blockbuilder_plugin>().get_sync_blocklist(msg.last_irreversible_block_num);
@@ -902,6 +929,23 @@ namespace Xmaxplatform {
 	   for (auto con : connections)
 	   {
 		   con->send_blockconfirm(confirm);
+	   }
+   }
+
+   void chainnet_plugin_impl::broadcast_connectingip(connection_ptr cp)
+   {
+	   connecting_nodes_message msg;
+	   for (auto con : connections)
+	   {
+		   if (cp != con)
+		   {
+			   msg.endingPointList.push_back(std::move(con->get_connecting_endpoint()));
+		   }   
+	   }
+
+	   if (!msg.isEmpty())
+	   {
+		   cp->send_connection_iplist(msg);
 	   }
    }
 
@@ -1126,15 +1170,7 @@ namespace Xmaxplatform {
     *  Used to trigger a new connection from RPC API
     */
    Chain::string chainnet_plugin::connect( const Chain::string& host ) {
-      if( my->find_connection( host ) )
-         return "already connected";
-
-      connection_ptr c = std::make_shared<connection_xmax>(host);
-      fc_dlog(my->logger,"adding new connection to the list");
-      my->connections.insert( c );
-      fc_dlog(my->logger,"calling active connector");
-      my->connect( c );
-      return "added connection";
+	   return my->connectImpl(host);
    }
 
    Chain::string chainnet_plugin::disconnect( const Chain::string& host ) {
