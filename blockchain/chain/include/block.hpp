@@ -105,7 +105,7 @@ namespace Xmaxplatform { namespace Chain {
 
 FC_REFLECT_ENUM(Xmaxplatform::Chain::transaction_receipt::result_code, (applied)(failure))
 
-FC_REFLECT(Xmaxplatform::Chain::transaction_receipt_header, (receipt_num)(result))
+FC_REFLECT(Xmaxplatform::Chain::transaction_receipt_header, (receipt_idx)(result))
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::transaction_receipt, (Xmaxplatform::Chain::transaction_receipt_header), (trx))
 
 FC_REFLECT(Xmaxplatform::Chain::block_header, (previous)(timestamp)(transaction_merkle_root)(builder)(next_builders))

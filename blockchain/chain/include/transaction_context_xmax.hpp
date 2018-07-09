@@ -35,7 +35,7 @@ namespace Chain {
 		std::vector<message_receipt> msg_receipts;
 	protected:
 
-		void exec_message(const Basetypes::message & msg, uint32_t apply_depth);
+		void exec_message(const Chain::message_xmax & msg, uint32_t apply_depth);
 		message_response exec_one_message(message_context_xmax& context);
 
 		chain_xmax&						chain;

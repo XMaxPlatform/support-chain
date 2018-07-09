@@ -26,7 +26,8 @@ namespace Chain {
 
 		for (const auto& msg : trx.messages)
 		{
-			exec_message(msg, 0);
+			const Chain::message_xmax xmxmsg(msg);
+			exec_message(xmxmsg, 0);
 		}
 	}
 
@@ -35,7 +36,7 @@ namespace Chain {
 		dbsession.squash();
 	}
 
-	void transaction_context_xmax::exec_message(const Basetypes::message& msg, uint32_t apply_depth)
+	void transaction_context_xmax::exec_message(const Chain::message_xmax& msg, uint32_t apply_depth)
 	{
 
 		XMAX_ASSERT(apply_depth < Config::max_message_apply_depth,

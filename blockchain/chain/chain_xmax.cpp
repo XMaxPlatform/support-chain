@@ -31,7 +31,6 @@
 #include <chrono>
 
 #include <objects/transaction_object.hpp>
-#include <objects/generated_transaction_object.hpp>
 #include <objects/block_summary_object.hpp>
 #include <objects/account_object.hpp>
 #include <objects/vote_objects.hpp>
@@ -130,7 +129,6 @@ namespace Xmaxplatform { namespace Chain {
             _context->block_db.add_index<key64x64x64_value_index>();
 
 			_context->block_db.add_index<transaction_multi_index>();
-			_context->block_db.add_index<generated_transaction_multi_index>();
 			_context->block_db.add_index<block_summary_multi_index>();
 			_context->block_db.add_index<block_multi_index>();
 
@@ -220,7 +218,7 @@ namespace Xmaxplatform { namespace Chain {
 						signed_trx.messages.push_back(m);
 					});
 
-					transaction_request_ptr request = std::make_shared<transaction_request>(std::move(signed_trx));
+					transaction_request_ptr request = std::make_shared<transaction_request>(signed_trx);
 					apply_transaction_impl(request);
 				}
 
@@ -484,154 +482,13 @@ namespace Xmaxplatform { namespace Chain {
 		}
 
 
-		//--------------------------------------------------
-		Xmaxplatform::Chain::processed_transaction chain_xmax::transaction_from_variant(const fc::variant& v) const {
-			const variant_object& vo = v.get_object();
-#define GET_FIELD( VO, FIELD, RESULT ) \
-   if( VO.contains(#FIELD) ) fc::from_variant( VO[#FIELD], RESULT.FIELD )
 
-			processed_transaction result;
-			GET_FIELD(vo, ref_block_num, result);
-			GET_FIELD(vo, ref_block_prefix, result);
-			GET_FIELD(vo, expiration, result);
-			GET_FIELD(vo, scope, result);
-			GET_FIELD(vo, signatures, result);
-
-			if (vo.contains("messages")) {
-				const vector<variant>& msgs = vo["messages"].get_array();
-				result.messages.resize(msgs.size());
-				for (uint32_t i = 0; i < msgs.size(); ++i) {
-					const auto& vo = msgs[i].get_object();
-					GET_FIELD(vo, code, result.messages[i]);
-					GET_FIELD(vo, type, result.messages[i]);
-					GET_FIELD(vo, authorization, result.messages[i]);
-
-					if (vo.contains("data")) {
-						const auto& data = vo["data"];
-						if (data.is_string()) {
-							GET_FIELD(vo, data, result.messages[i]);
-						}
-						else if (data.is_object()) {
-							result.messages[i].data = message_to_binary(result.messages[i].code, result.messages[i].type, data);							
-						}
-					}
-				}
-			}
-			if (vo.contains("output")) {
-				const vector<variant>& outputs = vo["output"].get_array();
-			}
-			return result;
-#undef GET_FIELD
-		}
-
-		//--------------------------------------------------
-		fc::variant chain_xmax::transaction_to_variant(const processed_transaction& trx) const
-		{
-#define SET_FIELD( MVO, OBJ, FIELD ) MVO(#FIELD, OBJ.FIELD)
-
-			fc::mutable_variant_object trx_mvo;
-			SET_FIELD(trx_mvo, trx, ref_block_num);
-			SET_FIELD(trx_mvo, trx, ref_block_prefix);
-			SET_FIELD(trx_mvo, trx, expiration);
-			SET_FIELD(trx_mvo, trx, scope);
-			SET_FIELD(trx_mvo, trx, signatures);
-
-			vector<fc::mutable_variant_object> msgs(trx.messages.size());
-			vector<fc::variant> msgsv(msgs.size());
-
-
-			for (uint32_t i = 0; i < trx.messages.size(); ++i) {
-				auto& msg_mvo = msgs[i];
-				auto& msg = trx.messages[i];
-				SET_FIELD(msg_mvo, msg, code);
-				SET_FIELD(msg_mvo, msg, type);
-				SET_FIELD(msg_mvo, msg, authorization);
-
-				const auto& code_account = _context->block_db.get<account_object, by_name>(msg.code);
-				if (!Basetypes::abi_serializer::is_empty_abi(code_account.abi)) {
-					try {
-						msg_mvo("data", message_from_binary(msg.code, msg.type, msg.data));
-						msg_mvo("hex_data", msg.data);
-					}
-					catch (...) {
-						SET_FIELD(msg_mvo, msg, data);
-					}
-				}
-				else {
-					SET_FIELD(msg_mvo, msg, data);
-				}
-
-				msgsv[i] = std::move(msgs[i]);
-			}
-			trx_mvo("messages", std::move(msgsv));
-			trx_mvo("output", fc::variant(trx.output));
-
-			return fc::variant(std::move(trx_mvo));
-#undef SET_FIELD
-		}
-
-
-		//--------------------------------------------------
-		fc::variant chain_xmax::transaction_events_to_variant(const processed_transaction& trx) const {
-#define SET_FIELD(MVO, OBJ, FIELD) MVO(#FIELD, OBJ.FIELD)
-
-			fc::mutable_variant_object events_mvo;
-
-			vector<event_output> evtv;
-
-			for (auto& message_output : trx.output)
-			{
-				for (auto& event_output : message_output.events)
-				{
-					evtv.push_back(event_output);
-				}
-			}
-
-			vector<fc::mutable_variant_object> evtomv(evtv.size());
-			vector<fc::variant> evtov(evtomv.size());
-			for (int i = 0; i < evtv.size(); ++i)
-			{
-				auto& evt = evtv[i];
-				auto& evto = evtomv[i];
-				SET_FIELD(evto, evt, name);
-				SET_FIELD(evto, evt, code);
-				SET_FIELD(evto, evt, type);
-				//SET_FIELD( evto, evt, data );
-				evto("data", event_from_binary(evt.code, evt.event_type_name, evt.data));
-
-				evtov[i] = std::move(evtomv[i]);
-			}
-
-			//events_mvo( "events", fc::variant( evtov ) );
-
-			return evtov;
-#undef SET_FIELD
-		}
-
-		Xmaxplatform::Chain::processed_transaction chain_xmax::push_transaction(const signed_transaction& trx, uint32_t skip /*= skip_nothing*/)
-		{
-			try {
-				transaction_request_ptr request = std::make_shared<transaction_request>(trx);
-				return _push_transaction(request);
-			} FC_CAPTURE_AND_RETHROW((trx))
-		}
-
-		Xmaxplatform::Chain::processed_transaction chain_xmax::_push_transaction(transaction_request_ptr request)
+		transaction_response_ptr chain_xmax::push_transaction(const signed_transaction& trx, uint32_t skip /*= skip_nothing*/)
 		{
 
-			FC_ASSERT(_context->pending_transactions.size() < 1000, "too many pending transactions, try again later");
+			transaction_request_ptr request = std::make_shared<transaction_request>(trx);
+			return push_transaction(request);
 
-			auto temp_session = _context->block_db.start_undo_session(true);
-			validate_referenced_accounts(request->signed_trx);
-			check_transaction_authorization(request->signed_trx);
-			auto pt = apply_transaction(request->signed_trx);
-			_context->pending_transactions.push_back(request);
-
-			temp_session.squash();
-
-			on_pending_transaction(request->signed_trx);
-
-			return pt;
 		}
 
 		transaction_response_ptr chain_xmax::push_transaction(transaction_request_ptr request)
@@ -1087,39 +944,7 @@ namespace Xmaxplatform { namespace Chain {
 			return msg_handler();
 		}
 
-        void chain_xmax::process_message(const transaction& trx, account_name code,
-                                         const message_xmax& message, message_output& output,
-                                         message_context_xmax* parent_context, int depth,
-                                         const fc::time_point& start_time ) {
 
-   //         auto us_duration = (fc::time_point::now() - start_time).count();
-
-   //         message_context_xmax xmax_ctx(*this, _context->block_db, trx, message, code);
-   //         apply_message(xmax_ctx);
-
-			//for (auto& event_output : xmax_ctx.events)
-			//{
-			//	output.events.push_back(std::move(event_output));
-			//}
-
-   //         output.notify.reserve( xmax_ctx.notified.size() );
-
-   //         for( uint32_t i = 0; i < xmax_ctx.notified.size(); ++i ) {
-   //             try {
-   //                 auto notify_code = xmax_ctx.notified[i];
-   //                 output.notify.push_back( {notify_code} );
-   //                 process_message(trx, notify_code, message, output.notify.back().output, &xmax_ctx, depth + 1, start_time );
-   //             } FC_CAPTURE_AND_RETHROW((xmax_ctx.notified[i]))
-   //         }
-
-   //         // combine inline messages and process
-   //         if (xmax_ctx.inline_messages.size() > 0) {
-   //             output.inline_trx = inline_transaction(trx);
-   //             (*output.inline_trx).messages = std::move(xmax_ctx.inline_messages);
-   //         }
-
-
-        }
 
 
         void chain_xmax::apply_message(message_context_xmax& context)
@@ -1160,10 +985,6 @@ namespace Xmaxplatform { namespace Chain {
 			XMAX_ASSERT(transaction == nullptr, tx_duplicate, "Transaction is not unique");
 		}
 
-		void chain_xmax::validate_uniqueness(const generated_transaction& trx)const {
-			if (!should_check_for_duplicate_transactions()) return;
-		}
-
 		void chain_xmax::record_transaction(const Chain::signed_transaction& trx) {
 			//Insert transaction into unique transactions database.
 			_context->block_db.create<transaction_object>([&](transaction_object& transaction) {
@@ -1171,14 +992,6 @@ namespace Xmaxplatform { namespace Chain {
 				transaction.expiration = trx.expiration;
 			});
 		}
-
-		void chain_xmax::record_transaction(const generated_transaction& trx) {
-			_context->block_db.modify(_context->block_db.get<generated_transaction_object, generated_transaction_object::by_trx_id>(trx.id), [&](generated_transaction_object& transaction) {
-				transaction.status = generated_transaction_object::PROCESSED;
-			});
-		}
-
-
 
 
 		void chain_xmax::validate_tapos(const transaction& trx)const {
@@ -1317,6 +1130,73 @@ namespace Xmaxplatform { namespace Chain {
 				return ptrx;
 			} FC_CAPTURE_AND_RETHROW((trx))
 		}
+
+
+
+		transaction_package_ptr chain_xmax::transaction_from_variant(const fc::variant& v) const
+		{
+
+			const variant_object& vo = v.get_object();
+#define GET_FIELD( VO, FIELD, RESULT ) \
+   if( VO.contains(#FIELD) ) fc::from_variant( VO[#FIELD], RESULT.FIELD )
+
+			signed_transaction result;
+			GET_FIELD(vo, ref_block_num, result);
+			GET_FIELD(vo, ref_block_prefix, result);
+			GET_FIELD(vo, expiration, result);
+			GET_FIELD(vo, scope, result);
+			GET_FIELD(vo, signatures, result);
+
+			if (vo.contains("messages")) {
+				const vector<variant>& msgs = vo["messages"].get_array();
+				result.messages.resize(msgs.size());
+				for (uint32_t i = 0; i < msgs.size(); ++i) {
+					const auto& vo = msgs[i].get_object();
+					GET_FIELD(vo, code, result.messages[i]);
+					GET_FIELD(vo, type, result.messages[i]);
+					GET_FIELD(vo, authorization, result.messages[i]);
+
+					if (vo.contains("data")) {
+						const auto& data = vo["data"];
+						if (data.is_string()) {
+							GET_FIELD(vo, data, result.messages[i]);
+						}
+						else if (data.is_object()) {
+							result.messages[i].data = message_to_binary(result.messages[i].code, result.messages[i].type, data);
+						}
+					}
+				}
+			}
+			return std::make_shared<transaction_package>(result);
+#undef GET_FIELD
+		}
+		fc::variant       chain_xmax::transaction_to_variant(const transaction_response& response) const
+		{
+			fc::variant vo;
+			fc::to_variant(response, vo);
+			return vo;
+		}
+		fc::variant       chain_xmax::transaction_events_to_variant(const transaction_response& trx)const
+		{
+
+			vector<string> outstrings;
+			for (const auto& it: trx.message_responses)
+			{
+				outstrings.push_back(it.out_string);
+			}
+
+			vector<fc::mutable_variant_object> outobjs(outstrings.size());
+			vector<fc::variant> outs(outstrings.size());
+			 
+			for (int i = 0; i < outstrings.size(); ++i)
+			{
+				outobjs[i]("event", outstrings[i]);
+
+				outs[i] = outobjs[i];
+			}
+			return outs;
+		}
+
 
 		void chain_xmax::require_account(const account_name& name) const
 		{
