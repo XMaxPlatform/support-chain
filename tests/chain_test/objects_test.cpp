@@ -33,22 +33,22 @@ namespace {
 		erc20_token_object obj;
 		//erc20_token_object obj;
 		obj.id = id;
-		obj.token_name = asset_symbol(MAKE_TOKEN_NAME(token_name[0], token_name[1], token_name[2]));
+		obj.token_name = token_name_from_string(token_name);
 		obj.owner_name = xmax::string_to_name(owner_name.c_str());
 		obj.token_amount = amount;
 		tbl.get<by_token_and_owner>().insert(obj);
 	}
 
 	template <typename MultiIndexType>
-	static void AddErc721ObjToTable(MultiIndexType& tbl, erc721_token_object::id_type id, const std::string& token_name,
-		const std::string& owner_name, const Xmaxplatform::Chain::xmax_erc721_id& token_id) {
+	static void AddErc721ObjToTable(MultiIndexType& tbl, erc721_token_object_test::id_type id, const std::string& token_name,
+		const std::string& owner_name/*, const Xmaxplatform::Chain::xmax_erc721_id& token_id*/) {
 		assert(token_name.size() == 3);		
 
 		erc721_token_object_test obj;
 		obj.id = id;		
-		obj.token_name = asset_symbol(MAKE_TOKEN_NAME(token_name[0], token_name[1], token_name[2]));
+		obj.token_name = token_name_from_string(token_name);
 		obj.owner_name = xmax::string_to_name(owner_name.c_str());
-		obj.minted_tokens.insert(token_id);
+		//obj.minted_tokens.insert(token_id);
 		tbl.get<by_token_name>().insert(obj);
 	}
 
@@ -119,18 +119,24 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(erc721_test_suite)
 
-BOOST_AUTO_TEST_CASE(erc721_test_add) {
+BOOST_AUTO_TEST_CASE(erc72_test_issue) {
+
 	auto& tbl = GetTestErc721Container();
 
-	
-	AddErc721ObjToTable(tbl, 1, "TST", "testera", Xmaxplatform::Chain::xmax_erc721_id("f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b"));
-	AddErc721ObjToTable(tbl, 2, "TST", "testerb", Xmaxplatform::Chain::xmax_erc721_id("f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b"));
-	AddErc721ObjToTable(tbl, 3, "TSA", "testera", Xmaxplatform::Chain::xmax_erc721_id("f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b"));
-	AddErc721ObjToTable(tbl, 4, "TSA", "testerb", Xmaxplatform::Chain::xmax_erc721_id("f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b"));
-	//error case
-	AddErc721ObjToTable(tbl, 5, "TST", "testera", Xmaxplatform::Chain::xmax_erc721_id("f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b"));
+	AddErc721ObjToTable(tbl, 1, "AAA", "testera");
+	AddErc721ObjToTable(tbl, 2, "AAB", "testera");
+	AddErc721ObjToTable(tbl, 3, "AAC", "testerb");
+	AddErc721ObjToTable(tbl, 4, "AAD", "testerc");
+	//Error cases
+	AddErc721ObjToTable(tbl, 5, "AAA", "testerc");
 
 	BOOST_CHECK(tbl.size() == 4);
+
+}
+
+BOOST_AUTO_TEST_CASE(erc721_test_mint) {
+	auto& tbl = GetTestErc721Container();
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()
