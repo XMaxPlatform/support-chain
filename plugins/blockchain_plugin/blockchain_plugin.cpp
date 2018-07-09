@@ -253,7 +253,7 @@ namespace Chain_APIs{
 	Xmaxplatform::Chain_APIs::read_only::get_required_keys_result read_only::get_required_keys(const get_required_keys_params& params) const
 	{
 		auto pretty_input = _chain.transaction_from_variant(params.transaction);
-		auto required_keys_set = _chain.get_required_keys(pretty_input, params.available_keys);
+		auto required_keys_set = _chain.get_required_keys(pretty_input->unpack_trx(), params.available_keys);
 		get_required_keys_result result;
 		result.required_keys = required_keys_set;
 		return result;
@@ -324,11 +324,23 @@ namespace Chain_APIs{
 	//--------------------------------------------------
 	Xmaxplatform::Chain_APIs::read_write::push_transaction_results read_write::push_transaction(const push_transaction_params& params)
 	{
-		auto pretty_input = _chain.transaction_from_variant(params);
-		auto ptrx = _chain.push_transaction(pretty_input, skip_flags);
-		auto pretty_trx = _chain.transaction_to_variant(ptrx);
-		auto pretty_events = _chain.transaction_events_to_variant(ptrx);
-		return read_write::push_transaction_results{ pretty_input.id(), pretty_trx, pretty_events };
+
+
+
+		Chain::transaction_package_ptr package = _chain.transaction_from_variant(params);
+
+		Chain::transaction_request_ptr request = std::make_shared<Chain::transaction_request>(std::move(*package.get()));
+
+		Chain::transaction_response_ptr respone = _chain.push_transaction(request);
+
+		auto pretty_trx = _chain.transaction_to_variant(*respone);
+		auto pretty_events = _chain.transaction_events_to_variant(*respone);
+		return read_write::push_transaction_results{ request->signed_trx.id(), pretty_trx, pretty_events };
+
+		//auto ptrx = _chain.push_transaction(pretty_input, skip_flags);
+		//auto pretty_trx = _chain.transaction_to_variant(ptrx);
+		//auto pretty_events = _chain.transaction_events_to_variant(ptrx);
+		//return read_write::push_transaction_results{ pretty_input.id(), pretty_trx, pretty_events };
 	}
 
 

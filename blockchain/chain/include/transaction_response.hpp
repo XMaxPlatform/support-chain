@@ -38,4 +38,4 @@ namespace Chain {
 }
 }
 FC_REFLECT(Xmaxplatform::Chain::message_response, (owner_id)(msg_body)(msg_receipt)(out_string)(sub_message))
-FC_REFLECT(Xmaxplatform::Chain::transaction_response,(message_responses))
+FC_REFLECT(Xmaxplatform::Chain::transaction_response,(receipt)(message_responses))

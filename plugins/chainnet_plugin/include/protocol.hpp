@@ -130,20 +130,8 @@ namespace Xmaxplatform {
     ordered_blk_ids req_blocks;
   };
 
-  struct processed_trans_summary {
-	  xmax_type_transaction_id id;
-	  Chain::vector<message_output> outmsgs;
-  };
-
-  struct thread_ids {
-	  Chain::vector<xmax_type_transaction_id> gen_trx; // is this necessary to send?
-	  Chain::vector<processed_trans_summary> user_trx;
-  };
-
-  using threads_ids = Chain::vector<thread_ids>;
    struct block_summary_message {
       signed_block_header         block_header;
-	  Chain::vector<threads_ids>           trx_ids;
    };
 
    struct sync_request_message {
@@ -180,9 +168,8 @@ FC_REFLECT(Xmaxplatform::handshake_message,
 (os)(agent)(generation))
 FC_REFLECT(Xmaxplatform::leave_message, (reason)(node_id))
 FC_REFLECT(Xmaxplatform::time_message, (org)(rec)(xmt)(dst))
-FC_REFLECT(Xmaxplatform::processed_trans_summary, (id)(outmsgs))
-FC_REFLECT(Xmaxplatform::thread_ids, (gen_trx)(user_trx))
-FC_REFLECT(Xmaxplatform::block_summary_message, (block_header)(trx_ids))
+
+FC_REFLECT(Xmaxplatform::block_summary_message, (block_header))
 FC_REFLECT(Xmaxplatform::notice_message, (known_trx)(known_blocks))
 FC_REFLECT(Xmaxplatform::request_message, (req_trx)(req_blocks))
 FC_REFLECT(Xmaxplatform::sync_request_message, (start_block)(end_block))

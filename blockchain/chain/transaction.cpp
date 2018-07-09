@@ -66,11 +66,6 @@ namespace Xmaxplatform {
 			return enc.result();
 		}
 
-		xmax_type_summary generated_transaction::merkle_digest() const {
-			xmax_type_summary::encoder enc;
-			fc::raw::pack(enc, *this);
-			return enc.result();
-		}
 
 	}
 } // Xmaxplatform::chain
