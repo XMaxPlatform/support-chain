@@ -16,6 +16,7 @@
 #include <chrono>
 #include <boost/lexical_cast.hpp>
 #include <fc/utf8.hpp>
+#include <objects/account_object.hpp>
 #if WIN32
 #include <fc/int128.hpp>
 #endif
@@ -30,6 +31,7 @@ namespace Xmaxplatform {
 	namespace Chain {
 
 		jsvm_xmax::jsvm_xmax() 
+			:current_validate_context(nullptr)
 		{
 
 		}
@@ -108,7 +110,7 @@ namespace Xmaxplatform {
 				load(c.code, c.db);
 				const auto& recipient = c.db.get<account_object, by_name>(c.code);
 				
-				vm_onInit((char*)recipient.code.data());
+				vm_onInit();
 
 			} FC_CAPTURE_AND_RETHROW()
 		}
@@ -148,10 +150,6 @@ namespace Xmaxplatform {
 
 		void jsvm_xmax::V8EnvDiscard()
 		{
-			if (current_state!=NULL&& !current_state->current_context.IsEmpty())
-			{
-				current_state->current_context.Get(m_pIsolate)->Exit();
-			}
 			m_pIsolate->Dispose();
 			v8::V8::Dispose();
 			v8::V8::ShutdownPlatform();
@@ -159,27 +157,49 @@ namespace Xmaxplatform {
 			delete m_CreateParams.array_buffer_allocator;
 		}
 
-		void  jsvm_xmax::vm_apply(char* code) {
+		void jsvm_xmax::V8ExitContext()
+		{
+			if (current_state != NULL && !current_state->current_context.IsEmpty())
+			{
+				current_state->current_context.Get(m_pIsolate)->Exit();
+			}
+		}
+
+		void  jsvm_xmax::vm_apply() {
 		
 			CleanInstruction();
 			Local<Context> context = current_state->current_context.Get(m_pIsolate);
-			message_context_xmax & validate_context = *jsvm_xmax::get().current_validate_context;
+			message_context_xmax* p_validate_context = jsvm_xmax::get().current_validate_context;
 			Handle<v8::Value> params[2];
-			params[0] = I64Cpp2JS(m_pIsolate, context, uint64_t(validate_context.msg.code));
-			params[1] = I64Cpp2JS(m_pIsolate, context, uint64_t(validate_context.msg.type));
+			uint64_t code = 0;
+			uint64_t type = 0;
+			if(p_validate_context!=nullptr)
+			{
+				code = uint64_t(p_validate_context->msg.code);
+				type = uint64_t(p_validate_context->msg.type);
+			}
+			params[0] = I64Cpp2JS(m_pIsolate, context, code);
+			params[1] = I64Cpp2JS(m_pIsolate, context, type);
 			CallJsFoo(m_pIsolate, context, "apply", 0, NULL);
 		
 		}
 
-		void  jsvm_xmax::vm_onInit(char* code)
+		void  jsvm_xmax::vm_onInit()
 		{
 			try {
 				CleanInstruction();
 				Local<Context> context = current_state->current_context.Get(m_pIsolate);
-				message_context_xmax & validate_context = *jsvm_xmax::get().current_validate_context;
+				message_context_xmax* p_validate_context = jsvm_xmax::get().current_validate_context;
 				Handle<v8::Value> params[2];
-				params[0] = I64Cpp2JS(m_pIsolate, context, uint64_t(validate_context.msg.code));
-				params[1] = I64Cpp2JS(m_pIsolate, context, uint64_t(validate_context.msg.type));
+				uint64_t code = 0;
+				uint64_t type = 0;
+				if (p_validate_context != nullptr)
+				{
+					code = uint64_t(p_validate_context->msg.code);
+					type = uint64_t(p_validate_context->msg.type);
+				}
+				params[0] = I64Cpp2JS(m_pIsolate, context, code);
+				params[1] = I64Cpp2JS(m_pIsolate, context, type);
 				CallJsFoo(m_pIsolate, context, "init", 0, NULL);
 
 			}
@@ -192,18 +212,20 @@ namespace Xmaxplatform {
 
 		void jsvm_xmax::load(const account_name& name, const Basechain::database& db)
 		{
-			const auto& recipient = db.get<account_object, by_name>(name);
-			LoadScript(recipient);
+			const auto& accountobj = db.get<account_object, by_name>(name);
+
+			message_context_xmax& msg_contxt = *jsvm_xmax::get().current_message_context;
+			const auto& recipient = msg_contxt.db.get<account_object, by_name>(msg_contxt.code);
+			LoadScript(name, recipient.code.data(), accountobj.abi, accountobj.code_version);
 		}
 
-		void jsvm_xmax::LoadScript(const account_object& recipient)
+		void jsvm_xmax::LoadScript(account_name name, const char* code,const shared_vector<char>& abi,const fc::sha256& code_version)
 		{
-			account_name name = recipient.name;
 			auto& state = instances[name];
 
-			if (state.code_version != recipient.code_version) {
+			if (state.code_version != code_version) {
 
-				state.code_version = fc::sha256();
+				state.code_version = code_version;
 				state.table_key_types.clear();
 
 				if (!state.current_context.IsEmpty())
@@ -211,28 +233,23 @@ namespace Xmaxplatform {
 
 				state.current_context = CreateJsContext(m_pIsolate, *m_pGlobalObjectTemplate);
 
-				if (!current_state->current_context.IsEmpty())
-					ExitJsContext(m_pIsolate, current_state->current_context);
+				V8ExitContext();
 
 				EnterJsContext(m_pIsolate, state.current_context);
 
-
-				message_context_xmax& msg_contxt = *jsvm_xmax::get().current_message_context;
-				const auto& recipient = msg_contxt.db.get<account_object, by_name>(msg_contxt.code);
-
-				state.current_script = CompileJsCode(m_pIsolate, state.current_context.Get(m_pIsolate), (char*)recipient.code.data());
+				state.current_script = CompileJsCode(m_pIsolate, state.current_context.Get(m_pIsolate), (char*)code);
 				current_state = &state;
-
+			
 				try
 				{
 					const auto init_time = fc::time_point::now();
 
 					//init abi
-					Basetypes::abi abi;
-					if (Basetypes::abi_serializer::to_abi(recipient.abi, abi))
+					Basetypes::abi byteabi;
+					if (Basetypes::abi_serializer::to_abi(abi, byteabi))
 					{
 						state.tables_fixed = true;
-						for (auto& table : abi.tables)
+						for (auto& table : byteabi.tables)
 						{
 							const auto key_type = to_key_type(table.index_type);
 							if (key_type == invalid_key_type)
@@ -253,6 +270,7 @@ namespace Xmaxplatform {
 				table_key_types = &state.table_key_types;
 				tables_fixed = state.tables_fixed;
 				table_storage = 0;
+
 			}
 			else if (current_state != &state)
 			{
@@ -263,6 +281,77 @@ namespace Xmaxplatform {
 				current_state = &state;
 			}
 		}
+
+		void jsvm_xmax::LoadScriptTest(account_name name, const char* code, const std::vector<char>& abi, const fc::sha256& code_version, bool sciptTest /*= false*/)
+		{
+			auto& state = instances[name];
+
+			if (state.code_version != code_version) {
+
+				state.code_version = fc::sha256();
+				state.table_key_types.clear();
+
+				if (!state.current_context.IsEmpty())
+					state.current_context.Reset();
+
+				state.current_context = CreateJsContext(m_pIsolate, *m_pGlobalObjectTemplate);
+
+				V8ExitContext();
+
+				EnterJsContext(m_pIsolate, state.current_context);
+
+				state.current_script = CompileJsCode(m_pIsolate, state.current_context.Get(m_pIsolate), (char*)code);
+				current_state = &state;
+				if (sciptTest)
+				{
+
+				}
+				else
+				{
+					try
+					{
+						const auto init_time = fc::time_point::now();
+
+						//init abi
+						Basetypes::abi byteabi;
+						if (Basetypes::abi_serializer::to_abi(abi, byteabi))
+						{
+							state.tables_fixed = true;
+							for (auto& table : byteabi.tables)
+							{
+								const auto key_type = to_key_type(table.index_type);
+								if (key_type == invalid_key_type)
+									throw Serialization::FatalSerializationException("For code \"" + (std::string)name + "\" index_type of \"" +
+										table.index_type + "\" referenced but not supported");
+
+								state.table_key_types.emplace(std::make_pair(table.table_name, key_type));
+							}
+						}
+					}
+					catch (Serialization::FatalSerializationException exception)
+					{
+						std::cerr << "Error:" << std::endl;
+						std::cerr << exception.message << std::endl;
+						throw;
+					}
+
+					table_key_types = &state.table_key_types;
+					tables_fixed = state.tables_fixed;
+					table_storage = 0;
+
+				}
+
+			}
+			else if (current_state != &state)
+			{
+				if (!current_state->current_context.IsEmpty())
+					ExitJsContext(m_pIsolate, current_state->current_context);
+
+				EnterJsContext(m_pIsolate, state.current_context);
+				current_state = &state;
+			}
+		}
+
 	}
 }
 

@@ -2,7 +2,6 @@
 #include <blockchain_exceptions.hpp>
 #include <message_xmax.hpp>
 #include <message_context_xmax.hpp>
-#include <objects/account_object.hpp>
 #include <libplatform/libplatform.h>
 #include <v8.h>
 
@@ -36,6 +35,7 @@ namespace Xmaxplatform {
 			void V8SetupGlobalObjTemplate(v8::Local<v8::ObjectTemplate>* pGlobalTemp);
 			void V8EnvInit();
 			void V8EnvDiscard();
+			void V8ExitContext();
 			v8::Isolate* V8GetIsolate();
 
 			void StoreInstruction(int ins);
@@ -47,7 +47,11 @@ namespace Xmaxplatform {
 			void validate(message_context_xmax& c);
 			void precondition(message_context_xmax& c);
 
-			void LoadScript(const account_object& ac);
+			void LoadScript(account_name name, const char* code, const shared_vector<char>& abi, const fc::sha256& code_version);
+			void LoadScriptTest(account_name name, const char* code, const std::vector<char>& abi, const fc::sha256& code_version, bool sciptTest = false);
+
+			void  vm_apply();
+			void  vm_onInit();
 
 			int64_t current_execution_time();
 
@@ -75,10 +79,7 @@ namespace Xmaxplatform {
 			void load(const account_name& name, const Basechain::database& db);
 			void  vm_validate();
 			void  vm_precondition();
-			void  vm_apply(char* code);
-			void  vm_onInit(char* code);
 
-			
 			void CleanInstruction();
 
 			map<account_name, ModuleState> instances;

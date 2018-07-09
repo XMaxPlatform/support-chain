@@ -1,18 +1,35 @@
 #ifdef USE_V8
 #include "jsvm_xmax.h"
 
-
+using namespace Xmaxplatform::Chain;
+using namespace v8;
 int main(int argc, char** argv)
 {
-	Xmaxplatform::Chain::jsvm_xmax::get().V8EnvInit();
+	jsvm_xmax::get().V8EnvInit();
 	{
-		v8::Isolate::Scope isolate_scope(Xmaxplatform::Chain::jsvm_xmax::get().V8GetIsolate());
+		Isolate::Scope isolate_scope(jsvm_xmax::get().V8GetIsolate());
 		// Create a stack-allocated handle scope.
-		v8::HandleScope handle_scope(Xmaxplatform::Chain::jsvm_xmax::get().V8GetIsolate());
-		v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(Xmaxplatform::Chain::jsvm_xmax::get().V8GetIsolate());
-		Xmaxplatform::Chain::jsvm_xmax::get().V8SetupGlobalObjTemplate(&global);
+		HandleScope handle_scope(jsvm_xmax::get().V8GetIsolate());
+		Local<ObjectTemplate> global = ObjectTemplate::New(jsvm_xmax::get().V8GetIsolate());
+
+		jsvm_xmax::get().V8SetupGlobalObjTemplate(&global);
+		std::vector<char> dummyabi;
+		{
+			const char* code1 = "var i = 33;function init(code,type){while(i>0)i--;return i;} ";
+			jsvm_xmax::get().LoadScriptTest(11, code1, dummyabi, fc::sha256("AA"), true);
+			jsvm_xmax::get().vm_onInit();
+		}
+
+		{
+			const char* code2 = "var i = 3;function init(code,type){while(i>0)i--;return i;} ";
+			jsvm_xmax::get().LoadScriptTest(22, code2, dummyabi, fc::sha256("BB"), true);
+			jsvm_xmax::get().vm_onInit();
+		}
+
+		//account_object first("","");
+		jsvm_xmax::get().V8ExitContext();
 	}
-	Xmaxplatform::Chain::jsvm_xmax::get().V8EnvDiscard();
+	jsvm_xmax::get().V8EnvDiscard();
 }
 
 
