@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include <blockchain_exceptions.hpp>
 #include <message_xmax.hpp>
 #include <message_context_xmax.hpp>
@@ -7,8 +6,7 @@
 #include <libplatform/libplatform.h>
 #include <v8.h>
 
-
-using namespace v8;
+#include "jsvm_util.h"
 
 namespace Xmaxplatform {
 	namespace Chain {
@@ -23,22 +21,28 @@ namespace Xmaxplatform {
 			};
 			typedef map<name, key_type> TableMap;
 			struct ModuleState {
-				
-
-				Local<Script>			 current_script;
-				Isolate*                 current_isolate = nullptr;
-				Local<Context>           current_context;
-
-				Isolate::Scope*          current_isolate_scope;
-				HandleScope*             current_handle_scope;	
-				Context::Scope*			 current_context_scope;
-
+				//one contract one context map.
+				v8::Local<v8::Script>			 current_script;		
+				PersistentCpyableContext           current_context;
+			
 				fc::sha256               code_version;
 				TableMap                 table_key_types;
 				bool                     tables_fixed = false;
 			};
 
 			static jsvm_xmax& get();
+
+			void V8SetInstructionCallBack(const char* name,void* foo);
+			void V8SetupGlobalObjTemplate(v8::Local<v8::ObjectTemplate>* pGlobalTemp);
+			void V8EnvInit();
+			void V8EnvDiscard();
+			v8::Isolate* V8GetIsolate();
+			
+			void StoreInstruction(int ins);
+			void CleanInstruction();
+
+			int GetExecutedInsCount();
+			std::list<int>& GetExecutedIns();
 
 			void init(message_context_xmax& c);
 			void apply(message_context_xmax& c, uint32_t execution_time, bool received_block);
@@ -70,7 +74,7 @@ namespace Xmaxplatform {
 			uint32_t                   row_overhead_db_limit_bytes = Config::default_row_overhead_db_limit_bytes;
 
 		private:
-			void InitV8();
+			
 			void load(const account_name& name, const Basechain::database& db);
 			void  vm_validate();
 			void  vm_precondition();
@@ -83,7 +87,31 @@ namespace Xmaxplatform {
 			map<account_name, ModuleState> instances;
 			fc::time_point checktimeStart;
 
+			v8::Isolate* m_pIsolate;
+			v8::Local<v8::ObjectTemplate>* m_pGlobalObjectTemplate;
+
+			int m_instructionCount;
+			std::list<int> m_Intrunctions;
+
+			v8::Isolate::CreateParams m_CreateParams;
+			v8::Platform* m_pPlatform;
+
+
 			jsvm_xmax();
 		};
+		inline v8::Isolate* jsvm_xmax::V8GetIsolate()
+		{
+			return m_pIsolate;
+		}
+		inline int jsvm_xmax::GetExecutedInsCount()
+		{
+			return m_instructionCount;
+		}
+
+		inline std::list<int>& jsvm_xmax::GetExecutedIns()
+		{
+			return m_Intrunctions;
+		}
+
 	}
 }
