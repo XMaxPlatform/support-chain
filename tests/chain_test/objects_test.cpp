@@ -15,6 +15,7 @@
 #include <boost/test/included/unit_test.hpp>
 #include <objects/object_utility.hpp>
 #include <objects/erc721_token_object.hpp>
+#include <basetypes.hpp>
 
 
 
@@ -24,11 +25,20 @@ using namespace Xmaxplatform::Basetypes;
 //*** Utility functions
 namespace {
 
+	static inline bool IsDuplicateTokenNameEx(const duplicate_type_exception& ex) {
+		std::string ex_msg = ex.to_string();
+		return ex_msg.find("Mint ERC721 token already exist") != std::string::npos;
+	}
+
+	template <typename MultiIndexType>
+	static inline const erc721_token_object_test& FindErc721ObjFromTable(MultiIndexType& tbl, const std::string& token_name) {
+		 auto it = tbl.get<by_token_name>().find(token_name_from_string(token_name));
+		 return *it;
+	}
+
 	template <typename MultiIndexType>
 	static void AddErc20ObjToTable(MultiIndexType& tbl, erc20_token_object::id_type id, const std::string& token_name,		
 		const std::string& owner_name, Xmaxplatform::Basetypes::share_type amount) {
-
-		assert(token_name.size() == 3);
 
 		erc20_token_object obj;
 		//erc20_token_object obj;
@@ -42,7 +52,6 @@ namespace {
 	template <typename MultiIndexType>
 	static void AddErc721ObjToTable(MultiIndexType& tbl, erc721_token_object_test::id_type id, const std::string& token_name,
 		const std::string& owner_name/*, const Xmaxplatform::Chain::xmax_erc721_id& token_id*/) {
-		assert(token_name.size() == 3);		
 
 		erc721_token_object_test obj;
 		obj.id = id;		
@@ -50,6 +59,18 @@ namespace {
 		obj.owner_name = xmax::string_to_name(owner_name.c_str());
 		//obj.minted_tokens.insert(token_id);
 		tbl.get<by_token_name>().insert(obj);
+	}
+
+	template <typename MultiIndexType>
+	static void MintErc721Token(MultiIndexType& tbl, const std::string& token_name, const Xmaxplatform::Chain::xmax_erc721_id& token_id) {
+		auto it = tbl.get<by_token_name>().find(token_name_from_string(token_name));		
+	
+		auto mint_it = it->minted_tokens.find(token_id);
+		XMAX_ASSERT(mint_it == it->minted_tokens.end(), duplicate_type_exception, "Mint ERC721 token already exist : ${name}", ("name", token_name));
+
+		tbl.get<by_token_name>().modify(it, [&token_id](erc721_token_object_test& o) {
+			o.minted_tokens.insert(token_id);
+		});
 	}
 
 	static erc20_token_multi_index_test& GetTestErc20Container() {
@@ -137,6 +158,16 @@ BOOST_AUTO_TEST_CASE(erc72_test_issue) {
 BOOST_AUTO_TEST_CASE(erc721_test_mint) {
 	auto& tbl = GetTestErc721Container();
 
+	
+	MintErc721Token(tbl, "AAA", Xmaxplatform::Chain::xmax_erc721_id("f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b"));
+	MintErc721Token(tbl, "AAA", Xmaxplatform::Chain::xmax_erc721_id("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"));
+	BOOST_CHECK_EXCEPTION({ 
+		MintErc721Token(tbl, "AAA", Xmaxplatform::Chain::xmax_erc721_id("f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b"));
+		}, duplicate_type_exception, IsDuplicateTokenNameEx);
+	MintErc721Token(tbl, "AAA", Xmaxplatform::Chain::xmax_erc721_id("88d4266fd4e6338d13b845fcf289579d209c897823b9217da3e161936f031589"));
+
+	auto& obj = FindErc721ObjFromTable(tbl, "AAA");
+	BOOST_CHECK(obj.minted_tokens.size() == 3);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
