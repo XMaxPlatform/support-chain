@@ -163,12 +163,20 @@ struct issueerc2o
    token_name	asset_symbol
    total_balance	asset
 
+struct minterc2o	
+	token_name asset_symbol
+	mint_amount asset
+
 struct issueerc21
 	creator	account_name
 	owner     authority
 	active    authority
 	recovery  authority
 	token_name asset_symbol
+
+struct minterc21	
+	token_name asset_symbol
+	token_id uint256
 
 struct revoketoken
 	token_name asset_symbol

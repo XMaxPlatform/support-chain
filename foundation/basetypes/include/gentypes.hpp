@@ -660,6 +660,26 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
+    struct minterc2o { 
+        minterc2o() = default;
+        minterc2o(const asset_symbol& token_name, const asset& mint_amount)
+           : token_name(token_name), mint_amount(mint_amount) {}
+
+        asset_symbol                     token_name;
+        asset                            mint_amount;
+    };
+
+    template<> struct get_struct<minterc2o> { 
+        static const struct_t& type() { 
+           static struct_t result = { "minterc2o", "", {
+                {"token_name", "asset_symbol"},
+                {"mint_amount", "asset"},
+              }
+           };
+           return result;
+         }
+    };
+
     struct issueerc21 { 
         issueerc21() = default;
         issueerc21(const account_name& creator, const authority& owner, const authority& active, const authority& recovery, const asset_symbol& token_name)
@@ -680,6 +700,26 @@ namespace Xmaxplatform { namespace Basetypes {
                 {"active", "authority"},
                 {"recovery", "authority"},
                 {"token_name", "asset_symbol"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct minterc21 { 
+        minterc21() = default;
+        minterc21(const asset_symbol& token_name, const uint256& token_id)
+           : token_name(token_name), token_id(token_id) {}
+
+        asset_symbol                     token_name;
+        uint256                          token_id;
+    };
+
+    template<> struct get_struct<minterc21> { 
+        static const struct_t& type() { 
+           static struct_t result = { "minterc21", "", {
+                {"token_name", "asset_symbol"},
+                {"token_id", "uint256"},
               }
            };
            return result;
@@ -736,5 +776,7 @@ FC_REFLECT( Xmaxplatform::Basetypes::unregbuilder                     , (builder
 FC_REFLECT( Xmaxplatform::Basetypes::regproxy                         , (proxy) )
 FC_REFLECT( Xmaxplatform::Basetypes::unregproxy                       , (proxy) )
 FC_REFLECT( Xmaxplatform::Basetypes::issueerc2o                       , (creator)(owner)(active)(recovery)(token_name)(total_balance) )
+FC_REFLECT( Xmaxplatform::Basetypes::minterc2o                        , (token_name)(mint_amount) )
 FC_REFLECT( Xmaxplatform::Basetypes::issueerc21                       , (creator)(owner)(active)(recovery)(token_name) )
+FC_REFLECT( Xmaxplatform::Basetypes::minterc21                        , (token_name)(token_id) )
 FC_REFLECT( Xmaxplatform::Basetypes::revoketoken                      , (token_name)(permission) )
