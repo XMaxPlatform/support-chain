@@ -55,6 +55,8 @@ namespace Xmaxplatform { namespace Chain {
 
    FC_DECLARE_DERIVED_EXCEPTION( pop_empty_chain,                   Xmaxplatform::Chain::undo_database_exception, 3070001, "there are no blocks to pop" )
 
+	FC_DECLARE_DERIVED_EXCEPTION(script_runout, Xmaxplatform::Chain::transaction_exception, 3080001, "run out of script instrunction limit")
+
    #define XMAX_RECODE_EXC( cause_type, effect_type ) \
       catch( const cause_type& e ) \
       { throw( effect_type( e.what(), e.get_log() ) ); }

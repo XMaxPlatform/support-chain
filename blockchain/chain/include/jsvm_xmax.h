@@ -38,7 +38,7 @@ namespace Xmaxplatform {
 			void V8ExitContext();
 			v8::Isolate* V8GetIsolate();
 
-			void StoreInstruction(int ins);
+			bool StoreInstruction(int ins);
 			int GetExecutedInsCount();
 			std::list<int>& GetExecutedIns();
 
@@ -49,6 +49,7 @@ namespace Xmaxplatform {
 
 			void LoadScript(account_name name, const char* code, const shared_vector<char>& abi, const fc::sha256& code_version);
 			void LoadScriptTest(account_name name, const char* code, const std::vector<char>& abi, const fc::sha256& code_version, bool sciptTest = false);
+			void SetInstructionLimit(uint32_t instructionLimit);
 
 			void  vm_apply();
 			void  vm_onInit();
@@ -88,8 +89,9 @@ namespace Xmaxplatform {
 			v8::Isolate* m_pIsolate;
 			v8::Local<v8::ObjectTemplate>* m_pGlobalObjectTemplate;
 
-			int m_instructionCount;
+			uint32_t m_instructionCount;
 			std::list<int> m_Intrunctions;
+			uint32_t m_instructionLimit;
 
 			v8::Isolate::CreateParams m_CreateParams;
 			v8::Platform* m_pPlatform;
@@ -111,5 +113,9 @@ namespace Xmaxplatform {
 			return m_Intrunctions;
 		}
 
+		inline void jsvm_xmax::SetInstructionLimit(uint32_t instructionLimit)
+		{
+			m_instructionLimit = instructionLimit;
+		}
 	}
 }

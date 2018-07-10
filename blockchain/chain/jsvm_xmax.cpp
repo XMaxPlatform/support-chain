@@ -32,8 +32,9 @@ namespace Xmaxplatform {
 
 		jsvm_xmax::jsvm_xmax() 
 			:current_validate_context(nullptr)
+			,m_instructionLimit(1000)
 		{
-
+			CleanInstruction();
 		}
 
 
@@ -73,13 +74,10 @@ namespace Xmaxplatform {
 			static jsvm_xmax*  jsvm = nullptr;
 			if (!jsvm)
 			{
-				//
-
 				jsvm = new jsvm_xmax();
-				//jsvm->InitV8();
 			}
 			return *jsvm;
-	  }
+	   }
 
 		#ifdef NDEBUG
 		const int CHECKTIME_LIMIT = 3000;
@@ -87,10 +85,15 @@ namespace Xmaxplatform {
 		const int CHECKTIME_LIMIT = 36000;
 #endif
 
-		void jsvm_xmax::StoreInstruction(int ins)
+		bool jsvm_xmax::StoreInstruction(int ins)
 		{
+			
 			m_instructionCount++;
 			m_Intrunctions.push_back(ins);
+			if (m_instructionCount > m_instructionLimit)
+			{
+				return false;
+			}
 		}
 
 		void jsvm_xmax::CleanInstruction()
@@ -115,10 +118,13 @@ namespace Xmaxplatform {
 			} FC_CAPTURE_AND_RETHROW()
 		}
 		
-		v8::Object* CallBackCheck(int args_length, v8::Object** args_object, v8::Isolate* isolate) {
-			void* arg1 = *(reinterpret_cast<v8::Object**>(reinterpret_cast<intptr_t>(args_object) - 1 * sizeof(int)));
+		Object* CallBackCheck(int args_length, Object** args_object, Isolate* isolate) {
+			void* arg1 = *(reinterpret_cast<Object**>(reinterpret_cast<intptr_t>(args_object) - 1 * sizeof(int)));
 			int value = (int)arg1;
-			jsvm_xmax::get().StoreInstruction(value);
+			HandleScope scope(isolate);
+			if (!jsvm_xmax::get().StoreInstruction(value))
+				return V8_ThrowException(isolate, "ScriptRunout");
+
 			return args_object[0];
 		}
 
@@ -166,21 +172,27 @@ namespace Xmaxplatform {
 		}
 
 		void  jsvm_xmax::vm_apply() {
-		
-			CleanInstruction();
-			Local<Context> context = current_state->current_context.Get(m_pIsolate);
-			message_context_xmax* p_validate_context = jsvm_xmax::get().current_validate_context;
-			Handle<v8::Value> params[2];
-			uint64_t code = 0;
-			uint64_t type = 0;
-			if(p_validate_context!=nullptr)
-			{
-				code = uint64_t(p_validate_context->msg.code);
-				type = uint64_t(p_validate_context->msg.type);
+			try {
+				CleanInstruction();
+				Local<Context> context = current_state->current_context.Get(m_pIsolate);
+				message_context_xmax* p_validate_context = jsvm_xmax::get().current_validate_context;
+				Handle<v8::Value> params[2];
+				uint64_t code = 0;
+				uint64_t type = 0;
+				if (p_validate_context != nullptr)
+				{
+					code = uint64_t(p_validate_context->msg.code);
+					type = uint64_t(p_validate_context->msg.type);
+				}
+				params[0] = I64Cpp2JS(m_pIsolate, context, code);
+				params[1] = I64Cpp2JS(m_pIsolate, context, type);	
+				CallJsFoo(m_pIsolate, context, "apply", 0, NULL);
 			}
-			params[0] = I64Cpp2JS(m_pIsolate, context, code);
-			params[1] = I64Cpp2JS(m_pIsolate, context, type);
-			CallJsFoo(m_pIsolate, context, "apply", 0, NULL);
+			catch (const Runtime::Exception& e) {
+				edump((std::string(describeExceptionCause(e.cause))));
+				edump((e.callStack));
+				throw;
+			}
 		
 		}
 
@@ -201,12 +213,15 @@ namespace Xmaxplatform {
 				params[0] = I64Cpp2JS(m_pIsolate, context, code);
 				params[1] = I64Cpp2JS(m_pIsolate, context, type);
 				CallJsFoo(m_pIsolate, context, "init", 0, NULL);
-
 			}
 			catch (const Runtime::Exception& e) {
 				edump((std::string(describeExceptionCause(e.cause))));
 				edump((e.callStack));
 				throw;
+			}
+			catch (...)
+			{
+				int i = 99999;
 			}
 		}
 

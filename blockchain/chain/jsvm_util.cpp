@@ -63,7 +63,14 @@ namespace Xmaxplatform {
 			if (script.IsEmpty()) {
 				std::cerr << "js compile failed" << std::endl;
 			}
-			script->Run();
+			TryCatch trycatch(pIsolate);
+			Local<Value> v = script->Run();
+			if (v.IsEmpty()) {
+				Local<Value> exception = trycatch.Exception();
+				String::Utf8Value exception_str(exception);
+				printf("Exception: %s\n", *exception_str);
+				// ...
+			}
 			return script;
 		}
 
@@ -80,7 +87,14 @@ namespace Xmaxplatform {
 			{
 				V8_ParseWithPlugin();
 				Handle<Function> js_func = Handle<Function>::Cast(js_func_val);
+				TryCatch trycatch(pIsolate);
 				Handle<v8::Value> hResult = js_func->Call(context->Global(), argc, params);
+				if (hResult.IsEmpty()) {
+					Local<Value> exception = trycatch.Exception();
+					String::Utf8Value exception_str(exception);
+					printf("Exception: %s\n", *exception_str);
+					// ...
+				}	
 				V8_ParseWithOutPlugin();
 				return hResult;
 			}
@@ -113,17 +127,18 @@ namespace Xmaxplatform {
 			void FooBind::exportFoo(const FunctionCallbackInfo<v8::Value>& args)
 			{
 				bool first = true;
-				for (int i = 0; i < args.Length(); i++) {
+				//for (int i = 0; i < args.Length(); i++) {
 					v8::HandleScope handle_scope(args.GetIsolate());
-	
-					Handle<v8::Value> js_data_value = args[i];
+					HandleScope scope(args.GetIsolate());
+					args.GetIsolate()->ThrowException(v8::Exception::Error(String::NewFromUtf8(args.GetIsolate(), "error string here")));
+				//	Handle<v8::Value> js_data_value = args[i];
 
-					bool bIsObject = js_data_value->IsObject();
-					if (bIsObject)
-					{
+				//	bool bIsObject = js_data_value->IsObject();
+				//	if (bIsObject)
+				//	{
 					
-					}
-				}
+				//	}
+				//}
 			}
 		}
 

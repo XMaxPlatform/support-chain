@@ -17,10 +17,12 @@ int main(int argc, char** argv)
 		{
 			const char* code1 = "var i = 33;function init(code,type){while(i>0)i--;return i;} ";
 			jsvm_xmax::get().LoadScriptTest(11, code1, dummyabi, fc::sha256("AA"), true);
+			jsvm_xmax::get().SetInstructionLimit(50);
 			jsvm_xmax::get().vm_onInit();
 		}
 
 		{
+			jsvm_xmax::get().SetInstructionLimit(200);
 			const char* code2 = "var i = 3;function init(code,type){while(i>0)i--;return i;} ";
 			jsvm_xmax::get().LoadScriptTest(22, code2, dummyabi, fc::sha256("BB"), true);
 			jsvm_xmax::get().vm_onInit();
