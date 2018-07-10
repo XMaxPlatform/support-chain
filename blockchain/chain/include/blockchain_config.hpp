@@ -44,6 +44,7 @@ using fc::ecc::private_key;
         const static uint16 default_inline_depth_limit = 4;
         const static uint32 default_max_inline_msg_size = 4 * 1024;
         const static uint32 default_max_gen_trx_size = 64 * 1024;
+		const static uint32 max_message_apply_depth = 5;
 
         const static share_type initial_token_supply = asset::from_string("1000000000.0000 XMX").amount;
 

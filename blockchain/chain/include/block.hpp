@@ -34,18 +34,46 @@ namespace Xmaxplatform { namespace Chain {
             xmax_type_signature        builder_signature;
         };
 
-        struct thread {
+   //     struct thread {
 
-			vector<processed_generated_transaction> generated_intput;
-			vector<processed_transaction> user_input;
+			//vector<processed_generated_transaction> generated_intput;
+			//vector<processed_transaction> user_input;
 
-            xmax_type_summary merkle_digest() const;
-        };
+   //         xmax_type_summary merkle_digest() const;
+   //     };
+
+		struct transaction_receipt_header
+		{
+			enum result_code : uint8_t
+			{
+				applied = 0,
+				failure = 1,
+			};
+			uint64_t								receipt_idx;
+			fc::enum_type<uint8_t, result_code>		result;
+		};
+
+		struct transaction_receipt : public transaction_receipt_header
+		{
+			transaction_receipt() = default;
+			transaction_receipt(transaction_package trx)
+				: trx(trx)
+			{
+			}
+			transaction_receipt(xmax_type_transaction_id id)
+				: trx(id)
+			{
+			}
+
+			fc::static_variant<xmax_type_transaction_id, transaction_package> trx;
+		};
 
         struct signed_block : public signed_block_header
         {
             xmax_type_merkle_root calculate_merkle_root() const;
-            vector<vector<thread>> threads;
+            //vector<vector<thread>> threads;
+
+			std::vector<transaction_receipt> receipts;
         };
 
 		struct signed_block_list
@@ -75,10 +103,14 @@ namespace Xmaxplatform { namespace Chain {
 
     } } // Xmaxplatform::Chain
 
+FC_REFLECT_ENUM(Xmaxplatform::Chain::transaction_receipt::result_code, (applied)(failure))
+
+FC_REFLECT(Xmaxplatform::Chain::transaction_receipt_header, (receipt_idx)(result))
+FC_REFLECT_DERIVED(Xmaxplatform::Chain::transaction_receipt, (Xmaxplatform::Chain::transaction_receipt_header), (trx))
+
 FC_REFLECT(Xmaxplatform::Chain::block_header, (previous)(timestamp)(transaction_merkle_root)(builder)(next_builders))
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block_header, (Xmaxplatform::Chain::block_header), (builder_signature))
-FC_REFLECT(Xmaxplatform::Chain::thread, )
-FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block, (Xmaxplatform::Chain::signed_block_header), (threads))
+FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block, (Xmaxplatform::Chain::signed_block_header))
 
 FC_REFLECT(Xmaxplatform::Chain::block_confirmation_header, (block_id)(verifier))
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::block_confirmation, (Xmaxplatform::Chain::block_confirmation_header), (builder_signature))

@@ -21,8 +21,9 @@ public:
                  Basechain::database& db,
                  const Chain::transaction& t,
                  const Chain::message_xmax& m,
-                 const Basetypes::account_name& code)
-      : _chain_xmax(con), db(db), trx(t), msg(m), code(code), mutable_controller(con),
+                 const Basetypes::account_name& code,
+				 uint32_t depth)
+      : _chain_xmax(con), db(db), trx(t), msg(m), code(code), apply_depth(depth), mutable_controller(con),
         mutable_db(db), used_authorizations(msg.authorization.size(), false),
         next_pending_transaction_serial(0), next_pending_message_serial(0){}
 
@@ -311,14 +312,14 @@ public:
    const Basechain::database&   db;  ///< database where state is stored
    const Chain::transaction&    trx; ///< used to gather the valid read/write scopes
    const Chain::message_xmax&        msg; ///< message being applied
-    Basetypes::account_name          code; ///< the code that is currently running
-
+   Basetypes::account_name           code; ///< the code that is currently running
+   uint32_t							 apply_depth;
    chain_xmax&    mutable_controller;
    Basechain::database& mutable_db;
 
    std::deque<account_name>             notified;
-   std::vector<Basetypes::message>          inline_messages; ///< queued inline messages
-   std::vector<Basetypes::transaction>      deferred_transactions; ///< deferred txs
+   std::vector<Chain::message_xmax>		inline_messages; ///< queued inline messages
+   std::vector<Basetypes::transaction>	deferred_transactions; ///< deferred txs
    std::vector<event_output>            events;
 
    ///< Parallel to msg.authorization; tracks which permissions have been used while processing the message

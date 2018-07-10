@@ -4,20 +4,31 @@
 */
 #pragma once
 #include <blockchain_types.hpp>
+#include <transaction.hpp>
+#include <message_xmax.hpp>
 namespace Xmaxplatform {
 namespace Chain {
 	
 
+
+
 	class message_response
 	{
 	public:
-		xmax_type_transaction_id owner_id;
+		xmax_type_transaction_id	owner_id;
+		message_xmax				msg_body;
+		message_receipt				msg_receipt;
+		string						out_string;
+
+		std::vector<message_response> sub_message;
 	};
 
 
 	class transaction_response
 	{
 	public:
+		fc::optional<transaction_receipt_header> receipt;
+
 		std::vector<message_response> message_responses;
 	};
 
@@ -26,5 +37,5 @@ namespace Chain {
 
 }
 }
-FC_REFLECT(Xmaxplatform::Chain::message_response,(owner_id))
-FC_REFLECT(Xmaxplatform::Chain::transaction_response,(message_responses))
+FC_REFLECT(Xmaxplatform::Chain::message_response, (owner_id)(msg_body)(msg_receipt)(out_string)(sub_message))
+FC_REFLECT(Xmaxplatform::Chain::transaction_response,(receipt)(message_responses))

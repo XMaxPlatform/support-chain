@@ -38,7 +38,7 @@ if(WIN32)
                
                 add_custom_command(TARGET embed_genesis 
                                  POST_BUILD
-                                 COMMAND  ${CMAKE_COMMAND} -E copy_if_different "${OPENSSL_ROOT_DIR}/bin/libcrypto-1_1-x64.dll"  "${EMBED_GENESIS_BIN_DIR}/"      
+                                 COMMAND  ${CMAKE_COMMAND} -E copy_if_different ${OPENSSL_ROOT_DIR}/libcrypto-1_1-x64.dll  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/     
                                  )
                
         endif()

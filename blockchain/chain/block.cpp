@@ -55,23 +55,25 @@ namespace Xmaxplatform { namespace Chain {
 
    xmax_type_merkle_root signed_block::calculate_merkle_root()const
    {
-      if(threads.empty())
-         return xmax_type_merkle_root();
+      //if(threads.empty())
+      //   return xmax_type_merkle_root();
 
-      vector<xmax_type_summary> ids;
-      for (const auto& cycle : threads)
-         for (const auto& thread : cycle)
-            ids.emplace_back(thread.merkle_digest());
+      //vector<xmax_type_summary> ids;
+      //for (const auto& cycle : threads)
+      //   for (const auto& thread : cycle)
+      //      ids.emplace_back(thread.merkle_digest());
 
-      return xmax_type_merkle_root::hash(merkle(ids));
+      //return xmax_type_merkle_root::hash(merkle(ids));
+
+	   return xmax_type_merkle_root();
    }
 
-   xmax_type_summary thread::merkle_digest() const {
-      vector<xmax_type_summary> ids;
+   //xmax_type_summary thread::merkle_digest() const {
+   //   vector<xmax_type_summary> ids;
 
 
-      return merkle(ids);
-   }
+   //   return merkle(ids);
+   //}
 
 
 

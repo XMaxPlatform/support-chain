@@ -95,12 +95,8 @@ namespace Xmaxplatform { namespace Chain {
 	   fc::variant        message_from_binary(name code, name type, const vector<char>& bin)const;
 	   fc::variant        event_from_binary(name code, type_name tname, const vector<char>& bin)const;
 
-	   processed_transaction transaction_from_variant(const fc::variant& v)const;
-	   fc::variant       transaction_to_variant(const processed_transaction& trx)const;
-	   fc::variant       transaction_events_to_variant(const processed_transaction& trx)const;
 
-	   processed_transaction push_transaction(const signed_transaction& trx, uint32_t skip = Config::skip_nothing);
-	   processed_transaction _push_transaction(transaction_request_ptr request);
+	   transaction_response_ptr push_transaction(const signed_transaction& trx, uint32_t skip = Config::skip_nothing);
 
 	   transaction_response_ptr push_transaction(transaction_request_ptr request);
 
@@ -109,6 +105,10 @@ namespace Xmaxplatform { namespace Chain {
 	   flat_set<public_key_type> get_required_keys(const signed_transaction& transaction, const flat_set<public_key_type>& candidateKeys)const;
 
 	   vector<signed_block>	get_syncblock_from_lastnum(const uint32_t& lastnum);
+
+	   transaction_package_ptr transaction_from_variant(const fc::variant& v)const;
+	   fc::variant       transaction_to_variant(const transaction_response& response)const;
+	   fc::variant       transaction_events_to_variant(const transaction_response& trx)const;
 
    private:
 
@@ -134,9 +134,6 @@ namespace Xmaxplatform { namespace Chain {
 	   void _update_final_state(const signed_block& b);
 	   void _irreversible_block(const block_pack_ptr& pack);
 	 // void rate_limit_message(const message& message);
-      void process_message(const transaction& trx, account_name code, const message_xmax& message,
-                            message_output& output, message_context_xmax* parent_context = nullptr,
-                            int depth = 0, const fc::time_point& start_time = fc::time_point::now());
        void apply_message(message_context_xmax& c);
 
 	   template<typename T>
@@ -146,19 +143,19 @@ namespace Xmaxplatform { namespace Chain {
 	   
 	   transaction_response_ptr apply_transaction_impl(transaction_request_ptr request);
 
+	   transaction_receipt& apply_transaction_receipt(const signed_transaction& trx);
+
 	   void process_confirmation(const block_confirmation& conf);
 
 	   void require_account(const account_name& name) const;
 
 	   void validate_uniqueness(const Chain::signed_transaction& trx)const;
-	   void validate_uniqueness(const generated_transaction& trx)const;
 	   void validate_tapos(const transaction& trx)const;
 	   void validate_referenced_accounts(const transaction& trx)const;
 	   void validate_expiration(const transaction& trx) const;
 	   void validate_scope(const transaction& trx) const;
 
 	   void record_transaction(const signed_transaction& trx);
-	   void record_transaction(const generated_transaction& trx);
 
 
 	   bool should_check_for_duplicate_transactions()const;

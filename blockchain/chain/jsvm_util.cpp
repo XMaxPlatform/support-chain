@@ -63,7 +63,7 @@ namespace Xmaxplatform {
 			if (script.IsEmpty()) {
 				std::cerr << "js compile failed" << std::endl;
 			}
-
+			script->Run();
 			return script;
 		}
 

@@ -130,6 +130,7 @@ namespace Xmaxplatform { namespace Chain {
    using xmax_type_block_id = fc::sha256;
    using xmax_type_merkle_root = fc::sha256;
    using xmax_type_transaction_id = fc::sha256;
+   using xmax_type_message_id = fc::sha256;
    using xmax_type_summary = fc::sha256;
    using xmax_type_generated_transaction_id = fc::sha256;
    using xmax_type_signature = fc::ecc::compact_signature;
@@ -156,13 +157,15 @@ namespace Xmaxplatform { namespace Chain {
             builder_info_object_type,
             resource_token_object_type,
 			transaction_object_type,
-			generated_transaction_object_type,
 			block_summary_object_type,
 			rate_limiting_object_type,
 			block_object_type,
 			erc20_token_object_type,
 			erc721_token_object_type,
 			erc721_token_account_object_type,
+			account_status_object_type,
+			global_trx_status_object_type,
+			global_msg_status_object_type,
             OBJECT_TYPE_COUNT ///< Sentry value which contains the number of different object types
         };
    

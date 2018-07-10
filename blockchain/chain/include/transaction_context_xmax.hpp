@@ -5,6 +5,7 @@
 #pragma once
 #include <fc/time.hpp>
 #include <basechain.hpp>
+#include <message_xmax.hpp>
 namespace Xmaxplatform {
 namespace Chain {
 
@@ -23,15 +24,19 @@ namespace Chain {
 
 		void squash();
 
+
 	public:
 
 		inline transaction_response_ptr get_response() const
 		{
 			return response;
 		}
+
+		std::vector<message_receipt> msg_receipts;
 	protected:
 
-		void exec_message(const Chain::message_xmax& msg);
+		void exec_message(const Chain::message_xmax & msg, uint32_t apply_depth);
+		message_response exec_one_message(message_context_xmax& context);
 
 		chain_xmax&						chain;
 		const signed_transaction&		trx;
@@ -40,6 +45,8 @@ namespace Chain {
 		fc::time_point	start_time;
 
 		transaction_response_ptr response;
+
+
 	};
 }
 }

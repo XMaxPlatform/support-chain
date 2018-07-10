@@ -31,12 +31,12 @@ namespace Xmaxplatform {
 			id_type id;
 			Basetypes::asset_symbol token_name;
 			Basetypes::account_name owner_name;
-			shared_set<xmax_erc721_id> tokens;
+			std::set<xmax_erc721_id> tokens;
 		};
 		
 		struct by_token_and_owner;		
 
-		using erc721_token_multi_index = Basechain::shared_multi_index_container<
+		using erc721_token_account_multi_index = Basechain::shared_multi_index_container<
 			erc721_token_account_object,
 			indexed_by<
 			ordered_unique<tag<by_id>,
@@ -52,15 +52,15 @@ namespace Xmaxplatform {
 			>//indexed_by
 		>;
 
-		using erc721_token_multi_index_test = boost::multi_index_container<
+		using erc721_token_account_multi_index_test = boost::multi_index_container<
 			erc721_token_account_object_test,
 			indexed_by<
 			ordered_unique<tag<by_id>,
-			member<erc721_token_account_object_test, erc721_token_account_object::id_type, &erc721_token_account_object_test::id>
+			member<erc721_token_account_object_test, erc721_token_account_object_test::id_type, &erc721_token_account_object_test::id>
 			>,
 			ordered_unique<tag<by_token_and_owner>,
 				composite_key<
-				erc721_token_account_object,
+				erc721_token_account_object_test,
 				member<erc721_token_account_object_test, Basetypes::asset_symbol, &erc721_token_account_object_test::token_name>,
 				member<erc721_token_account_object_test, Basetypes::account_name, &erc721_token_account_object_test::owner_name>
 				>
@@ -71,4 +71,4 @@ namespace Xmaxplatform {
 	}
 } // namespace Xmaxplatform::chain
 
-BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::erc721_token_account_object, Xmaxplatform::Chain::erc721_token_multi_index)
+BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::erc721_token_account_object, Xmaxplatform::Chain::erc721_token_account_multi_index)

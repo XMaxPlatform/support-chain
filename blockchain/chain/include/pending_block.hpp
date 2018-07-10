@@ -21,6 +21,8 @@ namespace Xmaxplatform { namespace Chain {
 		database::session					db_session;
 		block_pack_ptr						pack;
 
+		std::vector<message_receipt>		message_receipts;
+
 		void push_db()
 		{
 			db_session.push();

@@ -1,2 +1,3 @@
 
 add_subdirectory(chain_test)
+add_subdirectory(script_test)

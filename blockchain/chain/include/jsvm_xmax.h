@@ -2,7 +2,6 @@
 #include <blockchain_exceptions.hpp>
 #include <message_xmax.hpp>
 #include <message_context_xmax.hpp>
-
 #include <libplatform/libplatform.h>
 #include <v8.h>
 
@@ -36,11 +35,10 @@ namespace Xmaxplatform {
 			void V8SetupGlobalObjTemplate(v8::Local<v8::ObjectTemplate>* pGlobalTemp);
 			void V8EnvInit();
 			void V8EnvDiscard();
+			void V8ExitContext();
 			v8::Isolate* V8GetIsolate();
-			
-			void StoreInstruction(int ins);
-			void CleanInstruction();
 
+			void StoreInstruction(int ins);
 			int GetExecutedInsCount();
 			std::list<int>& GetExecutedIns();
 
@@ -48,6 +46,12 @@ namespace Xmaxplatform {
 			void apply(message_context_xmax& c, uint32_t execution_time, bool received_block);
 			void validate(message_context_xmax& c);
 			void precondition(message_context_xmax& c);
+
+			void LoadScript(account_name name, const char* code, const shared_vector<char>& abi, const fc::sha256& code_version);
+			void LoadScriptTest(account_name name, const char* code, const std::vector<char>& abi, const fc::sha256& code_version, bool sciptTest = false);
+
+			void  vm_apply();
+			void  vm_onInit();
 
 			int64_t current_execution_time();
 
@@ -60,9 +64,6 @@ namespace Xmaxplatform {
 			message_context_xmax*       current_validate_context = nullptr;
 			message_context_xmax*       current_precondition_context = nullptr;
 
-// 			Runtime::MemoryInstance*   current_memory = nullptr;
-// 			Runtime::ModuleInstance*   current_module = nullptr;
-// 			wasm_memory*               current_memory_management = nullptr;
 			ModuleState*               current_state = nullptr;
 			TableMap*                  table_key_types = nullptr;
 			bool                       tables_fixed = false;
@@ -78,11 +79,8 @@ namespace Xmaxplatform {
 			void load(const account_name& name, const Basechain::database& db);
 			void  vm_validate();
 			void  vm_precondition();
-			void  vm_apply(char* code);
-			void  vm_onInit(char* code);
-			//U32   vm_pointer_to_offset(char*);
 
-
+			void CleanInstruction();
 
 			map<account_name, ModuleState> instances;
 			fc::time_point checktimeStart;
