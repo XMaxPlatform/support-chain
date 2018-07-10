@@ -19,6 +19,9 @@ set_target_properties(chain_test PROPERTIES
                         FOLDER
                         "Test" )
 
+
+add_test(NAME chain_test COMMAND chain_test)                        
+
 install(TARGETS 
 chain_test 
 
