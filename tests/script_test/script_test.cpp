@@ -32,5 +32,9 @@ int main(int argc, char** argv)
 	jsvm_xmax::get().V8EnvDiscard();
 }
 
+#else
+int main(int argc, char** argv) {
+	return 0;
+}
 
 #endif
