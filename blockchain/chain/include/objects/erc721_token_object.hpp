@@ -25,6 +25,7 @@ namespace Xmaxplatform {
 		};
 
 		class erc721_token_object_test : public Basechain::object<erc721_token_object_type, erc721_token_object_test> {
+			OBJECT_CCTOR(erc721_token_object_test, (minted_tokens))
 		public:
 			erc721_token_object_test() = default;
 			

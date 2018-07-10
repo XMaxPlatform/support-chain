@@ -13,9 +13,9 @@
 namespace Xmaxplatform { namespace Chain {
 
     class voter_info_object : public Basechain::object<vote_info_object_type, voter_info_object> {
-        OBJECT_CCTOR(voter_info_object)
+        OBJECT_CCTOR(voter_info_object, (builders))
 
-        typedef std::vector<account_name> builder_list;
+        typedef shared_vector<account_name> builder_list;
 
         id_type         id;
         account_name	owner;
@@ -93,7 +93,10 @@ BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::builder_info_object, Xmaxplatform:
 
 FC_REFLECT(Basechain::oid<Xmaxplatform::Chain::voter_info_object>, (_id))
 
-FC_REFLECT(Xmaxplatform::Chain::voter_info_object, (id)(owner)(proxy)(is_proxy)(proxied_votes)(builders)(staked)(unstaking)(unstake_per_week)(deferred_trx_id)(last_update)(last_unstake_time))
+FC_REFLECT(Xmaxplatform::Chain::voter_info_object, (id)(owner)(proxy)(is_proxy)
+(proxied_votes)(builders)
+(staked)(unstaking)(unstake_per_week)
+(deferred_trx_id)(last_update)(last_unstake_time))
 
 FC_REFLECT(Basechain::oid<Xmaxplatform::Chain::builder_info_object>, (_id))
 

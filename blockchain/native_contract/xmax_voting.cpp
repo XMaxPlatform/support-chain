@@ -50,7 +50,7 @@ namespace Native_contract {
             });
         }
 
-        const std::vector<account_name> *builders = nullptr;
+        std::vector<account_name> builders;
         if (voter->proxy) {
             auto proxy = voters_tbl.find(voter->proxy);
             XMAX_ASSERT(proxy != nullptr, message_validate_exception, "selected proxy not found"); //data corruption
@@ -58,15 +58,15 @@ namespace Native_contract {
                 a.proxied_votes += amount;
             });
             if (proxy->is_proxy) { //only if proxy is still active. if proxy has been unregistered, we update proxied_votes, but don't propagate to builders
-                builders = &proxy->builders;
+                builders.assign(proxy->builders.begin(), proxy->builders.end());
             }
         } else {
-            builders = &voter->builders;
+			builders.assign(voter->builders.begin(), voter->builders.end());
         }
 
-        if (builders) {
+        if (builders.size()) {
             builders_table builders_tbl(context.mutable_db);
-            for (auto p : *builders) {
+            for (auto p : builders) {
                 auto prod = builders_tbl.find(p);
                 XMAX_ASSERT(prod != nullptr, message_validate_exception,
                             "never existed builder"); //data corruption
@@ -93,22 +93,22 @@ namespace Native_contract {
                 a.last_update = context.current_time();
             });
 
-            const std::vector<account_name> *builders = nullptr;
+            vector<account_name> builders;
             if (voter->proxy) {
                 auto proxy = voters_tbl.find(voter->proxy);
                 voters_tbl.modify(proxy, [&](voter_info_object &a) {
                     a.proxied_votes -= (uint128) amount;
                 });
                 if (proxy->is_proxy) { //only if proxy is still active. if proxy has been unregistered, we update proxied_votes, but don't propagate to builders
-                    builders = &proxy->builders;
+					builders.assign(proxy->builders.begin(), proxy->builders.end());
                 }
             } else {
-                builders = &voter->builders;
+				builders.assign(voter->builders.begin(), voter->builders.end());
             }
 
-            if (builders) {
+            if (builders.size()) {
                 builders_table builders_tbl(context.mutable_db);
-                for (auto p : *builders) {
+                for (auto p : builders) {
                     auto prod = builders_tbl.find(p);
                     XMAX_ASSERT(prod != nullptr, message_validate_exception,
                                 "never existed builder"); //data corruption
@@ -165,7 +165,7 @@ namespace Native_contract {
 
 
         //find old builders, update old proxy if needed
-        const std::vector<account_name> *old_builders = nullptr;
+		vector<account_name> old_builders;
         if (voter->proxy.good()) {
             if (voter->proxy == vp.proxy) {
                 return; // nothing changed
@@ -179,15 +179,15 @@ namespace Native_contract {
 
             if (old_proxy->is_proxy !=
                 0) { //if proxy stoped being proxy, the votes were already taken back from builders by on( const unregister_proxy& )
-                old_builders = &old_proxy->builders;
+                old_builders.assign(old_proxy->builders.begin(), old_proxy->builders.end());
             }
         } else {
-            old_builders = &voter->builders;
+			old_builders.assign(voter->builders.begin(), voter->builders.end());
         }
 
 
         //find new builders, update new proxy if needed
-        const std::vector<account_name> *new_builders = nullptr;
+		vector<account_name> new_builders;
         if (vp.proxy) {
             auto new_proxy = voters_tbl.find(vp.proxy);
             XMAX_ASSERT(new_proxy != nullptr && new_proxy->is_proxy != 0, message_validate_exception,
@@ -195,9 +195,9 @@ namespace Native_contract {
             voters_tbl.modify(new_proxy, [&](auto &a) {
                 a.proxied_votes += voter->staked;
             });
-            new_builders = &new_proxy->builders;
+			new_builders.assign(new_proxy->builders.begin(), new_proxy->builders.end());
         } else {
-            new_builders = &vp.builders;
+			new_builders.assign(vp.builders.begin(), vp.builders.end());
         }
 
 
@@ -208,11 +208,11 @@ namespace Native_contract {
             votes += voter->proxied_votes;
         }
 
-        if (old_builders) { //old_builders == nullptr if proxy has stopped being a proxy and votes were taken back from the builders at that moment
+        if (old_builders.size()) { //old_builders == nullptr if proxy has stopped being a proxy and votes were taken back from the builders at that moment
             //revoke votes only from no longer elected
-            std::vector<account_name> revoked(old_builders->size());
-            auto end_it = std::set_difference(old_builders->begin(), old_builders->end(), new_builders->begin(),
-                                              new_builders->end(), revoked.begin());
+            std::vector<account_name> revoked(old_builders.size());
+            auto end_it = std::set_difference(old_builders.begin(), old_builders.end(), new_builders.begin(),
+                                              new_builders.end(), revoked.begin());
             for (auto it = revoked.begin(); it != end_it; ++it) {
                 auto prod = builders_tbl.find(*it);
                 XMAX_ASSERT(prod != nullptr, message_validate_exception,
@@ -224,13 +224,13 @@ namespace Native_contract {
         }
 
         //update newly elected
-        std::vector<account_name> elected(new_builders->size());
+        std::vector<account_name> elected(new_builders.size());
         auto end_it = elected.begin();
-        if (old_builders) {
-            end_it = std::set_difference(new_builders->begin(), new_builders->end(), old_builders->begin(),
-                                         old_builders->end(), elected.begin());
+        if (old_builders.size()) {
+            end_it = std::set_difference(new_builders.begin(), new_builders.end(), old_builders.begin(),
+                                         old_builders.end(), elected.begin());
         } else {
-            end_it = std::copy(new_builders->begin(), new_builders->end(), elected.begin());
+            end_it = std::copy(new_builders.begin(), new_builders.end(), elected.begin());
         }
         for (auto it = elected.begin(); it != end_it; ++it) {
             auto builder = builders_tbl.find(*it);
@@ -247,7 +247,7 @@ namespace Native_contract {
         voters_tbl.modify(voter, [&](voter_info_object &a) {
             a.proxy = vp.proxy;
             a.last_update = context.current_time();
-            a.builders = vp.builders;
+			a.builders.assign(vp.builders.begin(), vp.builders.end());
         });
 
     }
