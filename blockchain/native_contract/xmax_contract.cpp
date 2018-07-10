@@ -8,14 +8,15 @@
 #include <message_context_xmax.hpp>
 #include <message_xmax.hpp>
 
-
+#include <objects/object_utility.hpp>
 #include <objects/account_object.hpp>
 #include <objects/xmx_token_object.hpp>
 #include <objects/resource_token_object.hpp>
 #include <objects/chain_object_table.hpp>
 #include <objects/static_config_object.hpp>
 #include <objects/erc20_token_object.hpp>
-#include <objects/object_utility.hpp>
+#include <objects/erc721_token_object.hpp>
+#include <objects/erc721_token_account_object.hpp>
 #include <xmax_voting.hpp>
 #include <vm_xmax.hpp>
 
@@ -276,7 +277,31 @@ void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
 
 //--------------------------------------------------
 void handle_xmax_issueerc21(Chain::message_context_xmax& context) {
+	auto& db = context.mutable_db;
+	auto issue_erc721 = context.msg.as<Types::issueerc21>();
 
+	//Check precondition
+	auto existing_account = db.find<account_object, by_name>(issue_erc721.token_name);
+	XMAX_ASSERT(existing_account == nullptr, account_name_exists_exception,
+		"Cannot create ERC721 token account named ${name}, as that name is already taken",
+		("name", issue_erc721.token_name));
+
+	auto existing_token_obj = db.find<erc721_token_object, by_token_name>(issue_erc721.token_name);
+	XMAX_ASSERT(existing_token_obj == nullptr, message_validate_exception,
+		"Erc721 token:'${t}' already exist, the owner is ${owner}",
+		("t", issue_erc721.token_name)("owner", existing_token_obj->owner_name));
+
+	//Create token account
+	const auto& token_account = db.create<account_object>([&issue_erc721, &context](account_object& a) {
+		a.name = issue_erc721.token_name;
+		a.creation_date = context.current_time();
+	});
+
+	//Create erc721 token object
+	db.create<erc721_token_object>([&issue_erc721](erc721_token_object& token) {
+		token.token_name = issue_erc721.token_name;
+		token.owner_name = issue_erc721.creator;		
+	});
 }
 
 
