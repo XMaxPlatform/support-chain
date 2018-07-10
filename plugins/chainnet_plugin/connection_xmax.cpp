@@ -137,7 +137,7 @@ namespace Xmaxplatform {
 
 	void connection_xmax::send_blockconfirm(const Chain::block_confirmation& confirm)
 	{
-
+		msg_enqueue(confirm);
 	}
 
 	void connection_xmax::send_signedblocklist(const Chain::signed_block_list& blockList)
