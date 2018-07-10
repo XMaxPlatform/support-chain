@@ -249,6 +249,10 @@ void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
 	auto& db = context.mutable_db;
 	auto issue_erc20 = context.msg.as<Types::issueerc2o>();
 
+	//Todo: Check creator authorization
+
+	//Todo: Check keys authority validation
+
 	//Check existence
 	auto existing_account = db.find<account_object, by_name>(issue_erc20.token_name);
 	XMAX_ASSERT(existing_account == nullptr, account_name_exists_exception,
@@ -275,6 +279,7 @@ void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
 		tok.token_name = issue_erc20.token_name;
 		tok.owner_name = issue_erc20.creator;
 		tok.token_amount = issue_erc20.total_balance.amount;		
+		tok.total_supply = issue_erc20.total_balance.amount;
 	});
 
 
@@ -285,6 +290,10 @@ void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
 void handle_xmax_issueerc21(Chain::message_context_xmax& context) {
 	auto& db = context.mutable_db;
 	auto issue_erc721 = context.msg.as<Types::issueerc21>();
+
+	//Todo: Check creator authorization
+
+	//Todo: Check keys authority validation
 
 	//Check precondition
 	auto existing_account = db.find<account_object, by_name>(issue_erc721.token_name);
@@ -297,6 +306,7 @@ void handle_xmax_issueerc21(Chain::message_context_xmax& context) {
 		"Erc721 token:'${t}' already exist, the owner is ${owner}",
 		("t", issue_erc721.token_name)("owner", existing_token_obj->owner_name));
 
+	
 	//Create token account
 	create_account_internal(addaccount{ issue_erc721.creator,
 										issue_erc721.token_name,

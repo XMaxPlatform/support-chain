@@ -22,6 +22,7 @@ namespace Xmaxplatform {
 			Basetypes::asset_symbol token_name;
 			Basetypes::account_name owner_name;
 			Basetypes::share_type token_amount = 0;
+			Basetypes::share_type total_supply = 0;
 		};
 		
 		struct by_token_and_owner;
