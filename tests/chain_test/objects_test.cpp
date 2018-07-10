@@ -2,20 +2,24 @@
 
 
 
-#include <objects/erc20_token_object.hpp>
+
 //#include <chain_time.hpp>
 //#include <publickey.hpp>
 
+#include <basetypes.hpp>
+#include <basechain.hpp>
 #include <asset.hpp>
 #include <string_utilities.hpp>
 #include <fc/log/appender.hpp>
-#include "objects/account_object.hpp"
-#include "basechain.hpp"
 
-#include <boost/test/included/unit_test.hpp>
+
+#include <objects/erc20_token_object.hpp>
+#include <objects/account_object.hpp>
 #include <objects/object_utility.hpp>
 #include <objects/erc721_token_object.hpp>
-#include <basetypes.hpp>
+#include <objects/erc721_token_account_object.hpp>
+
+#include <boost/test/included/unit_test.hpp>
 
 
 
@@ -30,10 +34,21 @@ namespace {
 		return ex_msg.find("Mint ERC721 token already exist") != std::string::npos;
 	}
 
+	static inline bool IsDuplicateTransTokenNameException(const duplicate_type_exception& ex) {
+		std::string ex_msg = ex.to_string();
+		return ex_msg.find("ERC721 already got the token") != std::string::npos;
+	}
+
 	template <typename MultiIndexType>
 	static inline const erc721_token_object_test& FindErc721ObjFromTable(MultiIndexType& tbl, const std::string& token_name) {
 		 auto it = tbl.get<by_token_name>().find(token_name_from_string(token_name));
 		 return *it;
+	}
+
+	template <typename MultiIndexType>
+	static inline const erc721_token_account_object_test& FindErc721AccountObjFromTable(MultiIndexType& tbl, const std::string& token_name, const std::string& owner_name) {
+		auto it = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex(token_name, owner_name));
+		return *it;
 	}
 
 	template <typename MultiIndexType>
@@ -62,6 +77,17 @@ namespace {
 	}
 
 	template <typename MultiIndexType>
+	static void AddErc721AccountObjToTable(MultiIndexType& tbl, erc721_token_account_object_test::id_type id, const std::string& token_name,
+		const std::string& owner_name) {
+		erc721_token_account_object_test obj;
+		obj.id = id;
+		obj.token_name = token_name_from_string(token_name);
+		obj.owner_name = xmax::string_to_name(owner_name.c_str());
+		//obj.tokens.insert(token_id);
+		tbl.insert(obj);
+	}
+
+	template <typename MultiIndexType>
 	static void MintErc721Token(MultiIndexType& tbl, const std::string& token_name, const Xmaxplatform::Chain::xmax_erc721_id& token_id) {
 		auto it = tbl.get<by_token_name>().find(token_name_from_string(token_name));		
 	
@@ -73,6 +99,22 @@ namespace {
 		});
 	}
 
+	template <typename MultiIndexType>
+	static void SendErc20TokenToAccount(MultiIndexType& tbl, const std::string& token_name, const std::string& owner_name,
+		const Xmaxplatform::Chain::xmax_erc721_id& token_id) {
+		auto it = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex(token_name, owner_name)); 
+		const erc721_token_account_object_test& obj = *it;
+
+		auto token_it = obj.tokens.find(token_id);
+		XMAX_ASSERT(token_it == obj.tokens.end(), duplicate_type_exception, "The account ${owner} ERC721 already got the token ${token_name} with id : ${token_id}", 
+			("owner", owner_name)("token_name", token_name)("token_id", token_id));
+
+
+		tbl.get<by_token_and_owner>().modify(it, [&token_id](erc721_token_account_object_test& o) {
+			o.tokens.insert(token_id);
+		});
+	}
+
 	static erc20_token_multi_index_test& GetTestErc20Container() {
 		static erc20_token_multi_index_test tbl;
 		return tbl;
@@ -80,6 +122,11 @@ namespace {
 
 	static erc721_token_multi_index_test& GetTestErc721Container() {
 		static erc721_token_multi_index_test tbl;
+		return tbl;
+	}
+
+	static erc721_token_account_multi_index_test& GetTestErc721TokenAccountTable() {
+		static erc721_token_account_multi_index_test tbl;
 		return tbl;
 	}
 	
@@ -168,6 +215,35 @@ BOOST_AUTO_TEST_CASE(erc721_test_mint) {
 
 	auto& obj = FindErc721ObjFromTable(tbl, "AAA");
 	BOOST_CHECK(obj.minted_tokens.size() == 3);
+}
+
+BOOST_AUTO_TEST_CASE(erc721_test_account) {
+	auto& tbl = GetTestErc721TokenAccountTable();
+	AddErc721AccountObjToTable(tbl, 1, "AAA", "testera");
+	AddErc721AccountObjToTable(tbl, 2, "AAB", "testera");
+	AddErc721AccountObjToTable(tbl, 3, "AAB", "testerb");
+	AddErc721AccountObjToTable(tbl, 4, "AAC", "testerc");
+	//Error case
+	AddErc721AccountObjToTable(tbl, 5, "AAA", "testera");
+
+	BOOST_CHECK(tbl.size() == 4);
+
+}
+
+BOOST_AUTO_TEST_CASE(erc721_test_account_addtoken) {
+	auto& tbl = GetTestErc721TokenAccountTable();
+
+
+	SendErc20TokenToAccount(tbl, "AAA", "testera", xmax_erc721_id{ "f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b" });
+	SendErc20TokenToAccount(tbl, "AAA", "testera", xmax_erc721_id{ "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" });
+	BOOST_CHECK_EXCEPTION({
+		SendErc20TokenToAccount(tbl, "AAA", "testera", xmax_erc721_id("f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b"));
+		}, duplicate_type_exception, IsDuplicateTransTokenNameException);
+	SendErc20TokenToAccount(tbl, "AAB", "testera", xmax_erc721_id{ "f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b" });
+	SendErc20TokenToAccount(tbl, "AAB", "testerb", xmax_erc721_id{ "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" });
+
+	auto& obj = FindErc721AccountObjFromTable(tbl, "AAA", "testera");
+	BOOST_CHECK(obj.tokens.size() == 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
