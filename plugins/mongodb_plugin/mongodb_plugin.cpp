@@ -661,7 +661,7 @@ namespace Xmaxplatform {
 		uint32_t trans_idx = 0;
 		bool transactions_in_block = false;
 
-		for (auto& v_threads : block.threads)
+		/*for (auto& v_threads : block.threads)
 		{
 			for (auto& thread : v_threads) 
 			{
@@ -674,7 +674,7 @@ namespace Xmaxplatform {
 					++trans_idx;
 				}
 			}
-		}
+		}*/
 
 		auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
 			std::chrono::microseconds{ fc::time_point::now().time_since_epoch().count() });
