@@ -778,7 +778,7 @@ namespace Xmaxplatform {
 
    void chainnet_plugin_impl::handle_message(connection_ptr c, const block_confirmation &msg)
    {
-
+	   app().get_plugin<blockbuilder_plugin>().on_recv_message(msg);
    }
 
    void chainnet_plugin_impl::handle_message(connection_ptr c, const signed_block_list &msg)
