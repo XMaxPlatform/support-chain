@@ -13,7 +13,7 @@ namespace Xmaxplatform { namespace Chain {
       return xmax_type_summary::hash(*this);
    }
 
-   uint32_t block_header::num_from_id(const xmax_type_block_id& id)
+   xmax_type_block_num block_header::num_from_id(const xmax_type_block_id& id)
    {
       return fc::endian_reverse_u32(id._hash[0]);
    }

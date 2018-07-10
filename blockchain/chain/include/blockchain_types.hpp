@@ -127,6 +127,8 @@ namespace Xmaxplatform { namespace Chain {
    using Xmaxplatform::Basetypes::int256;
    using Xmaxplatform::Basetypes::uint128_t;
 
+   using xmax_type_block_num = uint32_t;
+
    using xmax_type_block_id = fc::sha256;
    using xmax_type_merkle_root = fc::sha256;
    using xmax_type_transaction_id = fc::sha256;

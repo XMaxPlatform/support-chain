@@ -25,7 +25,7 @@ namespace Xmaxplatform {
 			xmax_type_block_id blk_id;
 			signed_block block;
 
-			uint32_t block_num() const { return block.block_num(); }
+			Chain::xmax_type_block_num block_num() const { return block.block_num(); }
 		};
 
 		
@@ -36,7 +36,7 @@ namespace Xmaxplatform {
 			indexed_by<
 			ordered_unique<tag<by_id>, BOOST_MULTI_INDEX_MEMBER(block_object, block_object::id_type, id)>,
 			ordered_unique<tag<by_blk_id>, BOOST_MULTI_INDEX_MEMBER(block_object, xmax_type_block_id, blk_id)>,
-			ordered_non_unique<tag<by_blk_num>, const_mem_fun<block_object, uint32_t, &block_object::block_num>>
+			ordered_non_unique<tag<by_blk_num>, const_mem_fun<block_object, Chain::xmax_type_block_num, &block_object::block_num>>
 			>
 		>;
 

@@ -124,7 +124,7 @@ namespace block_detail
 	static uint64_t write_block(std::fstream& block_stream, std::fstream& index_stream, const signed_block_ptr& blockptr)
 	{
 		auto data = fc::raw::pack(*blockptr);
-		uint32_t num = blockptr->block_num();
+		xmax_type_block_num num = blockptr->block_num();
 		xmax_type_block_id id = blockptr->id();
 
 		block_detail::stream_end(block_stream, IO_Write);

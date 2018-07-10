@@ -61,7 +61,7 @@ namespace Xmaxplatform { namespace Chain {
 		chain_xmax::xmax_config				config;
 		database							block_db;
 		forkdatabase						fork_db;
-		uint32_t							last_irreversible_block_num = 0;
+		Chain::xmax_type_block_num			last_irreversible_block_num = 0;
 
 		const uint32_t                   pending_txn_depth_limit;
 		uint64_t                         skip_flags = 0;
@@ -227,7 +227,7 @@ namespace Xmaxplatform { namespace Chain {
 				_make_fianl_block();
 				_final_block();
 
-				uint32_t block_num = _context->block_head->block_num;
+				Chain::xmax_type_block_num block_num = _context->block_head->block_num;
 				_context->chain_log.append_block(_context->block_head->block);				
 				_context->building_block->push_db();
 				_context->building_block.reset();

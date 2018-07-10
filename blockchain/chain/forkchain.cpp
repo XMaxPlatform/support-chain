@@ -41,7 +41,7 @@ namespace Chain {
 	using boost::multi_index_container;
 
 	struct by_block_id;
-	struct by_number;
+	struct by_number_less;
 	struct by_pre_id;
 	struct by_longest_num;
 
@@ -50,7 +50,7 @@ namespace Chain {
 		indexed_by<
 			hashed_unique< tag<by_block_id>, member<block_raw, xmax_type_block_id, &block_raw::block_id>, std::hash<xmax_type_block_id> >,
 			ordered_non_unique< tag<by_pre_id>, const_mem_fun<block_raw, const xmax_type_block_id&, &block_raw::prev_id> >,
-			ordered_non_unique < tag<by_number>,
+			ordered_non_unique < tag<by_number_less>,
 				composite_key< block_raw,
 					member<block_raw, uint32_t, &block_raw::block_num>,
 					member<block_raw, bool, &block_raw::main_chain>
@@ -60,9 +60,10 @@ namespace Chain {
 			ordered_non_unique< tag<by_longest_num>,
 				composite_key<block_raw,
 					member<block_raw, uint32_t, &block_raw::last_confired_num>,
+					member<block_raw, uint32_t, &block_raw::dpos_irreversible_num>,
 					member<block_raw, uint32_t, &block_raw::block_num>
 				>,
-				composite_key_compare< std::greater<uint32_t>, std::greater<uint32_t> >
+				composite_key_compare< std::greater<uint32_t>, std::greater<uint32_t>, std::greater<uint32_t> >
 			>
 		>
 		> block_pack_index;
@@ -85,7 +86,7 @@ namespace Chain {
 
 		block_pack_ptr get_main_block_by_num(uint32_t num) const
 		{
-			auto& idx = packs.get<by_number>();
+			auto& idx = packs.get<by_number_less>();
 			const auto first = idx.lower_bound(num);
 
 			if (first == idx.end() || (*first)->block_num != num || (*first)->main_chain != true)
@@ -96,22 +97,29 @@ namespace Chain {
 
 		void add_block(block_pack_ptr block_pack)
 		{
-			auto result = packs.insert(block_pack);
+
 			FC_ASSERT(block_pack->block_id == block_pack->new_header.id());
 
+			auto result = packs.insert(block_pack);
 			FC_ASSERT(result.second, "unable to insert block state, duplicate state detected");
 
 			head = *packs.get<by_longest_num>().begin();
 
-			auto oldest = *packs.get<by_number>().begin();
+			auto earliest = *packs.get<by_number_less>().begin();
 
 
 			// check confirmed block data and update.
 
-			if (oldest->block_num < head->last_confired_num)
+			if (earliest->block_num < head->last_confired_num)
 			{
 				on_last_confirmed_grow(head->last_confired_id, head->last_confired_num);
 			}
+			else if (earliest->block_num < head->dpos_irreversible_num)
+			{
+				set_last_confirmed(head->dpos_irreversible_id); // force confirm by dpos irreversible.
+				on_last_confirmed_grow(head->dpos_irreversible_id, head->dpos_irreversible_num);
+			}
+
 		}
 		void set_last_confirmed(xmax_type_block_id last_id)
 		{
@@ -119,7 +127,7 @@ namespace Chain {
 
 			FC_ASSERT(itr != packs.end(), "Unknown block id ${id}", ("id", last_id));
 
-			uint32_t block_num = (*itr)->block_num;
+			Chain::xmax_type_block_num block_num = (*itr)->block_num;
 
 			packs.modify(itr, [&](auto& val)
 			{
@@ -149,7 +157,7 @@ namespace Chain {
 		{
 			std::vector<xmax_type_block_id> remlist;
 			std::vector<xmax_type_block_id> confiremdlist;
-			auto& idx = packs.get<by_number>();
+			auto& idx = packs.get<by_number_less>();
 
 			auto it = idx.begin();
 			for (auto it = idx.begin(); (it != idx.end() && (*it)->block_num < last_confirmed_num); ++it)

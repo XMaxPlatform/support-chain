@@ -101,7 +101,7 @@ namespace Xmaxplatform {
 				{}
 
 				Chain::xmax_type_block_id id;
-				uint32_t             block_num = 0;
+				Chain::xmax_type_block_num	 block_num = 0;
 				uint32_t             ref_block_prefix = 0;
 			};
 

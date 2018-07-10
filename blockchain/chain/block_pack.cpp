@@ -62,6 +62,44 @@ namespace Chain {
 		last_confired_id = pre_pack.last_confired_id;
 
 
+		block_brief last_brief(pre_pack.new_header.builder, pre_pack.block_num, pre_pack.block_id);
+
+		if (pre_pack.last_block_of_builders.size() == 0)
+		{
+			set_dpos_irreversible(pre_pack.dpos_irreversible_num, pre_pack.dpos_irreversible_id);
+			last_block_of_builders.push_back(last_brief);
+		}
+		else if (pre_pack.last_block_of_builders.back().builder == pre_pack.new_header.builder)// update last block info of builder.
+		{
+			last_block_of_builders = pre_pack.last_block_of_builders;
+			set_dpos_irreversible(pre_pack.dpos_irreversible_num, pre_pack.dpos_irreversible_id);
+
+			last_block_of_builders.back() = last_brief;
+			
+		}
+		else //(pre_pack.last_block_of_builders.back().builder != pre_pack.new_header.builder)
+		{
+			if (pre_pack.last_block_of_builders.size() < Config::dpos_irreversible_num)
+			{
+				last_block_of_builders = pre_pack.last_block_of_builders;
+				last_block_of_builders.push_back(last_brief);
+				set_dpos_irreversible(pre_pack.dpos_irreversible_num, pre_pack.dpos_irreversible_id);
+
+			}
+			else //(pre_pack.last_block_of_builders.size() >= Config::dpos_irreversible_num)
+			{
+				// this block can make a old block become irreversible.
+
+				// update irreversible_num 
+				set_dpos_irreversible(pre_pack.last_block_of_builders.front().block_num, pre_pack.last_block_of_builders.front().block_id);
+
+
+				std::copy(pre_pack.last_block_of_builders.begin() + 1, pre_pack.last_block_of_builders.end(), last_block_of_builders.begin());
+
+				last_block_of_builders.push_back(last_brief);
+			}
+		}
+
 	}
 
 	void block_pack::init_by_block(signed_block_ptr b, bool confirmed)
@@ -87,5 +125,9 @@ namespace Chain {
 
 	}
 
+	void block_pack::set_dpos_irreversible(xmax_type_block_num num, const xmax_type_block_id& id)
+	{
+
+	}
 }
 }

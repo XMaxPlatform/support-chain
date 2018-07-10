@@ -43,8 +43,8 @@ namespace Xmaxplatform {
 								  /// Expires increased while the txn is
 								  /// "in flight" to anoher peer
 		Chain::vector<char>    packed_transaction; /// the received raw bundle
-		uint32_t        block_num = 0; /// block transaction was included in
-		uint32_t        true_block = 0; /// used to reset block_uum when request is 0
+		Chain::xmax_type_block_num        block_num = 0; /// block transaction was included in
+		Chain::xmax_type_block_num        true_block = 0; /// used to reset block_uum when request is 0
 		uint16_t        requests = 0; /// the number of "in flight" requests for this txn
 	};
 	/**
@@ -55,9 +55,9 @@ namespace Xmaxplatform {
 			:start_block(start), end_block(end), last(last_acted),
 			start_time(time_point::now())//, block_cache()
 		{}
-		uint32_t     start_block;
-		uint32_t     end_block;
-		uint32_t     last; ///< last sent or received
+		Chain::xmax_type_block_num     start_block;
+		Chain::xmax_type_block_num     end_block;
+		Chain::xmax_type_block_num     last; ///< last sent or received
 		time_point   start_time; ///< time request made or received
 	};
 	using sync_state_ptr = shared_ptr< sync_state >;
@@ -66,7 +66,7 @@ namespace Xmaxplatform {
 		xmax_type_transaction_id id;
 		bool                is_known_by_peer = false; ///< true if we sent or received this trx to this peer or received notice from peer
 		bool                is_noticed_to_peer = false; ///< have we sent peer notice we know it (true if we receive from this peer)
-		uint32_t            block_num = 0; ///< the block number the transaction was included in
+		Chain::xmax_type_block_num            block_num = 0; ///< the block number the transaction was included in
 		time_point          requested_time; /// in case we fetch large trx
 	};
 
@@ -86,8 +86,8 @@ namespace Xmaxplatform {
 	};
 
 	struct update_block_num {
-		uint32_t new_bnum;
-		update_block_num(uint32_t bnum) : new_bnum(bnum) {}
+		Chain::xmax_type_block_num new_bnum;
+		update_block_num(Chain::xmax_type_block_num bnum) : new_bnum(bnum) {}
 		void operator() (node_transaction_state& nts) {
 			if (nts.requests) {
 				nts.true_block = new_bnum;

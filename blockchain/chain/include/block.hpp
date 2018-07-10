@@ -13,8 +13,8 @@ namespace Xmaxplatform { namespace Chain {
         struct block_header
         {
             xmax_type_summary             digest() const;
-            uint32_t                      block_num() const { return num_from_id(previous) + 1; }
-            static uint32_t num_from_id(const xmax_type_block_id& id);
+			xmax_type_block_num           block_num() const { return num_from_id(previous) + 1; }
+            static xmax_type_block_num num_from_id(const xmax_type_block_id& id);
 
 
             xmax_type_block_id            previous;
