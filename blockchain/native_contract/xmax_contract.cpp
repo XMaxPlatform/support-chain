@@ -38,36 +38,40 @@ using namespace ::Xmaxplatform::Basetypes;
 typedef mutable_db_table <xmx_token_object, by_owner_name> xmax_token_table;
 typedef mutable_db_table <resource_token_object, by_owner_name> resource_token_table;
 
-void handle_xmax_addaccount(message_context_xmax& context) {
-   auto create = context.msg.as<Types::addaccount>();
+//Utility functions
+static void create_account_internal(Types::addaccount& create, Basechain::database& db, time& current_time) {
+		
+	auto existing_account = db.find<account_object, by_name>(create.name);
+	XMAX_ASSERT(existing_account == nullptr, account_name_exists_exception,
+		"Cannot create account named ${name}, as that name is already taken",
+		("name", create.name));
 
-   auto& db = context.mutable_db;
+	const auto& new_account = db.create<account_object>([&create, &current_time](account_object& a) {
+		a.name = create.name;
+		a.creation_date = current_time;
+	});
 
-   auto existing_account = db.find<account_object, by_name>(create.name);
-   XMAX_ASSERT(existing_account == nullptr, account_name_exists_exception,
-              "Cannot create account named ${name}, as that name is already taken",
-              ("name", create.name));
+	const auto& creatorToken = db.get<xmx_token_object, by_owner_name>(create.creator);
 
-   const auto& new_account = db.create<account_object>([&create, &context](account_object& a) {
-      a.name = create.name;
-      a.creation_date = context.current_time();
-   });
+	XMAX_ASSERT(creatorToken.xmx_token >= create.deposit.amount, message_validate_exception,
+		"Creator '${c}' has insufficient funds to make account creation deposit of ${a}",
+		("c", create.creator)("a", create.deposit));
 
-   const auto& creatorToken = context.mutable_db.get<xmx_token_object, by_owner_name>(create.creator);
+	db.modify(creatorToken, [&create](xmx_token_object& b) {
+		b.xmx_token -= create.deposit.amount;
+	});
 
-   XMAX_ASSERT(creatorToken.xmx_token >= create.deposit.amount, message_validate_exception,
-              "Creator '${c}' has insufficient funds to make account creation deposit of ${a}",
-              ("c", create.creator)("a", create.deposit));
+	db.create<xmx_token_object>([&create](xmx_token_object& b) {
+		b.owner_name = create.name;
+		b.xmx_token = 0; //create.deposit.amount; TODO: make sure we credit this in @staked
+	});
+}
 
-   context.mutable_db.modify(creatorToken, [&create](xmx_token_object& b) {
-      b.xmx_token -= create.deposit.amount;
-   });
 
-   context.mutable_db.create<xmx_token_object>([&create](xmx_token_object& b) {
-      b.owner_name = create.name;
-      b.xmx_token = 0; //create.deposit.amount; TODO: make sure we credit this in @staked
-   });
 
+//API handler implementations
+void handle_xmax_addaccount(message_context_xmax& context) {	
+	create_account_internal(context.msg.as<Types::addaccount>(), context.mutable_db, context.current_time());
 }
 
 void handle_xmax_transfer(message_context_xmax& context) {
@@ -252,10 +256,12 @@ void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
 		("name", issue_erc20.token_name));
 
 	//Create token account
-	const auto& token_account = db.create<account_object>([&issue_erc20, &context](account_object& a) {
-		a.name = issue_erc20.token_name;
-		a.creation_date = context.current_time();
-	});
+	create_account_internal(addaccount{ issue_erc20.creator,
+		issue_erc20.token_name,
+		issue_erc20.owner,
+		issue_erc20.active,
+		issue_erc20.recovery,
+		asset{} }, context.mutable_db, context.current_time());	
 	
 	
 	auto erc20_index = MakeErcTokenIndex(issue_erc20.token_name, issue_erc20.creator);
@@ -292,10 +298,13 @@ void handle_xmax_issueerc21(Chain::message_context_xmax& context) {
 		("t", issue_erc721.token_name)("owner", existing_token_obj->owner_name));
 
 	//Create token account
-	const auto& token_account = db.create<account_object>([&issue_erc721, &context](account_object& a) {
-		a.name = issue_erc721.token_name;
-		a.creation_date = context.current_time();
-	});
+	create_account_internal(addaccount{ issue_erc721.creator,
+										issue_erc721.token_name,
+										issue_erc721.owner,
+										issue_erc721.active,
+										issue_erc721.recovery,
+										asset{} }, context.mutable_db, context.current_time());
+
 
 	//Create erc721 token object
 	db.create<erc721_token_object>([&issue_erc721](erc721_token_object& token) {
