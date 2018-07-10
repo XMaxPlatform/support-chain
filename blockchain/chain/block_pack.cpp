@@ -94,7 +94,7 @@ namespace Chain {
 				set_dpos_irreversible(pre_pack.last_block_of_builders.front().block_num, pre_pack.last_block_of_builders.front().block_id);
 
 
-				std::copy(pre_pack.last_block_of_builders.begin() + 1, pre_pack.last_block_of_builders.end(), last_block_of_builders.begin());
+				last_block_of_builders.assign(pre_pack.last_block_of_builders.begin() + 1, pre_pack.last_block_of_builders.end());
 
 				last_block_of_builders.push_back(last_brief);
 			}
@@ -127,7 +127,8 @@ namespace Chain {
 
 	void block_pack::set_dpos_irreversible(xmax_type_block_num num, const xmax_type_block_id& id)
 	{
-
+		dpos_irreversible_id = id;
+		dpos_irreversible_num = num;
 	}
 }
 }

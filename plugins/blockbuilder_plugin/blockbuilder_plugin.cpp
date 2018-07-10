@@ -343,6 +343,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
 	void blockbuilder_plugin_impl::confirmation_block_self()
 	{
+		return;
 		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
 		block_pack_ptr pack_ptr = chain.head_block_pack();
 

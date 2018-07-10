@@ -23,7 +23,7 @@ using Basetypes::permission_name;
 using Basetypes::public_key;
 using fc::ecc::private_key;
         const static char key_prefix[] = "XMX";
-		const static int blocks_per_builder = 7;
+		const static int blocks_per_builder = 3;
 		const static int builders_per_round = 21;
 		const static int dpos_irreversible_num = 21 * 2 / 3;
         const static int blocks_per_round = blocks_per_builder * builders_per_round;
