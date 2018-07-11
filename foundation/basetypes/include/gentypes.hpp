@@ -708,18 +708,18 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct minterc21 { 
         minterc21() = default;
-        minterc21(const asset_symbol& token_name, const uint256& token_id)
+        minterc21(const asset_symbol& token_name, const fixed_string32& token_id)
            : token_name(token_name), token_id(token_id) {}
 
         asset_symbol                     token_name;
-        uint256                          token_id;
+        fixed_string32                   token_id;
     };
 
     template<> struct get_struct<minterc21> { 
         static const struct_t& type() { 
            static struct_t result = { "minterc21", "", {
                 {"token_name", "asset_symbol"},
-                {"token_id", "uint256"},
+                {"token_id", "fixed_string32"},
               }
            };
            return result;

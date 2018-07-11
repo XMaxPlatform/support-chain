@@ -176,7 +176,7 @@ struct issueerc21
 
 struct minterc21	
 	token_name asset_symbol
-	token_id uint256
+	token_id fixed_string32
 
 struct revoketoken
 	token_name asset_symbol
