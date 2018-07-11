@@ -54,6 +54,8 @@ namespace Xmaxplatform {
 			void  vm_apply();
 			void  vm_onInit();
 
+			void vm_calli64param2(const char* foo,uint64_t code, uint64_t type);
+
 			int64_t current_execution_time();
 
 			void checktime();

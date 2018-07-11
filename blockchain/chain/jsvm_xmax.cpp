@@ -87,7 +87,6 @@ namespace Xmaxplatform {
 
 		bool jsvm_xmax::StoreInstruction(int ins)
 		{
-			
 			m_instructionCount++;
 			m_Intrunctions.push_back(ins);
 			if (m_instructionCount > m_instructionLimit)
@@ -172,47 +171,41 @@ namespace Xmaxplatform {
 		}
 
 		void  jsvm_xmax::vm_apply() {
-			try {
-				CleanInstruction();
-				Local<Context> context = current_state->current_context.Get(m_pIsolate);
-				message_context_xmax* p_validate_context = jsvm_xmax::get().current_validate_context;
-				Handle<v8::Value> params[2];
-				uint64_t code = 0;
-				uint64_t type = 0;
-				if (p_validate_context != nullptr)
-				{
-					code = uint64_t(p_validate_context->msg.code);
-					type = uint64_t(p_validate_context->msg.type);
-				}
-				params[0] = I64Cpp2JS(m_pIsolate, context, code);
-				params[1] = I64Cpp2JS(m_pIsolate, context, type);	
-				CallJsFoo(m_pIsolate, context, "apply", 0, NULL);
+			message_context_xmax* p_validate_context = jsvm_xmax::get().current_validate_context;
+
+			uint64_t code = 0;
+			uint64_t type = 0;
+			if (p_validate_context != nullptr)
+			{
+				code = uint64_t(p_validate_context->msg.code);
+				type = uint64_t(p_validate_context->msg.type);
 			}
-			catch (const Runtime::Exception& e) {
-				edump((std::string(describeExceptionCause(e.cause))));
-				edump((e.callStack));
-				throw;
-			}
-		
+			vm_calli64param2("apply", code, type);
 		}
 
 		void  jsvm_xmax::vm_onInit()
 		{
+			message_context_xmax* p_validate_context = jsvm_xmax::get().current_validate_context;
+			
+			uint64_t code = 0;
+			uint64_t type = 0;
+			if (p_validate_context != nullptr)
+			{
+				code = uint64_t(p_validate_context->msg.code);
+				type = uint64_t(p_validate_context->msg.type);
+			}
+			vm_calli64param2("init", code, type);
+		}
+
+		void jsvm_xmax::vm_calli64param2(const char* foo, uint64_t code, uint64_t type)
+		{
 			try {
 				CleanInstruction();
 				Local<Context> context = current_state->current_context.Get(m_pIsolate);
-				message_context_xmax* p_validate_context = jsvm_xmax::get().current_validate_context;
 				Handle<v8::Value> params[2];
-				uint64_t code = 0;
-				uint64_t type = 0;
-				if (p_validate_context != nullptr)
-				{
-					code = uint64_t(p_validate_context->msg.code);
-					type = uint64_t(p_validate_context->msg.type);
-				}
 				params[0] = I64Cpp2JS(m_pIsolate, context, code);
 				params[1] = I64Cpp2JS(m_pIsolate, context, type);
-				CallJsFoo(m_pIsolate, context, "init", 0, NULL);
+				CallJsFoo(m_pIsolate, context, foo, 0, NULL);
 			}
 			catch (const Runtime::Exception& e) {
 				edump((std::string(describeExceptionCause(e.cause))));
@@ -221,7 +214,8 @@ namespace Xmaxplatform {
 			}
 			catch (...)
 			{
-				int i = 99999;
+				edump((std::string("js code run out")));
+				throw;
 			}
 		}
 

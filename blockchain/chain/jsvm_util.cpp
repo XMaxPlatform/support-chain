@@ -2,6 +2,7 @@
 #ifdef USE_V8
 #include "jsvm_util.h"
 #include <iostream>
+#include <blockchain_exceptions.hpp>
 #include "jsvm_objbind/Int64Bind.h"
 using namespace v8;
 namespace Xmaxplatform {
@@ -93,7 +94,7 @@ namespace Xmaxplatform {
 					Local<Value> exception = trycatch.Exception();
 					String::Utf8Value exception_str(exception);
 					printf("Exception: %s\n", *exception_str);
-					// ...
+					throw script_runout();
 				}	
 				V8_ParseWithOutPlugin();
 				return hResult;
