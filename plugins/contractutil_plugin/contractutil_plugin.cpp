@@ -259,26 +259,52 @@ namespace Xmaxplatform {
 
 			cc.push_transaction(trx);
 		}
-		void sign_and_push(const std::string& callerPK, const fc::variant& params)
+		void fix_push_trx(const fc::variant& var_params, const fc::variant& var_trx)
 		{
 			// parse transaction.
-			blockchain_plugin& chain = app().get_plugin<blockchain_plugin>();
+			blockchain_plugin& chain_plugin = app().get_plugin<blockchain_plugin>();
 
 			Chain::signed_transaction trx;
 
-			chain.getchain().parse_transaction(trx, params);
+			chain_plugin.getchain().parse_transaction(trx, var_trx);
 
 			// signed transaction with private key.
-			Chain::chain_id_type chainid;
-			app().get_plugin<blockchain_plugin>().get_chain_id(chainid);
-			fc::ecc::private_key caller_priv_key = *Utilities::wif_to_key(callerPK);
-			trx.sign(caller_priv_key, chainid);
+
+			const auto& po = var_params.get_object();
+
+			std::string callerPK;
+			fc::microseconds duration_sec = fc::seconds(60);
+
+
+#define GET_FIELD( VO, FIELD, RESULT ) if( VO.contains(FIELD) ) fc::from_variant( VO[FIELD], RESULT )
+
+			GET_FIELD(po, "sign_key", callerPK);
+			GET_FIELD(po, "duration_sec", duration_sec);
+
+#undef GET_FIELD 
+			fc::optional<fc::ecc::private_key> caller_priv_key = Utilities::wif_to_key(callerPK);
+			if (caller_priv_key.valid())
+			{
+				if (Basetypes::time(fc::microseconds(0)) == trx.expiration)
+				{
+					trx.expiration = chain_plugin.getchain().head_block_time() + duration_sec;
+				}
+				if (0 == trx.ref_block_num || 0 == trx.ref_block_prefix)
+				{
+					transaction_set_reference_block(trx, chain_plugin.getchain().head_block_id());
+				}
+
+				Chain::chain_id_type chainid;
+				app().get_plugin<blockchain_plugin>().get_chain_id(chainid);
+
+				trx.sign(*caller_priv_key, chainid);
+			}
+
 
 			Chain::transaction_package_ptr new_package = std::make_shared<Chain::transaction_package>(trx);
 
-
 			// push transaction to chain.
-			auto result = chain.get_read_write_api().push_transaction_package(new_package);
+			auto result = chain_plugin.get_read_write_api().push_transaction_package(new_package);
 	
 		}
 	};
@@ -297,7 +323,7 @@ namespace Xmaxplatform {
 			CALL(contractutil_plugin, my, create_account, INVOKE_V_R_R_R_R_R(my, create_account, std::string, std::string, std::string, public_key_type, public_key_type), 200),
 			CALL(contractutil_plugin, my, push_transaction, INVOKE_V_R_R_R_R(my, push_transaction, std::string, std::string, fc::variant , fc::variant), 200),
 			CALL(contractutil_plugin, my, set_code, INVOKE_V_R_R_R(my, set_code, std::string, std::string,  std::string), 200),
-			CALL(contractutil_plugin, my, sign_and_push, INVOKE_V_R_R(my, sign_and_push, std::string, fc::variant), 200),
+			CALL(contractutil_plugin, my, fix_push_trx, INVOKE_V_R_R(my, fix_push_trx, fc::variant, fc::variant), 200),
 #ifdef USE_V8
 			CALL(contractutil_plugin, my, set_jscode, INVOKE_V_R_R_R(my, set_jscode, std::string, std::string,  std::string), 200),
 #endif
