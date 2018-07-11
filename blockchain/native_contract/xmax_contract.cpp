@@ -320,9 +320,42 @@ void handle_xmax_issueerc21(Chain::message_context_xmax& context) {
 	db.create<erc721_token_object>([&issue_erc721](erc721_token_object& token) {
 		token.token_name = issue_erc721.token_name;
 		token.owner_name = issue_erc721.creator;		
-	});
+	});	
 }
 
+
+//--------------------------------------------------
+void handle_xmax_minterc21(Chain::message_context_xmax& context)
+{
+	auto& db = context.mutable_db;
+	auto minterc721 = context.msg.as<Types::minterc21>();
+
+	//Todo: Check owner authorization
+
+	//Check precondition
+	auto existing_account = db.find<account_object, by_name>(minterc721.token_name);
+	XMAX_ASSERT(existing_account != nullptr, message_precondition_exception,
+		"Cannot find ERC721 token account named ${name}, as that name does not exist",
+		("name", minterc721.token_name));
+
+	auto existing_token_obj = db.find<erc721_token_object, by_token_name>(minterc721.token_name);
+	XMAX_ASSERT(existing_token_obj != nullptr, message_validate_exception,
+		"Erc721 token:'${t}' does not exist.", ("t", minterc721.token_name));
+
+
+	const auto& tokenObj = db.get<erc721_token_object, by_token_name>(minterc721.token_name);
+	xmax_erc721_id token_id{ minterc721.token_id };
+	XMAX_ASSERT(tokenObj.minted_tokens.find(token_id) == tokenObj.minted_tokens.end(),
+		message_validate_exception,
+		"The ERC721 token: ${token_name} with token id:${token_id} has already minted",
+		("token_name", minterc721.token_name)("token_id", minterc721.token_id));
+
+
+	db.modify(tokenObj, [&minterc721](erc721_token_object& obj) {
+		obj.minted_tokens.insert(xmax_erc721_id(minterc721.token_id));
+	});
+
+}
 
 //--------------------------------------------------
 void handle_xmax_revoketoken(Chain::message_context_xmax& context)

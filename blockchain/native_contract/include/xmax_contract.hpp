@@ -36,6 +36,7 @@ void handle_xmax_unregproxy(Chain::message_context_xmax& context);
 //ERC20, ERC721 Relative interfaces
 void handle_xmax_issueerc2o(Chain::message_context_xmax& context);
 void handle_xmax_issueerc21(Chain::message_context_xmax& context);
+void handle_xmax_minterc21(Chain::message_context_xmax& context);
 void handle_xmax_revoketoken(Chain::message_context_xmax& context);
 
 
