@@ -65,7 +65,5 @@ namespace Xmaxplatform {
 			fc::raw::pack(enc, static_cast<const Basetypes::transaction&>(*this));
 			return enc.result();
 		}
-
-
 	}
 } // Xmaxplatform::chain

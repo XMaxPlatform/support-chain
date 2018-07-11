@@ -1137,16 +1137,11 @@ namespace Xmaxplatform { namespace Chain {
 			} FC_CAPTURE_AND_RETHROW((trx))
 		}
 
-
-
-		transaction_package_ptr chain_xmax::transaction_from_variant(const fc::variant& v) const
+		void chain_xmax::parse_transaction(signed_transaction& result, const fc::variant& v) const
 		{
-
 			const variant_object& vo = v.get_object();
-#define GET_FIELD( VO, FIELD, RESULT ) \
-   if( VO.contains(#FIELD) ) fc::from_variant( VO[#FIELD], RESULT.FIELD )
+#define GET_FIELD( VO, FIELD, RESULT ) if( VO.contains(#FIELD) ) fc::from_variant( VO[#FIELD], RESULT.FIELD )
 
-			signed_transaction result;
 			GET_FIELD(vo, ref_block_num, result);
 			GET_FIELD(vo, ref_block_prefix, result);
 			GET_FIELD(vo, expiration, result);
@@ -1173,6 +1168,14 @@ namespace Xmaxplatform { namespace Chain {
 					}
 				}
 			}
+#undef GET_FIELD
+
+		}
+
+		transaction_package_ptr chain_xmax::transaction_from_variant(const fc::variant& v) const
+		{
+			signed_transaction result;
+			parse_transaction(result, v);
 			return std::make_shared<transaction_package>(result);
 #undef GET_FIELD
 		}

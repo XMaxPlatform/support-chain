@@ -320,15 +320,8 @@ namespace Chain_APIs{
 	}
 
 	
-
-	//--------------------------------------------------
-	Xmaxplatform::Chain_APIs::read_write::push_transaction_results read_write::push_transaction(const push_transaction_params& params)
+	Xmaxplatform::Chain_APIs::read_write::push_transaction_results read_write::push_transaction_package(Chain::transaction_package_ptr package)
 	{
-
-
-
-		Chain::transaction_package_ptr package = _chain.transaction_from_variant(params);
-
 		Chain::transaction_request_ptr request = std::make_shared<Chain::transaction_request>(std::move(*package.get()));
 
 		Chain::transaction_response_ptr respone = _chain.push_transaction(request);
@@ -336,6 +329,14 @@ namespace Chain_APIs{
 		auto pretty_trx = _chain.transaction_to_variant(*respone);
 		auto pretty_events = _chain.transaction_events_to_variant(*respone);
 		return read_write::push_transaction_results{ request->signed_trx.id(), pretty_trx, pretty_events };
+	}
+
+	//--------------------------------------------------
+	Xmaxplatform::Chain_APIs::read_write::push_transaction_results read_write::push_transaction(const push_transaction_params& params)
+	{
+		Chain::transaction_package_ptr package = _chain.transaction_from_variant(params);
+
+		return push_transaction_package(package);
 
 		//auto ptrx = _chain.push_transaction(pretty_input, skip_flags);
 		//auto pretty_trx = _chain.transaction_to_variant(ptrx);

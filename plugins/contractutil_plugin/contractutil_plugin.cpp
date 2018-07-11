@@ -259,8 +259,28 @@ namespace Xmaxplatform {
 
 			cc.push_transaction(trx);
 		}
-	
+		void sign_and_push(const std::string& callerPK, const fc::variant& params)
+		{
+			// parse transaction.
+			blockchain_plugin& chain = app().get_plugin<blockchain_plugin>();
 
+			Chain::signed_transaction trx;
+
+			chain.getchain().parse_transaction(trx, params);
+
+			// signed transaction with private key.
+			Chain::chain_id_type chainid;
+			app().get_plugin<blockchain_plugin>().get_chain_id(chainid);
+			fc::ecc::private_key caller_priv_key = *Utilities::wif_to_key(callerPK);
+			trx.sign(caller_priv_key, chainid);
+
+			Chain::transaction_package_ptr new_package = std::make_shared<Chain::transaction_package>(trx);
+
+
+			// push transaction to chain.
+			auto result = chain.get_read_write_api().push_transaction_package(new_package);
+	
+		}
 	};
 
 	contractutil_plugin::contractutil_plugin() {}
@@ -277,6 +297,7 @@ namespace Xmaxplatform {
 			CALL(contractutil_plugin, my, create_account, INVOKE_V_R_R_R_R_R(my, create_account, std::string, std::string, std::string, public_key_type, public_key_type), 200),
 			CALL(contractutil_plugin, my, push_transaction, INVOKE_V_R_R_R_R(my, push_transaction, std::string, std::string, fc::variant , fc::variant), 200),
 			CALL(contractutil_plugin, my, set_code, INVOKE_V_R_R_R(my, set_code, std::string, std::string,  std::string), 200),
+			CALL(contractutil_plugin, my, sign_and_push, INVOKE_V_R_R(my, sign_and_push, std::string, fc::variant), 200),
 #ifdef USE_V8
 			CALL(contractutil_plugin, my, set_jscode, INVOKE_V_R_R_R(my, set_jscode, std::string, std::string,  std::string), 200),
 #endif

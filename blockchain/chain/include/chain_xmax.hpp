@@ -106,7 +106,10 @@ namespace Xmaxplatform { namespace Chain {
 
 	   vector<signed_block>	get_syncblock_from_lastnum(const uint32_t& lastnum);
 
+	   void parse_transaction(signed_transaction& result, const fc::variant& v) const;
+
 	   transaction_package_ptr transaction_from_variant(const fc::variant& v)const;
+
 	   fc::variant       transaction_to_variant(const transaction_response& response)const;
 	   fc::variant       transaction_events_to_variant(const transaction_response& trx)const;
 

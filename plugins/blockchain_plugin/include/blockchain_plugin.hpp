@@ -218,6 +218,8 @@ namespace Xmaxplatform {
 				fc::variant                 events;
 			};
 
+			push_transaction_results push_transaction_package(Chain::transaction_package_ptr package);
+
 			push_transaction_results push_transaction(const push_transaction_params& params);
 
 			using push_transactions_params = vector<push_transaction_params>;
