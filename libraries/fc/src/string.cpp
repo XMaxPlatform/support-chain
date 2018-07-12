@@ -88,6 +88,30 @@ namespace fc  {
   string operator + ( const string& s, char c ) 	 { return string(s) += c; }
 #endif // USE_FC_STRING
 
+  int32_t  to_int32(const fc::string& i)
+  {
+	  try
+	  {
+		  return boost::lexical_cast<int32_t>(i.c_str(), i.size());
+	  }
+	  catch (const boost::bad_lexical_cast& e)
+	  {
+		  FC_THROW_EXCEPTION(parse_error_exception, "Couldn't parse int32_t");
+	  }
+	  FC_RETHROW_EXCEPTIONS(warn, "${i} => int32_t", ("i", i))
+  }
+  uint32_t to_uint32(const fc::string& i)
+  {
+	  try
+	  {
+		  return boost::lexical_cast<uint32_t>(i.c_str(), i.size());
+	  }
+	  catch (const boost::bad_lexical_cast& e)
+	  {
+		  FC_THROW_EXCEPTION(parse_error_exception, "Couldn't parse uint32_t");
+	  }
+	  FC_RETHROW_EXCEPTIONS(warn, "${i} => uint32_t", ("i", i))
+  }
 
   int64_t    to_int64( const fc::string& i )
   {

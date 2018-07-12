@@ -8,9 +8,6 @@
 #include <message_xmax.hpp>
 namespace Xmaxplatform {
 namespace Chain {
-	
-
-
 
 	class message_response
 	{
@@ -30,6 +27,9 @@ namespace Chain {
 		fc::optional<transaction_receipt_header> receipt;
 
 		std::vector<message_response> message_responses;
+
+		fc::optional<fc::exception>                error;
+		std::exception_ptr                         error_ptr;
 	};
 
 

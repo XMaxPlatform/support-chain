@@ -277,6 +277,10 @@ public:
     {
        return a.which() < b.which();
     }
+	int which() const { return _tag; }
+
+	template<typename X>
+	bool contains() const { return which() == tag<X>::value; }
 
     template<typename X>
     X& get() {
@@ -333,11 +337,6 @@ public:
       _tag = w;
       impl::storage_ops<0, Types...>::con(_tag, storage);
     }
-
-    int which() const {return _tag;}
-
-    template<typename X>
-    bool contains() const { return which() == tag<X>::value; }
 };
 
 template<typename Result>

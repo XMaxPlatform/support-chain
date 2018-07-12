@@ -43,6 +43,19 @@ namespace fc {
       return fc::time_point_sec( (pt - epoch).total_seconds() );
   } FC_RETHROW_EXCEPTIONS( warn, "unable to convert ISO-formatted string to fc::time_point_sec" ) }
 
+  time_point_sec time_point_sec::from_string(const fc::string& s)
+  {
+	  try
+	  {
+		  uint32_t v = fc::to_uint32(s);
+		  return time_point_sec(v);
+	  }
+	  catch (...)
+	  {
+		  return from_iso_string(s);
+	  }
+  }
+
   time_point::operator fc::string()const
   {
       return fc::string( time_point_sec( *this ) );
@@ -53,17 +66,24 @@ namespace fc {
       return time_point( time_point_sec::from_iso_string( s ) );
   } FC_RETHROW_EXCEPTIONS( warn, "unable to convert ISO-formatted string to fc::time_point" ) }
 
+  time_point time_point::from_string(const fc::string& s)
+  {
+	  try {
+		  return time_point(time_point_sec::from_string(s));
+	  } FC_RETHROW_EXCEPTIONS(warn, "unable to convert string to fc::time_point")
+  }
+
   void to_variant( const fc::time_point& t, variant& v ) {
     v = fc::string( t );
   }
   void from_variant( const fc::variant& v, fc::time_point& t ) {
-    t = fc::time_point::from_iso_string( v.as_string() );
+    t = fc::time_point::from_string( v.as_string() );
   }
   void to_variant( const fc::time_point_sec& t, variant& v ) {
     v = fc::string( t );
   }
   void from_variant( const fc::variant& v, fc::time_point_sec& t ) {
-    t = fc::time_point_sec::from_iso_string( v.as_string() );
+    t = fc::time_point_sec::from_string( v.as_string() );
   }
 
   // inspired by show_date_relative() in git's date.c

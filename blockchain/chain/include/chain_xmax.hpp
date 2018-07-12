@@ -139,12 +139,12 @@ namespace Xmaxplatform { namespace Chain {
 	 // void rate_limit_message(const message& message);
        void apply_message(message_context_xmax& c);
 
-	   template<typename T>
-	   typename T::processed apply_transaction(const T& trx);
-	   template<typename T>
-	   typename T::processed process_transaction(const T& trx, int depth, const fc::time_point& start_time);
-	   
+	   bool check_trx(const transaction_request_ptr& request) const;
+	   transaction_response_ptr apply_transaction(transaction_request_ptr request);
 	   transaction_response_ptr apply_transaction_impl(transaction_request_ptr request);
+
+	   transaction_response_ptr make_response() const;
+	   transaction_response_ptr make_response(const fc::exception& e) const;
 
 	   transaction_receipt& apply_transaction_receipt(const signed_transaction& trx);
 
@@ -168,19 +168,6 @@ namespace Xmaxplatform { namespace Chain {
 	   void check_transaction_authorization(const signed_transaction& trx, bool allow_unused_signatures = false)const;
 	   void block_summary(const signed_block& next_block);
 	   void update_or_create_builders(const builder_rule& builders);
-	   template<typename T>
-	   void validate_transaction(const T& trx) const {
-		   try {
-
-			   XMAX_ASSERT(trx.messages.size() > 0, transaction_exception, "A transaction must have at least one message");
-
-			   validate_scope(trx);
-			   validate_expiration(trx);
-			   validate_uniqueness(trx);
-			   validate_tapos(trx);
-
-		   } FC_CAPTURE_AND_RETHROW((trx))
-	   }
 
    public:
 

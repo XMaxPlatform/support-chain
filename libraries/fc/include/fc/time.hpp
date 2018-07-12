@@ -51,7 +51,7 @@ namespace fc {
 
         operator fc::string()const;
         static time_point from_iso_string( const fc::string& s );
-
+		static time_point from_string(const fc::string& s);
         const microseconds& time_since_epoch()const { return elapsed; }
         uint32_t            sec_since_epoch()const  { return elapsed.count() / 1000000; }
         bool   operator > ( const time_point& t )const                              { return elapsed._count > t.elapsed._count; }
@@ -118,7 +118,7 @@ namespace fc {
 
         operator fc::string()const;
         static time_point_sec from_iso_string( const fc::string& s );
-
+		static time_point_sec from_string(const fc::string& s);
     private:
         uint32_t utc_seconds;
   };

@@ -387,8 +387,6 @@ namespace Xmaxplatform { namespace Chain {
 			return config.next_builders.builders[bias];
 		}
 
-
-
 		const builder_info& chain_xmax::get_block_builder(uint32_t delta_slot) const
 		{
 			asset(delta_slot >= 0);
@@ -491,7 +489,6 @@ namespace Xmaxplatform { namespace Chain {
 
 		transaction_response_ptr chain_xmax::push_transaction(const signed_transaction& trx, uint32_t skip /*= skip_nothing*/)
 		{
-
 			transaction_request_ptr request = std::make_shared<transaction_request>(trx);
 			return push_transaction(request);
 
@@ -499,18 +496,33 @@ namespace Xmaxplatform { namespace Chain {
 
 		transaction_response_ptr chain_xmax::push_transaction(transaction_request_ptr request)
 		{
-			validate_expiration(request->signed_trx);
-			validate_tapos(request->signed_trx);
-			validate_referenced_accounts(request->signed_trx);
-			validate_uniqueness(request->signed_trx);
-
-			if (!_context->building_block.valid())
+			if (check_trx(request))
 			{
-				_context->pending_transactions.push_back(request);
-				return std::make_shared<transaction_response>();
-			}
+				if (!_context->building_block.valid())
+				{
+					_context->pending_transactions.push_back(request);
+					return make_response();
+				}
 
-			return apply_transaction_impl(request);
+				return apply_transaction_impl(request);
+			}
+			else
+			{
+				return make_response();
+			}
+		}
+
+		transaction_response_ptr chain_xmax::apply_transaction(transaction_request_ptr request)
+		{
+			FC_ASSERT(_context->building_block.valid(), "not transaction apply time.");
+			if (check_trx(request))
+			{
+				return apply_transaction_impl(request);
+			}
+			else
+			{
+				return make_response();
+			}
 		}
 
 		transaction_response_ptr chain_xmax::apply_transaction_impl(transaction_request_ptr request)
@@ -530,13 +542,26 @@ namespace Xmaxplatform { namespace Chain {
 				Impl.squash();
 				fc::move_append(_context->building_block->message_receipts, std::move(Impl.msg_receipts));
 				_context->building_block->pack->transactions.push_back(request);
+				return response;
 			}
-			FC_CAPTURE_AND_RETHROW((response));
-			return response;
+			catch (const fc::exception& e) {
+				return make_response(e);
+			}
+			return make_response();
 		}
 
+		transaction_response_ptr chain_xmax::make_response() const
+		{
+			return std::make_shared<transaction_response>();
+		}
+		transaction_response_ptr chain_xmax::make_response(const fc::exception& e) const
+		{
+			transaction_response_ptr response = std::make_shared<transaction_response>();
+			response->error = e;
+			response->error_ptr = std::current_exception();
 
-
+			return response;
+		}
 		transaction_receipt& chain_xmax::apply_transaction_receipt(const signed_transaction& trx)
 		{
 			block_pack& block_pk = *_context->building_block->pack;
@@ -554,8 +579,6 @@ namespace Xmaxplatform { namespace Chain {
 			}
 
 			receipt.receipt_idx = idx;
-
-
 
 			receipt.result = transaction_receipt::applied;
 			return receipt;
@@ -584,6 +607,11 @@ namespace Xmaxplatform { namespace Chain {
 
 			_start_build(when);
 
+			for (auto request : _context->pending_transactions)
+			{
+				apply_transaction(request);
+			}
+			_context->pending_transactions.clear();
 			_generate_block();
 
 			_sign_block(sign_private_key);
@@ -603,18 +631,37 @@ namespace Xmaxplatform { namespace Chain {
 			);
 
 			_commit_block();
-
-			_context->pending_transactions.clear();
 		}
 
 		void chain_xmax::confirm_block(const signed_block_ptr next_block)
 		{
 			_validate_block_desc(next_block);
 
+
+			vector<transaction_request_ptr> transactions;
+
+			for (auto trx : next_block->receipts)
+			{
+				if (trx.trx.contains<transaction_package>())
+				{
+					const auto& package = trx.trx.get<transaction_package>();
+					transactions.push_back(std::make_shared<transaction_request>(package));
+				}
+				else
+				{
+					XMAX_ASSERT(false, block_validate_exception, "encountered unexpected package type.");
+				}
+			}
+
 			auto exec_start = std::chrono::high_resolution_clock::now();
 			_abort_build();
 
 			_start_build(next_block->timestamp);
+
+			for (auto request : transactions)
+			{
+				apply_transaction(request);
+			}
 
 			_generate_block();
 
@@ -1052,6 +1099,24 @@ namespace Xmaxplatform { namespace Chain {
 				std::back_inserter(intersection));
 			FC_ASSERT(intersection.size() == 0, "a transaction may not redeclare scope in read_scope");
 		}
+
+		bool chain_xmax::check_trx(const transaction_request_ptr& request) const
+		{
+			try {
+
+				XMAX_ASSERT(request->signed_trx.messages.size() > 0, transaction_exception, "A transaction must have at least one message");
+				validate_scope(request->signed_trx);
+				validate_expiration(request->signed_trx);
+				validate_tapos(request->signed_trx);
+				validate_referenced_accounts(request->signed_trx);
+				validate_uniqueness(request->signed_trx);
+
+				return true;
+			} FC_CAPTURE_AND_RETHROW((request->signed_trx))
+
+			return false;
+		}
+
 		bool chain_xmax::should_check_for_duplicate_transactions() const
 		{ 
 			return !(_context->skip_flags & Config::skip_transaction_dupe_check);
@@ -1096,45 +1161,6 @@ namespace Xmaxplatform { namespace Chain {
 					});
 				}
 			}
-		}
-
-		template<typename T>
-		typename T::processed chain_xmax::apply_transaction(const T& trx)
-		{
-			try {
-				validate_transaction(trx);
-				record_transaction(trx);
-				return process_transaction(trx, 0, fc::time_point::now());
-
-			} FC_CAPTURE_AND_RETHROW((trx))
-		}
-
-		template<typename T>
-		typename T::processed chain_xmax::process_transaction(const T& trx, int depth, const fc::time_point& start_time)
-		{
-			try {
-				const blockchain_configuration& chain_configuration = get_static_config().setup;
-				XMAX_ASSERT((fc::time_point::now() - start_time).count() < chain_configuration.max_trx_runtime, checktime_exceeded,
-					"Transaction exceeded maximum total transaction time of ${limit}ms", ("limit", chain_configuration.max_trx_runtime / 1000));
-
-				XMAX_ASSERT(depth < chain_configuration.in_depth_limit, tx_resource_exhausted,
-					"Transaction exceeded maximum inline recursion depth of ${limit}", ("limit", chain_configuration.in_depth_limit));
-
-				typename T::processed ptrx(trx);
-				ptrx.output.resize(trx.messages.size());
-
-				for (uint32_t i = 0; i < trx.messages.size(); ++i) {
-					auto& output = ptrx.output[i];
-					//rate_limit_message(trx.messages[i]); no limit for now
-					process_message(trx, trx.messages[i].code, trx.messages[i], output, nullptr, 0, start_time);
-					if (output.inline_trx.valid()) {
-						const transaction& trx = *output.inline_trx;
-						output.inline_trx = process_transaction(pending_inline_transaction(trx), depth + 1, start_time);
-					}
-				}
-
-				return ptrx;
-			} FC_CAPTURE_AND_RETHROW((trx))
 		}
 
 		void chain_xmax::parse_transaction(signed_transaction& result, const fc::variant& v) const
