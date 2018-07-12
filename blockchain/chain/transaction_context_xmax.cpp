@@ -72,11 +72,8 @@ namespace Chain {
 					try {
 						vm_xmax::get().apply(context, execution_time, true);
 					}
-					catch (const fc::exception &ex) {
-
-					}
+					FC_CAPTURE_AND_LOG((context.msg))
 				}
-
 			}
 		} FC_CAPTURE_AND_RETHROW((context.msg))
 

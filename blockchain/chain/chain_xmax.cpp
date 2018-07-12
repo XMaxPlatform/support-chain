@@ -527,8 +527,8 @@ namespace Xmaxplatform { namespace Chain {
 
 		transaction_response_ptr chain_xmax::apply_transaction_impl(transaction_request_ptr request)
 		{
-			transaction_response_ptr response;
 			try {
+				transaction_response_ptr response;
 				transaction_context_xmax Impl(*this, request->signed_trx);
 
 				Impl.exec();
@@ -545,9 +545,10 @@ namespace Xmaxplatform { namespace Chain {
 				return response;
 			}
 			catch (const fc::exception& e) {
+				wlog("${details}", ("details", e.to_detail_string()));
+
 				return make_response(e);
 			}
-			return make_response();
 		}
 
 		transaction_response_ptr chain_xmax::make_response() const
