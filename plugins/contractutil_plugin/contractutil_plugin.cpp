@@ -210,7 +210,7 @@ namespace Xmaxplatform {
 		   {
 			   std::string tempstrname;
 			   fc::from_variant(vlist[i], tempstrname);
-			   scopelist.push_back(Xmaxplatform::Basetypes::string_to_name(tempstrname.c_str()));
+			   scopelist.push_back(Xmaxplatform::Basetypes::name(tempstrname));
 		   }
 
 		   trx.scope = sort_names(std::move(scopelist));

@@ -88,7 +88,7 @@ namespace Xmaxplatform {namespace Chain {
 
 #define UPDATE_RECORD(UPDATEFUNC, INDEX, DATASIZE) \
    auto lambda = [&](message_context_xmax* ctx, INDEX::value_type::key_type* keys, char *data, uint32_t datalen) -> int32_t { \
-      return ctx->UPDATEFUNC<INDEX::value_type>( name(scope), name(ctx->code.value), table_name, keys, data, datalen); \
+      return ctx->UPDATEFUNC<INDEX::value_type>( name(scope), name(ctx->code.code()), table_name, keys, data, datalen); \
    }; \
    const int32_t ret = validate<decltype(lambda), INDEX::value_type::key_type, INDEX::value_type::number_of_keys>(valueptr, DATASIZE, lambda);
 
@@ -108,7 +108,7 @@ namespace Xmaxplatform {namespace Chain {
 \
       XMAX_ASSERT(storage <= (vm_xmax::get().per_code_account_max_db_limit_mbytes * bytes_per_mbyte), \
                  tx_code_db_limit_exceeded, \
-                 "Database limit exceeded for account=${name}",("name", name(vm_xmax::get().current_message_context->code.value))); \
+                 "Database limit exceeded for account=${name}",("name", name(vm_xmax::get().current_message_context->code.code()))); \
       return created ? 1 : 0; \
    } \
    DEFINE_INTRINSIC_FUNCTION4(env,update_##OBJTYPE,update_##OBJTYPE,i32,i64,scope,i64,table,i32,valueptr,i32,valuelen) { \
@@ -123,7 +123,7 @@ namespace Xmaxplatform {namespace Chain {
       \
       XMAX_ASSERT(storage <= (vm_xmax::get().per_code_account_max_db_limit_mbytes * bytes_per_mbyte), \
                  tx_code_db_limit_exceeded, \
-                 "Database limit exceeded for account=${name}",("name", name(vm_xmax::get().current_message_context->code.value))); \
+                 "Database limit exceeded for account=${name}",("name", name(vm_xmax::get().current_message_context->code.code()))); \
       return 1; \
    } \
    DEFINE_INTRINSIC_FUNCTION3(env,remove_##OBJTYPE,remove_##OBJTYPE,i32,i64,scope,i64,table,i32,valueptr) { \
@@ -137,7 +137,7 @@ namespace Xmaxplatform {namespace Chain {
       \
       XMAX_ASSERT(storage <= (vm_xmax::get().per_code_account_max_db_limit_mbytes * bytes_per_mbyte), \
                  tx_code_db_limit_exceeded, \
-                 "Database limit exceeded for account=${name}",("name", name(vm_xmax::get().current_message_context->code.value))); \
+                 "Database limit exceeded for account=${name}",("name", name(vm_xmax::get().current_message_context->code.code()))); \
       return 1; \
    }
 
@@ -172,7 +172,7 @@ namespace Xmaxplatform {namespace Chain {
 #define UPDATE_RECORD_STR(FUNCTION) \
   VERIFY_TABLE(str) \
   auto lambda = [&](message_context_xmax* ctx, std::string* keys, char *data, uint32_t datalen) -> int32_t { \
-    return ctx->FUNCTION<keystr_value_object>( name(scope), name(ctx->code.value), table_name, keys, data, datalen); \
+    return ctx->FUNCTION<keystr_value_object>( name(scope), name(ctx->code.code()), table_name, keys, data, datalen); \
   }; \
   const int32_t ret = validate_str<decltype(lambda)>(keyptr, keylen, valueptr, valuelen, lambda);
 
@@ -198,7 +198,7 @@ namespace Xmaxplatform {namespace Chain {
 
 		XMAX_ASSERT(storage <= (vm_xmax::get().per_code_account_max_db_limit_mbytes * bytes_per_mbyte),
 			tx_code_db_limit_exceeded,
-			"Database limit exceeded for account=${name}", ("name", name(vm_xmax::get().current_message_context->code.value)));
+			"Database limit exceeded for account=${name}", ("name", name(vm_xmax::get().current_message_context->code.code())));
 
 		return created ? 1 : 0;
 	}
@@ -211,7 +211,7 @@ namespace Xmaxplatform {namespace Chain {
 
 		XMAX_ASSERT(storage <= (vm_xmax::get().per_code_account_max_db_limit_mbytes * bytes_per_mbyte),
 			tx_code_db_limit_exceeded,
-			"Database limit exceeded for account=${name}", ("name", name(vm_xmax::get().current_message_context->code.value)));
+			"Database limit exceeded for account=${name}", ("name", name(vm_xmax::get().current_message_context->code.code())));
 		return 1;
 	}
 	DEFINE_INTRINSIC_FUNCTION4(env, remove_str, remove_str, i32, i64, scope, i64, table, i32, keyptr, i32, keylen) {
@@ -223,7 +223,7 @@ namespace Xmaxplatform {namespace Chain {
 
 		XMAX_ASSERT(storage <= (vm_xmax::get().per_code_account_max_db_limit_mbytes * bytes_per_mbyte),
 			tx_code_db_limit_exceeded,
-			"Database limit exceeded for account=${name}", ("name", name(vm_xmax::get().current_message_context->code.value)));
+			"Database limit exceeded for account=${name}", ("name", name(vm_xmax::get().current_message_context->code.code())));
 		return 1;
 	}
 

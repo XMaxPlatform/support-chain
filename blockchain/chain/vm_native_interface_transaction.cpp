@@ -46,7 +46,7 @@ namespace Xmaxplatform {namespace Chain {
 		auto apply_context = vm_xmax::get().current_validate_context;
 		// if this is not sent from the code account with the permission of "code" then we must
 		// presently have the permission to add it, otherwise its a failure
-		if (!(account == apply_context->code.value && name(permission) == name("code"))) {
+		if (!(account == apply_context->code.code() && name(permission) == name("code"))) {
 			apply_context->require_authorization(name(account), name(permission));
 		}
 		auto& pmsg = apply_context->get_pending_message(handle);
