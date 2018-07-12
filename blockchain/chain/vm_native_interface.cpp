@@ -10,7 +10,7 @@
 #include <vm_native_interface_transaction.hpp>
 #include <vm_native_interface_event.hpp>
 #include <message_context_xmax.hpp>
-
+#include <shortname.hpp>
 #include <fc/uint128.hpp>
 
 namespace Xmaxplatform {namespace Chain {
@@ -51,38 +51,9 @@ namespace Xmaxplatform {namespace Chain {
 	}
 	BIND_VM_NATIVE_FUCTION_R2(vm_xmax_assert, ds_void, xmax_assert, ds_int, ds_string)
 
-	char char_to_symbol(char c)
-	{
-		if (c >= (char)'a' && c <= (char)'z')
-			return (c - (char)'a') + 6;
-		if (c >= '1' && c <= '5')
-			return (c - '1') + 1;
-		return 0;
-	}
-
 	int64 vm_string_to_name(const string& str)
 	{
-		uint32_t len = 0;
-		while (str[len]) ++len;
-
-		int64 value = 0;
-
-		for (uint32_t i = 0; i <= 12; ++i) {
-			uint64_t c = 0;
-			if (i < len && i <= 12) c = uint64_t(char_to_symbol(str[i]));
-
-			if (i < 12) {
-				c &= 0x1f;
-				c <<= 64 - 5 * (i + 1);
-			}
-			else {
-				c &= 0x0f;
-			}
-
-			value |= c;
-		}
-
-		return value;
+		return ShortCode::short_name::to_name_code(str.c_str());
 	}
 	BIND_VM_NATIVE_FUCTION_R1(vm_string_to_name, ds_i64, str2n, ds_string)
 
