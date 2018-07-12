@@ -18,16 +18,24 @@
 #include <objects/object_utility.hpp>
 #include <objects/erc721_token_object.hpp>
 #include <objects/erc721_token_account_object.hpp>
+#include <objects/erc20_token_account_object.hpp>
 
 #include <boost/test/included/unit_test.hpp>
+#include <blockchain_exceptions.hpp>
 
 
 
 using namespace Xmaxplatform::Chain;
 using namespace Xmaxplatform::Basetypes;
 
-//*** Utility functions
 namespace {
+	
+	//*** Utility functions
+
+	template <class ExceptionType>
+	static inline bool AlwaysPassCheckException(const ExceptionType& ex) {
+		return true;
+	}
 
 	static inline bool IsDuplicateTokenNameEx(const duplicate_type_exception& ex) {
 		std::string ex_msg = ex.to_string();
@@ -51,6 +59,8 @@ namespace {
 		return *it;
 	}
 
+	//*** Erc20 Utility functions
+
 	template <typename MultiIndexType>
 	static void AddErc20ObjToTable(MultiIndexType& tbl, erc20_token_object::id_type id, const std::string& token_name,		
 		const std::string& owner_name, Xmaxplatform::Basetypes::share_type amount) {
@@ -61,8 +71,54 @@ namespace {
 		obj.token_name = token_name_from_string(token_name);
 		obj.owner_name = xmax::string_to_name(owner_name.c_str());
 		obj.balance = amount;
+		obj.total_supply = amount;
 		tbl.insert(obj);
 	}
+
+	template <typename MultiIndexType>
+	static void AddErc20AccountObjToTable(MultiIndexType& tbl, erc20_token_account_object::id_type id, const std::string& token_name,
+		const std::string& owner_name, int init_balance) {
+
+		erc20_token_account_object obj;
+		obj.id = id;
+		obj.token_name = token_name_from_string(token_name);
+		obj.owner_name = xmax::string_to_name(owner_name.c_str());
+		obj.balance = static_cast<share_type>(init_balance);
+		tbl.insert(obj);
+	}
+
+	template <typename MultiIndexType>
+	static void MintErc20Tokens(MultiIndexType& tbl, const std::string& token_name, int amount) {
+		auto it = tbl.get<by_token_name>().find(token_name_from_string(token_name));
+
+		XMAX_ASSERT(it != tbl.get<by_token_name>().end(), message_validate_exception,
+			"Erc20 token:${token_name} has not created", ("token_name", token_name));
+
+		share_type t_amount(amount);
+
+		tbl.get<by_token_name>().modify(it, [t_amount](erc20_token_object& o) {
+			o.balance += t_amount;
+			o.total_supply += t_amount;
+		});
+	}
+	
+	template <typename MultiIndexType>
+	static void SendErc20TokensToAccount(MultiIndexType& account_table, const std::string& token_name, const std::string& owner_name,
+		Xmaxplatform::Basetypes::share_type amount) {
+
+		auto it = account_table.get<by_token_and_owner>().find(MakeErcTokenIndex(token_name, owner_name));
+		const erc20_token_account_object& obj = *it;
+
+		XMAX_ASSERT(it != account_table.get<by_token_and_owner>().end(), message_validate_exception,
+			"Erc20 token:${token_name} with account:${owner_name} has not created", ("token_name", token_name)("owner_name", owner_name));
+
+		account_table.get<by_token_and_owner>().modify(it, [amount](erc20_token_account_object& o) {
+			o.balance += amount;
+		});
+	}
+
+
+	//*** Erc721 Utility functions
 
 	template <typename MultiIndexType>
 	static void AddErc721ObjToTable(MultiIndexType& tbl, erc721_token_object_test::id_type id, const std::string& token_name,
@@ -120,6 +176,11 @@ namespace {
 		return tbl;
 	}
 
+	static erc20_token_account_multi_index_test& GetTestErc20TokenAccountTable() {
+		static erc20_token_account_multi_index_test tbl;
+		return tbl;
+	}
+
 	static erc721_token_multi_index_test& GetTestErc721Container() {
 		static erc721_token_multi_index_test tbl;
 		return tbl;
@@ -140,17 +201,38 @@ namespace fc {
 BOOST_AUTO_TEST_SUITE(erc20_test_suite)
 
 
-BOOST_AUTO_TEST_CASE(erc20_test_add) {
+BOOST_AUTO_TEST_CASE(erc20_test_issue) {
 	auto& tbl = GetTestErc20Container();
 			
-	AddErc20ObjToTable(tbl, 1, "TST", "testera", 12345);
-	AddErc20ObjToTable(tbl, 2, "TST", "testerb", 54321);
-	AddErc20ObjToTable(tbl, 3, "TSA", "testera", 13579);
-	AddErc20ObjToTable(tbl, 4, "TSA", "testerb", 24680);
+	AddErc20ObjToTable(tbl, 1, "TST", "testera", 12345);	
+	AddErc20ObjToTable(tbl, 2, "TSA", "testera", 13579);
+	AddErc20ObjToTable(tbl, 3, "TSC", "testerb", 24680);
+	
 	//error case
+	AddErc20ObjToTable(tbl, 4, "TST", "testerb", 54321);
 	AddErc20ObjToTable(tbl, 5, "TST", "testera", 67890);
 
-	BOOST_CHECK(tbl.size() == 4);
+	BOOST_CHECK(tbl.size() == 3);
+}
+
+BOOST_AUTO_TEST_CASE(erc20_test_mint) {
+	auto& tbl = GetTestErc20Container();
+
+	MintErc20Tokens(tbl, "TST", 20000);
+	MintErc20Tokens(tbl, "TSA", 10000);
+	MintErc20Tokens(tbl, "TSC", 5000);
+
+	BOOST_CHECK_EXCEPTION({
+		MintErc20Tokens(tbl, "TSD", 12345);
+		}, message_validate_exception, [](const message_validate_exception& ex) {
+			std::string ex_msg = ex.to_string();
+			return ex_msg.find("Erc20 token:TSD has not created") != std::string::npos;
+		});
+
+	BOOST_CHECK_EXCEPTION({
+		MintErc20Tokens(tbl, "TSE", 22345);
+		}, message_validate_exception, AlwaysPassCheckException);
+	
 }
 
 BOOST_AUTO_TEST_CASE(erc20_test_index) {
@@ -160,34 +242,54 @@ BOOST_AUTO_TEST_CASE(erc20_test_index) {
 	BOOST_ASSERT(it != tbl.get<by_token_name>().end());
 	auto& obj = *it;
 	BOOST_CHECK(obj.id == erc20_token_object::id_type(1));
-	BOOST_CHECK(obj.balance == 12345);
+	BOOST_CHECK(obj.balance == 32345);
 
-	auto it2 = tbl.get<by_token_name>().find(token_name_from_string("TST"));
+	auto it2 = tbl.get<by_token_name>().find(token_name_from_string("TSA"));
 	BOOST_ASSERT(it2 != tbl.get<by_token_name>().end());
 	auto& obj2 = *it2;
 	BOOST_CHECK(obj2.id == erc20_token_object::id_type(2));
-	BOOST_CHECK(obj2.balance == 54321);
+	BOOST_CHECK(obj2.balance == 23579);
 
-	auto it3 = tbl.get<by_token_name>().find(token_name_from_string("TSA"));
+	auto it3 = tbl.get<by_token_name>().find(token_name_from_string("TSC"));
 	BOOST_ASSERT(it3 != tbl.get<by_token_name>().end());
 	auto& obj3 = *it3;
 	BOOST_CHECK(obj3.id == erc20_token_object::id_type(3));
-	BOOST_CHECK(obj3.balance == 13579);
-
-	auto it4 = tbl.get<by_token_name>().find(token_name_from_string("TSA"));
-	BOOST_ASSERT(it4 != tbl.get<by_token_name>().end());
-	auto& obj4 = *it4;
-	BOOST_CHECK(obj4.id == erc20_token_object::id_type(4));
-	BOOST_CHECK(obj4.balance == 24680);
+	BOOST_CHECK(obj3.balance == 29680);
 }
 
+BOOST_AUTO_TEST_CASE(erc20_test_account) {
+	auto& tbl = GetTestErc20TokenAccountTable();
 
+	AddErc20AccountObjToTable(tbl, 1, "TSA", "testera", 12345);
+	AddErc20AccountObjToTable(tbl, 2, "TSA", "testerb", 24680);
+	AddErc20AccountObjToTable(tbl, 3, "TSB", "testera", 13579);
+	//Error cases
+	AddErc20AccountObjToTable(tbl, 4, "TSB", "testera", 24000);
+	AddErc20AccountObjToTable(tbl, 5, "TSA", "testerb", 37223);
+
+	BOOST_CHECK(tbl.size() == 3);
+}
+
+BOOST_AUTO_TEST_CASE(erc20_test_account_send) {
+	auto& tbl = GetTestErc20TokenAccountTable();
+
+	SendErc20TokensToAccount(tbl, "TSA", "testera", 10000);
+	BOOST_CHECK(tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TSA", "testera"))->balance == 22345);
+
+	SendErc20TokensToAccount(tbl, "TSB", "testera", 20000);
+	BOOST_CHECK(tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TSB", "testera"))->balance == 33579);
+
+	BOOST_CHECK_EXCEPTION({
+		SendErc20TokensToAccount(tbl, "TSC", "testera", 20000);
+		}, message_validate_exception, AlwaysPassCheckException);
+
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(erc721_test_suite)
 
-BOOST_AUTO_TEST_CASE(erc72_test_issue) {
+BOOST_AUTO_TEST_CASE(erc721_test_issue) {
 
 	auto& tbl = GetTestErc721Container();
 
