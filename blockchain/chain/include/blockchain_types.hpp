@@ -163,6 +163,7 @@ namespace Xmaxplatform { namespace Chain {
 			rate_limiting_object_type,
 			block_object_type,
 			erc20_token_object_type,
+			erc20_token_account_object_type,
 			erc721_token_object_type,
 			erc721_token_account_object_type,
 			account_status_object_type,
