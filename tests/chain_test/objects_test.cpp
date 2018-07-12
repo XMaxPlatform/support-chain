@@ -60,8 +60,8 @@ namespace {
 		obj.id = id;
 		obj.token_name = token_name_from_string(token_name);
 		obj.owner_name = xmax::string_to_name(owner_name.c_str());
-		obj.token_amount = amount;
-		tbl.get<by_token_and_owner>().insert(obj);
+		obj.balance = amount;
+		tbl.insert(obj);
 	}
 
 	template <typename MultiIndexType>
@@ -100,9 +100,9 @@ namespace {
 	}
 
 	template <typename MultiIndexType>
-	static void SendErc20TokenToAccount(MultiIndexType& tbl, const std::string& token_name, const std::string& owner_name,
+	static void SendErc721TokenToAccount(MultiIndexType& tbl, const std::string& token_name, const std::string& owner_name,
 		const Xmaxplatform::Chain::xmax_erc721_id& token_id) {
-		auto it = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex(token_name, owner_name)); 
+		auto it = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex(token_name, owner_name));
 		const erc721_token_account_object_test& obj = *it;
 
 		auto token_it = obj.tokens.find(token_id);
@@ -156,29 +156,29 @@ BOOST_AUTO_TEST_CASE(erc20_test_add) {
 BOOST_AUTO_TEST_CASE(erc20_test_index) {
 	auto& tbl = GetTestErc20Container();
 	
-	auto it = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TST", "testera"));
-	BOOST_ASSERT(it != tbl.get<by_token_and_owner>().end());
+	auto it = tbl.get<by_token_name>().find(token_name_from_string("TST"));
+	BOOST_ASSERT(it != tbl.get<by_token_name>().end());
 	auto& obj = *it;
 	BOOST_CHECK(obj.id == erc20_token_object::id_type(1));
-	BOOST_CHECK(obj.token_amount == 12345);
+	BOOST_CHECK(obj.balance == 12345);
 
-	auto it2 = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TST", "testerb"));
-	BOOST_ASSERT(it2 != tbl.get<by_token_and_owner>().end());
+	auto it2 = tbl.get<by_token_name>().find(token_name_from_string("TST"));
+	BOOST_ASSERT(it2 != tbl.get<by_token_name>().end());
 	auto& obj2 = *it2;
 	BOOST_CHECK(obj2.id == erc20_token_object::id_type(2));
-	BOOST_CHECK(obj2.token_amount == 54321);
+	BOOST_CHECK(obj2.balance == 54321);
 
-	auto it3 = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TSA", "testera"));
-	BOOST_ASSERT(it3 != tbl.get<by_token_and_owner>().end());
+	auto it3 = tbl.get<by_token_name>().find(token_name_from_string("TSA"));
+	BOOST_ASSERT(it3 != tbl.get<by_token_name>().end());
 	auto& obj3 = *it3;
 	BOOST_CHECK(obj3.id == erc20_token_object::id_type(3));
-	BOOST_CHECK(obj3.token_amount == 13579);
+	BOOST_CHECK(obj3.balance == 13579);
 
-	auto it4 = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TSA", "testerb"));
-	BOOST_ASSERT(it4 != tbl.get<by_token_and_owner>().end());
+	auto it4 = tbl.get<by_token_name>().find(token_name_from_string("TSA"));
+	BOOST_ASSERT(it4 != tbl.get<by_token_name>().end());
 	auto& obj4 = *it4;
 	BOOST_CHECK(obj4.id == erc20_token_object::id_type(4));
-	BOOST_CHECK(obj4.token_amount == 24680);
+	BOOST_CHECK(obj4.balance == 24680);
 }
 
 
@@ -234,13 +234,13 @@ BOOST_AUTO_TEST_CASE(erc721_test_account_addtoken) {
 	auto& tbl = GetTestErc721TokenAccountTable();
 
 
-	SendErc20TokenToAccount(tbl, "AAA", "testera", xmax_erc721_id{ "f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b" });
-	SendErc20TokenToAccount(tbl, "AAA", "testera", xmax_erc721_id{ "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" });
+	SendErc721TokenToAccount(tbl, "AAA", "testera", xmax_erc721_id{ "f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b" });
+	SendErc721TokenToAccount(tbl, "AAA", "testera", xmax_erc721_id{ "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" });
 	BOOST_CHECK_EXCEPTION({
-		SendErc20TokenToAccount(tbl, "AAA", "testera", xmax_erc721_id("f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b"));
+		SendErc721TokenToAccount(tbl, "AAA", "testera", xmax_erc721_id("f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b"));
 		}, duplicate_type_exception, IsDuplicateTransTokenNameException);
-	SendErc20TokenToAccount(tbl, "AAB", "testera", xmax_erc721_id{ "f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b" });
-	SendErc20TokenToAccount(tbl, "AAB", "testerb", xmax_erc721_id{ "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" });
+	SendErc721TokenToAccount(tbl, "AAB", "testera", xmax_erc721_id{ "f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b" });
+	SendErc721TokenToAccount(tbl, "AAB", "testerb", xmax_erc721_id{ "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" });
 
 	auto& obj = FindErc721AccountObjFromTable(tbl, "AAA", "testera");
 	BOOST_CHECK(obj.tokens.size() == 2);

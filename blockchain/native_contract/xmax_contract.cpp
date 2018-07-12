@@ -259,6 +259,11 @@ void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
 		"Cannot create ERC20 token account named ${name}, as that name is already taken",
 		("name", issue_erc20.token_name));
 
+	auto existing_token_obj = db.find<erc20_token_object, by_token_name>(issue_erc20.token_name);
+	XMAX_ASSERT(existing_token_obj == nullptr, message_validate_exception,
+		"Erc20 token:'${t}' already exist, the owner is ${owner}",
+		("t", issue_erc20.token_name)("owner", existing_token_obj->owner_name));
+
 	//Create token account
 	create_account_internal(addaccount{ issue_erc20.creator,
 		issue_erc20.token_name,
@@ -268,18 +273,12 @@ void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
 		asset{} }, context.mutable_db, context.current_time());	
 	
 	
-	auto erc20_index = MakeErcTokenIndex(issue_erc20.token_name, issue_erc20.creator);
-	bool not_exist = db.find<erc20_token_object, by_token_and_owner>(erc20_index) == nullptr;
-	XMAX_ASSERT(not_exist,
-		message_validate_exception,
-		"Erc20 token:'${t}' already exist with Owner Name: ${o}",
-		("t", issue_erc20.owner)("o", issue_erc20.token_name));
 
-	db.create<erc20_token_object>([&issue_erc20](erc20_token_object& tok) {		
-		tok.token_name = issue_erc20.token_name;
-		tok.owner_name = issue_erc20.creator;
-		tok.token_amount = issue_erc20.total_balance.amount;		
-		tok.total_supply = issue_erc20.total_balance.amount;
+	db.create<erc20_token_object>([&issue_erc20](erc20_token_object& obj) {		
+		obj.token_name = issue_erc20.token_name;
+		obj.owner_name = issue_erc20.creator;
+		obj.balance = issue_erc20.total_balance.amount;
+		obj.total_supply = issue_erc20.total_balance.amount;
 	});
 
 
