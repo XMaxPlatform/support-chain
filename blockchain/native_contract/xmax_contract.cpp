@@ -254,25 +254,11 @@ void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
 	//Todo: Check keys authority validation
 
 	//Check existence
-	auto existing_account = db.find<account_object, by_name>(issue_erc20.token_name);
-	XMAX_ASSERT(existing_account == nullptr, account_name_exists_exception,
-		"Cannot create ERC20 token account named ${name}, as that name is already taken",
-		("name", issue_erc20.token_name));
-
 	auto existing_token_obj = db.find<erc20_token_object, by_token_name>(issue_erc20.token_name);
 	XMAX_ASSERT(existing_token_obj == nullptr, message_validate_exception,
 		"Erc20 token:'${t}' already exist, the owner is ${owner}",
 		("t", issue_erc20.token_name)("owner", existing_token_obj->owner_name));
 
-	//Create token account
-	create_account_internal(addaccount{ issue_erc20.creator,
-		issue_erc20.token_name,
-		issue_erc20.owner,
-		issue_erc20.active,
-		issue_erc20.recovery,
-		asset{} }, context.mutable_db, context.current_time());	
-	
-	
 
 	db.create<erc20_token_object>([&issue_erc20](erc20_token_object& obj) {		
 		obj.token_name = issue_erc20.token_name;
@@ -292,29 +278,16 @@ void handle_xmax_issueerc21(Chain::message_context_xmax& context) {
 
 	//Todo: Check creator authorization
 
-	//Todo: Check keys authority validation
+	//Todo: validate the owner active recovery authority
+	
 
 	//Check precondition
-	auto existing_account = db.find<account_object, by_name>(issue_erc721.token_name);
-	XMAX_ASSERT(existing_account == nullptr, account_name_exists_exception,
-		"Cannot create ERC721 token account named ${name}, as that name is already taken",
-		("name", issue_erc721.token_name));
-
 	auto existing_token_obj = db.find<erc721_token_object, by_token_name>(issue_erc721.token_name);
 	XMAX_ASSERT(existing_token_obj == nullptr, message_validate_exception,
 		"Erc721 token:'${t}' already exist, the owner is ${owner}",
 		("t", issue_erc721.token_name)("owner", existing_token_obj->owner_name));
 
 	
-	//Create token account
-	create_account_internal(addaccount{ issue_erc721.creator,
-										issue_erc721.token_name,
-										issue_erc721.owner,
-										issue_erc721.active,
-										issue_erc721.recovery,
-										asset{} }, context.mutable_db, context.current_time());
-
-
 	//Create erc721 token object
 	db.create<erc721_token_object>([&issue_erc721](erc721_token_object& token) {
 		token.token_name = issue_erc721.token_name;
@@ -382,8 +355,13 @@ void handle_xmax_minterc21(Chain::message_context_xmax& context)
 }
 
 //--------------------------------------------------
-void handle_xmax_revoketoken(Chain::message_context_xmax& context)
-{
+void handle_xmax_revokeerc2o(Chain::message_context_xmax& context) {
+
+}
+
+
+//--------------------------------------------------
+void handle_xmax_revokeerc21(Chain::message_context_xmax& context) {
 
 }
 

@@ -40,7 +40,8 @@ void handle_xmax_minterc2o(Chain::message_context_xmax& context);
 void handle_xmax_issueerc21(Chain::message_context_xmax& context);
 void handle_xmax_minterc21(Chain::message_context_xmax& context);
 
-void handle_xmax_revoketoken(Chain::message_context_xmax& context);
+void handle_xmax_revokeerc2o(Chain::message_context_xmax& context);
+void handle_xmax_revokeerc21(Chain::message_context_xmax& context);
 
 
 } // namespace Native_contract
