@@ -305,11 +305,6 @@ void handle_xmax_minterc2o(Chain::message_context_xmax& context)
 	//Todo: Check owner authorization
 
 	//Check precondition
-	auto existing_account = db.find<account_object, by_name>(minterc20.token_name);
-	XMAX_ASSERT(existing_account != nullptr, message_precondition_exception,
-		"Cannot find ERC20 token account named ${name}, as that name does not exist",
-		("name", minterc20.token_name));
-
 	auto existing_token_obj = db.find<erc20_token_object, by_token_name>(minterc20.token_name);
 	XMAX_ASSERT(existing_token_obj != nullptr, message_validate_exception,
 		"Erc20 token:'${t}' does not exist.", ("t", minterc20.token_name));
@@ -330,11 +325,6 @@ void handle_xmax_minterc21(Chain::message_context_xmax& context)
 	//Todo: Check owner authorization
 
 	//Check precondition
-	auto existing_account = db.find<account_object, by_name>(minterc721.token_name);
-	XMAX_ASSERT(existing_account != nullptr, message_precondition_exception,
-		"Cannot find ERC721 token account named ${name}, as that name does not exist",
-		("name", minterc721.token_name));
-
 	auto existing_token_obj = db.find<erc721_token_object, by_token_name>(minterc721.token_name);
 	XMAX_ASSERT(existing_token_obj != nullptr, message_validate_exception,
 		"Erc721 token:'${t}' does not exist.", ("t", minterc721.token_name));
@@ -356,7 +346,7 @@ void handle_xmax_minterc21(Chain::message_context_xmax& context)
 
 //--------------------------------------------------
 void handle_xmax_revokeerc2o(Chain::message_context_xmax& context) {
-
+	
 }
 
 
