@@ -324,6 +324,31 @@ void handle_xmax_issueerc21(Chain::message_context_xmax& context) {
 
 
 //--------------------------------------------------
+void handle_xmax_minterc20(Chain::message_context_xmax& context)
+{
+	auto& db = context.mutable_db;
+	auto minterc20 = context.msg.as<Types::minterc2o>();
+
+	//Todo: Check owner authorization
+
+	//Check precondition
+	auto existing_account = db.find<account_object, by_name>(minterc20.token_name);
+	XMAX_ASSERT(existing_account != nullptr, message_precondition_exception,
+		"Cannot find ERC20 token account named ${name}, as that name does not exist",
+		("name", minterc20.token_name));
+
+	auto existing_token_obj = db.find<erc20_token_object, by_token_name>(minterc20.token_name);
+	XMAX_ASSERT(existing_token_obj != nullptr, message_validate_exception,
+		"Erc20 token:'${t}' does not exist.", ("t", minterc20.token_name));
+
+	const auto& tokenObj = db.get<erc20_token_object, by_token_name>(minterc20.token_name);
+	db.modify(tokenObj, [&minterc20](erc20_token_object& obj) {
+		obj.total_supply += minterc20.mint_amount.amount;
+		obj.balance += minterc20.mint_amount.amount;
+	});
+}
+
+//--------------------------------------------------
 void handle_xmax_minterc21(Chain::message_context_xmax& context)
 {
 	auto& db = context.mutable_db;
