@@ -726,20 +726,36 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
-    struct revoketoken { 
-        revoketoken() = default;
-        revoketoken(const asset_symbol& token_name, const permission_name& permission)
-           : token_name(token_name), permission(permission) {}
+    struct revokeerc2o { 
+        revokeerc2o() = default;
+        revokeerc2o(const asset_symbol& token_name)
+           : token_name(token_name) {}
 
         asset_symbol                     token_name;
-        permission_name                  permission;
     };
 
-    template<> struct get_struct<revoketoken> { 
+    template<> struct get_struct<revokeerc2o> { 
         static const struct_t& type() { 
-           static struct_t result = { "revoketoken", "", {
+           static struct_t result = { "revokeerc2o", "", {
                 {"token_name", "asset_symbol"},
-                {"permission", "permission_name"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct revokeerc21 { 
+        revokeerc21() = default;
+        revokeerc21(const asset_symbol& token_name)
+           : token_name(token_name) {}
+
+        asset_symbol                     token_name;
+    };
+
+    template<> struct get_struct<revokeerc21> { 
+        static const struct_t& type() { 
+           static struct_t result = { "revokeerc21", "", {
+                {"token_name", "asset_symbol"},
               }
            };
            return result;
@@ -779,4 +795,5 @@ FC_REFLECT( Xmaxplatform::Basetypes::issueerc2o                       , (creator
 FC_REFLECT( Xmaxplatform::Basetypes::minterc2o                        , (token_name)(mint_amount) )
 FC_REFLECT( Xmaxplatform::Basetypes::issueerc21                       , (creator)(owner)(active)(recovery)(token_name) )
 FC_REFLECT( Xmaxplatform::Basetypes::minterc21                        , (token_name)(token_id) )
-FC_REFLECT( Xmaxplatform::Basetypes::revoketoken                      , (token_name)(permission) )
+FC_REFLECT( Xmaxplatform::Basetypes::revokeerc2o                      , (token_name) )
+FC_REFLECT( Xmaxplatform::Basetypes::revokeerc21                      , (token_name) )
