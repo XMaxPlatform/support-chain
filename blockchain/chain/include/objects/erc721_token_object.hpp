@@ -22,6 +22,7 @@ namespace Xmaxplatform {
 			Basetypes::asset_symbol token_name;
 			Basetypes::account_name owner_name;		
 			shared_set<xmax_erc721_id> minted_tokens;
+			int8_t revoked = 0;
 		};
 
 		class erc721_token_object_test : public Basechain::object<erc721_token_object_type, erc721_token_object_test> {

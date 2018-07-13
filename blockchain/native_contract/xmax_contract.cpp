@@ -346,13 +346,32 @@ void handle_xmax_minterc21(Chain::message_context_xmax& context)
 
 //--------------------------------------------------
 void handle_xmax_revokeerc2o(Chain::message_context_xmax& context) {
-	
+	auto& db = context.mutable_db;
+	auto revokeerc2o = context.msg.as<Types::revokeerc2o>();
+
+	//Todo: Check owner authorization
+
+	//Check precondition
+	auto& erc20_obj = db.get<erc20_token_object, by_token_name>(revokeerc2o.token_name);	
+	db.modify(erc20_obj, [](erc20_token_object& obj) {
+		obj.revoked = 1;
+	});
+
 }
 
 
 //--------------------------------------------------
 void handle_xmax_revokeerc21(Chain::message_context_xmax& context) {
+	auto& db = context.mutable_db;
+	auto revokeerc721 = context.msg.as<Types::revokeerc21>();
 
+	//Todo: Check owner authorization
+
+	//Check precondition
+	auto& erc721_obj = db.get<erc721_token_object, by_token_name>(revokeerc721.token_name);
+	db.modify(erc721_obj, [](erc721_token_object& obj) {
+		obj.revoked = 1;
+	});
 }
 
 	} // namespace Native

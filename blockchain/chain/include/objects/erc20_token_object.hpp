@@ -23,6 +23,7 @@ namespace Xmaxplatform {
 			Basetypes::account_name owner_name;
 			Basetypes::share_type balance = 0;
 			Basetypes::share_type total_supply = 0;
+			int8_t revoked = 0;
 		};
 		
 		struct by_token_name;
