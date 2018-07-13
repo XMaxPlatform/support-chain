@@ -79,7 +79,7 @@ namespace Xmaxplatform {
 			return *jsvm;
 	   }
 
-		#ifdef NDEBUG
+#ifdef NDEBUG
 		const int CHECKTIME_LIMIT = 3000;
 #else
 		const int CHECKTIME_LIMIT = 36000;
