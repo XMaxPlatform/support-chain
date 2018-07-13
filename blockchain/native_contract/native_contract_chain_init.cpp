@@ -45,6 +45,7 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
     SET_APP_HANDLER( xmax, xmax, unregproxy, Xmaxplatform );
 	SET_APP_HANDLER(xmax, xmax, setcode, Xmaxplatform);
 	SET_APP_HANDLER(xmax, xmax, issueerc2o, Xmaxplatform);
+	SET_APP_HANDLER(xmax, xmax, minterc2o, Xmaxplatform);
 	SET_APP_HANDLER(xmax, xmax, issueerc21, Xmaxplatform);
 	SET_APP_HANDLER(xmax, xmax, minterc21, Xmaxplatform);
 	SET_APP_HANDLER(xmax, xmax, revoketoken, Xmaxplatform);
@@ -85,6 +86,7 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::regproxy>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unregproxy>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc2o>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::minterc2o>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc21>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::minterc21>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::revoketoken>::type());

@@ -324,7 +324,7 @@ void handle_xmax_issueerc21(Chain::message_context_xmax& context) {
 
 
 //--------------------------------------------------
-void handle_xmax_minterc20(Chain::message_context_xmax& context)
+void handle_xmax_minterc2o(Chain::message_context_xmax& context)
 {
 	auto& db = context.mutable_db;
 	auto minterc20 = context.msg.as<Types::minterc2o>();
