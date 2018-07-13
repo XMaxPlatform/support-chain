@@ -243,6 +243,11 @@ void handle_xmax_unregproxy(message_context_xmax& context)    {
     xmax_voting::unreg_proxy(context);
 }
 
+template <class ErcObjectType>
+void validate_token_not_revoke(const ErcObjectType& erc_object) {
+	XMAX_ASSERT(erc_object.revoked == 0, message_validate_exception,
+		"ERC token:${token_name} already revoked!", ("token_name", erc_object.token_name));
+}
 
 //--------------------------------------------------
 void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
@@ -305,12 +310,9 @@ void handle_xmax_minterc2o(Chain::message_context_xmax& context)
 	//Todo: Check owner authorization
 
 	//Check precondition
-	auto existing_token_obj = db.find<erc20_token_object, by_token_name>(minterc20.token_name);
-	XMAX_ASSERT(existing_token_obj != nullptr, message_validate_exception,
-		"Erc20 token:'${t}' does not exist.", ("t", minterc20.token_name));
-
-	const auto& tokenObj = db.get<erc20_token_object, by_token_name>(minterc20.token_name);
-	db.modify(tokenObj, [&minterc20](erc20_token_object& obj) {
+	auto& existing_token_obj = db.get<erc20_token_object, by_token_name>(minterc20.token_name);
+	validate_token_not_revoke(existing_token_obj);
+	db.modify(existing_token_obj, [&minterc20](erc20_token_object& obj) {
 		obj.total_supply += minterc20.mint_amount.amount;
 		obj.balance += minterc20.mint_amount.amount;
 	});
@@ -325,20 +327,17 @@ void handle_xmax_minterc21(Chain::message_context_xmax& context)
 	//Todo: Check owner authorization
 
 	//Check precondition
-	auto existing_token_obj = db.find<erc721_token_object, by_token_name>(minterc721.token_name);
-	XMAX_ASSERT(existing_token_obj != nullptr, message_validate_exception,
-		"Erc721 token:'${t}' does not exist.", ("t", minterc721.token_name));
 
-
-	const auto& tokenObj = db.get<erc721_token_object, by_token_name>(minterc721.token_name);
+	const auto& existing_token_obj = db.get<erc721_token_object, by_token_name>(minterc721.token_name);
+	validate_token_not_revoke(existing_token_obj);
 	xmax_erc721_id token_id{ minterc721.token_id };
-	XMAX_ASSERT(tokenObj.minted_tokens.find(token_id) == tokenObj.minted_tokens.end(),
+	XMAX_ASSERT(existing_token_obj.minted_tokens.find(token_id) == existing_token_obj.minted_tokens.end(),
 		message_validate_exception,
 		"The ERC721 token: ${token_name} with token id:${token_id} has already minted",
 		("token_name", minterc721.token_name)("token_id", minterc721.token_id));
 
 
-	db.modify(tokenObj, [&minterc721](erc721_token_object& obj) {
+	db.modify(existing_token_obj, [&minterc721](erc721_token_object& obj) {
 		obj.minted_tokens.insert(xmax_erc721_id(minterc721.token_id));
 	});
 
