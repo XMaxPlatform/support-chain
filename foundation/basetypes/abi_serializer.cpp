@@ -82,7 +82,7 @@ namespace Xmaxplatform { namespace Basetypes {
       
       //generated.hpp
       built_in_types.emplace("account_name",             pack_unpack<account_name>());
-      built_in_types.emplace("permission_name",          pack_unpack<permission_name>());
+      built_in_types.emplace("authority_name",           pack_unpack<authority_name>());
       built_in_types.emplace("func_name",                pack_unpack<func_name>());
       built_in_types.emplace("message_name",             pack_unpack<message_name>());
       //built_in_types.emplace("type_name",              pack_unpack<type_name>());

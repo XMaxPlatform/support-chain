@@ -19,7 +19,7 @@ using Basetypes::uint128;
 using Basetypes::share_type;
 using Basetypes::asset;
 using Basetypes::account_name;
-using Basetypes::permission_name;
+using Basetypes::authority_name;
 using Basetypes::public_key;
 using fc::ecc::private_key;
         const static char key_prefix[] = "XMX";
@@ -29,6 +29,8 @@ using fc::ecc::private_key;
         const static int blocks_per_round = blocks_per_builder * builders_per_round;
 	
         const static account_name xmax_contract_name = STN(xmax);
+		const static authority_name xmax_owner_auth = STN(owner);
+		const static authority_name xmax_active_auth = STN(active);
 
 		const extern public_key xmax_build_public_key;
 		const extern private_key xmax_build_private_key;

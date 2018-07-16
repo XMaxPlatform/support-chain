@@ -10,7 +10,7 @@ extern "C" {
    message_handle message_create(account_name code, func_name type, void const* data, int size);
 
  
-   void message_require_permission(message_handle msg, account_name account, permission_name permission);
+   void message_require_permission(message_handle msg, account_name account, authority_name permission);
 
 
    void message_send(message_handle msg);

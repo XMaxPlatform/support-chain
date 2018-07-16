@@ -18,7 +18,7 @@ extern "C" {
 	typedef uint32_t xmax_time;
 
 	typedef xmax_name account_name;
-	typedef xmax_name permission_name;
+	typedef xmax_name authority_name;
 	typedef xmax_name token_name;
 	typedef xmax_name table_name;
 	typedef xmax_name func_name;
@@ -74,7 +74,7 @@ extern "C" {
 
 	struct account_permission {
 		account_name account;
-		permission_name permission;
+		authority_name permission;
 	};
 
 #ifdef __cplusplus

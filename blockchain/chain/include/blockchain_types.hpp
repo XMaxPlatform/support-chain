@@ -101,13 +101,12 @@ namespace Xmaxplatform { namespace Chain {
    using Xmaxplatform::Basetypes::name;
    using action_name = name;
    using Xmaxplatform::Basetypes::account_name;
-   using Xmaxplatform::Basetypes::permission_name;
+   using Xmaxplatform::Basetypes::authority_name;
    using Xmaxplatform::Basetypes::asset;
    using Xmaxplatform::Basetypes::share_type;
    using Xmaxplatform::Basetypes::authority;
    using Xmaxplatform::Basetypes::public_key;
    using Xmaxplatform::Basetypes::transaction;
-   using Xmaxplatform::Basetypes::permission_name;
    using Xmaxplatform::Basetypes::type_name;
    using Xmaxplatform::Basetypes::func_name;
    using Xmaxplatform::Basetypes::time;
@@ -158,7 +157,7 @@ namespace Xmaxplatform { namespace Chain {
 
             account_object_type,
 			account_status_object_type,
-			permission_object_type,
+			authority_object_type,
 			builder_object_type,
             builder_info_object_type,
             vote_info_object_type,

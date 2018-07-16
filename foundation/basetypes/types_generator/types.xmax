@@ -1,5 +1,5 @@
 typedef name           account_name
-typedef name           permission_name
+typedef name           authority_name
 typedef name           func_name
 typedef name           event_name
 typedef fixed_string32 message_name
@@ -9,7 +9,7 @@ typedef fixed_string32 type_name
 
 struct account_permission
    account    account_name
-   permission permission_name
+   authority authority_name
 
 struct message
    code            account_name         # the contract defining the primary code to execute for code/type
@@ -115,19 +115,19 @@ struct setcode
 
 struct updateauth
    account     account_name
-   permission  permission_name
-   parent      permission_name
+   permission  authority_name
+   parent      authority_name
    new_authority   authority
 
 struct deleteauth
    account account_name
-   permission permission_name
+   permission authority_name
 
 struct linkauth # Specify a particular required permission for account to approve specified message type
    account     account_name # The account to require permissions for
    code        account_name # The contract to require permissions to invoke
    type        func_name
-   requirement permission_name # The permission name to require
+   requirement authority_name # The permission name to require
 
 struct unlinkauth
    account     account_name # The account to require permissions for
@@ -158,7 +158,6 @@ struct issueerc2o
    creator	account_name   
    owner     authority
    active    authority
-   recovery  authority
    token_name	asset_symbol
    total_balance	asset
 
@@ -170,7 +169,6 @@ struct issueerc21
 	creator	account_name
 	owner     authority
 	active    authority
-	recovery  authority
 	token_name asset_symbol
 
 struct minterc21	

@@ -297,7 +297,7 @@ public:
     * @throws tx_missing_auth If no sufficient permission was found
     */
    void require_authorization(const Basetypes::account_name& account);
-   void require_authorization(const Basetypes::account_name& account, const Basetypes::permission_name& permission);
+   void require_authorization(const Basetypes::account_name& account, const Basetypes::authority_name& auth_name);
    void require_scope(const Basetypes::account_name& account)const;
    void require_recipient(const Basetypes::account_name& account);
 

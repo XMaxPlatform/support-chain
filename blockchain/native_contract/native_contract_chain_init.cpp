@@ -133,7 +133,6 @@ std::vector<message_xmax> native_contract_chain_init::prepare_data(chain_xmax &c
 		   "addaccount", Basetypes::addaccount(Config::xmax_contract_name, acc_name,
 			   KeyAuthority(acct.owner_key),
 			   KeyAuthority(acct.active_key),
-			   KeyAuthority(acct.owner_key),
 			   acct.staking_balance));
 
 	   messages_to_process.emplace_back(std::move(msg1));

@@ -10,6 +10,7 @@
 
 #include <objects/object_utility.hpp>
 #include <objects/account_object.hpp>
+#include <objects/authority_object.hpp>
 #include <objects/xmx_token_object.hpp>
 #include <objects/resource_token_object.hpp>
 #include <objects/chain_object_table.hpp>
@@ -65,6 +66,27 @@ static void create_account_internal(Types::addaccount& create, Basechain::databa
 		b.owner_name = create.name;
 		b.xmx_token = 0; //create.deposit.amount; TODO: make sure we credit this in @staked
 	});
+
+	auto owner_p = db.create<authority_object>([&](authority_object& obj)
+	{
+		obj.auth_name = Config::xmax_owner_auth;
+
+		obj.parent = 0;
+		obj.owner_name = create.name;
+		obj.authoritys = create.owner;
+		obj.last_updated = current_time;
+	});
+
+	auto owner_a = db.create<authority_object>([&](authority_object& obj)
+	{
+		obj.auth_name = Config::xmax_active_auth;
+
+		obj.parent = owner_p.id;
+		obj.owner_name = create.name;
+		obj.authoritys = create.owner;
+		obj.last_updated = current_time;
+	});
+
 }
 
 

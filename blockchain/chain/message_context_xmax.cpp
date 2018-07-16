@@ -60,10 +60,10 @@ void message_context_xmax::require_authorization(const Basetypes::account_name& 
     used_authorizations[itr - msg.authorization.begin()] = true;
 }
 
-void message_context_xmax::require_authorization(const Basetypes::account_name& account,const Basetypes::permission_name& permission) {
-    auto itr = boost::find_if(msg.authorization, [&account, &permission](const auto& auth) { return auth.account == account && auth.permission == permission; });
+void message_context_xmax::require_authorization(const Basetypes::account_name& account,const Basetypes::authority_name& auth_name) {
+    auto itr = boost::find_if(msg.authorization, [&account, &auth_name](const auto& auth) { return auth.account == account && auth.authority == auth_name; });
     XMAX_ASSERT(itr != msg.authorization.end(), tx_missing_auth,
-                "Transaction is missing required authorization from ${acct} with permission ${permission}", ("acct", account)("permission", permission));
+                "Transaction is missing required authorization from ${acct} with permission for authority ${authority}", ("acct", account)("authority", auth_name));
     used_authorizations[itr - msg.authorization.begin()] = true;
 }
 

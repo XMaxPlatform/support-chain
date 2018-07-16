@@ -1,25 +1,25 @@
 #pragma once
 namespace Xmaxplatform { namespace Basetypes {
     typedef name                             account_name;
-    typedef name                             permission_name;
+    typedef name                             authority_name;
     typedef name                             func_name;
     typedef name                             event_name;
     typedef fixed_string32                   message_name;
     typedef fixed_string32                   type_name;
     struct account_permission { 
         account_permission() = default;
-        account_permission(const account_name& account, const permission_name& permission)
-           : account(account), permission(permission) {}
+        account_permission(const account_name& account, const authority_name& authority)
+           : account(account), authority(authority) {}
 
         account_name                     account;
-        permission_name                  permission;
+        authority_name                   authority;
     };
 
     template<> struct get_struct<account_permission> { 
         static const struct_t& type() { 
            static struct_t result = { "account_permission", "", {
                 {"account", "account_name"},
-                {"permission", "permission_name"},
+                {"authority", "authority_name"},
               }
            };
            return result;
@@ -394,14 +394,13 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct addaccount { 
         addaccount() = default;
-        addaccount(const account_name& creator, const account_name& name, const authority& owner, const authority& active, const authority& recovery, const asset& deposit)
-           : creator(creator), name(name), owner(owner), active(active), recovery(recovery), deposit(deposit) {}
+        addaccount(const account_name& creator, const account_name& name, const authority& owner, const authority& active, const asset& deposit)
+           : creator(creator), name(name), owner(owner), active(active), deposit(deposit) {}
 
         account_name                     creator;
         account_name                     name;
         authority                        owner;
         authority                        active;
-        authority                        recovery;
         asset                            deposit;
     };
 
@@ -412,7 +411,6 @@ namespace Xmaxplatform { namespace Basetypes {
                 {"name", "account_name"},
                 {"owner", "authority"},
                 {"active", "authority"},
-                {"recovery", "authority"},
                 {"deposit", "asset"},
               }
            };
@@ -448,12 +446,12 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct updateauth { 
         updateauth() = default;
-        updateauth(const account_name& account, const permission_name& permission, const permission_name& parent, const authority& new_authority)
+        updateauth(const account_name& account, const authority_name& permission, const authority_name& parent, const authority& new_authority)
            : account(account), permission(permission), parent(parent), new_authority(new_authority) {}
 
         account_name                     account;
-        permission_name                  permission;
-        permission_name                  parent;
+        authority_name                   permission;
+        authority_name                   parent;
         authority                        new_authority;
     };
 
@@ -461,8 +459,8 @@ namespace Xmaxplatform { namespace Basetypes {
         static const struct_t& type() { 
            static struct_t result = { "updateauth", "", {
                 {"account", "account_name"},
-                {"permission", "permission_name"},
-                {"parent", "permission_name"},
+                {"permission", "authority_name"},
+                {"parent", "authority_name"},
                 {"new_authority", "authority"},
               }
            };
@@ -472,18 +470,18 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct deleteauth { 
         deleteauth() = default;
-        deleteauth(const account_name& account, const permission_name& permission)
+        deleteauth(const account_name& account, const authority_name& permission)
            : account(account), permission(permission) {}
 
         account_name                     account;
-        permission_name                  permission;
+        authority_name                   permission;
     };
 
     template<> struct get_struct<deleteauth> { 
         static const struct_t& type() { 
            static struct_t result = { "deleteauth", "", {
                 {"account", "account_name"},
-                {"permission", "permission_name"},
+                {"permission", "authority_name"},
               }
            };
            return result;
@@ -492,13 +490,13 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct linkauth { 
         linkauth() = default;
-        linkauth(const account_name& account, const account_name& code, const func_name& type, const permission_name& requirement)
+        linkauth(const account_name& account, const account_name& code, const func_name& type, const authority_name& requirement)
            : account(account), code(code), type(type), requirement(requirement) {}
 
         account_name                     account;
         account_name                     code;
         func_name                        type;
-        permission_name                  requirement;
+        authority_name                   requirement;
     };
 
     template<> struct get_struct<linkauth> { 
@@ -507,7 +505,7 @@ namespace Xmaxplatform { namespace Basetypes {
                 {"account", "account_name"},
                 {"code", "account_name"},
                 {"type", "func_name"},
-                {"requirement", "permission_name"},
+                {"requirement", "authority_name"},
               }
            };
            return result;
@@ -634,13 +632,12 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct issueerc2o { 
         issueerc2o() = default;
-        issueerc2o(const account_name& creator, const authority& owner, const authority& active, const authority& recovery, const asset_symbol& token_name, const asset& total_balance)
-           : creator(creator), owner(owner), active(active), recovery(recovery), token_name(token_name), total_balance(total_balance) {}
+        issueerc2o(const account_name& creator, const authority& owner, const authority& active, const asset_symbol& token_name, const asset& total_balance)
+           : creator(creator), owner(owner), active(active), token_name(token_name), total_balance(total_balance) {}
 
         account_name                     creator;
         authority                        owner;
         authority                        active;
-        authority                        recovery;
         asset_symbol                     token_name;
         asset                            total_balance;
     };
@@ -651,7 +648,6 @@ namespace Xmaxplatform { namespace Basetypes {
                 {"creator", "account_name"},
                 {"owner", "authority"},
                 {"active", "authority"},
-                {"recovery", "authority"},
                 {"token_name", "asset_symbol"},
                 {"total_balance", "asset"},
               }
@@ -682,13 +678,12 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct issueerc21 { 
         issueerc21() = default;
-        issueerc21(const account_name& creator, const authority& owner, const authority& active, const authority& recovery, const asset_symbol& token_name)
-           : creator(creator), owner(owner), active(active), recovery(recovery), token_name(token_name) {}
+        issueerc21(const account_name& creator, const authority& owner, const authority& active, const asset_symbol& token_name)
+           : creator(creator), owner(owner), active(active), token_name(token_name) {}
 
         account_name                     creator;
         authority                        owner;
         authority                        active;
-        authority                        recovery;
         asset_symbol                     token_name;
     };
 
@@ -698,7 +693,6 @@ namespace Xmaxplatform { namespace Basetypes {
                 {"creator", "account_name"},
                 {"owner", "authority"},
                 {"active", "authority"},
-                {"recovery", "authority"},
                 {"token_name", "asset_symbol"},
               }
            };
@@ -763,7 +757,7 @@ namespace Xmaxplatform { namespace Basetypes {
     };
 
 }} // namespace Xmaxplatform::Basetypes
-FC_REFLECT( Xmaxplatform::Basetypes::account_permission               , (account)(permission) )
+FC_REFLECT( Xmaxplatform::Basetypes::account_permission               , (account)(authority) )
 FC_REFLECT( Xmaxplatform::Basetypes::message                          , (code)(type)(authorization)(data) )
 FC_REFLECT( Xmaxplatform::Basetypes::account_permission_weight        , (permission)(weight) )
 FC_REFLECT( Xmaxplatform::Basetypes::transaction                      , (ref_block_num)(ref_block_prefix)(expiration)(scope)(read_scope)(messages) )
@@ -780,7 +774,7 @@ FC_REFLECT( Xmaxplatform::Basetypes::nonce                            , (value) 
 FC_REFLECT( Xmaxplatform::Basetypes::lock                             , (from)(to)(amount) )
 FC_REFLECT( Xmaxplatform::Basetypes::unlock                           , (account)(amount) )
 FC_REFLECT( Xmaxplatform::Basetypes::claim                            , (account)(amount) )
-FC_REFLECT( Xmaxplatform::Basetypes::addaccount                       , (creator)(name)(owner)(active)(recovery)(deposit) )
+FC_REFLECT( Xmaxplatform::Basetypes::addaccount                       , (creator)(name)(owner)(active)(deposit) )
 FC_REFLECT( Xmaxplatform::Basetypes::setcode                          , (account)(vm_type)(vm_version)(code)(code_abi) )
 FC_REFLECT( Xmaxplatform::Basetypes::updateauth                       , (account)(permission)(parent)(new_authority) )
 FC_REFLECT( Xmaxplatform::Basetypes::deleteauth                       , (account)(permission) )
@@ -791,9 +785,9 @@ FC_REFLECT( Xmaxplatform::Basetypes::regbuilder                       , (builder
 FC_REFLECT( Xmaxplatform::Basetypes::unregbuilder                     , (builder) )
 FC_REFLECT( Xmaxplatform::Basetypes::regproxy                         , (proxy) )
 FC_REFLECT( Xmaxplatform::Basetypes::unregproxy                       , (proxy) )
-FC_REFLECT( Xmaxplatform::Basetypes::issueerc2o                       , (creator)(owner)(active)(recovery)(token_name)(total_balance) )
+FC_REFLECT( Xmaxplatform::Basetypes::issueerc2o                       , (creator)(owner)(active)(token_name)(total_balance) )
 FC_REFLECT( Xmaxplatform::Basetypes::minterc2o                        , (token_name)(mint_amount) )
-FC_REFLECT( Xmaxplatform::Basetypes::issueerc21                       , (creator)(owner)(active)(recovery)(token_name) )
+FC_REFLECT( Xmaxplatform::Basetypes::issueerc21                       , (creator)(owner)(active)(token_name) )
 FC_REFLECT( Xmaxplatform::Basetypes::minterc21                        , (token_name)(token_id) )
 FC_REFLECT( Xmaxplatform::Basetypes::revokeerc2o                      , (token_name) )
 FC_REFLECT( Xmaxplatform::Basetypes::revokeerc21                      , (token_name) )

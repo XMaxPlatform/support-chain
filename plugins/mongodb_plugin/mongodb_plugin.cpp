@@ -65,7 +65,7 @@ namespace Xmaxplatform {
 
 	using Xmaxplatform::Basetypes::account_name;
 	using Xmaxplatform::Basetypes::func_name;
-	using Xmaxplatform::Basetypes::permission_name;
+	using Xmaxplatform::Basetypes::authority_name;
 
 	using Xmaxplatform::Chain::xmax_type_block_id;
 	using Xmaxplatform::Chain::processed_transaction;

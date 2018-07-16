@@ -245,12 +245,11 @@ namespace Xmaxplatform {
 			{
 				auto owner_auth = Xmaxplatform::Chain::authority{ 1,{ { pub_key_owner, 1 } },{} };
 				auto active_auth = Xmaxplatform::Chain::authority{ 1,{ { pub_key_active, 1 } },{} };
-				auto recovery_auth = Xmaxplatform::Chain::authority{ 1,{},{ { { creator, "active" }, 1 } } };
 
 				trx.scope = sort_names({ creator,Config::xmax_contract_name });
 				transaction_emplace_message(trx, Config::xmax_contract_name, Xmaxplatform::Basetypes::vector<Basetypes::account_permission>{ {creator, "active"}}, "addaccount",
 					Basetypes::addaccount{ creator, accountName, owner_auth,
-					active_auth, recovery_auth, stake });
+					active_auth, stake });
 			}
 
 			trx.expiration = cc.head_block_time() + fc::seconds(30);

@@ -30,6 +30,7 @@
 #include <iostream>
 #include <chrono>
 
+#include <objects/authority_object.hpp>
 #include <objects/transaction_object.hpp>
 #include <objects/block_summary_object.hpp>
 #include <objects/account_object.hpp>
@@ -126,6 +127,7 @@ namespace Xmaxplatform { namespace Chain {
 
         void chain_xmax::setup_data_indexes() {
             _context->block_db.add_index<account_index>();
+			_context->block_db.add_index<permission_index>();
 
             _context->block_db.add_index<key_value_index>();
             _context->block_db.add_index<keystr_value_index>();
@@ -351,8 +353,6 @@ namespace Xmaxplatform { namespace Chain {
 			}
 			return empty_chain_id;
 		}
-
-
 
 		signed_block_ptr chain_xmax::head_block() const
 		{

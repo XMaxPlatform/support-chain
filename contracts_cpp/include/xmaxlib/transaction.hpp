@@ -38,12 +38,12 @@ namespace Xmaxplatform {
          }
       }
 
-      void add_permissions(account_name account, permission_name permission) {
+      void add_permissions(account_name account, authority_name permission) {
          message_require_permission(handle, account, permission);
       }
 
       template<typename ...Permissions>
-      void add_permissions(account_name account, permission_name permission, Permissions... permissions) {
+      void add_permissions(account_name account, authority_name permission, Permissions... permissions) {
          add_permissions(account, permission);
          add_permissions(permissions...);
       }
