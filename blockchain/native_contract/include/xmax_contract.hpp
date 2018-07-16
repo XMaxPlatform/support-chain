@@ -33,14 +33,15 @@ void handle_xmax_unregbuilder(Chain::message_context_xmax& context);
 void handle_xmax_regproxy(Chain::message_context_xmax& context);
 void handle_xmax_unregproxy(Chain::message_context_xmax& context);
 
-//ERC20, ERC721 Relative interfaces
+//ERC20 interfaces
 void handle_xmax_issueerc2o(Chain::message_context_xmax& context);
 void handle_xmax_minterc2o(Chain::message_context_xmax& context);
+void handle_xmax_revokeerc2o(Chain::message_context_xmax& context);
 
+
+//ERC721 interfaces
 void handle_xmax_issueerc21(Chain::message_context_xmax& context);
 void handle_xmax_minterc21(Chain::message_context_xmax& context);
-
-void handle_xmax_revokeerc2o(Chain::message_context_xmax& context);
 void handle_xmax_revokeerc21(Chain::message_context_xmax& context);
 
 
