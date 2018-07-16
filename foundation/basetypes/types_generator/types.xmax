@@ -103,7 +103,6 @@ struct addaccount
    name      account_name
    owner     authority
    active    authority
-   recovery  authority
    deposit   asset
 
 struct setcode
