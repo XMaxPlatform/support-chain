@@ -24,7 +24,7 @@ namespace Xmaxplatform { namespace Chain {
       account_name          code;
       account_name          table;
       uint64_t              primary_key;
-      shared_string         value;
+      mapped_string         value;
    };
 
    using key_value_index = Basechain::shared_multi_index_container<
@@ -73,8 +73,8 @@ namespace Xmaxplatform { namespace Chain {
       account_name          scope;
       account_name          code;
       account_name          table;
-      shared_string         primary_key;
-      shared_string         value;
+      mapped_string         primary_key;
+      mapped_string         value;
    };
 
    using keystr_value_index = Basechain::shared_multi_index_container<
@@ -105,7 +105,7 @@ namespace Xmaxplatform { namespace Chain {
       account_name          table;
       uint128_t             primary_key;
       uint128_t             secondary_key;
-      shared_string         value;
+      mapped_string         value;
    };
 
    using key128x128_value_index = Basechain::shared_multi_index_container<
@@ -148,7 +148,7 @@ namespace Xmaxplatform { namespace Chain {
       uint64_t              primary_key;
       uint64_t              secondary_key;
       uint64_t              tertiary_key;
-      shared_string         value;
+      mapped_string         value;
    };
 
    using key64x64x64_value_index = Basechain::shared_multi_index_container<

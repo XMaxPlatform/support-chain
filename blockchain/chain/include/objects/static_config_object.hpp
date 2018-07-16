@@ -21,9 +21,9 @@ namespace Xmaxplatform { namespace Chain {
 
        id_type id;
        blockchain_setup setup;
-	   shared_builder_rule current_builders;
+	   mapped_builder_rule current_builders;
 
-	   shared_builder_rule next_builders;
+	   mapped_builder_rule next_builders;
 
 	   //shared_builder_rule new_builders;
 

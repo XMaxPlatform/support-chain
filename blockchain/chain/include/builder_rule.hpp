@@ -98,11 +98,11 @@ namespace Xmaxplatform { namespace Chain {
 		return !(a == b);
 	}
 
-	struct shared_builder_rule {
-		shared_builder_rule(Chain::allocator<char> alloc)
+	struct mapped_builder_rule {
+		mapped_builder_rule(Chain::allocator<char> alloc)
 			:builders(alloc) {}
 
-		shared_builder_rule& operator=(const builder_rule& a) {
+		mapped_builder_rule& operator=(const builder_rule& a) {
 			version = a.version;
 			builders.clear();
 			builders.reserve(a.builders.size());
@@ -126,7 +126,7 @@ namespace Xmaxplatform { namespace Chain {
 			builders.assign(list.begin(), list.end());
 			version = vers;
 		}
-		void set_builders(const shared_vector<builder_info>& list, uint32_t vers)
+		void set_builders(const mapped_vector<builder_info>& list, uint32_t vers)
 		{
 			builders = list;
 			version = vers;
@@ -145,7 +145,7 @@ namespace Xmaxplatform { namespace Chain {
 			return builders.size() <= 0;
 		}
 		uint32_t                                       version = 0; ///< sequentially incrementing version number
-		shared_vector<builder_info>                    builders;
+		mapped_vector<builder_info>                    builders;
 	};
 
 }}

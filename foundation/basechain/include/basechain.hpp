@@ -50,24 +50,24 @@ namespace  Basechain {
    template<typename T>
    using allocator = bip::allocator<T, bip::managed_mapped_file::segment_manager>;
 
-   typedef bip::basic_string< char, std::char_traits< char >, allocator< char > > shared_string;
+   typedef bip::basic_string< char, std::char_traits< char >, allocator< char > > mapped_string;
 
    template<typename T>
-   using shared_vector = std::vector<T, allocator<T> >;
+   using mapped_vector = std::vector<T, allocator<T> >;
 
    struct strcmp_less
    {
-      bool operator()( const shared_string& a, const shared_string& b )const
+      bool operator()( const mapped_string& a, const mapped_string& b )const
       {
          return less( a.c_str(), b.c_str() );
       }
 
-      bool operator()( const shared_string& a, const std::string& b )const
+      bool operator()( const mapped_string& a, const std::string& b )const
       {
          return less( a.c_str(), b.c_str() );
       }
 
-      bool operator()( const std::string& a, const shared_string& b )const
+      bool operator()( const std::string& a, const mapped_string& b )const
       {
          return less( a.c_str(), b.c_str() );
       }

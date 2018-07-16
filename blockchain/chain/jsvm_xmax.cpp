@@ -228,7 +228,7 @@ namespace Xmaxplatform {
 			LoadScript(name, recipient.code.data(), accountobj.abi, accountobj.code_version);
 		}
 
-		void jsvm_xmax::LoadScript(account_name name, const char* code,const shared_vector<char>& abi,const fc::sha256& code_version)
+		void jsvm_xmax::LoadScript(account_name name, const char* code,const mapped_vector<char>& abi,const fc::sha256& code_version)
 		{
 			auto& state = instances[name];
 

@@ -82,7 +82,7 @@ namespace Xmaxplatform { namespace Chain {
 	   const builder_info&         get_block_builder(uint32_t delta_slot) const;
 	   const builder_info&         get_order_builder(uint32_t order_slot) const;
 	   const builder_object*	find_builder_object(account_name builder_name) const;
-	   const shared_builder_rule& get_verifiers_by_order(uint32_t order_slot) const;
+	   const mapped_builder_rule& get_verifiers_by_order(uint32_t order_slot) const;
 
 	   uint32_t				get_delta_slot_at_time(chain_timestamp when) const;
 	   uint32_t				get_order_slot_at_time(chain_timestamp when) const;

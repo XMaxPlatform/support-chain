@@ -15,7 +15,7 @@ namespace Xmaxplatform { namespace Chain {
     class voter_info_object : public Basechain::object<vote_info_object_type, voter_info_object> {
         OBJECT_CCTOR(voter_info_object, (builders))
 
-        typedef shared_vector<account_name> builder_list;
+        typedef mapped_vector<account_name> builder_list;
 
         id_type         id;
         account_name	owner;

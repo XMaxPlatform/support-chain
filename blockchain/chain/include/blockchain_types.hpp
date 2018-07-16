@@ -89,9 +89,9 @@ namespace Xmaxplatform { namespace Chain {
    struct void_t{};
 
    using Basechain::allocator;
-   using shared_string = boost::interprocess::basic_string<char, std::char_traits<char>, allocator<char>>;
+   using mapped_string = boost::interprocess::basic_string<char, std::char_traits<char>, allocator<char>>;
    template<typename T>
-   using shared_vector = boost::interprocess::vector<T, allocator<T>>;
+   using mapped_vector = boost::interprocess::vector<T, allocator<T>>;
    template<typename T>
    using shared_set = boost::interprocess::set<T, std::less<T>, allocator<T>>;
 
@@ -145,28 +145,35 @@ namespace Xmaxplatform { namespace Chain {
 
         enum object_type
         {
-            null_object_type,
+            null_object_type = 0,
             static_config_object_type,
-            dynamic_states_object_type,
+            dynamic_states_object_type,  
+			resource_token_object_type,
             xmx_token_object_type,
+
             key_value_object_type,
             keystr_value_object_type,
             key64x64x64_value_object_type,
             key128x128_value_object_type,
+
             account_object_type,
+			account_status_object_type,
+			permission_object_type,
 			builder_object_type,
-            vote_info_object_type,
             builder_info_object_type,
-            resource_token_object_type,
-			transaction_object_type,
-			block_summary_object_type,
-			rate_limiting_object_type,
-			block_object_type,
+            vote_info_object_type,
+
 			erc20_token_object_type,
 			erc20_token_account_object_type,
 			erc721_token_object_type,
 			erc721_token_account_object_type,
-			account_status_object_type,
+
+
+			transaction_object_type,
+			block_summary_object_type,
+			rate_limiting_object_type,
+			block_object_type,
+
 			global_trx_status_object_type,
 			global_msg_status_object_type,
             OBJECT_TYPE_COUNT ///< Sentry value which contains the number of different object types
@@ -177,6 +184,6 @@ namespace Xmaxplatform { namespace Chain {
 #define empty_chain_id Xmaxplatform::basemisc::empty_sha256
 
 namespace fc {
-  void to_variant(const Xmaxplatform::Chain::shared_vector<Xmaxplatform::Basetypes::field>& c, fc::variant& v);
-  void from_variant(const fc::variant& v, Xmaxplatform::Chain::shared_vector<Xmaxplatform::Basetypes::field>& fields);
+  void to_variant(const Xmaxplatform::Chain::mapped_vector<Xmaxplatform::Basetypes::field>& c, fc::variant& v);
+  void from_variant(const fc::variant& v, Xmaxplatform::Chain::mapped_vector<Xmaxplatform::Basetypes::field>& fields);
 }

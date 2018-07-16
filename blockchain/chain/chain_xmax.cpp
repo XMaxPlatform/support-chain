@@ -362,7 +362,7 @@ namespace Xmaxplatform { namespace Chain {
 		{
 			return _context->block_head;
 		}
-		const shared_builder_rule& _get_verifiers(const static_config_object& config, uint32_t order_slot)
+		const mapped_builder_rule& _get_verifiers(const static_config_object& config, uint32_t order_slot)
 		{
 			if (order_slot < Config::blocks_per_round || config.next_builders.is_empty())
 			{
@@ -428,7 +428,7 @@ namespace Xmaxplatform { namespace Chain {
 			return states.round_slot + delta;
 		}
 
-		const shared_builder_rule& chain_xmax::get_verifiers_by_order(uint32_t order_slot) const
+		const mapped_builder_rule& chain_xmax::get_verifiers_by_order(uint32_t order_slot) const
 		{
 			return _get_verifiers(get_static_config(), order_slot);
 		}

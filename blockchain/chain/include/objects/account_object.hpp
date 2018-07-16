@@ -18,8 +18,8 @@ namespace Xmaxplatform { namespace Chain {
       uint8_t             vm_version   = 0;
       fc::sha256          code_version;
       time                creation_date;
-      shared_vector<char> code;
-      shared_vector<char> abi;
+	  mapped_vector<char> code;
+	  mapped_vector<char> abi;
 
       void set_abi( const Xmaxplatform::Basetypes::abi& _abi ) {
          // Added resize(0) here to avoid bug in boost vector container
