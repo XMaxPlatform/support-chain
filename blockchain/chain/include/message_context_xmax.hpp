@@ -21,9 +21,8 @@ public:
                  Basechain::database& db,
                  const Chain::transaction& t,
                  const Chain::message_xmax& m,
-                 const Basetypes::account_name& code,
 				 uint32_t depth)
-      : _chain_xmax(con), db(db), trx(t), msg(m), code(code), apply_depth(depth), mutable_controller(con),
+      : _chain_xmax(con), db(db), trx(t), msg(m), code(m.code), apply_depth(depth), mutable_controller(con),
         mutable_db(db), used_authorizations(msg.authorization.size(), false),
         next_pending_transaction_serial(0), next_pending_message_serial(0){}
 
@@ -307,6 +306,11 @@ public:
    void get_active_builders(Basetypes::account_name *builders, uint32_t len);
 
    time current_time() const;
+
+   void change_code(account_name c)
+   {
+	   code = c;
+   }
 
    const chain_xmax&      _chain_xmax;
    const Basechain::database&   db;  ///< database where state is stored

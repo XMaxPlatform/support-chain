@@ -42,11 +42,25 @@ namespace Chain {
 		XMAX_ASSERT(apply_depth < Config::max_message_apply_depth,
 			transaction_exception, "inline action recursion depth reached");
 
-		message_context_xmax xmax_ctx(chain, chain.get_mutable_database(), trx, msg, msg.code, apply_depth);
+		message_context_xmax xmax_ctx(chain, chain.get_mutable_database(), trx, msg, apply_depth);
+
+		xmax_ctx.notified.push_back(msg.code);
 
 		message_response res = exec_one_message(xmax_ctx);
 
+		XMAX_ASSERT(xmax_ctx.notified.size() < 1000,
+			transaction_exception, "to many recipient.");
+
 		response->message_responses.emplace_back(std::move(res));
+
+		for ( int i = 1; i < xmax_ctx.notified.size(); ++i)
+		{
+			account_name notify_code = xmax_ctx.notified[i];
+			xmax_ctx.change_code(notify_code);
+			message_response res2 = exec_one_message(xmax_ctx);
+
+			response->message_responses.emplace_back(std::move(res2));
+		}
 
 		for (const auto& it : xmax_ctx.inline_messages)
 		{
