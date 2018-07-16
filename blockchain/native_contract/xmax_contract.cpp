@@ -374,6 +374,7 @@ void handle_xmax_revokeerc2o(Chain::message_context_xmax& context) {
 
 	//Check precondition
 	auto& erc20_obj = db.get<erc20_token_object, by_token_name>(revokeerc2o.token_name);	
+	validate_token_not_revoke(erc20_obj);
 	db.modify(erc20_obj, [](erc20_token_object& obj) {
 		obj.revoked = 1;
 	});
@@ -387,9 +388,10 @@ void handle_xmax_revokeerc21(Chain::message_context_xmax& context) {
 	auto revokeerc721 = context.msg.as<Types::revokeerc21>();
 
 	//Todo: Check owner authorization
-
+	
 	//Check precondition
 	auto& erc721_obj = db.get<erc721_token_object, by_token_name>(revokeerc721.token_name);
+	validate_token_not_revoke(erc721_obj);
 	db.modify(erc721_obj, [](erc721_token_object& obj) {
 		obj.revoked = 1;
 	});
