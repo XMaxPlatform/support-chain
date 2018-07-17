@@ -171,7 +171,6 @@ namespace Xmaxplatform { namespace Chain {
 			transaction_object_type,
 			block_summary_object_type,
 			rate_limiting_object_type,
-			block_object_type,
 
 			global_trx_status_object_type,
 			global_msg_status_object_type,

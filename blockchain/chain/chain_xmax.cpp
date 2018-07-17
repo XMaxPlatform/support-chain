@@ -38,7 +38,6 @@
 #include <objects/resource_token_object.hpp>
 #include <objects/xmx_token_object.hpp>
 #include <objects/builder_object.hpp>
-#include <objects/block_object.hpp>
 #include <objects/global_status_objects.hpp>
 #include <objects/erc20_token_object.hpp>
 #include <objects/erc721_token_object.hpp>
@@ -136,7 +135,6 @@ namespace Xmaxplatform { namespace Chain {
 
 			_context->block_db.add_index<transaction_multi_index>();
 			_context->block_db.add_index<block_summary_multi_index>();
-			_context->block_db.add_index<block_multi_index>();
 
             _context->block_db.add_index<static_config_multi_index>();
             _context->block_db.add_index<dynamic_states_multi_index>();
@@ -946,12 +944,6 @@ namespace Xmaxplatform { namespace Chain {
 				dgp.round_slot = current_round_slot;
 				dgp.builders_elect_state = builder_elect_state;
             });
-
-			// update block data
-			_context->block_db.create<block_object>([&](block_object& blk) {
-				blk.blk_id = last_block.id();
-				blk.block = last_block;
-			});
 
 			on_finalize_block(last_block);
 				
