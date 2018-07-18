@@ -2,7 +2,7 @@
 #include <libplatform/libplatform.h>
 #include <v8.h>
 #include "jsvm_objbind/V8Bind.h"
-#include "MessageBind.h"
+
 
 namespace Xmaxplatform {
 	namespace Chain {
@@ -20,11 +20,8 @@ namespace Xmaxplatform {
 
 			}
 
-			virtual void Setup(v8::Isolate* pIsolate, const v8::Local<v8::ObjectTemplate>& fooGlobal)
-			{
-				SetupV8MsgObjectToJs(pIsolate, fooGlobal);
-			}
-
+			virtual void Setup(v8::Isolate* pIsolate, const v8::Local<v8::ObjectTemplate>& fooGlobal);
+			virtual JsFooBindMap GetBindFoos(v8::Isolate* pIsolate);
 			
 		};
 

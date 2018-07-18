@@ -21,10 +21,6 @@
 #include <fc/int128.hpp>
 #endif
 
-
-#include "jsvm_objbind/Int64Bind.h"
-
-
 using namespace v8;
 namespace Xmaxplatform {
 
@@ -136,10 +132,9 @@ namespace Xmaxplatform {
 		void jsvm_xmax::V8SetupGlobalObjTemplate(v8::Local<v8::ObjectTemplate>* pGlobalTemp)
 		{
 			m_pGlobalObjectTemplate = pGlobalTemp;
-			BindJsFoos(m_pIsolate, *m_pGlobalObjectTemplate, FooBind::GetBindFoos(m_pIsolate));
-			SetupV8i64ObjectToJs(m_pIsolate, *m_pGlobalObjectTemplate);
 			if (m_pBind!=nullptr)
 			{
+				BindJsFoos(m_pIsolate, *m_pGlobalObjectTemplate, m_pBind->GetBindFoos(m_pIsolate));
 				m_pBind->Setup(m_pIsolate, *m_pGlobalObjectTemplate);
 			}
 		}

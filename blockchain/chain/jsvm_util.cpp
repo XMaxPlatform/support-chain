@@ -3,7 +3,7 @@
 #include "jsvm_util.h"
 #include <iostream>
 #include <blockchain_exceptions.hpp>
-#include "jsvm_objbind/Int64Bind.h"
+
 using namespace v8;
 namespace Xmaxplatform {
 
@@ -133,8 +133,8 @@ namespace Xmaxplatform {
 				Local<External> wrap = Local<External>::Cast(js_data_object->GetInternalField(0));
 				void* ptr = wrap->Value();
 				int64_t ret = 0;
-				V8i64* pv8i64 = static_cast<V8i64*>(ptr);
-				ret = (int64_t) pv8i64->data[0];
+				int64_t* pv8i64 = static_cast<int64_t*>(ptr);
+				ret = (int64_t) *pv8i64;
 				
 				return ret;
 			}
