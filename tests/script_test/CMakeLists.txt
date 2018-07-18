@@ -12,7 +12,7 @@ target_include_directories(script_test PUBLIC
                             ${Boost_INCLUDE_DIR})
 
 target_link_libraries(script_test 
-                   PRIVATE xmaxchain fc jsbind_plugin blockchain_plugin
+                   PRIVATE xmaxchain fc jsvmbind blockchain_plugin
  ${CMAKE_DL_LIBS} ${PLATFORM_SPECIFIC_LIBS}
                     ${Boost_LIBRARIES})
 if(USE_V8_VM)

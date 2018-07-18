@@ -8,7 +8,7 @@ target_include_directories(xmaxrun PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries( xmaxrun
         PRIVATE baseapp
-        PRIVATE blockchain_plugin blockbuilder_plugin chainhttp_plugin chainnet_plugin mongodb_plugin contractutil_plugin jsbind_plugin
+        PRIVATE blockchain_plugin blockbuilder_plugin chainhttp_plugin chainnet_plugin mongodb_plugin contractutil_plugin jsvmbind
         PRIVATE xmaxchain fc ${CMAKE_DL_LIBS} ${PLATFORM_SPECIFIC_LIBS} )
 if(USE_V8_VM)
 target_link_libraries( xmaxrun

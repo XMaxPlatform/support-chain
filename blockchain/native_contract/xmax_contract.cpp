@@ -210,7 +210,7 @@ void handle_xmax_setjscode(Chain::message_context_xmax& context)
 		a.set_abi(msg.code_abi);
 	});
 
-	message_context_xmax init_context(context.mutable_controller, context.mutable_db, context.trx, context.msg, msg.account,0);
+	message_context_xmax init_context(context.mutable_controller, context.mutable_db, context.trx, context.msg,0);
 	jsvm_xmax::get().init(init_context);
 
 }

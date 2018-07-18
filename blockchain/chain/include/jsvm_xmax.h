@@ -48,7 +48,7 @@ namespace Xmaxplatform {
 			void validate(message_context_xmax& c);
 			void precondition(message_context_xmax& c);
 
-			void LoadScript(account_name name, const char* code, const shared_vector<char>& abi, const fc::sha256& code_version);
+			void LoadScript(account_name name, const char* code, const mapped_vector<char>& abi, const fc::sha256& code_version);
 			void LoadScriptTest(account_name name, const char* code, const std::vector<char>& abi, const fc::sha256& code_version, bool sciptTest = false);
 			void SetInstructionLimit(uint32_t instructionLimit);
 
