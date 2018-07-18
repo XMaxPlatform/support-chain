@@ -1,4 +1,6 @@
 # Defines XMAX library target.
+set(USE_V8_VM true)
+
 project( Xmax )
 IF( WIN32 )
     cmake_minimum_required( VERSION 3.11.0 )
