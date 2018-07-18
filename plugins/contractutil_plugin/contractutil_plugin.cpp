@@ -180,10 +180,10 @@ namespace Xmaxplatform {
 
 #define GET_FIELD( VO, FIELD, RESULT ) \
        if( VO.contains(#FIELD) ) fc::from_variant( VO[#FIELD], RESULT.FIELD )
+
+
 	   {
 		   const variant_object& vo = v.get_object();
-
-
 		   message result;
 		   GET_FIELD(vo, code, result);
 		   GET_FIELD(vo, type, result);
@@ -210,7 +210,6 @@ namespace Xmaxplatform {
 		   {
 			   std::string tempstrname;
 			   fc::from_variant(vlist[i], tempstrname);
-			   scopelist.push_back(Xmaxplatform::Basetypes::name(tempstrname));
 		   }
 
 		   trx.scope = sort_names(std::move(scopelist));

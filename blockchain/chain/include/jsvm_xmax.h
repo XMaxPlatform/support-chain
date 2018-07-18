@@ -4,7 +4,7 @@
 #include <message_context_xmax.hpp>
 #include <libplatform/libplatform.h>
 #include <v8.h>
-
+#include "jsvm_objbind/V8Bind.h"
 #include "jsvm_util.h"
 
 namespace Xmaxplatform {
@@ -36,6 +36,7 @@ namespace Xmaxplatform {
 			void V8EnvInit();
 			void V8EnvDiscard();
 			void V8ExitContext();
+			void V8SetBind(V8Bind* bind);
 			v8::Isolate* V8GetIsolate();
 
 			bool StoreInstruction(int ins);
@@ -88,16 +89,17 @@ namespace Xmaxplatform {
 			map<account_name, ModuleState> instances;
 			fc::time_point checktimeStart;
 
-			v8::Isolate* m_pIsolate;
-			v8::Local<v8::ObjectTemplate>* m_pGlobalObjectTemplate;
-
 			uint32_t m_instructionCount;
 			std::list<int> m_Intrunctions;
 			uint32_t m_instructionLimit;
 
+			v8::Isolate* m_pIsolate;
+			v8::Local<v8::ObjectTemplate>* m_pGlobalObjectTemplate;
+
 			v8::Isolate::CreateParams m_CreateParams;
 			v8::Platform* m_pPlatform;
 
+			V8Bind* m_pBind;
 
 			jsvm_xmax();
 		};

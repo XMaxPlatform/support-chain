@@ -33,6 +33,7 @@ namespace Xmaxplatform {
 		jsvm_xmax::jsvm_xmax() 
 			:current_validate_context(nullptr)
 			,m_instructionLimit(1000)
+			, m_pBind(nullptr)
 		{
 			CleanInstruction();
 		}
@@ -137,6 +138,10 @@ namespace Xmaxplatform {
 			m_pGlobalObjectTemplate = pGlobalTemp;
 			BindJsFoos(m_pIsolate, *m_pGlobalObjectTemplate, FooBind::GetBindFoos(m_pIsolate));
 			SetupV8i64ObjectToJs(m_pIsolate, *m_pGlobalObjectTemplate);
+			if (m_pBind!=nullptr)
+			{
+				m_pBind->Setup(m_pIsolate, *m_pGlobalObjectTemplate);
+			}
 		}
 
 		void jsvm_xmax::V8EnvInit()
@@ -168,6 +173,11 @@ namespace Xmaxplatform {
 			{
 				current_state->current_context.Get(m_pIsolate)->Exit();
 			}
+		}
+
+		void jsvm_xmax::V8SetBind(V8Bind* bind)
+		{
+			m_pBind = bind;
 		}
 
 		void  jsvm_xmax::vm_apply() {

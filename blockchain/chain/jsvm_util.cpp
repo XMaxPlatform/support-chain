@@ -123,6 +123,24 @@ namespace Xmaxplatform {
 			return Undefined(isolate);
 		}
 
+		int64_t  I64JS2CPP(v8::Isolate* isolate, v8::Handle<v8::Value> obj)
+		{
+			bool bIsObject = obj->IsObject();
+			if (bIsObject)
+			{
+				Handle<Object> js_data_object = Handle<Object>::Cast(obj);
+
+				Local<External> wrap = Local<External>::Cast(js_data_object->GetInternalField(0));
+				void* ptr = wrap->Value();
+				int64_t ret = 0;
+				V8i64* pv8i64 = static_cast<V8i64*>(ptr);
+				ret = (int64_t) pv8i64->data[0];
+				
+				return ret;
+			}
+			return 0;
+		}
+
 		namespace FooBind
 		{
 			void FooBind::exportFoo(const FunctionCallbackInfo<v8::Value>& args)
@@ -132,14 +150,7 @@ namespace Xmaxplatform {
 					v8::HandleScope handle_scope(args.GetIsolate());
 					HandleScope scope(args.GetIsolate());
 					args.GetIsolate()->ThrowException(v8::Exception::Error(String::NewFromUtf8(args.GetIsolate(), "error string here")));
-				//	Handle<v8::Value> js_data_value = args[i];
 
-				//	bool bIsObject = js_data_value->IsObject();
-				//	if (bIsObject)
-				//	{
-					
-				//	}
-				//}
 			}
 		}
 

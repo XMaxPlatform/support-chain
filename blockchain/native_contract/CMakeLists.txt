@@ -16,7 +16,7 @@ target_include_directories( xmax_native_contract
 
 if(USE_V8_VM)
 target_include_directories(xmax_native_contract
-PUBLIC "include"  ${CMAKE_CURRENT_SOURCE_DIR}/../../libraries/v8/include )
+PUBLIC "include"  ${CMAKE_CURRENT_SOURCE_DIR}/../../libraries/v8/include  ${CMAKE_CURRENT_SOURCE_DIR}/../chain/ )
 endif()	
 
 INSTALL( TARGETS

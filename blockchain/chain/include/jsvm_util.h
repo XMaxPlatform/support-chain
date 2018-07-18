@@ -29,6 +29,11 @@ namespace Xmaxplatform {
 		v8::Handle<v8::Value> CallJsFoo(v8::Isolate* pIsolate, const v8::Local<v8::Context>& context, const char* fooname, unsigned int argc, v8::Handle<v8::Value>* params);
 
 		v8::Handle<v8::Value> I64Cpp2JS(v8::Isolate* isolate, const v8::Local<v8::Context>& context, int64_t v);
+		int64_t I64JS2CPP(v8::Isolate* isolate, v8::Handle<v8::Value> obj);
+
+		inline const char* StringJS2CPP(const v8::String::Utf8Value& value) {
+			return *value ? *value : "<string conversion failed>";
+		}
 
 		namespace FooBind
 		{

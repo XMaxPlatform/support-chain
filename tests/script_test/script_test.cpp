@@ -1,5 +1,6 @@
 #ifdef USE_V8
 #include "jsvm_xmax.h"
+#include <V8AllBind.h>
 
 using namespace Xmaxplatform::Chain;
 using namespace v8;
@@ -7,6 +8,9 @@ int main(int argc, char** argv)
 {
 	jsvm_xmax::get().V8EnvInit();
 	{
+		V8AllBind allbind;
+		jsvm_xmax::get().V8SetBind(&allbind);
+
 		Isolate::Scope isolate_scope(jsvm_xmax::get().V8GetIsolate());
 		// Create a stack-allocated handle scope.
 		HandleScope handle_scope(jsvm_xmax::get().V8GetIsolate());

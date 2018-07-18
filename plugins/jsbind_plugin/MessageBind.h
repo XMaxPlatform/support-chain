@@ -14,15 +14,12 @@ namespace Xmaxplatform {
 			{
 
 			}
-
-			void* dataPtr;
-			int dataLength;
 			
 		};
 
 		V8Msg* NewV8MsgFunction(const v8::FunctionCallbackInfo<v8::Value>& args);
 
-		void V8MsgWeakExternalReferenceCallback(v8::Persistent<v8::Value>, void* parameter);
+		void V8MsgWeakExternalReferenceCallback(const v8::WeakCallbackInfo<V8Msg>& data);
 
 		void V8MsgFunctionInvocationCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
 

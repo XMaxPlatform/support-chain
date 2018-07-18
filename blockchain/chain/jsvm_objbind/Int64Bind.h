@@ -28,7 +28,7 @@ namespace Xmaxplatform {
 
 		V8i64* NewV8i64Function(const FunctionCallbackInfo<v8::Value>& args);
 
-		void V8i64WeakExternalReferenceCallback(Persistent<v8::Value>, void* parameter);
+		void V8i64WeakExternalReferenceCallback(const WeakCallbackInfo<V8i64>& data);
 
 		void V8i64FunctionInvocationCallback(const FunctionCallbackInfo<v8::Value>& args);
 
