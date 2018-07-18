@@ -1,6 +1,6 @@
 #include "MessageBind.h"
-#include "jsvm_util.h"
-#include "jsvm_xmax.h"
+#include "jsvm_util.hpp"
+#include "jsvm_xmax.hpp"
 #include <../../blockchain_plugin/include/blockchain_plugin.hpp>
 #include <../../../blockchain/chain/include/blockchain_types.hpp>
 #include <fc/variant.hpp>
@@ -9,21 +9,7 @@
 using namespace v8;
 namespace Xmaxplatform {
 	namespace Chain {
-
-
-		template<typename T>
-		void MsgGet(name code, name type, const vector<char>& bin, const char* key, T& result)
-		{
-			Chain::chain_xmax& cc = app().get_plugin<blockchain_plugin>().getchain();
-			fc::variant var = cc.message_from_binary(code, type, bin);
-
-			const variant_object& vo = var.get_object();
-			if (vo.contains(key))
-			{
-				fc::from_variant(vo[key], result);
-			}
-		}
-
+		/*
 		V8Msg* NewV8MsgFunction(const FunctionCallbackInfo<v8::Value>& args)
 		{
 			return new V8Msg();
@@ -77,9 +63,22 @@ namespace Xmaxplatform {
 				isolate,
 				"V8i64",
 				NewStringType::kNormal).ToLocalChecked(), msg_templ);
+		}*/
+
+		template<typename T>
+		void MsgGet(name code, name type, const vector<char>& bin, const char* key, T& result)
+		{
+			Chain::chain_xmax& cc = app().get_plugin<blockchain_plugin>().getchain();
+			fc::variant var = cc.message_from_binary(code, type, bin);
+
+			const variant_object& vo = var.get_object();
+			if (vo.contains(key))
+			{
+				fc::from_variant(vo[key], result);
+			}
 		}
 
-		void GetData(const v8::FunctionCallbackInfo<v8::Value>& args)
+		void GetMsgData(const v8::FunctionCallbackInfo<v8::Value>& args)
 		{
 			Local<Object> self = args.Holder();
 

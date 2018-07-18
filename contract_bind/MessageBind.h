@@ -3,7 +3,7 @@
 
 namespace Xmaxplatform {
 	namespace Chain {
-		class V8Msg
+		/*class V8Msg
 		{
 		public:
 			V8Msg(uint64_t)
@@ -23,9 +23,10 @@ namespace Xmaxplatform {
 
 		void V8MsgFunctionInvocationCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
 
-		void SetupV8MsgObjectToJs(v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global);
+		void SetupV8MsgObjectToJs(v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global);*/
+		
 
-		void GetData(const v8::FunctionCallbackInfo<v8::Value>& args);
+		void GetMsgData(const v8::FunctionCallbackInfo<v8::Value>& args);
 
 	}
 }

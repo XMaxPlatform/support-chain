@@ -5,7 +5,7 @@
 #include <libplatform/libplatform.h>
 #include <v8.h>
 #include "jsvm_objbind/V8Bind.h"
-#include "jsvm_util.h"
+#include "jsvm_util.hpp"
 
 namespace Xmaxplatform {
 	namespace Chain {

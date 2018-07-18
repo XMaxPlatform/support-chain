@@ -1,6 +1,5 @@
-
 #ifdef USE_V8
-#include "jsvm_util.h"
+#include "jsvm_util.hpp"
 #include <iostream>
 #include <blockchain_exceptions.hpp>
 
