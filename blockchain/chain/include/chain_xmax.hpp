@@ -71,6 +71,7 @@ namespace Xmaxplatform { namespace Chain {
 	   block_pack_ptr		head_block_pack() const;
 
        time					head_block_time() const;
+	   chain_timestamp		head_block_timestamp() const;
 	   uint32_t				head_block_num() const;
 	   xmax_type_block_id	head_block_id()const;
 	   uint32_t				last_irreversible_block_num() const;
@@ -124,7 +125,8 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void _abort_build();
 	   void _start_build(chain_timestamp when);
-	   void _Start_first_build(chain_timestamp init_stamp);
+	   void _generate_next_builders();
+	   void _start_first_build(chain_timestamp init_stamp);
        void _generate_block();
 	   void _sign_block(const private_key_type& sign_private_key);
 	   void _make_fianl_block();
@@ -177,6 +179,8 @@ namespace Xmaxplatform { namespace Chain {
        );
 
 	   void confirm_block(const signed_block_ptr next_block);
+
+	   void push_block(const signed_block_ptr block);
 
 	   void broadcast_confirmation(account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func);
 

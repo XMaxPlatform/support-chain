@@ -9,6 +9,7 @@
 #include <blockchain_exceptions.hpp>
 #include <basechain.hpp>
 #include <forkchain.hpp>
+#include <chain_utils.hpp>
 #include <chain_init.hpp>
 #include <chain_xmax.hpp>
 #include <xmax_voting.hpp>
@@ -85,8 +86,8 @@ namespace Xmaxplatform { namespace Chain {
 			, fork_db(config.block_memory_dir)
 		{
 			//--------------------------------------
-#pragma message("-------------------------------------- skip some for test. --------------------------------------") 
-			skip_flags = skip_flags | Config::skip_confirmation;
+//#pragma message("-------------------------------------- skip some for test. --------------------------------------") 
+//			skip_flags = skip_flags | Config::skip_confirmation;
 			//-----------------------------------------
 		}
 		~chain_context()
@@ -178,7 +179,7 @@ namespace Xmaxplatform { namespace Chain {
 				//const chain_timestamp pre_stamp = init_stamp - chain_timestamp::create(1);
 
 
-				_Start_first_build(init_stamp);
+				_start_first_build(init_stamp);
 
 				// block genesis db.
 
@@ -228,6 +229,8 @@ namespace Xmaxplatform { namespace Chain {
 					apply_transaction_impl(request);
 				}
 
+				_generate_next_builders();
+
 				_generate_block();
 				_sign_block(Config::xmax_build_private_key);
 				_make_fianl_block();
@@ -251,6 +254,7 @@ namespace Xmaxplatform { namespace Chain {
 			{
 				wlog("No head block in fork db, try to fix...");
 
+				const auto&  
 				signed_block_ptr head = _context->chain_log.get_head();
 				pack_head = std::make_shared<block_pack>();
 				pack_head->init_by_block(head, true);
@@ -302,8 +306,13 @@ namespace Xmaxplatform { namespace Chain {
         }
 
         time chain_xmax::head_block_time() const {
-			return  _context->block_head->new_header.timestamp.time_point();
+			return head_block_timestamp().time_point();
         }
+
+		chain_timestamp chain_xmax::head_block_timestamp() const
+		{
+			return _context->block_head->new_header.timestamp;
+		}
 
 		uint32_t chain_xmax::head_block_num() const
 		{
@@ -354,35 +363,21 @@ namespace Xmaxplatform { namespace Chain {
 
 		signed_block_ptr chain_xmax::head_block() const
 		{
-			return _context->block_head->block;
+			return head_block_pack()->block;
 		}
 		block_pack_ptr chain_xmax::head_block_pack() const
 		{
 			return _context->block_head;
 		}
-		const mapped_builder_rule& _get_verifiers(const static_config_object& config, uint32_t order_slot)
+		const mapped_builder_rule& _get_builder_rule(const static_config_object& config, uint32_t order_slot)
 		{
-			if (order_slot < Config::blocks_per_round || config.next_builders.is_empty())
-			{
-				return config.current_builders;
-			}
-			return config.next_builders;
+
+			return utils::select_builder_rule(config.current_builders, config.next_builders, order_slot);
 		}
 
 		const builder_info& _get_builder(const static_config_object& config, uint32_t index)
 		{
-			if (index < Config::blocks_per_round || config.next_builders.is_empty())
-			{
-				uint32_t bias = (index / Config::blocks_per_builder) % config.current_builders.number();
-				return config.current_builders.builders[bias];
-			}
-
-			// get builder in next list.
-			uint32_t deltaslot = index - config.current_builders.number();
-
-			uint32_t bias = (index / Config::blocks_per_builder) % config.next_builders.number();
-
-			return config.next_builders.builders[bias];
+			return utils::select_builder(config.current_builders, config.next_builders, index);
 		}
 
 		const builder_info& chain_xmax::get_block_builder(uint32_t delta_slot) const
@@ -409,12 +404,7 @@ namespace Xmaxplatform { namespace Chain {
 
 		uint32_t chain_xmax::get_delta_slot_at_time(chain_timestamp when) const
 		{
-			chain_timestamp first_slot_time = get_delta_slot_time(1);
-			if (when < first_slot_time)
-				return 0;
-
-			chain_timestamp sub = when - first_slot_time;
-			return sub.get_stamp() + 1;
+			return utils::get_delta_slot_at_time(head_block_timestamp(), when);
 		}
 
 		uint32_t chain_xmax::get_order_slot_at_time(chain_timestamp when) const
@@ -428,14 +418,12 @@ namespace Xmaxplatform { namespace Chain {
 
 		const mapped_builder_rule& chain_xmax::get_verifiers_by_order(uint32_t order_slot) const
 		{
-			return _get_verifiers(get_static_config(), order_slot);
+			return _get_builder_rule(get_static_config(), order_slot);
 		}
 
         chain_timestamp chain_xmax::get_delta_slot_time(uint32_t delta_slot) const
         {
-			chain_timestamp head_block_abs_slot = chain_timestamp::from(head_block_time());
-			head_block_abs_slot += chain_timestamp::create(delta_slot);
-			return head_block_abs_slot;
+			return utils::get_delta_slot_time(head_block_timestamp(), delta_slot);
 
         }
 		const Basechain::database& chain_xmax::get_database() const
@@ -671,6 +659,11 @@ namespace Xmaxplatform { namespace Chain {
 			_commit_block();
 		}
 
+		void chain_xmax::push_block(const signed_block_ptr block)
+		{
+
+		}
+
 		void chain_xmax::broadcast_confirmation(account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func)
 		{
 			_broadcast_confirmation(_context->building_block->pack->block_id, account, validate_private_key, confirm_func);
@@ -684,7 +677,7 @@ namespace Xmaxplatform { namespace Chain {
 			}
 		}
 
-		void chain_xmax::_Start_first_build(chain_timestamp when)
+		void chain_xmax::_start_first_build(chain_timestamp when)
 		{
 			_context->building_block = _context->block_db.start_undo_session(true);
 
@@ -701,9 +694,6 @@ namespace Xmaxplatform { namespace Chain {
 			//check properties.
 			FC_ASSERT(head_block_time() < when.time_point(), "block must be generated at a timestamp after the head block time");
 
-			uint32_t order_slot = get_order_slot_at_time(when);
-			const builder_info& current_builder = get_order_builder(order_slot);
-
 			auto pending_undo = fc::make_scoped_exit([&]() {
 				_context->building_block.reset();
 			});
@@ -716,58 +706,49 @@ namespace Xmaxplatform { namespace Chain {
 
 				block_pack& pack = *_context->building_block->pack;
 
-				const auto& rule = _get_verifiers(get_static_config(), order_slot);
+				_context->building_block->pack->init_by_pre_pack(*_context->block_head, when);
 
-				_context->building_block->pack->init_by_pre_pack(*_context->block_head, when, current_builder.builder_name, rule);
+				_context->building_block->pack->main_chain = true;
 
+				_generate_next_builders();
+				
 				pending_undo.cancel();
 
-			} FC_CAPTURE_AND_RETHROW((current_builder.builder_name))
+			} FC_CAPTURE_AND_RETHROW((when))
 		}
 
-		void chain_xmax::_validate_block_desc(signed_block_ptr block)
-		{
-			FC_ASSERT(_context->block_head->block_id == block->previous, "head block id != previous id of next mblock");
+		void chain_xmax::_generate_next_builders()
+		{				
+			// create new builder list. before sign.
+			const dynamic_states_object& dy_state = get_dynamic_states();
+			if (elect_new_builders == dy_state.builders_elect_state)
+			{
+				xmax_builder_infos new_builders = Native_contract::xmax_voting::next_round(_context->block_db);
 
-			FC_ASSERT(_context->block_head->block_num + 1 == block->block_num(), "head block number + 1 != next block number");
+				const static_config_object& static_config = get_static_config();
+				uint32_t new_version = static_config.current_builders.version + 1;
+				builder_rule newrule;
+				newrule.set_builders(new_builders, new_version);
 
-			FC_ASSERT(block->transaction_merkle_root == block->calculate_merkle_root(), "action merkle root does not match");		
-			
-			const builder_object* builder = find_builder_object(block->builder);
+				_context->building_block->pack->set_next_builders(newrule);
+				std::stringstream namestream;
+				for (const builder_info& it : new_builders)
+				{
+					namestream << it.builder_name.to_string() << ",";
+				}
+				fc::mutable_variant_object capcture;
+				capcture.set("builders", namestream.str());
 
-			FC_ASSERT(block->is_signer_valid(builder->signing_key), "bad block.");
+				ilog("next round: ${builders}", (capcture));
+			}
 		}
 
         void chain_xmax::_generate_block() {
 
 			FC_ASSERT(_context->building_block);
             try {
-				_context->building_block->pack->main_chain = true;
 
 				signed_block_header& building_header = _context->building_block->pack->new_header;
-
-				const dynamic_states_object& dy_state = get_dynamic_states();
-
-				// create new builder list. before sign.
-				if (elect_new_builders == dy_state.builders_elect_state)
-				{
-					xmax_builder_infos new_builders = Native_contract::xmax_voting::next_round(_context->block_db);
-					
-					const static_config_object& static_config = get_static_config();
-					uint32_t new_version = static_config.current_builders.version + 1;
-					builder_rule newrule;
-					newrule.set_builders(new_builders, new_version);
-					building_header.next_builders = newrule;
-					std::stringstream namestream;
-					for (const builder_info& it : new_builders)
-					{
-						namestream << it.builder_name.to_string() << ",";
-					}
-					fc::mutable_variant_object capcture;
-					capcture.set("builders", namestream.str());
-
-					ilog("next round: ${builders}", (capcture));
-				}
 
 				// merkle
 				building_header.transaction_merkle_root = _context->calculate_merkle_root();
@@ -782,6 +763,19 @@ namespace Xmaxplatform { namespace Chain {
 				building_header.sign(sign_private_key);
 				_context->building_block->pack->block_id = building_header.id();
 			} FC_CAPTURE_AND_RETHROW((_context->building_block->pack->new_header.builder))
+		}
+
+		void chain_xmax::_validate_block_desc(signed_block_ptr block)
+		{
+			FC_ASSERT(_context->block_head->block_id == block->previous, "head block id != previous id of next mblock");
+
+			FC_ASSERT(_context->block_head->block_num + 1 == block->block_num(), "head block number + 1 != next block number");
+
+			FC_ASSERT(block->transaction_merkle_root == block->calculate_merkle_root(), "action merkle root does not match");
+
+			const builder_object* builder = find_builder_object(block->builder);
+
+			FC_ASSERT(block->is_signer_valid(builder->signing_key), "bad block.");
 		}
 
 		void chain_xmax::_validate_block(const signed_block_ptr next_block)

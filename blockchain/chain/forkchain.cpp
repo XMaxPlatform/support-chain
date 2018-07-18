@@ -59,7 +59,7 @@ namespace Chain {
 			>,
 			ordered_non_unique< tag<by_longest_num>,
 				composite_key<block_raw,
-					member<block_raw, uint32_t, &block_raw::last_confired_num>,
+					member<block_raw, uint32_t, &block_raw::last_confirmed_num>,
 					member<block_raw, uint32_t, &block_raw::dpos_irreversible_num>,
 					member<block_raw, uint32_t, &block_raw::block_num>
 				>,
@@ -97,7 +97,6 @@ namespace Chain {
 
 		void add_block(block_pack_ptr block_pack)
 		{
-
 			FC_ASSERT(block_pack->block_id == block_pack->new_header.id());
 
 			auto result = packs.insert(block_pack);
@@ -110,9 +109,9 @@ namespace Chain {
 
 			// check confirmed block data and update.
 
-			if (earliest->block_num < head->last_confired_num)
+			if (earliest->block_num < head->last_confirmed_num)
 			{
-				on_last_confirmed_grow(head->last_confired_id, head->last_confired_num);
+				on_last_confirmed_grow(head->last_confirmed_id, head->last_confirmed_num);
 			}
 			else if (earliest->block_num < head->dpos_irreversible_num)
 			{
@@ -159,19 +158,26 @@ namespace Chain {
 			std::vector<xmax_type_block_id> confiremdlist;
 			auto& idx = packs.get<by_number_less>();
 
+
+			//remove all bad blocks and confirmed blocks, except for last confirmed block.
 			auto it = idx.begin();
-			for (auto it = idx.begin(); (it != idx.end() && (*it)->block_num < last_confirmed_num); ++it)
+			for (auto it = idx.begin(); (it != idx.end() && (*it)->block_num <= last_confirmed_num); ++it)
 			{
-				remlist.push_back((*it)->block_id);
-				if ((*it)->last_confired_id == last_confirmed_id)
+				if ((*it)->last_confirmed_id == last_confirmed_id)
 				{
 					confiremdlist.push_back((*it)->block_id);
+					if ((*it)->block_id != last_confirmed_id)
+					{
+						remlist.push_back((*it)->block_id);
+					}
+				}
+				else
+				{
+					remlist.push_back((*it)->block_id);
 				}
 			}
 
-			confiremdlist.push_back(last_confirmed_id);
-			remlist.push_back(last_confirmed_id);
-
+			// irreversible event.
 			for (auto& it : confiremdlist)
 			{
 				auto ptr = get_block(it);
@@ -179,7 +185,7 @@ namespace Chain {
 				irreversible(ptr);
 			}
 
-			// remove all confirmed block and bad fork block.
+			// remove blocks no need.
 			for (auto& it : remlist)
 			{
 				auto itr = packs.find(it);
@@ -272,7 +278,7 @@ namespace Chain {
 			block_pack->add_confirmation(conf, skip);
 			if (block_pack->enough_confirmation())
 			{
-				if (block_pack->last_confired_num < block_pack->block_num)
+				if (block_pack->last_confirmed_num < block_pack->block_num)
 				{
 					_context->set_last_confirmed(block_pack->block_id);
 				}
