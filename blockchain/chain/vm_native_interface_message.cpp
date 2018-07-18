@@ -17,12 +17,12 @@ namespace Xmaxplatform {namespace Chain {
 
 	//--------------------------------message------------------------------------------//
 
-	int64 vm_xmax_current_code()
+	uint128 vm_xmax_current_code()
 	{
 		auto& wasm = vm_xmax::get();
 		return wasm.current_validate_context->code.code();
 	}
-	BIND_VM_NATIVE_FUCTION(vm_xmax_current_code, ds_i64, current_code)
+	BIND_VM_NATIVE_FUCTION(vm_xmax_current_code, ds_u128, current_code)
 
 	void vm_xmax_require_auth(const std::string& account)
 	{

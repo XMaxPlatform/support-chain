@@ -22,6 +22,8 @@ namespace IR
 		v128 = 5,
 	#endif
 
+		u128 = 6,		
+
 		num,
 		max = num-1
 	};
@@ -31,11 +33,13 @@ namespace IR
 	template<> struct ValueTypeInfo<ValueType::i64> { typedef I64 Value; };
 	template<> struct ValueTypeInfo<ValueType::f32> { typedef F32 Value; };
 	template<> struct ValueTypeInfo<ValueType::f64> { typedef F64 Value; };
+	template<> struct ValueTypeInfo<ValueType::u128> { typedef U128 Value; };
 
 	inline std::string asString(I32 value) { return std::to_string(value); }
 	inline std::string asString(I64 value) { return std::to_string(value); }
 	inline std::string asString(F32 value) { return std::to_string(value); }
 	inline std::string asString(F64 value) { return std::to_string(value); }
+	inline std::string asString(U128 value) { return boost::lexical_cast<std::string>(value); }
 
 	#if ENABLE_SIMD_PROTOTYPE
 	union V128
@@ -48,6 +52,7 @@ namespace IR
 		I32 i32[4];
 		U64 u64[2];
 		I64 i64[2];
+		U128 i128;
 	};
 	
 	inline std::string asString(const V128& v128)
@@ -91,6 +96,7 @@ namespace IR
 		case ValueType::i64: return 64;
 		case ValueType::f32: return 32;
 		case ValueType::f64: return 64;
+		case ValueType::u128: return 128;
 		#if ENABLE_SIMD_PROTOTYPE
 		case ValueType::v128: return 128;
 		#endif
@@ -107,6 +113,7 @@ namespace IR
 		case ValueType::i64: return "i64";
 		case ValueType::f32: return "f32";
 		case ValueType::f64: return "f64";
+		case ValueType::u128: return "u128";
 		#if ENABLE_SIMD_PROTOTYPE
 		case ValueType::v128: return "v128";
 		#endif
@@ -122,9 +129,10 @@ namespace IR
 		i64 = (U8)ValueType::i64,
 		f32 = (U8)ValueType::f32,
 		f64 = (U8)ValueType::f64,
+		u128 = (U8)ValueType::u128,
 		#if ENABLE_SIMD_PROTOTYPE
 		v128 = (U8)ValueType::v128,
-		#endif
+		#endif		
 		num,
 		max = num-1,
 	};
@@ -139,6 +147,7 @@ namespace IR
 		case ResultType::i64: return "i64";
 		case ResultType::f32: return "f32";
 		case ResultType::f64: return "f64";
+		case ResultType::u128: return "u128";
 		#if ENABLE_SIMD_PROTOTYPE
 		case ResultType::v128: return "v128";
 		#endif

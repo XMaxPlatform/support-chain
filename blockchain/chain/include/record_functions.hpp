@@ -11,7 +11,7 @@ template <typename T>
 struct find_tuple {};
 template <>
 struct find_tuple<key_value_object> {
-   inline static auto get(name scope, name code, name table, uint64_t* keys) {
+   inline static auto get(name scope, name code, name table, key_value_object::key_type* keys) {
       return boost::make_tuple( account_name(scope), account_name(code), account_name(table),
          *keys);
    }
@@ -25,10 +25,17 @@ struct find_tuple<keystr_value_object> {
 };
 template <>
 struct find_tuple<key128x128_value_object> {
-   inline static auto get(name scope, name code, name table, uint128_t* keys) {
+   inline static auto get(name scope, name code, name table, key128x128_value_object::key_type* keys) {
       return boost::make_tuple( account_name(scope), account_name(code), account_name(table),
          *keys, *(keys+1) );
    }
+};
+template <>
+struct find_tuple<key128x128x128_value_object> {
+	inline static auto get(name scope, name code, name table, key128x128x128_value_object::key_type* keys) {
+		return boost::make_tuple(account_name(scope), account_name(code), account_name(table),
+			*keys, *(keys + 1));
+	}
 };
 template <>
 struct find_tuple<key64x64x64_value_object> {
@@ -44,13 +51,13 @@ struct key_helper {};
 
 template <>
 struct key_helper<key_value_object> {
-   inline static void set(key_value_object& object, uint64_t* keys) {
+   inline static void set(key_value_object& object, key_value_object::key_type* keys) {
       object.primary_key = *keys;
    }
-   inline static void set(uint64_t* keys, const key_value_object& object) {
+   inline static void set(key_value_object::key_type* keys, const key_value_object& object) {
       *keys = object.primary_key;
    }
-   inline static bool compare(const key_value_object& object, uint64_t* keys) {
+   inline static bool compare(const key_value_object& object, key_value_object::key_type* keys) {
       return object.primary_key == *keys;
    }
 };
@@ -68,18 +75,36 @@ struct key_helper<keystr_value_object> {
 };
 template <>
 struct key_helper<key128x128_value_object> {
-   inline static auto set(key128x128_value_object& object, uint128_t* keys) {
+   inline static auto set(key128x128_value_object& object, key128x128_value_object::key_type* keys) {
       object.primary_key   = *keys;
       object.secondary_key = *(keys+1);
    }
-   inline static auto set(uint128_t* keys, const key128x128_value_object& object) {
+   inline static auto set(key128x128_value_object::key_type* keys, const key128x128_value_object& object) {
       *keys     = object.primary_key;
       *(keys+1) = object.secondary_key;
    }
-   inline static bool compare(const key128x128_value_object& object, uint128_t* keys) {
+   inline static bool compare(const key128x128_value_object& object, key128x128_value_object::key_type* keys) {
       return object.primary_key == *keys && 
              object.secondary_key == *(keys+1);
    }
+};
+template <>
+struct key_helper<key128x128x128_value_object> {
+	inline static auto set(key128x128x128_value_object& object, key128x128x128_value_object::key_type* keys) {
+		object.primary_key = *keys;
+		object.secondary_key = *(keys + 1);
+		object.tertiary_key = *(keys + 2);
+	}
+	inline static auto set(key128x128x128_value_object::key_type* keys, const key128x128x128_value_object& object) {
+		*keys = object.primary_key;
+		*(keys + 1) = object.secondary_key;
+		*(keys + 2) = object.tertiary_key;
+	}
+	inline static bool compare(const key128x128x128_value_object& object, key128x128x128_value_object::key_type* keys) {
+		return object.primary_key == *keys &&
+			object.secondary_key == *(keys + 1) &&
+			object.tertiary_key == *(keys + 2);
+	}
 };
 template <>
 struct key_helper<key64x64x64_value_object> {
@@ -106,7 +131,7 @@ struct load_record_tuple {};
 
 template <>
 struct load_record_tuple<key_value_object, by_scope_primary> {
-   inline static auto get(name scope, name code, name table, uint64_t* keys) {
+   inline static auto get(name scope, name code, name table, key_value_object::key_type* keys) {
       return boost::make_tuple( account_name(scope), account_name(code), account_name(table), *keys);
    }
 };
@@ -118,16 +143,38 @@ struct load_record_tuple<keystr_value_object, by_scope_primary> {
 };
 template <>
 struct load_record_tuple<key128x128_value_object, by_scope_primary> {
-   inline static auto get(name scope, name code, name table, uint128_t* keys) {
-      return boost::make_tuple( account_name(scope), account_name(code), account_name(table), *keys, uint128_t(0));
+   inline static auto get(name scope, name code, name table, key128x128_value_object::key_type* keys) {
+      return boost::make_tuple( account_name(scope), account_name(code), account_name(table), *keys, key128x128_value_object::key_type(0));
    }
 };
 template <>
 struct load_record_tuple<key128x128_value_object, by_scope_secondary> {
-   inline static auto get(name scope, name code, name table, uint128_t* keys) {
-      return boost::make_tuple( account_name(scope), account_name(code), account_name(table), *(keys+1), uint128_t(0));
+   inline static auto get(name scope, name code, name table, key128x128_value_object::key_type* keys) {
+      return boost::make_tuple( account_name(scope), account_name(code), account_name(table), *(keys+1), key128x128_value_object::key_type(0));
    }
 };
+
+
+template <>
+struct load_record_tuple<key128x128x128_value_object, by_scope_primary> {
+	inline static auto get(name scope, name code, name table, key128x128x128_value_object::key_type* keys) {
+		return boost::make_tuple(account_name(scope), account_name(code), account_name(table), *keys, key128x128x128_value_object::key_type(0), key128x128x128_value_object::key_type(0));
+	}
+};
+template <>
+struct load_record_tuple<key128x128x128_value_object, by_scope_secondary> {
+	inline static auto get(name scope, name code, name table, key128x128x128_value_object::key_type* keys) {
+		return boost::make_tuple(account_name(scope), account_name(code), account_name(table), *(keys + 1), key128x128x128_value_object::key_type(0));
+	}
+};
+template <>
+struct load_record_tuple<key128x128x128_value_object, by_scope_tertiary> {
+	inline static auto get(name scope, name code, name table, key128x128x128_value_object::key_type* keys) {
+		return boost::make_tuple(account_name(scope), account_name(code), account_name(table), *(keys + 2));
+	}
+};
+
+
 template <>
 struct load_record_tuple<key64x64x64_value_object, by_scope_primary> {
    inline static auto get(name scope, name code, name table, uint64_t* keys) {
@@ -165,10 +212,31 @@ struct load_record_compare<keystr_value_object, by_scope_primary> {
 };
 template <>
 struct load_record_compare<key128x128_value_object, by_scope_secondary> {
-   inline static auto compare(const key128x128_value_object& object, uint128_t* keys) {
+   inline static auto compare(const key128x128_value_object& object, key128x128_value_object::key_type* keys) {
       return object.secondary_key == *(keys+1);
    }
 };
+
+template <>
+struct load_record_compare<key128x128x128_value_object, by_scope_primary> {
+	inline static auto compare(const key128x128x128_value_object& object, key128x128x128_value_object::key_type* keys) {
+		return object.primary_key == *keys;
+	}
+};
+template <>
+struct load_record_compare<key128x128x128_value_object, by_scope_secondary> {
+	inline static auto compare(const key128x128x128_value_object& object, key128x128x128_value_object::key_type* keys) {
+		return object.secondary_key == *(keys + 1);
+	}
+};
+template <>
+struct load_record_compare<key128x128x128_value_object, by_scope_tertiary> {
+	inline static auto compare(const key128x128x128_value_object& object, key128x128x128_value_object::key_type* keys) {
+		return object.tertiary_key == *(keys + 2);
+	}
+};
+
+
 template <>
 struct load_record_compare<key64x64x64_value_object, by_scope_primary> {
    inline static auto compare(const key64x64x64_value_object& object, uint64_t* keys) {
@@ -200,7 +268,7 @@ struct front_record_tuple {
 template <>
 struct front_record_tuple<key_value_object> {
    inline static auto get(name scope, name code, name table) {
-      return boost::make_tuple( account_name(scope), account_name(code), account_name(table), uint64_t(0));
+      return boost::make_tuple( account_name(scope), account_name(code), account_name(table), key_value_object::key_type(0));
    }
 };
 template <>
@@ -225,7 +293,7 @@ struct next_record_tuple {};
 
 template <>
 struct next_record_tuple<key_value_object> {
-   inline static auto get(name scope, name code, name table, uint64_t* keys) {
+   inline static auto get(name scope, name code, name table, key_value_object::key_type* keys) {
       return boost::make_tuple( account_name(scope), account_name(code), account_name(table),
          *keys);
    }
@@ -239,10 +307,17 @@ struct next_record_tuple<keystr_value_object> {
 };
 template <>
 struct next_record_tuple<key128x128_value_object> {
-   inline static auto get(name scope, name code, name table, uint128_t* keys) {
-      return boost::make_tuple( uint64_t(scope), uint64_t(code), uint64_t(table),
+   inline static auto get(name scope, name code, name table, key128x128_value_object::key_type* keys) {
+      return boost::make_tuple(key128x128_value_object::key_type(scope), key128x128_value_object::key_type(code), key128x128_value_object::key_type(table),
           *keys, *(keys+1));
    }
+};
+template <>
+struct next_record_tuple<key128x128x128_value_object> {
+	inline static auto get(name scope, name code, name table, key128x128x128_value_object::key_type* keys) {
+		return boost::make_tuple(key128x128x128_value_object::key_type(scope), key128x128x128_value_object::key_type(code), key128x128x128_value_object::key_type(table),
+			*keys, *(keys + 1), *(keys + 2));
+	}
 };
 template <>
 struct next_record_tuple<key64x64x64_value_object> {
@@ -266,7 +341,7 @@ struct lower_bound_tuple<ObjectType, by_scope_primary> {
 };
 template <>
 struct lower_bound_tuple<key_value_object, by_scope_primary> {
-   inline static auto get(name scope, name code, name table, uint64_t* keys) {
+   inline static auto get(name scope, name code, name table, key_value_object::key_type* keys) {
       return boost::make_tuple( account_name(scope), account_name(code), account_name(table), *keys);
    }
 };
@@ -278,10 +353,24 @@ struct lower_bound_tuple<keystr_value_object, by_scope_primary> {
 };
 template <>
 struct lower_bound_tuple<key128x128_value_object, by_scope_secondary> {
-   inline static auto get(name scope, name code, name table, uint128_t* keys) {
+   inline static auto get(name scope, name code, name table, key128x128_value_object::key_type* keys) {
       return boost::make_tuple( account_name(scope), account_name(code), account_name(table),
-         *(keys+1), uint128_t(0));
+         *(keys+1), key128x128_value_object::key_type(0));
    }
+};
+template <>
+struct lower_bound_tuple<key128x128x128_value_object, by_scope_secondary> {
+	inline static auto get(name scope, name code, name table, key128x128x128_value_object::key_type* keys) {
+		return boost::make_tuple(account_name(scope), account_name(code), account_name(table),
+			*(keys + 1), key128x128x128_value_object::key_type(0));
+	}
+};
+template <>
+struct lower_bound_tuple<key128x128x128_value_object, by_scope_tertiary> {
+	inline static auto get(name scope, name code, name table, key128x128x128_value_object::key_type* keys) {
+		return boost::make_tuple(account_name(scope), account_name(code), account_name(table),
+			*(keys + 2));
+	}
 };
 template <>
 struct lower_bound_tuple<key64x64x64_value_object, by_scope_secondary> {
@@ -318,11 +407,28 @@ struct upper_bound_tuple<keystr_value_object, by_scope_primary> {
 };
 template <>
 struct upper_bound_tuple<key128x128_value_object, by_scope_secondary> {
-   inline static auto get(name scope, name code, name table, uint128_t* keys) {
+   inline static auto get(name scope, name code, name table, key128x128_value_object::key_type* keys) {
       return boost::make_tuple( account_name(scope), account_name(code), account_name(table),
-         *(keys+1), uint128_t(-1) );
+         *(keys+1), key128x128_value_object::key_type(-1) );
    }
 };
+
+template <>
+struct upper_bound_tuple<key128x128x128_value_object, by_scope_secondary> {
+	inline static auto get(name scope, name code, name table, key128x128x128_value_object::key_type* keys) {
+		return boost::make_tuple(account_name(scope), account_name(code), account_name(table),
+			*(keys + 1), key128x128x128_value_object::key_type(-1));
+	}
+};
+template <>
+struct upper_bound_tuple<key128x128x128_value_object, by_scope_tertiary> {
+	inline static auto get(name scope, name code, name table, key128x128x128_value_object::key_type* keys) {
+		return boost::make_tuple(account_name(scope), account_name(code), account_name(table),
+			*(keys + 2));
+	}
+};
+
+
 template <>
 struct upper_bound_tuple<key64x64x64_value_object, by_scope_secondary> {
    inline static auto get(name scope, name code, name table, uint64_t* keys) {

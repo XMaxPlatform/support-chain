@@ -103,6 +103,7 @@ namespace NativeTypes
 	typedef I64 i64;
 	typedef F32 f32;
 	typedef F64 f64;
+	typedef U128 u128;
 	typedef void none;
 	#if ENABLE_SIMD_PROTOTYPE
 	typedef IR::V128 v128;

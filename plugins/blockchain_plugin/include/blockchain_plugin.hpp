@@ -27,6 +27,7 @@ namespace Xmaxplatform {
             static const string KEYi64;
             static const string KEYstr;
             static const string KEYi128i128;
+			static const string KEYi128i128i128;
             static const string KEYi64i64i64;
             static const string PRIMARY;
             static const string SECONDARY;
@@ -148,10 +149,18 @@ namespace Xmaxplatform {
 			}
 
 			void copy_row(const Chain::key128x128_value_object& obj, vector<char>& data)const {
-				data.resize(2 * sizeof(uint128_t) + obj.value.size());
-				memcpy(data.data(), &obj.primary_key, sizeof(uint128_t));
-				memcpy(data.data() + sizeof(uint128_t), &obj.secondary_key, sizeof(uint128_t));
-				memcpy(data.data() + 2 * sizeof(uint128_t), obj.value.data(), obj.value.size());
+				data.resize(2 * sizeof(Chain::key128x128_value_object::key_type) + obj.value.size());
+				memcpy(data.data(), &obj.primary_key, sizeof(Chain::key128x128_value_object::key_type));
+				memcpy(data.data() + sizeof(Chain::key128x128_value_object::key_type), &obj.secondary_key, sizeof(Chain::key128x128_value_object::key_type));
+				memcpy(data.data() + 2 * sizeof(Chain::key128x128_value_object::key_type), obj.value.data(), obj.value.size());
+			}
+
+			void copy_row(const Chain::key128x128x128_value_object& obj, vector<char>& data)const {
+				data.resize(3 * sizeof(Chain::key128x128x128_value_object::key_type) + obj.value.size());
+				memcpy(data.data(), &obj.primary_key, sizeof(Chain::key128x128x128_value_object::key_type));
+				memcpy(data.data() + sizeof(Chain::key128x128x128_value_object::key_type), &obj.secondary_key, sizeof(Chain::key128x128x128_value_object::key_type));				
+				memcpy(data.data() + 2 * sizeof(Chain::key128x128x128_value_object::key_type), &obj.tertiary_key, sizeof(Chain::key128x128x128_value_object::key_type));
+				memcpy(data.data() + 3 * sizeof(Chain::key128x128x128_value_object::key_type), obj.value.data(), obj.value.size());
 			}
 
 			void copy_row(const Chain::key64x64x64_value_object& obj, vector<char>& data)const {

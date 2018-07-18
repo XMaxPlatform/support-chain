@@ -16,6 +16,7 @@ namespace Xmaxplatform {
 				i64,
 				i128i128,
 				i64i64i64,
+				i128i128i128,
 				invalid_key_type
 			};
 			typedef map<name, key_type> TableMap;

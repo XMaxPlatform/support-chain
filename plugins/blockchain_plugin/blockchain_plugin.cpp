@@ -186,6 +186,7 @@ namespace Chain_APIs{
 	const string read_only::KEYi64 = "i64";
 	const string read_only::KEYstr = "str";
 	const string read_only::KEYi128i128 = "i128i128";
+	const string read_only::KEYi128i128i128 = "i128i128i128";
 	const string read_only::KEYi64i64i64 = "i64i64i64";
 	const string read_only::PRIMARY = "primary";
 	const string read_only::SECONDARY = "secondary";
@@ -307,6 +308,14 @@ namespace Chain_APIs{
 				return get_table_rows_ex<Chain::key128x128_value_index, Chain::by_scope_primary>(p, abi);
 			if (table_key == SECONDARY)
 				return get_table_rows_ex<Chain::key128x128_value_index, Chain::by_scope_secondary>(p, abi);
+		}
+		else if (table_type == KEYi128i128i128) {
+			if (table_key == PRIMARY)
+				return get_table_rows_ex<Chain::key128x128x128_value_index, Chain::by_scope_primary>(p, abi);
+			if (table_key == SECONDARY)
+				return get_table_rows_ex<Chain::key128x128x128_value_index, Chain::by_scope_secondary>(p, abi);
+			if (table_key == TERTIARY)
+				return get_table_rows_ex<Chain::key128x128x128_value_index, Chain::by_scope_tertiary>(p, abi);
 		}
 		else if (table_type == KEYi64i64i64) {
 			if (table_key == PRIMARY)

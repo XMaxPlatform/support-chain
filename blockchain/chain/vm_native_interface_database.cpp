@@ -93,7 +93,7 @@ namespace Xmaxplatform {namespace Chain {
    const int32_t ret = validate<decltype(lambda), INDEX::value_type::key_type, INDEX::value_type::number_of_keys>(valueptr, DATASIZE, lambda);
 
 #define DEFINE_RECORD_UPDATE_FUNCTIONS(OBJTYPE, INDEX, KEY_SIZE) \
-   DEFINE_INTRINSIC_FUNCTION4(env,store_##OBJTYPE,store_##OBJTYPE,i32,i64,scope,i64,table,i32,valueptr,i32,valuelen) { \
+   DEFINE_INTRINSIC_FUNCTION4(env,store_##OBJTYPE,store_##OBJTYPE,i32,u128,scope,u128,table,i32,valueptr,i32,valuelen) { \
       VERIFY_TABLE(OBJTYPE) \
       UPDATE_RECORD(store_record, INDEX, valuelen); \
       /* ret is -1 if record created, or else it is the length of the data portion of the originally stored */ \
@@ -111,7 +111,7 @@ namespace Xmaxplatform {namespace Chain {
                  "Database limit exceeded for account=${name}",("name", name(vm_xmax::get().current_message_context->code.code()))); \
       return created ? 1 : 0; \
    } \
-   DEFINE_INTRINSIC_FUNCTION4(env,update_##OBJTYPE,update_##OBJTYPE,i32,i64,scope,i64,table,i32,valueptr,i32,valuelen) { \
+   DEFINE_INTRINSIC_FUNCTION4(env,update_##OBJTYPE,update_##OBJTYPE,i32,u128,scope,u128,table,i32,valueptr,i32,valuelen) { \
       VERIFY_TABLE(OBJTYPE) \
       UPDATE_RECORD(update_record, INDEX, valuelen); \
       /* ret is -1 if record created, or else it is the length of the data portion of the originally stored */ \
@@ -126,7 +126,7 @@ namespace Xmaxplatform {namespace Chain {
                  "Database limit exceeded for account=${name}",("name", name(vm_xmax::get().current_message_context->code.code()))); \
       return 1; \
    } \
-   DEFINE_INTRINSIC_FUNCTION3(env,remove_##OBJTYPE,remove_##OBJTYPE,i32,i64,scope,i64,table,i32,valueptr) { \
+   DEFINE_INTRINSIC_FUNCTION3(env,remove_##OBJTYPE,remove_##OBJTYPE,i32,u128,scope,u128,table,i32,valueptr) { \
       VERIFY_TABLE(OBJTYPE) \
       UPDATE_RECORD(remove_record, INDEX, sizeof(typename INDEX::value_type::key_type)*INDEX::value_type::number_of_keys); \
       /* ret is -1 if record created, or else it is the length of the data portion of the originally stored */ \
@@ -142,7 +142,7 @@ namespace Xmaxplatform {namespace Chain {
    }
 
 #define DEFINE_RECORD_READ_FUNCTION(OBJTYPE, ACTION, FUNCPREFIX, INDEX, SCOPE) \
-   DEFINE_INTRINSIC_FUNCTION5(env,ACTION##_##FUNCPREFIX##OBJTYPE,ACTION##_##FUNCPREFIX##OBJTYPE,i32,i64,scope,i64,code,i64,table,i32,valueptr,i32,valuelen) { \
+   DEFINE_INTRINSIC_FUNCTION5(env,ACTION##_##FUNCPREFIX##OBJTYPE,ACTION##_##FUNCPREFIX##OBJTYPE,i32,u128,scope,u128,code,u128,table,i32,valueptr,i32,valuelen) { \
       VERIFY_TABLE(OBJTYPE) \
       READ_RECORD(ACTION##_record, INDEX, SCOPE); \
    }
@@ -163,10 +163,10 @@ namespace Xmaxplatform {namespace Chain {
 	DEFINE_RECORD_READ_FUNCTIONS(i128i128, primary_, key128x128_value_index, by_scope_primary);
 	DEFINE_RECORD_READ_FUNCTIONS(i128i128, secondary_, key128x128_value_index, by_scope_secondary);
 
-	DEFINE_RECORD_UPDATE_FUNCTIONS(i64i64i64, key64x64x64_value_index, 24);
-	DEFINE_RECORD_READ_FUNCTIONS(i64i64i64, primary_, key64x64x64_value_index, by_scope_primary);
-	DEFINE_RECORD_READ_FUNCTIONS(i64i64i64, secondary_, key64x64x64_value_index, by_scope_secondary);
-	DEFINE_RECORD_READ_FUNCTIONS(i64i64i64, tertiary_, key64x64x64_value_index, by_scope_tertiary);
+	DEFINE_RECORD_UPDATE_FUNCTIONS(i128i128i128, key128x128x128_value_index, 48);
+	DEFINE_RECORD_READ_FUNCTIONS(i128i128i128, primary_, key128x128x128_value_index, by_scope_primary);
+	DEFINE_RECORD_READ_FUNCTIONS(i128i128i128, secondary_, key128x128x128_value_index, by_scope_secondary);
+	DEFINE_RECORD_READ_FUNCTIONS(i128i128i128, tertiary_, key128x128x128_value_index, by_scope_tertiary);
 
 
 #define UPDATE_RECORD_STR(FUNCTION) \
@@ -184,7 +184,7 @@ namespace Xmaxplatform {namespace Chain {
   }; \
   return validate_str<decltype(lambda)>(keyptr, keylen, valueptr, valuelen, lambda);
 
-	DEFINE_INTRINSIC_FUNCTION6(env, store_str, store_str, i32, i64, scope, i64, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
+	DEFINE_INTRINSIC_FUNCTION6(env, store_str, store_str, i32, u128, scope, u128, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
 		UPDATE_RECORD_STR(store_record)
 			const bool created = (ret == -1);
 		auto& storage = vm_xmax::get().table_storage;
@@ -202,7 +202,7 @@ namespace Xmaxplatform {namespace Chain {
 
 		return created ? 1 : 0;
 	}
-	DEFINE_INTRINSIC_FUNCTION6(env, update_str, update_str, i32, i64, scope, i64, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
+	DEFINE_INTRINSIC_FUNCTION6(env, update_str, update_str, i32, u128, scope, u128, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
 		UPDATE_RECORD_STR(update_record)
 			if (ret == -1) return 0;
 		auto& storage = vm_xmax::get().table_storage;
@@ -214,7 +214,7 @@ namespace Xmaxplatform {namespace Chain {
 			"Database limit exceeded for account=${name}", ("name", name(vm_xmax::get().current_message_context->code.code())));
 		return 1;
 	}
-	DEFINE_INTRINSIC_FUNCTION4(env, remove_str, remove_str, i32, i64, scope, i64, table, i32, keyptr, i32, keylen) {
+	DEFINE_INTRINSIC_FUNCTION4(env, remove_str, remove_str, i32, u128, scope, u128, table, i32, keyptr, i32, keylen) {
 		int32_t valueptr = 0, valuelen = 0;
 		UPDATE_RECORD_STR(remove_record)
 			if (ret == -1) return 0;
@@ -227,27 +227,28 @@ namespace Xmaxplatform {namespace Chain {
 		return 1;
 	}
 
-	DEFINE_INTRINSIC_FUNCTION7(env, load_str, load_str, i32, i64, scope, i64, code, i64, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
+	DEFINE_INTRINSIC_FUNCTION7(env, load_str, load_str, i32, u128, scope, u128, code, u128, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
 		READ_RECORD_STR(load_record)
 	}
-	DEFINE_INTRINSIC_FUNCTION5(env, front_str, front_str, i32, i64, scope, i64, code, i64, table, i32, valueptr, i32, valuelen) {
+	DEFINE_INTRINSIC_FUNCTION5(env, front_str, front_str, i32, u128, scope, u128, code, u128, table, i32, valueptr, i32, valuelen) {
 		int32_t keyptr = 0, keylen = 0;
 		READ_RECORD_STR(front_record)
 	}
-	DEFINE_INTRINSIC_FUNCTION5(env, back_str, back_str, i32, i64, scope, i64, code, i64, table, i32, valueptr, i32, valuelen) {
+	DEFINE_INTRINSIC_FUNCTION5(env, back_str, back_str, i32, u128, scope, u128, code, u128, table, i32, valueptr, i32, valuelen) {
 		int32_t keyptr = 0, keylen = 0;
 		READ_RECORD_STR(back_record)
 	}
-	DEFINE_INTRINSIC_FUNCTION7(env, next_str, next_str, i32, i64, scope, i64, code, i64, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
+	DEFINE_INTRINSIC_FUNCTION7(env, next_str, next_str, i32, u128, scope, u128, code, u128, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
 		READ_RECORD_STR(next_record)
 	}
-	DEFINE_INTRINSIC_FUNCTION7(env, previous_str, previous_str, i32, i64, scope, i64, code, i64, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
+	DEFINE_INTRINSIC_FUNCTION7(env, previous_str, previous_str, i32, u128, scope, u128, code, u128, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
 		READ_RECORD_STR(previous_record)
 	}
-	DEFINE_INTRINSIC_FUNCTION7(env, lower_bound_str, lower_bound_str, i32, i64, scope, i64, code, i64, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
+	DEFINE_INTRINSIC_FUNCTION7(env, lower_bound_str, lower_bound_str, i32, u128, scope, u128, code, u128, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
 		READ_RECORD_STR(lower_bound_record)
 	}
-	DEFINE_INTRINSIC_FUNCTION7(env, upper_bound_str, upper_bound_str, i32, i64, scope, i64, code, i64, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
+	DEFINE_INTRINSIC_FUNCTION7(env, upper_bound_str, upper_bound_str, i32, u128, scope, u128, code, u128, table, i32, keyptr, i32, keylen, i32, valueptr, i32, valuelen) {
+	
 		READ_RECORD_STR(upper_bound_record)
 	}
 

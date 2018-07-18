@@ -2,16 +2,15 @@
 #include <shortcode.hpp>
 
 namespace xmax {
-
-
-	static _CONST_EXPR_ std::string&& name_to_string(ShortCode::name_code name)
+		
+	static _CONST_EXPR_ std::string&& name_to_string(Xmaxplatform::Basetypes::name::name_code_type name)
 	{
-		return ShortCode::short_name::to_string(name);
+		return Xmaxplatform::Basetypes::name::to_string(name);
 	}
 
-	static _CONST_EXPR_ ShortCode::name_code string_to_name(const char* str)
+	static _CONST_EXPR_ Xmaxplatform::Basetypes::name::name_code_type string_to_name(const char* str)
 	{
-		return ShortCode::short_name::to_name_code(str);
+		return Xmaxplatform::Basetypes::name::to_name_code(str);
 	}
 }
 

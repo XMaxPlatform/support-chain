@@ -11,7 +11,7 @@
 #
 ## Allow includes relative to the source path.
 set(WAVM_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/Include)
-include_directories(${WAVM_INCLUDE_DIR})
+include_directories(${WAVM_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 #
 	# Use C++11
 #	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")

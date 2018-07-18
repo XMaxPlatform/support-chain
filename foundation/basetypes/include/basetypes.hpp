@@ -6,13 +6,14 @@
 #include <basedef.hpp>
 
 #include <shortname.hpp>
+#include <longname.hpp>
 
 #define STN(X) Xmaxplatform::Basetypes::name::to_name_code(#X)
 
 
 namespace Xmaxplatform { namespace Basetypes {       
 
-		using name = ShortCode::short_name;
+		using name = LongCode::long_name<uint128>;
         struct field {
             field_name name;
             type_name  type;

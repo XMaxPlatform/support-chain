@@ -20,6 +20,8 @@ namespace ShortCode{
 	struct short_name
 	{
 	public:
+		typedef name_code name_code_type;
+
 		bool valid()const { return true; }
 		bool empty()const { return 0 == namecode_; }
 		bool good()const { return !empty() && valid(); }

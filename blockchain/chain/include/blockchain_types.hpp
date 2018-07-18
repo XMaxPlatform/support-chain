@@ -154,7 +154,7 @@ namespace Xmaxplatform { namespace Chain {
             keystr_value_object_type,
             key64x64x64_value_object_type,
             key128x128_value_object_type,
-
+			key128x128x128_value_object_type,
             account_object_type,
 			account_status_object_type,
 			authority_object_type,

@@ -16,14 +16,14 @@ namespace Xmaxplatform { namespace Chain {
    struct key_value_object : public Basechain::object<key_value_object_type, key_value_object> {
 	   OBJECT_CCTOR(key_value_object, (value))
       
-      typedef uint64_t key_type;
+      typedef uint128 key_type;
       static const int number_of_keys = 1;
 
       id_type               id;
       account_name          scope;
       account_name          code;
       account_name          table;
-      uint64_t              primary_key;
+      uint128              primary_key;
       mapped_string         value;
    };
 
@@ -36,9 +36,9 @@ namespace Xmaxplatform { namespace Chain {
                member<key_value_object, account_name, &key_value_object::scope>,
                member<key_value_object, account_name, &key_value_object::code>,
                member<key_value_object, account_name, &key_value_object::table>,
-               member<key_value_object, uint64_t, &key_value_object::primary_key>
+               member<key_value_object, uint128, &key_value_object::primary_key>
             >,
-            composite_key_compare< std::less<account_name>,std::less<account_name>,std::less<account_name>,std::less<uint64_t> >
+            composite_key_compare< std::less<account_name>,std::less<account_name>,std::less<account_name>,std::less<uint128> >
          >
       >
    >;
@@ -96,15 +96,15 @@ namespace Xmaxplatform { namespace Chain {
    struct key128x128_value_object : public Basechain::object<key128x128_value_object_type, key128x128_value_object> {
       OBJECT_CCTOR(key128x128_value_object, (value))
 
-      typedef uint128_t key_type;
+      typedef uint128 key_type;
       static const int number_of_keys = 2;
 
       id_type               id;
       account_name          scope;
       account_name          code;
       account_name          table;
-      uint128_t             primary_key;
-      uint128_t             secondary_key;
+	  key_type             primary_key;
+	  key_type             secondary_key;
       mapped_string         value;
    };
 
@@ -117,23 +117,77 @@ namespace Xmaxplatform { namespace Chain {
                member<key128x128_value_object, account_name, &key128x128_value_object::scope>,
                member<key128x128_value_object, account_name, &key128x128_value_object::code>,
                member<key128x128_value_object, account_name, &key128x128_value_object::table>,
-               member<key128x128_value_object, uint128_t, &key128x128_value_object::primary_key>,
-               member<key128x128_value_object, uint128_t, &key128x128_value_object::secondary_key>
+               member<key128x128_value_object, key128x128_value_object::key_type, &key128x128_value_object::primary_key>,
+               member<key128x128_value_object, key128x128_value_object::key_type, &key128x128_value_object::secondary_key>
             >,
-            composite_key_compare< std::less<account_name>,std::less<account_name>,std::less<account_name>,std::less<uint128_t>,std::less<uint128_t> >
+            composite_key_compare< std::less<account_name>,std::less<account_name>,std::less<account_name>,std::less<key128x128_value_object::key_type>,std::less<key128x128_value_object::key_type> >
          >,
          ordered_unique<tag<by_scope_secondary>, 
             composite_key< key128x128_value_object,
                member<key128x128_value_object, account_name, &key128x128_value_object::scope>,
                member<key128x128_value_object, account_name, &key128x128_value_object::code>,
                member<key128x128_value_object, account_name, &key128x128_value_object::table>,
-               member<key128x128_value_object, uint128_t, &key128x128_value_object::secondary_key>,
-               member<key128x128_value_object, uint128_t, &key128x128_value_object::primary_key>
+               member<key128x128_value_object, key128x128_value_object::key_type, &key128x128_value_object::secondary_key>,
+               member<key128x128_value_object, key128x128_value_object::key_type, &key128x128_value_object::primary_key>
             >,
-            composite_key_compare< std::less<account_name>,std::less<account_name>,std::less<account_name>,std::less<uint128_t>,std::less<uint128_t> >
+            composite_key_compare< std::less<account_name>,std::less<account_name>,std::less<account_name>,std::less<key128x128_value_object::key_type>,std::less<key128x128_value_object::key_type> >
          >
       >
    >;
+
+   struct key128x128x128_value_object : public Basechain::object<key128x128x128_value_object_type, key128x128x128_value_object> {
+	   OBJECT_CCTOR(key128x128x128_value_object, (value))
+
+		   typedef uint128 key_type;
+	   static const int number_of_keys = 3;
+
+	   id_type               id;
+	   account_name          scope;
+	   account_name          code;
+	   account_name          table;
+	   uint128              primary_key;
+	   uint128              secondary_key;
+	   uint128              tertiary_key;
+	   mapped_string         value;
+   };
+
+   using key128x128x128_value_index = Basechain::shared_multi_index_container <
+	   key128x128x128_value_object,
+	   indexed_by <
+	   ordered_unique<tag<by_id>, member<key128x128x128_value_object, key128x128x128_value_object::id_type, &key128x128x128_value_object::id>>,
+	   ordered_unique<tag<by_scope_primary>,
+	   composite_key< key128x128x128_value_object,
+	   member<key128x128x128_value_object, account_name, &key128x128x128_value_object::scope>,
+	   member<key128x128x128_value_object, account_name, &key128x128x128_value_object::code>,
+	   member<key128x128x128_value_object, account_name, &key128x128x128_value_object::table>,
+	   member<key128x128x128_value_object, uint128, &key128x128x128_value_object::primary_key>,
+	   member<key128x128x128_value_object, uint128, &key128x128x128_value_object::secondary_key>,
+	   member<key128x128x128_value_object, uint128, &key128x128x128_value_object::tertiary_key>
+	   >,
+	   composite_key_compare< std::less<account_name>, std::less<account_name>, std::less<account_name>, std::less<uint128>, std::less<uint128>, std::less<uint128> >
+	   >,
+	   ordered_unique<tag<by_scope_secondary>,
+	   composite_key< key128x128x128_value_object,
+	   member<key128x128x128_value_object, account_name, &key128x128x128_value_object::scope>,
+	   member<key128x128x128_value_object, account_name, &key128x128x128_value_object::code>,
+	   member<key128x128x128_value_object, account_name, &key128x128x128_value_object::table>,
+	   member<key128x128x128_value_object, uint128, &key128x128x128_value_object::secondary_key>,
+	   member<key128x128x128_value_object, uint128, &key128x128x128_value_object::tertiary_key>/*,
+	   member<key128x128x128_value_object, typename key128x128x128_value_object::id_type, &key128x128x128_value_object::id>*/
+	   >
+	   >,
+	   ordered_unique<tag<by_scope_tertiary>,
+	   composite_key< key128x128x128_value_object,
+	   member<key128x128x128_value_object, account_name, &key128x128x128_value_object::scope>,
+	   member<key128x128x128_value_object, account_name, &key128x128x128_value_object::code>,
+	   member<key128x128x128_value_object, account_name, &key128x128x128_value_object::table>,
+	   member<key128x128x128_value_object, uint128, &key128x128x128_value_object::tertiary_key>/*,
+	   member<key128x128x128_value_object, typename key128x128x128_value_object::id_type, &key128x128x128_value_object::id>*/
+	   >,
+	   composite_key_compare< std::less<account_name>, std::less<account_name>, std::less<account_name>, std::less<uint128>/*, std::less<typename key128x128x128_value_object::id_type>*/ >
+	   >
+	   >
+   > ;
 
    struct key64x64x64_value_object : public Basechain::object<key64x64x64_value_object_type, key64x64x64_value_object> {
       OBJECT_CCTOR(key64x64x64_value_object, (value))
@@ -198,5 +252,6 @@ BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::key_value_object, Xmaxplatform::Ch
 BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::keystr_value_object, Xmaxplatform::Chain::keystr_value_index)
 BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::key128x128_value_object, Xmaxplatform::Chain::key128x128_value_index)
 BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::key64x64x64_value_object, Xmaxplatform::Chain::key64x64x64_value_index)
+BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::key128x128x128_value_object, Xmaxplatform::Chain::key128x128x128_value_index)
 
 FC_REFLECT(Xmaxplatform::Chain::key_value_object, (id)(scope)(code)(table)(primary_key)(value) )

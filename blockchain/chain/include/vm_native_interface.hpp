@@ -185,6 +185,8 @@ namespace Xmaxplatform {namespace Chain {
 		typedef vm_arg::ds_val<int32, vm_arg::vm_int_t, vm_arg::vm_value_t, vm_arg::vm_result_t> ds_int; // ds for size_t
 		typedef vm_arg::ds_val<int32, NativeTypes::i32, ValueType::i32, ResultType::i32> ds_i32; // ds for int32
 		typedef vm_arg::ds_val<int64, NativeTypes::i64, ValueType::i64, ResultType::i64> ds_i64; // ds for int64
+		typedef vm_arg::ds_val<int64, NativeTypes::i64, ValueType::i64, ResultType::i64> ds_i64; // ds for int64
+		typedef vm_arg::ds_val<uint128, NativeTypes::u128, ValueType::u128, ResultType::u128> ds_u128; // ds for int64
 
 		typedef vm_arg::ds_val<float, NativeTypes::f32, ValueType::f32, ResultType::f32> ds_f32; // ds for float
 		typedef vm_arg::ds_val<double, NativeTypes::f64, ValueType::f64, ResultType::f64> ds_f64; // ds for double
