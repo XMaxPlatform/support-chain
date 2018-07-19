@@ -62,9 +62,10 @@ namespace Chain {
 				composite_key<block_raw,
 					member<block_raw, uint32_t, &block_raw::last_confirmed_num>,
 					member<block_raw, uint32_t, &block_raw::dpos_irreversible_num>,
-					member<block_raw, uint32_t, &block_raw::block_num>
+					member<block_raw, uint32_t, &block_raw::block_num>,
+					member<block_raw, bool,		&block_raw::main_chain>
 				>,
-				composite_key_compare< std::greater<uint32_t>, std::greater<uint32_t>, std::greater<uint32_t> >
+				composite_key_compare< std::greater<uint32_t>, std::greater<uint32_t>, std::greater<uint32_t>, std::greater<bool> >
 			>
 		>
 		> block_pack_index;
@@ -103,7 +104,7 @@ namespace Chain {
 			auto result = packs.insert(block_pack);
 			FC_ASSERT(result.second, "unable to insert block state, duplicate state detected");
 
-			head = *packs.get<by_longest_num>().begin();
+			update_head();
 
 			auto earliest = *packs.get<by_number_less>().begin();
 
@@ -146,6 +147,38 @@ namespace Chain {
 			pack->generate_by_block(block);
 
 			add_block(pack);
+		}
+
+		void remove_chain(const xmax_type_block_id& begin_id)
+		{
+			std::vector<xmax_type_block_id> remove_blocks{ begin_id };
+
+			auto& idx = packs.get<by_pre_id>();
+
+			for (int i = 0; i < remove_blocks.size(); ++ i)
+			{
+				auto itr = packs.find(remove_blocks[i]);
+				if (itr != packs.end())
+				{
+					packs.erase(itr);
+				}
+
+				auto& child = idx.lower_bound(remove_blocks[i]);
+
+				while (child != idx.end())
+				{
+					remove_blocks.push_back((*child)->block_id);
+					++child;
+				}
+
+			}
+			
+			update_head();
+		}
+
+		void update_head()
+		{
+			head = *packs.get<by_longest_num>().begin();
 		}
 
 		void set_last_confirmed(xmax_type_block_id last_id)
@@ -332,6 +365,53 @@ namespace Chain {
 	block_pack_ptr forkdatabase::get_head() const
 	{
 		return _context->head;
+	}
+
+	void forkdatabase::remove_chain(const xmax_type_block_id& begin_id)
+	{
+		_context->remove_chain(begin_id);
+	}
+
+	std::pair<branch_blocks, branch_blocks>
+		forkdatabase::fetch_branch_from_fork(const xmax_type_block_id& firstid, const xmax_type_block_id& secondid) const
+	{
+		std::pair<branch_blocks, branch_blocks> branches;
+
+		auto branch1 = _context->get_block(firstid);
+		auto branch2 = _context->get_block(secondid);
+
+		FC_ASSERT(branch1, "Unknown block id ${id}", ("id", firstid));
+		FC_ASSERT(branch2, "Unknown block id ${id}", ("id", secondid));
+
+		branches.first.push_back(branch1);
+		branches.second.push_back(branch2);
+
+		while (branch1->block_num > branch2->block_num)
+		{
+			branch1 = _context->get_block(branch1->block_id);
+			FC_ASSERT(branch1);
+			branches.first.push_back(branch1);
+		}
+
+		while (branch1->block_num < branch2->block_num)
+		{
+			branch2 = _context->get_block(branch2->block_id);
+			FC_ASSERT(branch2);
+			branches.second.push_back(branch2);
+		}
+
+		while (branch1->prev_id() != branch2->prev_id())
+		{
+			branch1 = _context->get_block(branch1->block_id);
+			branch2 = _context->get_block(branch2->block_id);
+
+			FC_ASSERT(branch1);
+			FC_ASSERT(branch2);
+
+			branches.first.push_back(branch1);
+			branches.second.push_back(branch2);		
+		}
+		return branches;
 	}
 
 	irreversible_block_handle& forkdatabase::get_irreversible_handle()

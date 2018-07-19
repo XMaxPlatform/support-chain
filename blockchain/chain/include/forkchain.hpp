@@ -13,6 +13,8 @@ namespace Chain {
 
 	using irreversible_block_handle = std::function<void(block_pack_ptr)>;
 
+	using branch_blocks = std::vector<block_pack_ptr>;
+
 	class forkdatabase
 	{
 	public:
@@ -32,6 +34,13 @@ namespace Chain {
 		block_pack_ptr get_main_block_by_num(uint32_t num) const;
 
 		block_pack_ptr get_head() const;
+
+		void remove_chain(const xmax_type_block_id& begin_id);
+
+	
+		// get two branch, sort by each head block to fork begin block of each branch.
+		std::pair<branch_blocks, branch_blocks> 
+			fetch_branch_from_fork(const xmax_type_block_id& firstid, const xmax_type_block_id& secondid) const;
 
 		template<typename T, typename F>
 		void bind_irreversible(T* obj, F func)
