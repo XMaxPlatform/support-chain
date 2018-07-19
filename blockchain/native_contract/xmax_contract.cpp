@@ -24,7 +24,7 @@
 #include <abi_serializer.hpp>
 
 #ifdef USE_V8
-#include <jsvm_xmax.h>
+#include <jsvm_xmax.hpp>
 #endif
 
 

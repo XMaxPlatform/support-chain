@@ -1,13 +1,12 @@
 #ifdef USE_V8
 
-#include "jsvm_xmax.h"
+#include "jsvm_xmax.hpp"
 /**
 *  @file
 *  @copyright defined in xmax/LICENSE
 */
 #include <boost/function.hpp>
 #include <boost/multiprecision/cpp_bin_float.hpp>
-#include <jsvm_xmax.h>
 #include <chain_xmax.hpp>
 #include <vm_native_interface.hpp>
 #include <objects/key_value_object.hpp>

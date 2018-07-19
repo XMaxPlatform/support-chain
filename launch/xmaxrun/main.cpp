@@ -21,7 +21,7 @@
 #include <mongodb_plugin.hpp>
 
 #ifdef USE_V8
-#include "jsvm_xmax.h"
+#include "jsvm_xmax.hpp"
 #include "V8AllBind.h"
 #endif
 
