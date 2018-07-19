@@ -25,12 +25,7 @@ namespace Xmaxplatform {
 				return;
 
 			Handle<Object> object = args.This();
-			Local<External>  ee = External::New(args.GetIsolate(), cpp_object);
-			object->SetInternalField(0, ee);
-			Persistent<External> ret = Persistent<External>(args.GetIsolate(), ee);
-
-			ret.SetWeak(cpp_object, WeakExternalReferenceCallback, WeakCallbackType::kParameter);
-
+			Wrap(args.GetIsolate(), cpp_object, object);
 			args.GetReturnValue().Set(object);
 		}
 
@@ -51,12 +46,12 @@ namespace Xmaxplatform {
 
 			func_template->SetClassName(String::NewFromUtf8(
 				isolate,
-				"V8u128",
+				TypeName(),
 				NewStringType::kNormal).ToLocalChecked());
 			func_template->InstanceTemplate()->SetInternalFieldCount(1);
 			global->Set(String::NewFromUtf8(
 				isolate,
-				"V8u128",
+				TypeName(),
 				NewStringType::kNormal).ToLocalChecked(), func_template);
 
 

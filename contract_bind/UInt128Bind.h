@@ -22,9 +22,14 @@ namespace Xmaxplatform {
 			
 			V8u128():value_(0) {}
 
+			operator Basetypes::uint128() { return value_; }
 
 
 			//V8 bind
+			static constexpr inline const char* TypeName() {
+				return "V8u128";
+			}
+
 			static V8u128* NewV8CppObj(const v8::FunctionCallbackInfo<v8::Value>& args);
 			static void RegisterWithV8(v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global);
 			static void ConstructV8Object(const v8::FunctionCallbackInfo<v8::Value>& args);
