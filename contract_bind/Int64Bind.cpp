@@ -62,7 +62,7 @@ namespace Xmaxplatform {
 			
 			ret.SetWeak(cpp_object, V8i64WeakExternalReferenceCallback, WeakCallbackType::kParameter);
 
-			args.GetReturnValue().Set(Undefined(args.GetIsolate()));
+			args.GetReturnValue().Set(object);
 		}
 
 		void SetupV8i64ObjectToJs(Isolate* isolate, Handle<ObjectTemplate> global)
