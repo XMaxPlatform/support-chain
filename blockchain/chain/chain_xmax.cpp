@@ -229,7 +229,6 @@ namespace Xmaxplatform { namespace Chain {
 
 				_generate_block();
 				_sign_block(Config::xmax_build_private_key);
-				_make_fianl_block();
 				_final_block();
 
 				Chain::xmax_type_block_num block_num = _context->block_head->block_num;
@@ -666,8 +665,7 @@ namespace Xmaxplatform { namespace Chain {
 			{
 				try
 				{
-					std::pair<branch_blocks, branch_blocks> branches =
-						_context->fork_db.fetch_branch_from_fork(_context->block_head->block_id, new_head->block_id);
+					fetch_branch branches = _context->fork_db.fetch_branch_from_fork(_context->block_head->block_id, new_head->block_id);
 
 
 
@@ -788,6 +786,7 @@ namespace Xmaxplatform { namespace Chain {
 				signed_block_header& building_header = _context->building_block->pack->new_header;
 				building_header.sign(sign_private_key);
 				_context->building_block->pack->block_id = building_header.id();
+				_context->building_block->pack->validated = true;
 			} FC_CAPTURE_AND_RETHROW((_context->building_block->pack->new_header.builder))
 		}
 
@@ -818,6 +817,8 @@ namespace Xmaxplatform { namespace Chain {
 				FC_ASSERT(v_id == id, "bad block");
 
 				_context->building_block->pack->block_id = v_id;
+
+				_context->building_block->pack->validated = true;
 
 			} FC_CAPTURE_AND_RETHROW((next_block))
 		}

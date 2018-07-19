@@ -65,7 +65,7 @@ namespace Chain {
 		block_pack()
 		{
 		}
-
+		bool validated = false;
 		signed_block_ptr block;
 		vector<transaction_request_ptr> transactions;
 
@@ -94,5 +94,5 @@ FC_REFLECT(Xmaxplatform::Chain::block_raw, (block_num)(block_id)(new_header)
 (last_block_num)(last_confirmed_num)(last_confirmed_id)
 (dpos_irreversible_num)(dpos_irreversible_id)(last_block_of_builders))
 
-FC_REFLECT_DERIVED(Xmaxplatform::Chain::block_pack, (Xmaxplatform::Chain::block_raw), (block))
+FC_REFLECT_DERIVED(Xmaxplatform::Chain::block_pack, (Xmaxplatform::Chain::block_raw), (validated)(block)(transactions))
 
