@@ -5,6 +5,7 @@
 #include <../../../blockchain/chain/include/blockchain_types.hpp>
 #include <fc/variant.hpp>
 #include <chain_xmax.hpp>
+#include "UInt128Bind.h"
 
 using namespace v8;
 namespace Xmaxplatform {
@@ -89,7 +90,7 @@ namespace Xmaxplatform {
 			{
 				args.GetIsolate()->ThrowException(v8::Exception::Error(String::NewFromUtf8(args.GetIsolate(), "argument error!")));
 			}
-			int64_t code, type;
+			name code, type;
 			const char* key;
 			const char* totype;
 			
@@ -101,8 +102,8 @@ namespace Xmaxplatform {
 
 					bool bIsObject = js_data_value->IsObject();
 					if (bIsObject)
-					{
-						code = I64JS2CPP(args.GetIsolate(), js_data_value);
+					{						
+						code = *JsObjToCpp<V8u128>(args.GetIsolate(), js_data_value);
 					}
 				}
 				
@@ -112,7 +113,7 @@ namespace Xmaxplatform {
 					bool bIsObject = js_data_value->IsObject();
 					if (bIsObject)
 					{
-						type = I64JS2CPP(args.GetIsolate(), js_data_value);
+						type = *JsObjToCpp<V8u128>(args.GetIsolate(), js_data_value);
 					}
 				}
 
@@ -138,6 +139,14 @@ namespace Xmaxplatform {
 					int64_t ret;
 					MsgGet(code, type, jsvm_xmax::get().current_validate_context->msg.data, key, ret);
 					args.GetReturnValue().Set(I64Cpp2JS(args.GetIsolate(), args.GetIsolate()->GetCurrentContext(), ret));
+					return;
+				}
+
+				if (strcmp(totype, "u128") == 0) {
+					uint128 ret;					
+					MsgGet(code, type, jsvm_xmax::get().current_validate_context->msg.data, key, ret);
+					V8u128* pV8u128 = new V8u128(ret);
+					args.GetReturnValue().Set(CppObjToJs(args.GetIsolate(), args.GetIsolate()->GetCurrentContext(), pV8u128));
 					return;
 				}
 

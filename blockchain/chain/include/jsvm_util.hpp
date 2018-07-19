@@ -31,6 +31,36 @@ namespace Xmaxplatform {
 		v8::Handle<v8::Value> I64Cpp2JS(v8::Isolate* isolate, const v8::Local<v8::Context>& context, int64_t v);
 		int64_t I64JS2CPP(v8::Isolate* isolate, v8::Handle<v8::Value> obj);
 
+		template <typename ObjType>
+		inline ObjType* JsObjToCpp(v8::Isolate* isolate, v8::Handle<v8::Value> obj) {
+			bool bIsObject = obj->IsObject();
+			if (bIsObject) {			
+				return ObjType::Unwrap(Handle<Object>::Cast(obj));				
+			}
+			else {
+				return nullptr;
+			}		
+		}
+
+		template <typename ObjType>
+		v8::Handle<v8::Value> CppObjToJs(v8::Isolate* isolate, const v8::Local<v8::Context>& context, ObjType* cpp_object)
+		{
+			Handle<String> js_data = String::NewFromUtf8(isolate, ObjType::TypeName(), NewStringType::kNormal).ToLocalChecked();
+			Handle<v8::Value> js_data_value = context->Global()->Get(js_data);
+
+			bool bIsObject = js_data_value->IsObject();
+			if (bIsObject)
+			{
+				
+				Handle<Object> js_data_object = Handle<Object>::Cast(js_data_value);
+				ObjType::Wrap(isolate, cpp_object, js_data_object);
+				return js_data_object;								
+			}
+
+			return Undefined(isolate);
+		}
+
+
 		inline const char* StringJS2CPP(const v8::String::Utf8Value& value) {
 			return *value ? *value : "<string conversion failed>";
 		}
