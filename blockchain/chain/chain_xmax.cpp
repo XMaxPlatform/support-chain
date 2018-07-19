@@ -662,13 +662,20 @@ namespace Xmaxplatform { namespace Chain {
 		{
 			auto new_head = _context->fork_db.get_head();
 
-			if (new_head->prev_id() == _context->block_head->block_id)
+			while (!new_head->main_chain)
 			{
 				try
 				{
-					confirm_block()
+					std::pair<branch_blocks, branch_blocks> branches =
+						_context->fork_db.fetch_branch_from_fork(_context->block_head->block_id, new_head->block_id);
+
+
+
 				}
-				FC_CAPTURE_AND_RETHROW()
+				catch (const fc::exception& e)
+				{
+					_context->fork_db.remove_chain(new_head->block_id);
+				}
 			}
 
 		}
