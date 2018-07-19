@@ -2,6 +2,7 @@
 #include "V8AllBind.h"
 #include "MessageBind.h"
 #include "Int64Bind.h"
+#include "UInt128Bind.h"
 
 using namespace v8;
 namespace Xmaxplatform {
@@ -11,6 +12,7 @@ namespace Xmaxplatform {
 		{
 			//SetupV8MsgObjectToJs(pIsolate, fooGlobal);
 			SetupV8i64ObjectToJs(pIsolate, fooGlobal);
+			V8u128::RegisterWithV8(pIsolate, fooGlobal);
 		}
 
 		JsFooBindMap V8AllBind::GetBindFoos(v8::Isolate* pIsolate)
