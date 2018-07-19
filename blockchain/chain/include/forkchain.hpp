@@ -15,6 +15,13 @@ namespace Chain {
 
 	using branch_blocks = std::vector<block_pack_ptr>;
 
+	struct fetch_branch
+	{
+		block_pack_ptr fork_node;
+		branch_blocks first;
+		branch_blocks second;
+	};
+
 	class forkdatabase
 	{
 	public:
@@ -39,8 +46,7 @@ namespace Chain {
 
 	
 		// get two branch, sort by each head block to fork begin block of each branch.
-		std::pair<branch_blocks, branch_blocks> 
-			fetch_branch_from_fork(const xmax_type_block_id& firstid, const xmax_type_block_id& secondid) const;
+		fetch_branch fetch_branch_from_fork(const xmax_type_block_id& firstid, const xmax_type_block_id& secondid) const;
 
 		template<typename T, typename F>
 		void bind_irreversible(T* obj, F func)

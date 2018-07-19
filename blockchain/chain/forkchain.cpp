@@ -372,10 +372,9 @@ namespace Chain {
 		_context->remove_chain(begin_id);
 	}
 
-	std::pair<branch_blocks, branch_blocks>
-		forkdatabase::fetch_branch_from_fork(const xmax_type_block_id& firstid, const xmax_type_block_id& secondid) const
+	fetch_branch forkdatabase::fetch_branch_from_fork(const xmax_type_block_id& firstid, const xmax_type_block_id& secondid) const
 	{
-		std::pair<branch_blocks, branch_blocks> branches;
+		fetch_branch branches;
 
 		auto branch1 = _context->get_block(firstid);
 		auto branch2 = _context->get_block(secondid);
@@ -411,6 +410,8 @@ namespace Chain {
 			branches.first.push_back(branch1);
 			branches.second.push_back(branch2);		
 		}
+		branches.fork_node = get_block(branch1->prev_id());
+		FC_ASSERT(branches.fork_node);
 		return branches;
 	}
 
