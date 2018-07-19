@@ -34,6 +34,7 @@ namespace Chain {
 		xmax_type_block_id					block_id;
 		signed_block_header					new_header;
 
+		builder_info						bld_info;
 		uint32_t							round_slot = 0;
 		builder_rule						current_builders;
 		builder_rule						new_builders;
@@ -69,9 +70,12 @@ namespace Chain {
 		vector<transaction_request_ptr> transactions;
 
 
-		void init_default(chain_timestamp time, account_name builder);
+		void init_default(chain_timestamp time, const builder_info& builder, const builder_rule& cur_blders);
 		void init_by_pre_pack(const block_pack& pre_pack, chain_timestamp when, bool mainchain);
-		void init_by_block(signed_block_ptr b, const builder_rule& cur_blders, const builder_rule& new_blders, uint16_t roundslot, bool confirmed, bool mainchain);
+
+		void refresh(signed_block_ptr b, const builder_rule& cur_blders, const builder_rule& new_blders, uint16_t roundslot, bool confirmed, bool mainchain);
+
+		void generate_by_block(signed_block_ptr b);
 
 		void set_next_builders(const builder_rule& next);
 
@@ -86,7 +90,7 @@ namespace Chain {
 FC_REFLECT(Xmaxplatform::Chain::block_brief, (builder)(block_num)(block_id))
 
 FC_REFLECT(Xmaxplatform::Chain::block_raw, (block_num)(block_id)(new_header)
-(round_slot)(current_builders)(new_builders)(confirmations)(main_chain)
+(bld_info)(round_slot)(current_builders)(new_builders)(confirmations)(main_chain)
 (last_block_num)(last_confirmed_num)(last_confirmed_id)
 (dpos_irreversible_num)(dpos_irreversible_id)(last_block_of_builders))
 

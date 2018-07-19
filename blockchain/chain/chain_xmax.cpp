@@ -183,14 +183,10 @@ namespace Xmaxplatform { namespace Chain {
 
 				// block genesis db.
 
-				xmax_builder_infos list;
-				list.push_back(builder_info(Config::xmax_contract_name, Config::xmax_build_public_key));
-
 				// Create global properties
 				_context->block_db.create<static_config_object>([&](static_config_object &p) {
 					p.setup = initer.get_blockchain_setup();
-					p.current_builders.set_builders(list, 0);
-					p.next_builders.set_builders(p.current_builders.builders, 1);
+					p.current_builders = _context->building_block->pack->current_builders;
 				});
 
 				_context->block_db.create<dynamic_states_object>([&](dynamic_states_object &p) {
@@ -198,9 +194,9 @@ namespace Xmaxplatform { namespace Chain {
 					p.head_block_id = xmax_type_block_id();
 					p.state_time = init_stamp.time_point();
 					p.total_slot = 0;
-					p.block_builder = empty_name;
-					//p.round_begin_time = chain_timestamp::zero_timestamp;
-					p.round_slot = Config::blocks_per_round;
+					p.block_builder = _context->building_block->pack->bld_info.builder_name;
+
+					p.round_slot = _context->building_block->pack->round_slot;
 					p.builders_elect_state = elect_state::elect_new_builders;
 				});
 
@@ -254,11 +250,14 @@ namespace Xmaxplatform { namespace Chain {
 			{
 				wlog("No head block in fork db, try to fix...");
 
-				const auto&  
 				signed_block_ptr head = _context->chain_log.get_head();
 				pack_head = std::make_shared<block_pack>();
-				pack_head->init_by_block(head, true);
-				//_context->fork_db.add_block(pack_head);
+
+				const auto& static_config = get_static_config();
+				const auto& dynamic_states = get_dynamic_states();
+
+				pack_head->refresh(head, static_config.current_builders, static_config.next_builders, dynamic_states.round_slot, true, true);
+
 			}
 
 			_context->block_head = pack_head;
@@ -659,9 +658,25 @@ namespace Xmaxplatform { namespace Chain {
 			_commit_block();
 		}
 
+		void chain_xmax::_check_fork()
+		{
+			auto new_head = _context->fork_db.get_head();
+
+			if (new_head->prev_id() == _context->block_head->block_id)
+			{
+				try
+				{
+					confirm_block()
+				}
+				FC_CAPTURE_AND_RETHROW()
+			}
+
+		}
+
 		void chain_xmax::push_block(const signed_block_ptr block)
 		{
-
+			_context->fork_db.add_block(block);
+			_check_fork();
 		}
 
 		void chain_xmax::broadcast_confirmation(account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func)
@@ -679,11 +694,17 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::_start_first_build(chain_timestamp when)
 		{
+			builder_info xmxinfo(Config::xmax_contract_name, Config::xmax_build_public_key);
+			xmax_builder_infos list;
+			list.push_back(xmxinfo);
+			builder_rule rule;
+			rule.set_builders(list, 1);
+
 			_context->building_block = _context->block_db.start_undo_session(true);
 
 			// start build.
 			_context->building_block->pack = std::make_shared<block_pack>();
-			_context->building_block->pack->init_default(when, Config::xmax_contract_name);
+			_context->building_block->pack->init_default(when, xmxinfo, rule);
 
 			_context->block_head = _context->building_block->pack;
 		}
@@ -706,9 +727,7 @@ namespace Xmaxplatform { namespace Chain {
 
 				block_pack& pack = *_context->building_block->pack;
 
-				_context->building_block->pack->init_by_pre_pack(*_context->block_head, when);
-
-				_context->building_block->pack->main_chain = true;
+				_context->building_block->pack->init_by_pre_pack(*_context->block_head, when, true);
 
 				_generate_next_builders();
 				

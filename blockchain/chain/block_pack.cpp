@@ -33,20 +33,23 @@ namespace Chain {
 		return confirmations.size() >= minconf;
 	}
 
-	void block_pack::init_default(chain_timestamp time, account_name builder)
+	void block_pack::init_default(chain_timestamp time, const builder_info& builder, const builder_rule& cur_blders)
 	{
 		block = std::make_shared<signed_block>();
 		block->timestamp = time;
-		block->builder = builder;
+		block->builder = builder.builder_name;
+		block->previous = empty_chain_id;
 
-		//static_cast<block_header&>(*block) = new_header;
 
 		new_header.previous = empty_chain_id;
-		new_header.builder = builder;
+		new_header.builder = builder.builder_name;
 
 		block_num = new_header.block_num();
 
-		round_slot = 0;
+		bld_info = builder;
+		round_slot = Config::blocks_per_round;
+		current_builders = cur_blders;
+		main_chain = true;
 	}
 
 	void block_pack::init_by_pre_pack(const block_pack& pre_pack, chain_timestamp when, bool mainchain)
@@ -57,21 +60,22 @@ namespace Chain {
 		last_block_num = pre_pack.last_block_num;
 		last_confirmed_num = pre_pack.last_confirmed_num;
 		last_confirmed_id = pre_pack.last_confirmed_id;
-		this->main_chain = main_chain;
 
 		// generate block info.
 		uint32_t delta_slot = utils::get_delta_slot_at_time(pre_pack.new_header.timestamp, when);
 
 		block_num = pre_pack.block_num + 1;
-		round_slot = pre_pack.round_slot + delta_slot;
+		uint32_t new_slot = pre_pack.round_slot + delta_slot;
 
-		const builder_info& current_builder = utils::select_builder(current_builders, new_builders, round_slot);
+		const builder_info& current_builder = utils::select_builder(current_builders, new_builders, new_slot);
 
 		new_header.previous = pre_pack.block_id;
 		new_header.timestamp = when;
 		new_header.builder = current_builder.builder_name;
 
-		// generate builders.
+		// -----------------------------------
+		main_chain = mainchain;
+		round_slot = new_slot;
 		if (round_slot < Config::blocks_per_round)
 		{
 			current_builders = pre_pack.current_builders;
@@ -96,7 +100,7 @@ namespace Chain {
 		generate_dpos(pre_pack);
 	}
 
-	void block_pack::init_by_block(signed_block_ptr b, const builder_rule& cur_blders, const builder_rule& new_blders, uint16_t roundslot, bool confirmed, bool mainchain)
+	void block_pack::refresh(signed_block_ptr b, const builder_rule& cur_blders, const builder_rule& new_blders, uint16_t roundslot, bool confirmed, bool mainchain)
 	{		
 		// generate block info.
 		block = b;
@@ -124,7 +128,23 @@ namespace Chain {
 
 		main_chain = mainchain;
 
-		new_header = static_cast<signed_block_header&>(*block);
+		generate_by_block(b);
+	}
+
+	void block_pack::generate_by_block(signed_block_ptr b)
+	{
+		FC_ASSERT(b->builder == new_header.builder, "wrong builder number.");
+		FC_ASSERT(b->previous == new_header.previous, "wrong previous id.");
+		FC_ASSERT(b->timestamp == new_header.timestamp, "wrong time stamp.");
+
+		if (b->next_builders)
+		{
+			new_builders = *b->next_builders;
+		}
+
+		new_header = static_cast<signed_block_header&>(*b);
+
+		block = b;
 	}
 
 	void block_pack::set_next_builders(const builder_rule& next)

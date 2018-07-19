@@ -350,7 +350,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 		{
 			return;
 		}
-		const auto& verifiers = pack_ptr->verifiers;
+		const auto& verifiers = pack_ptr->current_builders;
 
 		for (const auto v : verifiers.builders)
 		{
