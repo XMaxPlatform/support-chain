@@ -135,6 +135,8 @@ namespace Xmaxplatform { namespace Chain {
 	   void _final_block();
 	   void _commit_block();
 
+	   void _check_fork();
+
 	   void _validate_block_desc(signed_block_ptr block);
 	   void _update_final_state(const signed_block& b);
 	   void _irreversible_block(const block_pack_ptr& pack);
