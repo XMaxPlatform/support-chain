@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE chain_test
+
 
 
 
@@ -20,9 +20,8 @@
 #include <objects/erc721_token_account_object.hpp>
 #include <objects/erc20_token_account_object.hpp>
 
-#include <boost/test/included/unit_test.hpp>
+ 
 #include <blockchain_exceptions.hpp>
-
 
 
 using namespace Xmaxplatform::Chain;

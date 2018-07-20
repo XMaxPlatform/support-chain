@@ -1,7 +1,7 @@
 
 
 file(GLOB SOURCE_FILES "*.cpp")
-file(GLOB HEADERS "include/*.hpp")
+file(GLOB HEADERS "*.hpp")
 
 
 
