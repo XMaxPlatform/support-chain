@@ -3,6 +3,7 @@
 #include "MessageBind.h"
 #include "Int64Bind.h"
 #include "UInt128Bind.h"
+#include "DBBind.h"
 
 using namespace v8;
 namespace Xmaxplatform {
@@ -22,6 +23,8 @@ namespace Xmaxplatform {
 
 			JsFooBindMap ret;
 			bindfoo(GetMsgData);
+			bindfoo(LoadRecord);
+			bindfoo(StoreRecord);
 			return std::move(ret);
 		}
 

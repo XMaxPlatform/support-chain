@@ -83,8 +83,8 @@ namespace Xmaxplatform {
 		{
 			Local<Object> self = args.Holder();
 
-			Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-			void* ptr = wrap->Value();
+//			Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+//			void* ptr = wrap->Value();
 
 			if (args.Length()!=4)
 			{
@@ -95,7 +95,7 @@ namespace Xmaxplatform {
 			const char* totype;
 			
 			{
-				v8::HandleScope handle_scope(args.GetIsolate());
+				//v8::HandleScope handle_scope(args.GetIsolate());
 				HandleScope scope(args.GetIsolate());
 				{
 					Handle<v8::Value> js_data_value = args[0];

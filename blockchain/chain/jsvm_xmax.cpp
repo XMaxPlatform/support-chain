@@ -28,7 +28,7 @@ namespace Xmaxplatform {
 		jsvm_xmax::jsvm_xmax() 
 			:current_validate_context(nullptr)
 			,m_instructionLimit(1000)
-			, m_pBind(nullptr)
+			,m_pBind(nullptr)
 		{
 			CleanInstruction();
 		}
@@ -209,7 +209,7 @@ namespace Xmaxplatform {
 				Handle<v8::Value> params[2];
 				params[0] = I64Cpp2JS(m_pIsolate, context, code);
 				params[1] = I64Cpp2JS(m_pIsolate, context, type);
-				CallJsFoo(m_pIsolate, context, foo, 0, NULL);
+				CallJsFoo(m_pIsolate, context, foo, 2, params);
 			}
 			catch (const Runtime::Exception& e) {
 				edump((std::string(describeExceptionCause(e.cause))));
