@@ -630,9 +630,9 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
-    struct issueerc2o { 
-        issueerc2o() = default;
-        issueerc2o(const account_name& creator, const authority& owner, const authority& active, const asset_symbol& token_name, const asset& total_balance)
+    struct issueerc20 { 
+        issueerc20() = default;
+        issueerc20(const account_name& creator, const authority& owner, const authority& active, const asset_symbol& token_name, const asset& total_balance)
            : creator(creator), owner(owner), active(active), token_name(token_name), total_balance(total_balance) {}
 
         account_name                     creator;
@@ -642,9 +642,9 @@ namespace Xmaxplatform { namespace Basetypes {
         asset                            total_balance;
     };
 
-    template<> struct get_struct<issueerc2o> { 
+    template<> struct get_struct<issueerc20> { 
         static const struct_t& type() { 
-           static struct_t result = { "issueerc2o", "", {
+           static struct_t result = { "issueerc20", "", {
                 {"creator", "account_name"},
                 {"owner", "authority"},
                 {"active", "authority"},
@@ -656,18 +656,18 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
-    struct minterc2o { 
-        minterc2o() = default;
-        minterc2o(const asset_symbol& token_name, const asset& mint_amount)
+    struct minterc20 { 
+        minterc20() = default;
+        minterc20(const asset_symbol& token_name, const asset& mint_amount)
            : token_name(token_name), mint_amount(mint_amount) {}
 
         asset_symbol                     token_name;
         asset                            mint_amount;
     };
 
-    template<> struct get_struct<minterc2o> { 
+    template<> struct get_struct<minterc20> { 
         static const struct_t& type() { 
-           static struct_t result = { "minterc2o", "", {
+           static struct_t result = { "minterc20", "", {
                 {"token_name", "asset_symbol"},
                 {"mint_amount", "asset"},
               }
@@ -676,9 +676,9 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
-    struct issueerc21 { 
-        issueerc21() = default;
-        issueerc21(const account_name& creator, const authority& owner, const authority& active, const asset_symbol& token_name)
+    struct issueerc721 { 
+        issueerc721() = default;
+        issueerc721(const account_name& creator, const authority& owner, const authority& active, const asset_symbol& token_name)
            : creator(creator), owner(owner), active(active), token_name(token_name) {}
 
         account_name                     creator;
@@ -687,9 +687,9 @@ namespace Xmaxplatform { namespace Basetypes {
         asset_symbol                     token_name;
     };
 
-    template<> struct get_struct<issueerc21> { 
+    template<> struct get_struct<issueerc721> { 
         static const struct_t& type() { 
-           static struct_t result = { "issueerc21", "", {
+           static struct_t result = { "issueerc721", "", {
                 {"creator", "account_name"},
                 {"owner", "authority"},
                 {"active", "authority"},
@@ -700,18 +700,18 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
-    struct minterc21 { 
-        minterc21() = default;
-        minterc21(const asset_symbol& token_name, const fixed_string32& token_id)
+    struct minterc721 { 
+        minterc721() = default;
+        minterc721(const asset_symbol& token_name, const fixed_string32& token_id)
            : token_name(token_name), token_id(token_id) {}
 
         asset_symbol                     token_name;
         fixed_string32                   token_id;
     };
 
-    template<> struct get_struct<minterc21> { 
+    template<> struct get_struct<minterc721> { 
         static const struct_t& type() { 
-           static struct_t result = { "minterc21", "", {
+           static struct_t result = { "minterc721", "", {
                 {"token_name", "asset_symbol"},
                 {"token_id", "fixed_string32"},
               }
@@ -720,17 +720,17 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
-    struct revokeerc2o { 
-        revokeerc2o() = default;
-        revokeerc2o(const asset_symbol& token_name)
+    struct revokeerc20 { 
+        revokeerc20() = default;
+        revokeerc20(const asset_symbol& token_name)
            : token_name(token_name) {}
 
         asset_symbol                     token_name;
     };
 
-    template<> struct get_struct<revokeerc2o> { 
+    template<> struct get_struct<revokeerc20> { 
         static const struct_t& type() { 
-           static struct_t result = { "revokeerc2o", "", {
+           static struct_t result = { "revokeerc20", "", {
                 {"token_name", "asset_symbol"},
               }
            };
@@ -738,17 +738,17 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
-    struct revokeerc21 { 
-        revokeerc21() = default;
-        revokeerc21(const asset_symbol& token_name)
+    struct revokeerc721 { 
+        revokeerc721() = default;
+        revokeerc721(const asset_symbol& token_name)
            : token_name(token_name) {}
 
         asset_symbol                     token_name;
     };
 
-    template<> struct get_struct<revokeerc21> { 
+    template<> struct get_struct<revokeerc721> { 
         static const struct_t& type() { 
-           static struct_t result = { "revokeerc21", "", {
+           static struct_t result = { "revokeerc721", "", {
                 {"token_name", "asset_symbol"},
               }
            };
@@ -785,9 +785,9 @@ FC_REFLECT( Xmaxplatform::Basetypes::regbuilder                       , (builder
 FC_REFLECT( Xmaxplatform::Basetypes::unregbuilder                     , (builder) )
 FC_REFLECT( Xmaxplatform::Basetypes::regproxy                         , (proxy) )
 FC_REFLECT( Xmaxplatform::Basetypes::unregproxy                       , (proxy) )
-FC_REFLECT( Xmaxplatform::Basetypes::issueerc2o                       , (creator)(owner)(active)(token_name)(total_balance) )
-FC_REFLECT( Xmaxplatform::Basetypes::minterc2o                        , (token_name)(mint_amount) )
-FC_REFLECT( Xmaxplatform::Basetypes::issueerc21                       , (creator)(owner)(active)(token_name) )
-FC_REFLECT( Xmaxplatform::Basetypes::minterc21                        , (token_name)(token_id) )
-FC_REFLECT( Xmaxplatform::Basetypes::revokeerc2o                      , (token_name) )
-FC_REFLECT( Xmaxplatform::Basetypes::revokeerc21                      , (token_name) )
+FC_REFLECT( Xmaxplatform::Basetypes::issueerc20                       , (creator)(owner)(active)(token_name)(total_balance) )
+FC_REFLECT( Xmaxplatform::Basetypes::minterc20                        , (token_name)(mint_amount) )
+FC_REFLECT( Xmaxplatform::Basetypes::issueerc721                      , (creator)(owner)(active)(token_name) )
+FC_REFLECT( Xmaxplatform::Basetypes::minterc721                       , (token_name)(token_id) )
+FC_REFLECT( Xmaxplatform::Basetypes::revokeerc20                      , (token_name) )
+FC_REFLECT( Xmaxplatform::Basetypes::revokeerc721                     , (token_name) )

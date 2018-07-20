@@ -44,12 +44,12 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
     SET_APP_HANDLER( xmax, xmax, regproxy, Xmaxplatform );
     SET_APP_HANDLER( xmax, xmax, unregproxy, Xmaxplatform );
 	SET_APP_HANDLER(xmax, xmax, setcode, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, issueerc2o, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, minterc2o, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, issueerc21, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, minterc21, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, revokeerc2o, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, revokeerc21, Xmaxplatform);
+	SET_APP_HANDLER(xmax, xmax, issueerc20, Xmaxplatform);
+	SET_APP_HANDLER(xmax, xmax, minterc20, Xmaxplatform);
+	SET_APP_HANDLER(xmax, xmax, revokeerc20, Xmaxplatform);
+	SET_APP_HANDLER(xmax, xmax, issueerc721, Xmaxplatform);
+	SET_APP_HANDLER(xmax, xmax, minterc721, Xmaxplatform);	
+	SET_APP_HANDLER(xmax, xmax, revokeerc721, Xmaxplatform);
 
 #ifdef USE_V8
 	SET_APP_HANDLER(xmax, xmax, setjscode, Xmaxplatform);
@@ -72,8 +72,12 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 	xmax_abi.actions.push_back(Types::action{ name("unregbuilder"), "unregbuilder" });
 	xmax_abi.actions.push_back(Types::action{ name("regproxy"), "regproxy" });
 	xmax_abi.actions.push_back(Types::action{ name("unregproxy"), "unregproxy" });
-	xmax_abi.actions.push_back(Types::action{ name("issueerc2o"), "issueerc2o" });
-	xmax_abi.actions.push_back(Types::action{ name("issueerc21"), "issueerc21" });
+	xmax_abi.actions.push_back(Types::action{ name("issueerc20"), "issueerc20" });
+	xmax_abi.actions.push_back(Types::action{ name("minterc20"), "minterc20" });
+	xmax_abi.actions.push_back(Types::action{ name("revokeerc20"), "revokeerc20" });
+	xmax_abi.actions.push_back(Types::action{ name("issueerc721"), "issueerc721" });
+	xmax_abi.actions.push_back(Types::action{ name("minterc721"), "minterc721" });
+	xmax_abi.actions.push_back(Types::action{ name("revokeerc721"), "revokeerc721" });
 	xmax_abi.actions.push_back(Types::action{ name("revoketoken"), "revoketoken" });
 
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transfer>::type());
@@ -86,12 +90,12 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unregbuilder>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::regproxy>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unregproxy>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc2o>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::minterc2o>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::revokeerc2o>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc21>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::minterc21>::type());	
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::revokeerc21>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc20>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::minterc20>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::revokeerc20>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc721>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::minterc721>::type());	
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::revokeerc721>::type());
 
 
    return xmax_abi;

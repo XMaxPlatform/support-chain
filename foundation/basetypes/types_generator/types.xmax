@@ -154,30 +154,30 @@ struct regproxy
 struct unregproxy
    proxy            account_name
 
-struct issueerc2o
+struct issueerc20
    creator	account_name   
    owner     authority
    active    authority
    token_name	asset_symbol
    total_balance	asset
 
-struct minterc2o	
+struct minterc20	
 	token_name asset_symbol
 	mint_amount asset
 
-struct issueerc21
+struct issueerc721
 	creator	account_name
 	owner     authority
 	active    authority
 	token_name asset_symbol
 
-struct minterc21	
+struct minterc721	
 	token_name asset_symbol
 	token_id fixed_string32
 
-struct revokeerc2o
+struct revokeerc20
 	token_name asset_symbol
 
-struct revokeerc21
+struct revokeerc721
 	token_name asset_symbol
 

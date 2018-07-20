@@ -34,15 +34,15 @@ void handle_xmax_regproxy(Chain::message_context_xmax& context);
 void handle_xmax_unregproxy(Chain::message_context_xmax& context);
 
 //ERC20 interfaces
-void handle_xmax_issueerc2o(Chain::message_context_xmax& context);
-void handle_xmax_minterc2o(Chain::message_context_xmax& context);
-void handle_xmax_revokeerc2o(Chain::message_context_xmax& context);
+void handle_xmax_issueerc20(Chain::message_context_xmax& context);
+void handle_xmax_minterc20(Chain::message_context_xmax& context);
+void handle_xmax_revokeerc20(Chain::message_context_xmax& context);
 
 
 //ERC721 interfaces
-void handle_xmax_issueerc21(Chain::message_context_xmax& context);
-void handle_xmax_minterc21(Chain::message_context_xmax& context);
-void handle_xmax_revokeerc21(Chain::message_context_xmax& context);
+void handle_xmax_issueerc721(Chain::message_context_xmax& context);
+void handle_xmax_minterc721(Chain::message_context_xmax& context);
+void handle_xmax_revokeerc721(Chain::message_context_xmax& context);
 
 
 } // namespace Native_contract

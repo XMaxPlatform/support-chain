@@ -272,9 +272,9 @@ void validate_token_not_revoke(const ErcObjectType& erc_object) {
 }
 
 //--------------------------------------------------
-void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
+void handle_xmax_issueerc20(Chain::message_context_xmax& context) {
 	auto& db = context.mutable_db;
-	auto issue_erc20 = context.msg.as<Types::issueerc2o>();
+	auto issue_erc20 = context.msg.as<Types::issueerc20>();
 
 	//Todo: Check creator authorization
 
@@ -299,9 +299,9 @@ void handle_xmax_issueerc2o(Chain::message_context_xmax& context) {
 
 
 //--------------------------------------------------
-void handle_xmax_issueerc21(Chain::message_context_xmax& context) {
+void handle_xmax_issueerc721(Chain::message_context_xmax& context) {
 	auto& db = context.mutable_db;
-	auto issue_erc721 = context.msg.as<Types::issueerc21>();
+	auto issue_erc721 = context.msg.as<Types::issueerc721>();
 
 	//Todo: Check creator authorization
 
@@ -324,10 +324,10 @@ void handle_xmax_issueerc21(Chain::message_context_xmax& context) {
 
 
 //--------------------------------------------------
-void handle_xmax_minterc2o(Chain::message_context_xmax& context)
+void handle_xmax_minterc20(Chain::message_context_xmax& context)
 {
 	auto& db = context.mutable_db;
-	auto minterc20 = context.msg.as<Types::minterc2o>();
+	auto minterc20 = context.msg.as<Types::minterc20>();
 
 	//Todo: Check owner authorization
 
@@ -341,10 +341,10 @@ void handle_xmax_minterc2o(Chain::message_context_xmax& context)
 }
 
 //--------------------------------------------------
-void handle_xmax_minterc21(Chain::message_context_xmax& context)
+void handle_xmax_minterc721(Chain::message_context_xmax& context)
 {
 	auto& db = context.mutable_db;
-	auto minterc721 = context.msg.as<Types::minterc21>();
+	auto minterc721 = context.msg.as<Types::minterc721>();
 
 	//Todo: Check owner authorization
 
@@ -366,9 +366,9 @@ void handle_xmax_minterc21(Chain::message_context_xmax& context)
 }
 
 //--------------------------------------------------
-void handle_xmax_revokeerc2o(Chain::message_context_xmax& context) {
+void handle_xmax_revokeerc20(Chain::message_context_xmax& context) {
 	auto& db = context.mutable_db;
-	auto revokeerc2o = context.msg.as<Types::revokeerc2o>();
+	auto revokeerc2o = context.msg.as<Types::revokeerc20>();
 
 	//Todo: Check owner authorization
 
@@ -383,9 +383,9 @@ void handle_xmax_revokeerc2o(Chain::message_context_xmax& context) {
 
 
 //--------------------------------------------------
-void handle_xmax_revokeerc21(Chain::message_context_xmax& context) {
+void handle_xmax_revokeerc721(Chain::message_context_xmax& context) {
 	auto& db = context.mutable_db;
-	auto revokeerc721 = context.msg.as<Types::revokeerc21>();
+	auto revokeerc721 = context.msg.as<Types::revokeerc721>();
 
 	//Todo: Check owner authorization
 	
