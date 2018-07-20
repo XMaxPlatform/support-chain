@@ -18,7 +18,7 @@ namespace Xmaxplatform {
 		{
 			OBJECT_CCTOR(transaction_object)
 
-				id_type             id;
+			id_type             id;
 			time_point_sec      expiration;
 			xmax_type_transaction_id trx_id;
 

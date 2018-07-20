@@ -36,20 +36,26 @@ namespace Chain {
 	void block_pack::init_default(chain_timestamp time, const builder_info& builder, const builder_rule& cur_blders)
 	{
 		block = std::make_shared<signed_block>();
+
 		block->timestamp = time;
 		block->builder = builder.builder_name;
 		block->previous = empty_chain_id;
 
-
-		new_header.previous = empty_chain_id;
+		new_header.timestamp = time;
 		new_header.builder = builder.builder_name;
+		new_header.previous = empty_chain_id;
 
 		block_num = new_header.block_num();
 
 		bld_info = builder;
-		round_slot = Config::blocks_per_round;
+		round_slot = 0;
 		current_builders = cur_blders;
 		main_chain = true;
+
+		validated = false;
+		new_round = true;
+
+
 	}
 
 	void block_pack::init_by_pre_pack(const block_pack& pre_pack, chain_timestamp when, bool mainchain)
@@ -67,7 +73,7 @@ namespace Chain {
 		block_num = pre_pack.block_num + 1;
 		uint32_t new_slot = pre_pack.round_slot + delta_slot;
 
-		const builder_info& current_builder = utils::select_builder(current_builders, new_builders, new_slot);
+		const builder_info& current_builder = utils::select_builder(pre_pack.current_builders, pre_pack.new_builders, new_slot);
 
 		new_header.previous = pre_pack.block_id;
 		new_header.timestamp = when;
@@ -76,12 +82,8 @@ namespace Chain {
 		// -----------------------------------
 		main_chain = mainchain;
 		round_slot = new_slot;
-		if (round_slot < Config::blocks_per_round)
-		{
-			current_builders = pre_pack.current_builders;
-			new_builders = pre_pack.new_builders;
-		}
-		else
+		new_round = round_slot < Config::blocks_per_round;
+		if (new_round)
 		{
 			if (!pre_pack.new_builders.is_empty())
 			{
@@ -94,6 +96,11 @@ namespace Chain {
 				new_builders = pre_pack.new_builders;
 			}
 			round_slot = round_slot % Config::blocks_per_round;
+		}
+		else
+		{
+			current_builders = pre_pack.current_builders;
+			new_builders = pre_pack.new_builders;
 		}
 
 		// generate dpos
@@ -149,7 +156,7 @@ namespace Chain {
 
 	void block_pack::set_next_builders(const builder_rule& next)
 	{
-		FC_ASSERT(current_builders.version == next.version + 1, "wrong builder version.");
+		FC_ASSERT(current_builders.version + 1 == next.version, "wrong builder version.");
 		FC_ASSERT(new_builders.number() == 0, "wrong builder number.");
 
 		new_header.next_builders = next;

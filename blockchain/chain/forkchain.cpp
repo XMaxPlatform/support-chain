@@ -372,6 +372,22 @@ namespace Chain {
 		_context->remove_chain(begin_id);
 	}
 
+	void forkdatabase::change_main_chain_flag(xmax_type_block_id id, bool main_chain_flag)
+	{
+		auto it = _context->packs.find(id);
+		FC_ASSERT(it != _context->packs.end(), "block not found in fork database");
+
+		if ((*it)->main_chain == main_chain_flag)
+		{
+			return;
+		}
+		// modify can trigger re-sort of Boost MultiIndex.
+		_context->packs.modify(it, [&main_chain_flag] (block_pack_ptr& p){
+			p->main_chain = main_chain_flag;
+		});
+
+	}
+
 	fetch_branch forkdatabase::fetch_branch_from_fork(const xmax_type_block_id& firstid, const xmax_type_block_id& secondid) const
 	{
 		fetch_branch branches;

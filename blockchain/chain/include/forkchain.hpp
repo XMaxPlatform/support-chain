@@ -44,6 +44,8 @@ namespace Chain {
 
 		void remove_chain(const xmax_type_block_id& begin_id);
 
+		void change_main_chain_flag(xmax_type_block_id id, bool main_chain_flag);
+
 	
 		// get two branch, sort by each head block to fork begin block of each branch.
 		fetch_branch fetch_branch_from_fork(const xmax_type_block_id& firstid, const xmax_type_block_id& secondid) const;

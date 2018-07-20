@@ -44,6 +44,7 @@ namespace Xmaxplatform { namespace Chain {
 	   struct xmax_config
 	   {
 		   bool open_flag = false;
+		   bool builder_mode = true;
 		   uint64_t  shared_memory_size = 0;
 		   Basechain::bfs::path block_memory_dir;
 		   Basechain::bfs::path fork_memory_dir;
@@ -133,15 +134,17 @@ namespace Xmaxplatform { namespace Chain {
 	   void _validate_block(const signed_block_ptr next_block);
 	   void _broadcast_confirmation(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func);
 	   void _final_block();
+	   void _push_fork();
 	   void _commit_block();
 
+	   void _pop_block();
 	   void _check_fork();
 
+	   void _apply_block(signed_block_ptr block, bool fork);
+
 	   void _validate_block_desc(signed_block_ptr block);
-	   void _update_final_state(const signed_block& b);
+	   void _update_final_state(const block_pack_ptr& pack);
 	   void _irreversible_block(const block_pack_ptr& pack);
-	 // void rate_limit_message(const message& message);
-       void apply_message(message_context_xmax& c);
 
 	   bool check_trx(const transaction_request_ptr& request) const;
 	   transaction_response_ptr apply_transaction(transaction_request_ptr request);
