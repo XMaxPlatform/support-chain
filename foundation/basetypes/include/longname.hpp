@@ -130,7 +130,7 @@ namespace LongCode{
 		}
 
 		static inline std::string to_string(NameCodeType name_code) {
-			if (name_code == 0)
+			if (name_code == invalid_code())
 				return "";
 
 			NameCodeType tmp = name_code;
@@ -190,7 +190,7 @@ namespace LongCode{
 	typedef std::unordered_map<char, long_name<uint128>::char_code_type> reverse_code_map_type_u128;
 
 	//  Construction of 128 bits: c0 c1 c2 ... c20 00
-	//  Each char take 6 bits
+	//  Each char take 6 bits	
 	const static char CODE_MAP_U128[] = {
 		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
@@ -214,6 +214,7 @@ namespace LongCode{
 
 	template<>
 	static char long_name<uint128>::code_to_char(long_name<uint128>::char_code_type code) {
+		static_assert((1 << char_bits()) > sizeof(CODE_MAP_U128), "The code map for type uint128 is too large to fit all characters in.");
 		assert(code >= 0 && code < sizeof(CODE_MAP_U128));
 		return CODE_MAP_U128[code - 1];
 	}
