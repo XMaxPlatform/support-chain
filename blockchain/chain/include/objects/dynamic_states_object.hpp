@@ -14,15 +14,6 @@
 
 namespace Xmaxplatform { namespace Chain {
 
-
-
-	enum elect_state
-	{
-		unknown_elect_state = 0,
-		elect_new_builders = 1,
-		builders_confirmed = 2,
-	};
-
 	class dynamic_states_object : public Basechain::object<dynamic_states_object_type, dynamic_states_object>
 	{
 		OBJECT_CCTOR(dynamic_states_object)
@@ -35,8 +26,6 @@ namespace Xmaxplatform { namespace Chain {
 		account_name            block_builder;
 		//chain_timestamp			round_begin_time; // the round begin time.
 		uint32_t				round_slot;
-
-		elect_state				builders_elect_state;
 	};
 
 	using dynamic_states_multi_index = Basechain::shared_multi_index_container<

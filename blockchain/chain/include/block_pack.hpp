@@ -66,8 +66,10 @@ namespace Chain {
 		{
 		}
 		bool validated = false;
+		bool new_round = false;
 		signed_block_ptr block;
-		vector<transaction_request_ptr> transactions;
+
+		vector<transaction_request_ptr> transactions; // cache only, serialization is not need.
 
 
 		void init_default(chain_timestamp time, const builder_info& builder, const builder_rule& cur_blders);
@@ -94,5 +96,5 @@ FC_REFLECT(Xmaxplatform::Chain::block_raw, (block_num)(block_id)(new_header)
 (last_block_num)(last_confirmed_num)(last_confirmed_id)
 (dpos_irreversible_num)(dpos_irreversible_id)(last_block_of_builders))
 
-FC_REFLECT_DERIVED(Xmaxplatform::Chain::block_pack, (Xmaxplatform::Chain::block_raw), (validated)(block)(transactions))
+FC_REFLECT_DERIVED(Xmaxplatform::Chain::block_pack, (Xmaxplatform::Chain::block_raw), (validated)(new_round)(block))
 
