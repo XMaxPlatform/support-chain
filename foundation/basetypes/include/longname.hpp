@@ -93,7 +93,7 @@ namespace LongCode{
 		operator NameCodeType()const { return namecode_; }
 						
 
-		static inline constexpr size_type char_size() {
+		static inline constexpr size_type char_bits() {
 			static_assert(false, "Need implemented in the specific class.");
 		}
 
@@ -106,15 +106,15 @@ namespace LongCode{
 		}
 
 		static inline constexpr size_type max_char_count() {
-			return type_size() / char_size();
+			return type_bits() / char_bits();
 		}
 
 		static inline constexpr char_code_type char_code_mask() {
-			return static_cast<char_code_type>((1 << char_size()) - 1);
+			return static_cast<char_code_type>((1 << char_bits()) - 1);
 		}
 
 		static inline constexpr char_code_type last_code_mask() {
-			return static_cast<char_code_type>((1 << (type_bits() - max_char_count() * char_size())) - 1);
+			return static_cast<char_code_type>((1 << (type_bits() - max_char_count() * char_bits())) - 1);
 		}
 		
 		static inline constexpr char_code_type invalid_code() {
@@ -138,7 +138,7 @@ namespace LongCode{
 
 			for (size_type i = 0; i < max_char_count(); ++i)
 			{
-				char_code_type code = (char)((tmp >> (type_bits() - char_size() * (i + 1))) & char_code_mask());
+				char_code_type code = (char)((tmp >> (type_bits() - char_bits() * (i + 1))) & char_code_mask());
 				if (code == invalid_code())
 				{
 					break;
@@ -146,7 +146,7 @@ namespace LongCode{
 				res += code_to_char(code);
 			}
 
-			return std::move(res);
+			return res;
 		}
 
 		static inline NameCodeType to_name_code(const char* str) {
@@ -161,7 +161,7 @@ namespace LongCode{
 
 				if (i < max_char_count()) {
 					c &= char_code_mask();
-					c <<= type_bits() - char_size() * (i + 1);
+					c <<= type_bits() - char_bits() * (i + 1);
 				}
 				else {
 					c &= last_code_mask();
@@ -181,7 +181,10 @@ namespace LongCode{
 
 	// ---------------- uint128 -----------------------
 	template<>
-	inline constexpr long_name<uint128>::size_type long_name<uint128>::char_size() { return 6; }
+	inline constexpr long_name<uint128>::size_type long_name<uint128>::char_bits() { return 6; }
+
+	template<>
+	inline constexpr long_name<uint128>::size_type long_name<uint128>::type_size() { return 16; }
 
 
 	typedef std::unordered_map<char, long_name<uint128>::char_code_type> reverse_code_map_type_u128;
@@ -198,7 +201,7 @@ namespace LongCode{
 		reverse_code_map_type_u128 reverse_code_map;
 		for (long_name<uint128>::char_code_type i = 0; i < sizeof(CODE_MAP_U128); ++i)
 		{
-			reverse_code_map[CODE_MAP_U128[i]] = i;
+			reverse_code_map[CODE_MAP_U128[i]] = i + 1;
 		}
 		return reverse_code_map;
 	}
@@ -212,7 +215,7 @@ namespace LongCode{
 	template<>
 	static char long_name<uint128>::code_to_char(long_name<uint128>::char_code_type code) {
 		assert(code >= 0 && code < sizeof(CODE_MAP_U128));
-		return CODE_MAP_U128[code];
+		return CODE_MAP_U128[code - 1];
 	}
 
 

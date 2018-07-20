@@ -3,7 +3,7 @@
 
 namespace xmax {
 		
-	static std::string&& name_to_string(Xmaxplatform::Basetypes::name::name_code_type name)
+	static std::string name_to_string(Xmaxplatform::Basetypes::name::name_code_type name)
 	{
 		return Xmaxplatform::Basetypes::name::to_string(name);
 	}
