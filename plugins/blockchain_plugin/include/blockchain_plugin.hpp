@@ -143,6 +143,16 @@ namespace Xmaxplatform {
 
 			erc20_total_supply_result erc20_total_supply(const erc20_total_supply_params& params) const;
 
+			struct erc20_balanceof_params {
+				asset_symbol token_name;
+				name owner;
+			};
+
+			struct erc20_balanceof_result {
+				uint256 balance;
+			};
+
+			erc20_balanceof_result erc20_balanceof(const erc20_balanceof_params& params) const;
 
 			void copy_row(const Chain::key_value_object& obj, vector<char>& data)const {
 				data.resize(sizeof(uint64_t) + obj.value.size());
@@ -300,3 +310,5 @@ FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_code_results, (account_name)
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_code_params, (account_name))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_total_supply_params, (token_name))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_total_supply_result, (total_supply))
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_balanceof_params, (token_name)(owner))
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_balanceof_result, (balance))
