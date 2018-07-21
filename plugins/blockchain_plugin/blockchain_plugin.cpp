@@ -14,6 +14,7 @@
 #include <chain_xmax.hpp>
 #include <wast_to_wasm.hpp>
 #include <mongodb_plugin.hpp>
+#include <objects/erc20_token_object.hpp>
 
 namespace Xmaxplatform {
 	namespace bfs = boost::filesystem;
@@ -156,6 +157,7 @@ namespace Xmaxplatform {
 														CHAIN_RO_CALL(get_block, 200),
 														CHAIN_RO_CALL(get_code, 200),
 														CHAIN_RO_CALL(get_required_keys, 200),
+														CHAIN_RO_CALL(erc20_total_supply, 200),
 														//---------------Write Apis-------------
 														CHAIN_RW_CALL(push_transaction, 202),
 														CHAIN_RW_CALL(push_transactions, 202)
@@ -258,6 +260,18 @@ namespace Chain_APIs{
 		get_required_keys_result result;
 		result.required_keys = required_keys_set;
 		return result;
+	}
+
+
+	//--------------------------------------------------
+	Xmaxplatform::Chain_APIs::read_only::erc20_total_supply_result read_only::erc20_total_supply(const erc20_total_supply_params& params) const
+	{
+		using namespace Xmaxplatform::Chain;
+
+		const auto &data = _chain.get_database();
+		const auto &token = data.get<erc20_token_object, by_token_name>(params.token_name);
+		return erc20_total_supply_result{ static_cast<uint256>(token.total_supply) };
+
 	}
 
 	read_only::get_account_results read_only::get_account(const get_account_params &params) const {
