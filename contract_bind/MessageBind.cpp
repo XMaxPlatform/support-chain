@@ -5,7 +5,7 @@
 #include <../../../blockchain/chain/include/blockchain_types.hpp>
 #include <fc/variant.hpp>
 #include <chain_xmax.hpp>
-#include "UInt128Bind.h"
+#include "jsvm_objbind/UInt128Bind.h"
 
 using namespace v8;
 namespace Xmaxplatform {
@@ -81,7 +81,7 @@ namespace Xmaxplatform {
 
 		void GetMsgData(const v8::FunctionCallbackInfo<v8::Value>& args)
 		{
-			Local<Object> self = args.Holder();
+//			Local<Object> self = args.Holder();
 
 //			Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
 //			void* ptr = wrap->Value();

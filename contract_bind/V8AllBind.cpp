@@ -2,7 +2,7 @@
 #include "V8AllBind.h"
 #include "MessageBind.h"
 #include "Int64Bind.h"
-#include "UInt128Bind.h"
+#include "jsvm_objbind/UInt128Bind.h"
 #include "DBBind.h"
 
 using namespace v8;

@@ -19,6 +19,7 @@
 #if WIN32
 #include <fc/int128.hpp>
 #endif
+#include <jsvm_objbind/UInt128Bind.h>
 
 using namespace v8;
 namespace Xmaxplatform {
@@ -177,12 +178,12 @@ namespace Xmaxplatform {
 		void  jsvm_xmax::vm_apply() {
 			message_context_xmax* p_validate_context = jsvm_xmax::get().current_validate_context;
 
-			uint64_t code = 0;
-			uint64_t type = 0;
+			uint128 code = 0;
+			uint128 type = 0;
 			if (p_validate_context != nullptr)
 			{
-				code = uint64_t(p_validate_context->msg.code);
-				type = uint64_t(p_validate_context->msg.type);
+				code = uint128(p_validate_context->msg.code);
+				type = uint128(p_validate_context->msg.type);
 			}
 			vm_calli64param2("apply", code, type);
 		}
@@ -191,24 +192,26 @@ namespace Xmaxplatform {
 		{
 			message_context_xmax* p_validate_context = jsvm_xmax::get().current_validate_context;
 			
-			uint64_t code = 0;
-			uint64_t type = 0;
+			uint128 code = 0;
+			uint128 type = 0;
 			if (p_validate_context != nullptr)
 			{
-				code = uint64_t(p_validate_context->msg.code);
-				type = uint64_t(p_validate_context->msg.type);
+				code = uint128(p_validate_context->msg.code);
+				type = uint128(p_validate_context->msg.type);
 			}
 			vm_calli64param2("init", code, type);
 		}
 
-		void jsvm_xmax::vm_calli64param2(const char* foo, uint64_t code, uint64_t type)
+		void jsvm_xmax::vm_calli64param2(const char* foo, uint128 code, uint128 type)
 		{
 			try {
 				CleanInstruction();
 				Local<Context> context = current_state->current_context.Get(m_pIsolate);
 				Handle<v8::Value> params[2];
-				params[0] = I64Cpp2JS(m_pIsolate, context, code);
-				params[1] = I64Cpp2JS(m_pIsolate, context, type);
+				V8u128 v8code(code);
+				V8u128 v8type(type);
+				params[0] = CppObjToJs<V8u128>(m_pIsolate, context, &v8code);
+				params[1] = CppObjToJs<V8u128>(m_pIsolate, context, &v8type);
 				CallJsFoo(m_pIsolate, context, foo, 2, params);
 			}
 			catch (const Runtime::Exception& e) {

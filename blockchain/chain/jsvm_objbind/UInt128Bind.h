@@ -4,7 +4,7 @@
 #include <map>
 #include <libplatform/libplatform.h>
 #include <v8.h>
-#include <V8BindObject.h>
+#include <jsvm_objbind/V8BindObject.h>
 
 
 
