@@ -13,7 +13,7 @@
 
 namespace Xmaxplatform { namespace Basetypes {       
 
-		using name = LongCode::long_name<uint128>;
+		using name = LongCode::long_name<Xmaxplatform::Basetypes::uint128>;
         struct field {
             field_name name;
             type_name  type;

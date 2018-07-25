@@ -754,6 +754,126 @@ namespace fc {
       s.read( (char*)&n, sizeof(n) );
     }
 
+	template<typename Type>
+	struct bnumtype
+	{
+		using num_type = Type;
+		using backend_type = typename num_type::backend_type;
+		using size_type = unsigned;
+		using limb_type = uint32_t;//boost::multiprecision::limb_type;
+	};
+
+	template<typename Stream, typename Data>
+	void xpack(Stream& s, unsigned size, const Data data[])
+	{
+		switch (size)
+		{
+		case 1:
+		{
+			pack(s, data[0]);
+			break;
+		}
+		case 2:
+		{
+			pack(s, data[0]);
+			pack(s, data[1]);
+			break;
+		}
+		case 3:
+		{
+			pack(s, data[0]);
+			pack(s, data[1]);
+			pack(s, data[2]);
+			break;
+		}
+		case 4:
+		{
+			pack(s, data[0]);
+			pack(s, data[1]);
+			pack(s, data[2]);
+			pack(s, data[3]);
+			break;
+		}
+		default:
+		{
+			for (int i = 0; i < size; ++i)
+			{
+				pack(s, data[i]);
+			}
+			break;
+		}
+
+		}
+	}
+	template<typename Stream, typename Data>
+	void xunpack(Stream& s, unsigned size, Data data[])
+	{
+		switch (size)
+		{
+		case 1:
+		{
+			unpack(s, data[0]);
+			break;
+		}
+		case 2:
+		{
+			unpack(s, data[0]);
+			unpack(s, data[1]);
+			break;
+		}
+		case 3:
+		{
+			unpack(s, data[0]);
+			unpack(s, data[1]);
+			unpack(s, data[2]);
+			break;
+		}
+		case 4:
+		{
+			unpack(s, data[0]);
+			unpack(s, data[1]);
+			unpack(s, data[2]);
+			unpack(s, data[3]);
+			break;
+		}
+		default:
+		{
+			for (int i = 0; i < size; ++i)
+			{
+				unpack(s, data[i]);
+			}
+			break;
+		}
+
+		}
+	}
+
+	template<typename Stream> void pack(Stream& s, const boost::multiprecision::uint128_t& n) {
+
+		using ntype = bnumtype<boost::multiprecision::uint128_t>;
+
+		const ntype::backend_type& bk = n.backend();
+
+		ntype::size_type size = bk.size();
+		const ntype::limb_type* data = (const ntype::limb_type*)bk.limbs();
+		pack(s, size);
+		xpack(s, size, data);
+
+	}
+	template<typename Stream> void unpack(Stream& s, boost::multiprecision::uint128_t& n) {
+
+		using ntype = bnumtype<boost::multiprecision::uint128_t>;
+
+		ntype::size_type size = 0;
+		ntype::limb_type data[ntype::backend_type::base_type::internal_limb_count] { 0 };
+		unpack(s, size);
+		FC_ASSERT(size <= ntype::backend_type::base_type::internal_limb_count);
+
+		ntype::backend_type& bk = n.backend();
+		bk.resize(size, 0);
+		xunpack(s, size, (ntype::limb_type*)bk.limbs());
+	}
+
     template<typename Stream> void pack( Stream& s, const UInt<256>& n ) {
        pack( s, static_cast<UInt<128>>(n) );
        pack( s, static_cast<UInt<128>>(n >> 128) );
