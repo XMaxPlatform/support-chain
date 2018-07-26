@@ -44,7 +44,7 @@ namespace Chain {
 			return next_builders.builders[bias];
 		}
 
-		xmax_type_digest cal_merkle(vector<xmax_type_digest> digests);
+		xmax_type_summary cal_merkle(vector<xmax_type_summary> digests);
 
 	}
 }

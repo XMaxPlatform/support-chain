@@ -811,7 +811,7 @@ namespace Xmaxplatform { namespace Chain {
 
 				const auto& trxs = building_block.receipts;
 
-				std::vector<xmax_type_digest> hashs;
+				std::vector<xmax_type_summary> hashs;
 				hashs.reserve(trxs.size());
 				for (const auto& t : trxs)
 				{

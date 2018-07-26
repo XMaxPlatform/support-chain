@@ -126,15 +126,16 @@ namespace Xmaxplatform { namespace Chain {
    using Xmaxplatform::Basetypes::int256;
    using Xmaxplatform::Basetypes::uint128_t;
 
-   using xmax_type_block_num = uint32_t;
-   using xmax_type_digest = fc::sha256;
-   using xmax_type_block_id = xmax_type_digest;
-   using xmax_type_merkle_root = xmax_type_digest;
-   using xmax_type_transaction_id = xmax_type_digest;
-   using xmax_type_message_id = xmax_type_digest;
-   using xmax_type_summary = xmax_type_digest;
-   using xmax_type_generated_transaction_id = xmax_type_digest;
+
+   using xmax_type_summary = fc::sha256;
+   using xmax_type_block_id = xmax_type_summary;
+   using xmax_type_merkle_root = xmax_type_summary;
+   using xmax_type_transaction_id = xmax_type_summary;
+   using xmax_type_message_id = xmax_type_summary;
+
    using xmax_type_signature = fc::ecc::compact_signature;
+
+   using xmax_type_block_num = uint32_t;
    using xmax_type_weight = uint16_t;
    using bytes = Basetypes::bytes;
    using xmax_erc721_id = fc::sha256;

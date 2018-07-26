@@ -68,7 +68,7 @@ namespace Xmaxplatform { namespace Chain {
 			fc::static_variant<xmax_type_transaction_id, transaction_package> trx;
 
 
-			xmax_type_digest cal_digest() const;
+			xmax_type_summary cal_digest() const;
 		};
 
         struct signed_block : public signed_block_header
@@ -108,7 +108,7 @@ FC_REFLECT_ENUM(Xmaxplatform::Chain::transaction_receipt::result_code, (applied)
 FC_REFLECT(Xmaxplatform::Chain::transaction_receipt_header, (receipt_idx)(result))
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::transaction_receipt, (Xmaxplatform::Chain::transaction_receipt_header), (trx))
 
-FC_REFLECT(Xmaxplatform::Chain::block_header, (previous)(timestamp)(transaction_merkle_root)(builder)(next_builders))
+FC_REFLECT(Xmaxplatform::Chain::block_header, (previous)(timestamp)(trxs_mroot)(builder)(next_builders))
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block_header, (Xmaxplatform::Chain::block_header), (builder_signature))
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block, (Xmaxplatform::Chain::signed_block_header))
 

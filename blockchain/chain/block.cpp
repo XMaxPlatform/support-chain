@@ -41,9 +41,9 @@ namespace Xmaxplatform { namespace Chain {
       return get_signer_key() == signer_key;
    }
 
-   xmax_type_digest transaction_receipt::cal_digest() const
+   xmax_type_summary transaction_receipt::cal_digest() const
    {
-	   xmax_type_digest::encoder coder;
+	   xmax_type_summary::encoder coder;
 
 	   fc::raw::pack(coder, receipt_idx);
 	   fc::raw::pack(coder, result);

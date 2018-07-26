@@ -66,7 +66,7 @@ namespace Xmaxplatform {
 			return enc.result();
 		}
 
-		xmax_type_digest transaction_package::cal_digest() const
+		xmax_type_summary transaction_package::cal_digest() const
 		{
 			xmax_type_summary::encoder enc;
 			fc::raw::pack(enc, code);
