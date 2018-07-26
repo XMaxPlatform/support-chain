@@ -78,7 +78,7 @@ namespace Chain {
 		fc::path				datadir;
 		irreversible_block_handle irreversible;
 
-		std::vector<block_pack_ptr> allblocks; // for test..
+		//std::vector<block_pack_ptr> allblocks; // for test..
 
 		block_pack_ptr get_block(xmax_type_block_id block_id) const
 		{
@@ -107,7 +107,7 @@ namespace Chain {
 			FC_ASSERT(result.second, "unable to insert block state, duplicate state detected");
 
 
-			allblocks.push_back(block_pack);
+			//allblocks.push_back(block_pack);
 
 			update_head();
 
