@@ -29,6 +29,10 @@ namespace Chain {
 
 		xmax_type_summary cal_merkle(vector<xmax_type_summary> digests) {
 
+			if (0 == digests.size())
+			{
+				return xmax_type_summary();
+			}
 			while (digests.size() > 1) {
 				if (digests.size() % 2)
 					digests.push_back(digests.back());
