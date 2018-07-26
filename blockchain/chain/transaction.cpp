@@ -65,5 +65,13 @@ namespace Xmaxplatform {
 			fc::raw::pack(enc, static_cast<const Basetypes::transaction&>(*this));
 			return enc.result();
 		}
+
+		xmax_type_digest transaction_package::cal_digest() const
+		{
+			xmax_type_summary::encoder enc;
+			fc::raw::pack(enc, code);
+			fc::raw::pack(enc, body.merkle_digest());
+			return enc.result();
+		}
 	}
 } // Xmaxplatform::chain

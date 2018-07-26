@@ -127,6 +127,8 @@ namespace Xmaxplatform { namespace Chain {
 		   return body;
 	   }
 
+	   xmax_type_digest cal_digest() const;
+
 	   package_code code;
 	   signed_transaction body;
    };

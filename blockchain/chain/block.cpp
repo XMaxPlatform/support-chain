@@ -41,41 +41,19 @@ namespace Xmaxplatform { namespace Chain {
       return get_signer_key() == signer_key;
    }
 
-   xmax_type_summary merkle(vector<xmax_type_summary> ids) {
-      while (ids.size() > 1) {
-         if (ids.size() % 2)
-            ids.push_back(ids.back());
-         for (int i = 0; i < ids.size() / 2; ++i)
-            ids[i/2] = xmax_type_summary::hash(std::make_pair(ids[i], ids[i+1]));
-         ids.resize(ids.size() / 2);
-      }
-
-      return ids.front();
-   }
-
-   xmax_type_merkle_root signed_block::calculate_merkle_root()const
+   xmax_type_digest transaction_receipt::cal_digest() const
    {
-      //if(threads.empty())
-      //   return xmax_type_merkle_root();
+	   xmax_type_digest::encoder coder;
 
-      //vector<xmax_type_summary> ids;
-      //for (const auto& cycle : threads)
-      //   for (const auto& thread : cycle)
-      //      ids.emplace_back(thread.merkle_digest());
+	   fc::raw::pack(coder, receipt_idx);
+	   fc::raw::pack(coder, result);
 
-      //return xmax_type_merkle_root::hash(merkle(ids));
-
-	   return xmax_type_merkle_root();
+	   if (trx.contains<xmax_type_transaction_id>())
+		   fc::raw::pack(coder, trx.get<xmax_type_transaction_id>());
+	   else
+		   fc::raw::pack(coder, trx.get<transaction_package>().cal_digest());
+	   return coder.result();
    }
-
-   //xmax_type_summary thread::merkle_digest() const {
-   //   vector<xmax_type_summary> ids;
-
-
-   //   return merkle(ids);
-   //}
-
-
 
    xmax_type_summary block_confirmation_header::digest() const
    {

@@ -19,7 +19,7 @@ namespace Xmaxplatform { namespace Chain {
 
             xmax_type_block_id            previous;
             chain_timestamp               timestamp;
-            xmax_type_merkle_root         transaction_merkle_root;
+            xmax_type_merkle_root         trxs_mroot;
             account_name                  builder;
 			optional<builder_rule>		  next_builders;
         };
@@ -66,13 +66,13 @@ namespace Xmaxplatform { namespace Chain {
 			}
 
 			fc::static_variant<xmax_type_transaction_id, transaction_package> trx;
+
+
+			xmax_type_digest cal_digest() const;
 		};
 
         struct signed_block : public signed_block_header
         {
-            xmax_type_merkle_root calculate_merkle_root() const;
-            //vector<vector<thread>> threads;
-
 			std::vector<transaction_receipt> receipts;
         };
 

@@ -97,13 +97,6 @@ namespace Xmaxplatform { namespace Chain {
 			fork_db.close();
 		}
 
-		xmax_type_merkle_root calculate_merkle_root() const
-		{
-			// empty now. test...
-#pragma message("Unrealized functions, realize in the future.") 
-			return xmax_type_merkle_root();
-		}
-
 		//template<typename Function>
 		//auto with_applying_block(Function&& f) -> decltype((*((Function*)nullptr))()) {
 		//	auto on_exit = fc::make_scoped_exit([this]() {
@@ -813,9 +806,19 @@ namespace Xmaxplatform { namespace Chain {
             try {
 
 				signed_block_header& building_header = _context->building_block->pack->new_header;
-
+				signed_block& building_block = *_context->building_block->pack->block;
 				// merkle
-				building_header.transaction_merkle_root = _context->calculate_merkle_root();
+
+				const auto& trxs = building_block.receipts;
+
+				std::vector<xmax_type_digest> hashs;
+				hashs.reserve(trxs.size());
+				for (const auto& t : trxs)
+				{
+					hashs.emplace_back(t.cal_digest());
+				}
+
+				building_header.trxs_mroot = utils::cal_merkle(hashs);
 
             } FC_CAPTURE_AND_RETHROW( (_context->building_block->pack->new_header.builder) )
 		}
@@ -836,7 +839,7 @@ namespace Xmaxplatform { namespace Chain {
 
 			FC_ASSERT(_context->block_head->block_num + 1 == block->block_num(), "head block number + 1 != next block number");
 
-			FC_ASSERT(block->transaction_merkle_root == block->calculate_merkle_root(), "action merkle root does not match");
+			//FC_ASSERT(block->transaction_merkle_root == block->calculate_merkle_root(), "action merkle root does not match");
 
 			const builder_object* builder = find_builder_object(block->builder);
 
