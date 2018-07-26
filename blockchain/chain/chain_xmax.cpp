@@ -254,7 +254,7 @@ namespace Xmaxplatform { namespace Chain {
 				const auto& static_config = get_static_config();
 				const auto& dynamic_states = get_dynamic_states();
 
-				pack_head->refresh(head, static_config.current_builders, static_config.next_builders, dynamic_states.round_slot, true, true);
+				pack_head->refresh(head, static_config.current_builders, static_config.next_builders, dynamic_states.round_slot, true, true, true);
 
 			}
 
@@ -899,13 +899,13 @@ namespace Xmaxplatform { namespace Chain {
 		void chain_xmax::_push_fork()
 		{
 			FC_ASSERT(_context->building_block);
-			const auto& new_block = _context->building_block->pack->block;
+			const auto pack = _context->building_block->pack;
 			try {
 
-				_context->fork_db.add_block(_context->building_block->pack);
+				_context->fork_db.add_block(pack);
 				_context->block_head = _context->fork_db.get_head();
-				FC_ASSERT(_context->building_block->pack == _context->block_head, "error new head in fork database");
-			} FC_CAPTURE_AND_RETHROW((new_block->block_num()))
+				FC_ASSERT(pack == _context->block_head, "error new head in fork database");
+			} FC_CAPTURE_AND_RETHROW((pack->block_num))
 		}
 
 		void chain_xmax::_commit_block() {

@@ -107,7 +107,7 @@ namespace Chain {
 		generate_dpos(pre_pack);
 	}
 
-	void block_pack::refresh(signed_block_ptr b, const builder_rule& cur_blders, const builder_rule& new_blders, uint16_t roundslot, bool confirmed, bool mainchain)
+	void block_pack::refresh(signed_block_ptr b, const builder_rule& cur_blders, const builder_rule& new_blders, uint16_t roundslot, bool confirmed, bool mainchain, bool irr_confirmed)
 	{		
 		// generate block info.
 		block = b;
@@ -117,17 +117,20 @@ namespace Chain {
 
 		last_block_num = block_num;
 
+
 		// generate confirm
 		if (confirmed)
 		{
 			last_confirmed_num = block_num;
 			last_confirmed_id = block_id;
+	
 		}
 		else
 		{
 			last_confirmed_num = 0;
 			last_confirmed_id = empty_chain_id;
 		}
+		irreversible_confirmed = irr_confirmed;
 
 		current_builders = cur_blders;
 		new_builders = new_blders;

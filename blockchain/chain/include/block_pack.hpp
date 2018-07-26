@@ -44,6 +44,7 @@ namespace Chain {
 		xmax_type_block_num					last_block_num = 0;
 		xmax_type_block_num					last_confirmed_num = 0;
 		xmax_type_block_id					last_confirmed_id;
+		bool								irreversible_confirmed = false;
 
 		xmax_type_block_num					dpos_irreversible_num = 0; // make dpos irreversible block number by this block.
 		xmax_type_block_id					dpos_irreversible_id;
@@ -75,7 +76,7 @@ namespace Chain {
 		void init_default(chain_timestamp time, const builder_info& builder, const builder_rule& cur_blders);
 		void init_by_pre_pack(const block_pack& pre_pack, chain_timestamp when, bool mainchain);
 
-		void refresh(signed_block_ptr b, const builder_rule& cur_blders, const builder_rule& new_blders, uint16_t roundslot, bool confirmed, bool mainchain);
+		void refresh(signed_block_ptr b, const builder_rule& cur_blders, const builder_rule& new_blders, uint16_t roundslot, bool confirmed, bool mainchain, bool irr_confirmed);
 
 		void generate_by_block(signed_block_ptr b);
 

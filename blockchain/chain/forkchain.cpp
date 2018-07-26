@@ -78,6 +78,8 @@ namespace Chain {
 		fc::path				datadir;
 		irreversible_block_handle irreversible;
 
+		std::vector<block_pack_ptr> allblocks; // for test..
+
 		block_pack_ptr get_block(xmax_type_block_id block_id) const
 		{
 			auto itr = packs.find(block_id);
@@ -103,6 +105,9 @@ namespace Chain {
 
 			auto result = packs.insert(block_pack);
 			FC_ASSERT(result.second, "unable to insert block state, duplicate state detected");
+
+
+			allblocks.push_back(block_pack);
 
 			update_head();
 
@@ -183,13 +188,13 @@ namespace Chain {
 
 		void set_last_confirmed(xmax_type_block_id last_id)
 		{
-			auto itr = packs.find(last_id);
+			auto confirmed_pack = packs.find(last_id);
 
-			FC_ASSERT(itr != packs.end(), "unknown block id ${id}", ("id", last_id));
+			FC_ASSERT(confirmed_pack != packs.end(), "unknown block id ${id}", ("id", last_id));
 
-			Chain::xmax_type_block_num block_num = (*itr)->block_num;
+			Chain::xmax_type_block_num block_num = (*confirmed_pack)->block_num;
 
-			packs.modify(itr, [&](auto& val)
+			packs.modify(confirmed_pack, [&](auto& val)
 			{
 				val->last_block_num = block_num;
 				val->last_confirmed_num = block_num;
@@ -197,7 +202,7 @@ namespace Chain {
 			});
 
 			// flash all pre blocks.
-			xmax_type_block_id pre_id = (*itr)->prev_id();
+			xmax_type_block_id pre_id = (*confirmed_pack)->prev_id();
 			block_pack_index::iterator pre_it = packs.find(pre_id);
 			while (pre_it != packs.end() && pre_id != empty_chain_id)
 			{
@@ -211,6 +216,37 @@ namespace Chain {
 
 				pre_it = packs.find(pre_id);
 			};
+
+			// find all next blocks.
+			auto& pidx = packs.get<by_pre_id>();
+
+			std::vector<xmax_type_block_id> idlist{ last_id };
+
+			for (int i = 0; i < idlist.size(); ++i)
+			{
+				auto itl = pidx.lower_bound(idlist[i]);
+				auto itu = pidx.upper_bound(idlist[i]);
+
+				while (itl != itu)
+				{
+					idlist.push_back((*itl)->block_id);
+					++itl;
+				}
+			}
+			// flash all next blocks.
+			for (int i = 1; i < idlist.size(); ++i)
+			{
+				auto itr = packs.find(idlist[i]);
+				if (itr != packs.end())
+				{
+					packs.modify(itr, [&](auto& val) {
+						val->last_block_num = block_num;
+						val->last_confirmed_num = block_num;
+						val->last_confirmed_id = last_id;
+					});
+				}
+			}
+
 		}
 
 		void on_last_confirmed_grow(xmax_type_block_id last_confirmed_id, uint32_t last_confirmed_num)
@@ -226,7 +262,11 @@ namespace Chain {
 			{
 				if ((*it)->last_confirmed_id == last_confirmed_id)
 				{
-					confiremdlist.push_back((*it)->block_id);
+					if ((*it)->irreversible_confirmed)
+					{
+						confiremdlist.push_back((*it)->block_id);
+					}
+
 					if ((*it)->block_id != last_confirmed_id)
 					{
 						remlist.push_back((*it)->block_id);
@@ -244,6 +284,8 @@ namespace Chain {
 				auto ptr = get_block(it);
 
 				irreversible(ptr);
+
+				ptr->irreversible_confirmed = true;
 			}
 
 			// remove blocks no need.
