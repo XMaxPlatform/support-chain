@@ -94,6 +94,8 @@ namespace Xmaxplatform { namespace Chain {
    using mapped_vector = boost::interprocess::vector<T, allocator<T>>;
    template<typename T>
    using shared_set = boost::interprocess::set<T, std::less<T>, allocator<T>>;
+   template<typename K, typename T>
+   using shared_map = boost::interprocess::map<K, T, std::less<K>, allocator<std::pair<const K, T>>>;
 
    using private_key_type = fc::ecc::private_key;
    using chain_id_type = fc::sha256;
