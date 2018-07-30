@@ -636,7 +636,7 @@ namespace Xmaxplatform {
 			<< "block_id" << block_id_str
 			<< "prev_block_id" << prev_block_id
 			<< "timestamp" << b_date{ std::chrono::milliseconds{ std::chrono::seconds{Chain::chain_timestamp::to_time_point(block.timestamp).sec_since_epoch()}} }
-			<< "transaction_merkle_root" << block.transaction_merkle_root.str()
+			//<< "transaction_merkle_root" << block.transaction_merkle_root.str()
 			<< "builder_account_name" << block.builder.to_string();
 		
 		_insert_block_transactions(block, block_doc);
