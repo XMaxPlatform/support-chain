@@ -18,6 +18,7 @@
 #include <objects/object_utility.hpp>
 #include <objects/erc20_token_account_object.hpp>
 #include <objects/erc721_token_account_object.hpp>
+#include <objects/erc721_token_object.hpp>
 
 namespace Xmaxplatform {
 	namespace bfs = boost::filesystem;
@@ -163,6 +164,7 @@ namespace Xmaxplatform {
 														CHAIN_RO_CALL(erc20_total_supply, 200),
 														CHAIN_RO_CALL(erc20_balanceof, 200),
 														CHAIN_RO_CALL(erc721_balanceof, 200),
+														CHAIN_RO_CALL(erc721_ownerof, 200),
 														//---------------Write Apis-------------
 														CHAIN_RW_CALL(push_transaction, 202),
 														CHAIN_RW_CALL(push_transactions, 202)
@@ -299,6 +301,18 @@ namespace Chain_APIs{
 		const auto &data = _chain.get_database();
 		const auto &token_account = data.get<erc721_token_account_object, by_token_and_owner>(MakeErcTokenIndex(params.token_name, params.owner));
 		return erc721_balanceof_result{ static_cast<uint256>(token_account.tokens.size()) };
+	}
+
+
+	//--------------------------------------------------
+	Xmaxplatform::Chain_APIs::read_only::erc721_ownerof_result read_only::erc721_ownerof(const erc721_ownerof_params& params) const
+	{
+		using namespace Xmaxplatform::Chain;
+
+		const auto &data = _chain.get_database();
+		const auto &token_obj = data.get<erc721_token_object, by_token_name>(params.token_name);
+		return erc721_ownerof_result{ token_obj.token_owners.at(params.token_id) };
+
 	}
 
 	read_only::get_account_results read_only::get_account(const get_account_params &params) const {

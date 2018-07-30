@@ -9,6 +9,7 @@
 #include <chain_xmax.hpp>
 #include <chainhttp_plugin.hpp>
 #include <abi_serializer.hpp>
+#include <blockchain_types.hpp>
 
 using namespace Baseapp;
 namespace Xmaxplatform {
@@ -145,7 +146,7 @@ namespace Xmaxplatform {
 
 			struct erc20_balanceof_params {
 				asset_symbol token_name;
-				name owner;
+				account_name owner;
 			};
 
 			struct erc20_balanceof_result {
@@ -157,6 +158,17 @@ namespace Xmaxplatform {
 			using erc721_balanceof_params = erc20_balanceof_params;
 			using erc721_balanceof_result = erc20_balanceof_result;
 			erc721_balanceof_result erc721_balanceof(const erc721_balanceof_params& params) const;
+
+			struct erc721_ownerof_params {
+				asset_symbol token_name;
+				Chain::xmax_erc721_id token_id;
+			};
+
+			struct erc721_ownerof_result {
+				account_name owner;
+			};
+			erc721_ownerof_result erc721_ownerof(const erc721_ownerof_params& params) const;
+
 
 			void copy_row(const Chain::key_value_object& obj, vector<char>& data)const {
 				data.resize(sizeof(uint64_t) + obj.value.size());
@@ -316,3 +328,5 @@ FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_total_supply_params, (toke
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_total_supply_result, (total_supply))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_balanceof_params, (token_name)(owner))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_balanceof_result, (balance))
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc721_ownerof_params, (token_name)(token_id))
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc721_ownerof_result, (owner))
