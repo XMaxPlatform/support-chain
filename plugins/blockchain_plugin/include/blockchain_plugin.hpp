@@ -154,6 +154,10 @@ namespace Xmaxplatform {
 
 			erc20_balanceof_result erc20_balanceof(const erc20_balanceof_params& params) const;
 
+			using erc721_balanceof_params = erc20_balanceof_params;
+			using erc721_balanceof_result = erc20_balanceof_result;
+			erc721_balanceof_result erc721_balanceof(const erc721_balanceof_params& params) const;
+
 			void copy_row(const Chain::key_value_object& obj, vector<char>& data)const {
 				data.resize(sizeof(uint64_t) + obj.value.size());
 				memcpy(data.data(), &obj.primary_key, sizeof(uint64_t));
