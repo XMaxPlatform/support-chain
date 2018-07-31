@@ -12,6 +12,12 @@ namespace Chain {
 struct blockchain_setup : public Basetypes::blockchain_configuration {
    using Basetypes::blockchain_configuration::blockchain_configuration;
 
+   blockchain_configuration()
+   {
+
+   }
+
+
    blockchain_configuration& operator= (const Basetypes::blockchain_configuration& other);
 
    static blockchain_configuration get_median_values(std::vector<blockchain_configuration> votes);
