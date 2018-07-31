@@ -72,6 +72,9 @@ void message_context_xmax::require_scope(const Basetypes::account_name& account)
       return scope == account;
    });
 
+   XMAX_ASSERT(itr != trx.scope.end(), tx_missing_scope, "missing scope of ${account}",
+	   ("account", account));
+
 }
 
 void message_context_xmax::require_recipient(const Basetypes::account_name& account) {

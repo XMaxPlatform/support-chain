@@ -507,6 +507,9 @@ namespace Xmaxplatform { namespace Chain {
 				transaction_response_ptr response;
 				transaction_context_xmax Impl(*this, request->signed_trx);
 
+
+
+
 				Impl.exec();
 
 				record_transaction(request->signed_trx);
@@ -1083,15 +1086,18 @@ namespace Xmaxplatform { namespace Chain {
 		void chain_xmax::validate_expiration(const transaction& trx) const
 		{
 			try {
-				fc::time_point_sec now = head_block_time();
-				const blockchain_configuration& chain_configuration = get_static_config().setup;
+				fc::time_point now = head_block_time();
+				//const blockchain_configuration& chain_configuration = get_static_config().setup;
 
-// 				XMAX_ASSERT(trx.expiration <= now + int32_t(chain_configuration.max_trx_lifetime),
-// 					transaction_exception, "Transaction expiration is too far in the future",
-// 					("trx.expiration", trx.expiration)("now", now)
-// 					("max_til_exp", chain_configuration.max_trx_lifetime));
-// 				XMAX_ASSERT(now <= trx.expiration, transaction_exception, "Transaction is expired",
-// 					("now", now)("trx.exp", trx.expiration));
+				static const int64_t max_trx_lifetime = 600;//chain_configuration.max_trx_lifetime
+
+				XMAX_ASSERT(fc::time_point(trx.expiration) <= now + fc::seconds(max_trx_lifetime),
+					transaction_exception, "Transaction expiration is too far in the future",
+					("trx.expiration", trx.expiration)("now", now)
+					("max_til_exp", max_trx_lifetime));
+
+				XMAX_ASSERT(now <= trx.expiration, transaction_exception, "Transaction is expired",
+					("now", now)("trx.exp", trx.expiration));
 			} FC_CAPTURE_AND_RETHROW((trx))
 		}
 

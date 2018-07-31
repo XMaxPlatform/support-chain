@@ -49,6 +49,7 @@ namespace Xmaxplatform { namespace Chain {
    FC_DECLARE_DERIVED_EXCEPTION( tx_code_db_limit_exceeded,         Xmaxplatform::Chain::transaction_exception, 3030020, "Database storage limit for code account has been exceeded in transaction message" )
    FC_DECLARE_DERIVED_EXCEPTION( msg_resource_exhausted,            Xmaxplatform::Chain::transaction_exception, 3030021, "message exhausted allowed resources" )
    FC_DECLARE_DERIVED_EXCEPTION( api_not_supported,                 Xmaxplatform::Chain::transaction_exception, 3030022, "API not currently supported" )
+   FC_DECLARE_DERIVED_EXCEPTION( tx_missing_scope,					Xmaxplatform::Chain::transaction_exception, 3030023, "missing required scope")
 
    FC_DECLARE_DERIVED_EXCEPTION( account_name_exists_exception,     Xmaxplatform::Chain::message_precondition_exception, 3050001, "account name already exists" )
    FC_DECLARE_DERIVED_EXCEPTION( invalid_pts_address,               Xmaxplatform::Chain::utility_exception, 3060001, "invalid pts address" )
