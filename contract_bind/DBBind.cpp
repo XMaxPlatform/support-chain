@@ -156,19 +156,19 @@ namespace Xmaxplatform {
 				}
 			}
 
-			int64_t i64key;
+			name i64key;
 			{
 				Handle<v8::Value> js_data_value = args[2];
 
 				bool bIsObject = js_data_value->IsObject();
 				if (bIsObject)
 				{
-					i64key = I64JS2CPP(args.GetIsolate(), js_data_value); //*JsObjToCpp<V8u128>(args.GetIsolate(), js_data_value);
+					i64key = *JsObjToCpp<V8u128>(args.GetIsolate(), js_data_value);
 				}
 				else
 				{
 					Local<v8::Integer> v8int = Local<v8::Integer>::Cast(js_data_value);
-					i64key = v8int->Value();;
+					i64key = v8int->Value();
 				}
 			}
 

@@ -29,6 +29,7 @@ namespace Xmaxplatform {
 		jsvm_xmax::jsvm_xmax() 
 			:current_validate_context(nullptr)
 			,m_instructionLimit(1000)
+			,m_instructionCount(0)
 			,m_pBind(nullptr)
 		{
 			CleanInstruction();
