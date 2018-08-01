@@ -8,6 +8,9 @@
       FC_THROW_EXCEPTION( exc_type, FORMAT, __VA_ARGS__ );            \
    FC_MULTILINE_MACRO_END
 
+#define XMAX_THROW( exc_type, FORMAT, ... ) \
+    throw exc_type( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) );
+
 
 #define XMAX_DECLARE_OP_BASE_EXCEPTIONS( op_name )                \
    FC_DECLARE_DERIVED_EXCEPTION(                                      \
