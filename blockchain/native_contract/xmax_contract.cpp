@@ -7,6 +7,7 @@
 #include <chain_xmax.hpp>
 #include <message_context_xmax.hpp>
 #include <message_xmax.hpp>
+#include <authoritys_utils.hpp>
 
 #include <objects/object_utility.hpp>
 #include <objects/account_object.hpp>
@@ -39,6 +40,30 @@ using namespace ::Xmaxplatform::Basetypes;
 typedef mutable_db_table <xmx_token_object, by_owner_name> xmax_token_table;
 typedef mutable_db_table <resource_token_object, by_owner_name> resource_token_table;
 
+
+void validate_authority(const message_context_xmax& context, const authority& auth) {
+
+	for (const account_permission_weight& a : auth.accounts)
+	{
+		const account_object* acct = context.db.find<account_object, by_name>(a.permission.account);
+		XMAX_ASSERT( acct != nullptr, message_validate_exception, "account '${account}' does not exist", ("account", a.permission.account) );
+
+		if (a.permission.authority == Config::xmax_owner_name || a.permission.authority == Config::xmax_active_name)
+			continue; // account was already checked to exist, so its owner and active permissions should exist
+
+		try {
+			utils::get_authority_object(context.db, a.permission);
+		}
+		catch (...) 
+		{
+			XMAX_THROW(message_validate_exception,
+				"permission '${perm}' does not exist",
+				("perm", a.permission)
+			);
+		}
+	}
+}
+
 //Utility functions
 static void create_account_internal(Types::addaccount& create, Basechain::database& db, time& current_time) {
 		
@@ -69,7 +94,7 @@ static void create_account_internal(Types::addaccount& create, Basechain::databa
 
 	auto owner_p = db.create<authority_object>([&](authority_object& obj)
 	{
-		obj.auth_name = Config::xmax_owner_auth;
+		obj.auth_name = Config::xmax_owner_name;
 
 		obj.parent = 0;
 		obj.owner_name = create.name;
@@ -79,7 +104,7 @@ static void create_account_internal(Types::addaccount& create, Basechain::databa
 
 	auto owner_a = db.create<authority_object>([&](authority_object& obj)
 	{
-		obj.auth_name = Config::xmax_active_auth;
+		obj.auth_name = Config::xmax_active_name;
 
 		obj.parent = owner_p.id;
 		obj.owner_name = create.name;
@@ -106,23 +131,25 @@ void handle_xmax_updateauth(Chain::message_context_xmax& context)
 
 	XMAX_ASSERT(!msg.permission.empty(), message_validate_exception, "Cannot create authority with empty name");
 
-	XMAX_ASSERT(msg.permission.to_string().find(Config::xmax_contract_string) != 0, message_validate_exception,
-		"Permission names cannot be started with 'xmax'.");
+	XMAX_ASSERT(utils::check_authority_name(msg.permission), message_validate_exception, "Permission names cannot be started with 'xmax'.");
 
 	XMAX_ASSERT(msg.permission != msg.parent, message_validate_exception, "Cannot set an authority as its own parent");
 
 	data_db.get<account_object, by_name>(msg.account);
 
-	XMAX_ASSERT(validate_authorization(msg.new_authority), message_validate_exception, "Invalid authority: ${auth}", ("auth", msg.new_authority));
+	XMAX_ASSERT(utils::validate_weight(msg.new_authority), message_validate_exception, "Invalid authority: ${auth}", ("auth", msg.new_authority));
 
 
-	if (msg.permission == Config::xmax_active_auth)
-		XMAX_ASSERT(msg.parent == config::xmax_owner_auth, message_validate_exception, "Cannot change active authority's parent from owner", ("msg.parent", msg.parent));
+	if (msg.permission == Config::xmax_active_name)
+		XMAX_ASSERT(msg.parent == config::xmax_owner_name, message_validate_exception, "Cannot change active authority's parent from owner", ("msg.parent", msg.parent));
 
-	if (msg.permission == Config::xmax_owner_auth)
+	if (msg.permission == Config::xmax_owner_name)
 		XMAX_ASSERT(msg.parent.empty(), message_validate_exception, "Cannot change owner authority's parent");
 	else
 		XMAX_ASSERT(!msg.parent.empty(), message_validate_exception, "Only owner permission can have empty parent");
+
+
+	validate_authority(context, msg.new_authority);
 
 
 }
