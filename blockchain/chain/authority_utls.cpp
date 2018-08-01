@@ -2,9 +2,12 @@
 *  @file
 *  @copyright defined in xmax/LICENSE
 */
+#include <blockchain_exceptions.hpp>
 #include <authoritys_utils.hpp>
 namespace Xmaxplatform {
 namespace Chain {
+
+	using Basechain::database;
 
 	namespace utils
 	{
@@ -24,7 +27,7 @@ namespace Chain {
 		{
 			auth_weight weights = 0;
 
-			if ((auth.keys.size() + auth.accounts.size() + auth.waits.size()) > (1 << 16))
+			if ((auth.keys.size() + auth.accounts.size()) > (1 << 16))
 				return false; // (assumes auth_weight is uint16_t and threshold is of type uint32_t)
 
 			if (auth.threshold == 0)
@@ -49,6 +52,19 @@ namespace Chain {
 			}
 			return weights >= auth.threshold;
 		}
+
+		const authority_object& get_permission(database& db, const account_auth& auth)
+		{
+			try {
+				FC_ASSERT(!auth.account.empty() && !auth.permission.empty(), "Invalid authority");
+
+				return db.get<authority_object, by_owner>(std::make_tuple(auth.account, auth.permission));
+
+			} FC_CAPTURE_AND_RETHROW(("auth", auth))
+		}
+
+
+
 	}
 }
 }
