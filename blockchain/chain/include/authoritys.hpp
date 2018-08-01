@@ -81,15 +81,5 @@ namespace Chain {
 		mapped_vector<key_permission>		keys;
 		mapped_vector<account_permission>	accounts;
 	};
-
-	namespace utils
-	{
-		void check_authorization(const std::vector<Basetypes::message>& messages, const flat_set<public_key_type>& keys);
-
-		bool validate_weight(const authority& auth);
-
-		const authority_object& get_permission(database& db, const account_auth& auth);
-	}
-
 }
 }

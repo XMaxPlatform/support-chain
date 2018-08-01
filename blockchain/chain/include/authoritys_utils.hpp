@@ -5,8 +5,16 @@
 #pragma once
 #include <blockchain_types.hpp>
 #include <authoritys.hpp>
+#include <objects/authority_object.hpp>
+
+namespace  Basechain {
+	class database;
+}
+
 namespace Xmaxplatform {
 namespace Chain {
+
+
 
 	namespace utils
 	{
@@ -14,7 +22,7 @@ namespace Chain {
 
 		bool validate_weight(const authority& auth);
 
-		const authority_object& get_permission(database& db, const account_auth& auth);
+		const authority_object& get_permission(Basechain::database& db, const account_auth& auth);
 	}
 
 }
