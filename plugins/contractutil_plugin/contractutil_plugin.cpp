@@ -133,7 +133,7 @@ namespace Xmaxplatform {
 
 			Chain::signed_transaction trx;
 			trx.scope = sort_names({ Config::xmax_contract_name, callername });
-			transaction_emplace_message(trx, Config::xmax_contract_name, Basetypes::vector<Basetypes::account_permission>{ {callername, "active"}},
+			transaction_emplace_message(trx, Config::xmax_contract_name, Basetypes::vector<Basetypes::account_auth>{ {callername, "active"}},
 				"setcode", handler);
 
 			std::cout << "Publishing contract..."<< std::endl;
@@ -158,7 +158,7 @@ namespace Xmaxplatform {
 
 			Chain::signed_transaction trx;
 			trx.scope = sort_names({ Config::xmax_contract_name, callername });
-			transaction_emplace_message(trx, Config::xmax_contract_name, Basetypes::vector<Basetypes::account_permission>{ {callername, "active"}},
+			transaction_emplace_message(trx, Config::xmax_contract_name, Basetypes::vector<Basetypes::account_auth>{ {callername, "active"}},
 				"setjscode", handler);
 
 			std::cout << "Publishing contract..." << std::endl;
@@ -246,7 +246,7 @@ namespace Xmaxplatform {
 				auto active_auth = Xmaxplatform::Chain::authority{ 1,{ { pub_key_active, 1 } },{} };
 
 				trx.scope = sort_names({ creator,Config::xmax_contract_name });
-				transaction_emplace_message(trx, Config::xmax_contract_name, Xmaxplatform::Basetypes::vector<Basetypes::account_permission>{ {creator, "active"}}, "addaccount",
+				transaction_emplace_message(trx, Config::xmax_contract_name, Xmaxplatform::Basetypes::vector<Basetypes::account_auth>{ {creator, "active"}}, "addaccount",
 					Basetypes::addaccount{ creator, accountName, owner_auth,
 					active_auth, stake });
 			}

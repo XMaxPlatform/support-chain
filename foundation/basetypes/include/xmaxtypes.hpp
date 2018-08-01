@@ -11,27 +11,27 @@ namespace Xmaxplatform {
 namespace Basetypes {
 
 
-	inline bool operator== (const account_permission& lhs, const account_permission& rhs) {
+	inline bool operator== (const account_auth& lhs, const account_auth& rhs) {
 		return std::tie(lhs.account, lhs.authority) == std::tie(rhs.account, rhs.authority);
 	}
 
-	inline bool operator!= (const account_permission& lhs, const account_permission& rhs) {
+	inline bool operator!= (const account_auth& lhs, const account_auth& rhs) {
 		return std::tie(lhs.account, lhs.authority) != std::tie(rhs.account, rhs.authority);
 	}
 
-	inline bool operator< (const account_permission& lhs, const account_permission& rhs) {
+	inline bool operator< (const account_auth& lhs, const account_auth& rhs) {
 		return std::tie(lhs.account, lhs.authority) < std::tie(rhs.account, rhs.authority);
 	}
 
-	inline bool operator<= (const account_permission& lhs, const account_permission& rhs) {
+	inline bool operator<= (const account_auth& lhs, const account_auth& rhs) {
 		return std::tie(lhs.account, lhs.authority) <= std::tie(rhs.account, rhs.authority);
 	}
 
-	inline bool operator> (const account_permission& lhs, const account_permission& rhs) {
+	inline bool operator> (const account_auth& lhs, const account_auth& rhs) {
 		return std::tie(lhs.account, lhs.authority) > std::tie(rhs.account, rhs.authority);
 	}
 
-	inline bool operator>= (const account_permission& lhs, const account_permission& rhs) {
+	inline bool operator>= (const account_auth& lhs, const account_auth& rhs) {
 		return std::tie(lhs.account, lhs.authority) >= std::tie(rhs.account, rhs.authority);
 	}
 }

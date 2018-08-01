@@ -311,7 +311,7 @@ public:
    void require_recipient(const Basetypes::account_name& account);
 
    bool all_authorizations_used() const;
-   vector<Basetypes::account_permission> unused_authorizations() const;
+   vector<Basetypes::account_auth> unused_authorizations() const;
 
    void get_active_builders(Basetypes::account_name *builders, uint32_t len);
 
@@ -369,7 +369,7 @@ public:
       typedef uint32_t handle_type;
       
       pending_message(const handle_type& _handle, const account_name& code, const func_name& type, const bytes& data)
-         : Basetypes::message(code, type, vector<Basetypes::account_permission>(), data)
+         : Basetypes::message(code, type, vector<Basetypes::account_auth>(), data)
          , handle(_handle) {}
 
       handle_type handle;

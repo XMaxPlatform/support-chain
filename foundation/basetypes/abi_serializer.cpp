@@ -86,7 +86,7 @@ namespace Xmaxplatform { namespace Basetypes {
       built_in_types.emplace("func_name",                pack_unpack<func_name>());
       built_in_types.emplace("message_name",             pack_unpack<message_name>());
       //built_in_types.emplace("type_name",              pack_unpack<type_name>());
-      built_in_types.emplace("account_permission",       pack_unpack<account_permission>());
+      built_in_types.emplace("account_permission",       pack_unpack<account_auth>());
       built_in_types.emplace("message",                  pack_unpack<message>());
       built_in_types.emplace("account_permission_weight",pack_unpack<account_permission_weight>());
       built_in_types.emplace("transaction",              pack_unpack<transaction>());

@@ -6,18 +6,18 @@ namespace Xmaxplatform { namespace Basetypes {
     typedef name                             event_name;
     typedef fixed_string32                   message_name;
     typedef fixed_string32                   type_name;
-    struct account_permission { 
-        account_permission() = default;
-        account_permission(const account_name& account, const authority_name& authority)
+    struct account_auth { 
+        account_auth() = default;
+        account_auth(const account_name& account, const authority_name& authority)
            : account(account), authority(authority) {}
 
         account_name                     account;
         authority_name                   authority;
     };
 
-    template<> struct get_struct<account_permission> { 
+    template<> struct get_struct<account_auth> { 
         static const struct_t& type() { 
-           static struct_t result = { "account_permission", "", {
+           static struct_t result = { "account_auth", "", {
                 {"account", "account_name"},
                 {"authority", "authority_name"},
               }
@@ -28,12 +28,12 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct message { 
         message() = default;
-        message(const account_name& code, const func_name& type, const vector<account_permission>& authorization, const bytes& data)
+        message(const account_name& code, const func_name& type, const vector<account_auth>& authorization, const bytes& data)
            : code(code), type(type), authorization(authorization), data(data) {}
 
         account_name                     code;
         func_name                        type;
-        vector<account_permission>       authorization;
+        vector<account_auth>             authorization;
         bytes                            data;
     };
 
@@ -42,7 +42,7 @@ namespace Xmaxplatform { namespace Basetypes {
            static struct_t result = { "message", "", {
                 {"code", "account_name"},
                 {"type", "func_name"},
-                {"authorization", "account_permission[]"},
+                {"authorization", "account_auth[]"},
                 {"data", "bytes"},
               }
            };
@@ -52,17 +52,17 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct account_permission_weight { 
         account_permission_weight() = default;
-        account_permission_weight(const account_permission& permission, const uint16& weight)
+        account_permission_weight(const account_auth& permission, const uint16& weight)
            : permission(permission), weight(weight) {}
 
-        account_permission               permission;
+        account_auth                     permission;
         uint16                           weight;
     };
 
     template<> struct get_struct<account_permission_weight> { 
         static const struct_t& type() { 
            static struct_t result = { "account_permission_weight", "", {
-                {"permission", "account_permission"},
+                {"permission", "account_auth"},
                 {"weight", "uint16"},
               }
            };
@@ -757,7 +757,7 @@ namespace Xmaxplatform { namespace Basetypes {
     };
 
 }} // namespace Xmaxplatform::Basetypes
-FC_REFLECT( Xmaxplatform::Basetypes::account_permission               , (account)(authority) )
+FC_REFLECT( Xmaxplatform::Basetypes::account_auth                     , (account)(authority) )
 FC_REFLECT( Xmaxplatform::Basetypes::message                          , (code)(type)(authorization)(data) )
 FC_REFLECT( Xmaxplatform::Basetypes::account_permission_weight        , (permission)(weight) )
 FC_REFLECT( Xmaxplatform::Basetypes::transaction                      , (ref_block_num)(ref_block_prefix)(expiration)(scope)(read_scope)(messages) )
