@@ -25,11 +25,11 @@ namespace Xmaxplatform {
             const Chain::chain_xmax& _chain;
 
         public:
-            static const string KEYi64;
+            static const string KEYi128;
             static const string KEYstr;
             static const string KEYi128i128;
 			static const string KEYi128i128i128;
-            static const string KEYi64i64i64;
+          //  static const string KEYi64i64i64;
             static const string PRIMARY;
             static const string SECONDARY;
             static const string TERTIARY;
@@ -171,9 +171,13 @@ namespace Xmaxplatform {
 
 
 			void copy_row(const Chain::key_value_object& obj, vector<char>& data)const {
-				data.resize(sizeof(uint64_t) + obj.value.size());
-				memcpy(data.data(), &obj.primary_key, sizeof(uint64_t));
-				memcpy(data.data() + sizeof(uint64_t), obj.value.data(), obj.value.size());
+				data.resize(obj.primary_key.backend().size() * 4 + 4 + obj.value.size());
+				fc::datastream<char*> ds(data.data(), data.size());
+				fc::raw::pack(ds, obj.primary_key);
+				ds.write(obj.value.data(), obj.value.size());
+				data.resize(ds.tellp());
+				//memcpy(data.data(), &obj.primary_key, sizeof(uint128_t));
+				//memcpy(data.data() + sizeof(uint128_t), obj.value.data(), obj.value.size());
 			}
 
 			void copy_row(const Chain::keystr_value_object& obj, vector<char>& data)const {

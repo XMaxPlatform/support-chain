@@ -41,12 +41,12 @@ namespace Xmaxplatform {
 		{
 			if ("str" == type_name)
 				return str;
-			if ("i64" == type_name)
-				return i64;
+			if ("i128" == type_name)
+				return i128;
 			if ("i128i128" == type_name)
 				return i128i128;
-			if ("i64i64i64" == type_name)
-				return i64i64i64;
+			if ("i128i128i128" == type_name)
+				return i128i128i128;
 
 			return invalid_key_type;
 		}
@@ -57,12 +57,12 @@ namespace Xmaxplatform {
 			{
 			case str:
 				return "str";
-			case i64:
-				return "i64";
+			case i128:
+				return "i128";
 			case i128i128:
 				return "i128i128";
-			case i64i64i64:
-				return "i64i64i64";
+			case i128i128i128:
+				return "i128i128i128";
 			default:
 				return std::string("<invalid key type - ") + boost::lexical_cast<std::string>(int(key_type)) + ">";
 			}
