@@ -13,6 +13,7 @@
 #include <chain_init.hpp>
 #include <chain_xmax.hpp>
 #include <xmax_voting.hpp>
+#include <authoritys_utils.hpp>
 
 #include <rand.hpp>
 
@@ -507,7 +508,7 @@ namespace Xmaxplatform { namespace Chain {
 				transaction_response_ptr response;
 				transaction_context_xmax Impl(*this, request->signed_trx);
 
-				check_authorization(request->signed_trx.messages, request->signed_trx.get_signature_keys(_context->config.chain_id));
+				utils::check_authorization(request->signed_trx.messages, request->signed_trx.get_signature_keys(_context->config.chain_id));
 
 
 				Impl.exec();

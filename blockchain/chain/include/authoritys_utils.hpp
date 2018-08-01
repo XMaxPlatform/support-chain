@@ -20,7 +20,7 @@ namespace Chain {
 
 		bool validate_weight(const authority& auth);
 
-		const authority_object& get_authority_object(const Basechain::database& db, const Basetypes::account_permission& auth);
+		const authority_object& get_authority_object(const Basechain::database& db, const Basetypes::account_auth& auth);
 
 		bool check_authority_name(authority_name name);
 	}

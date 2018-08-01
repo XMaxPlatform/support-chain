@@ -7,18 +7,18 @@ typedef fixed_string32 type_name
 
 # import account type as localtype
 
-struct account_permission
+struct account_auth
    account    account_name
    authority authority_name
 
 struct message
    code            account_name         # the contract defining the primary code to execute for code/type
    type            func_name            # the action to be taken
-   authorization   account_permission[] # the accounts and permission levels provided
+   authorization   account_auth[]		# the accounts and auth levels provided
    data            bytes                # opaque data processed by code
 
 struct account_permission_weight
-   permission   account_permission
+   permission   account_auth
    weight       uint16
 
 struct transaction

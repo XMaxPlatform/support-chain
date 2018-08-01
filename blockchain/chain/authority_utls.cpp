@@ -53,7 +53,7 @@ namespace Chain {
 			return weights >= auth.threshold;
 		}
 
-		const authority_object& get_authority_object(const database& db, const Basetypes::account_permission& auth)
+		const authority_object& get_authority_object(const database& db, const Basetypes::account_auth& auth)
 		{
 			try {
 				FC_ASSERT(!auth.account.empty() && !auth.authority.empty(), "Invalid authority");
