@@ -27,7 +27,8 @@ using fc::ecc::private_key;
 		const static int builders_per_round = 21;
 		const static int dpos_irreversible_need = 21 * 2 / 3;
         const static int blocks_per_round = blocks_per_builder * builders_per_round;
-	
+
+		const static string xmax_contract_string = "xmax";
         const static account_name xmax_contract_name = STN(xmax);
 		const static authority_name xmax_owner_auth = STN(owner);
 		const static authority_name xmax_active_auth = STN(active);
