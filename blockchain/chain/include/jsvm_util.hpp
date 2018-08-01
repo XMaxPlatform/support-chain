@@ -43,18 +43,23 @@ namespace Xmaxplatform {
 		}
 
 		template <typename ObjType>
-		v8::Handle<v8::Value> CppObjToJs(v8::Isolate* isolate, const v8::Local<v8::Context>& context, ObjType* cpp_object)
+		v8::Handle<v8::Value> CppObjToJs(v8::Isolate* isolate, const v8::Local<v8::Context>& context, ObjType cpp_object)
 		{
 			Handle<String> js_data = String::NewFromUtf8(isolate, ObjType::TypeName(), NewStringType::kNormal).ToLocalChecked();
 			Handle<v8::Value> js_data_value = context->Global()->Get(js_data);
-
+			ObjType* ptrobj = new ObjType(cpp_object);
 			bool bIsObject = js_data_value->IsObject();
 			if (bIsObject)
 			{
 				
 				Handle<Object> js_data_object = Handle<Object>::Cast(js_data_value);
-				ObjType::Wrap(isolate, cpp_object, js_data_object);
-				return js_data_object;								
+
+
+				Handle<v8::Value>  argcodev[1];
+				
+				argcodev[0] = External::New(isolate, ptrobj);
+				Handle<v8::Value> codeObj = js_data_object->CallAsConstructor(1, argcodev);
+				return codeObj;
 			}
 
 			return Undefined(isolate);

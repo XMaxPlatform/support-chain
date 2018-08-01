@@ -7,9 +7,9 @@ namespace Xmaxplatform {
 
 		void StrToName(const v8::FunctionCallbackInfo<v8::Value>& args)
 		{
-			if (args.Length() != 4)
+			if (args.Length() != 1)
 			{
-				args.GetIsolate()->ThrowException(v8::Exception::Error(String::NewFromUtf8(args.GetIsolate(), "argument error!")));
+				args.GetIsolate()->ThrowException(v8::Exception::Error(String::NewFromUtf8(args.GetIsolate(), "StrToName:argument count error!")));
 			}
 
 			HandleScope scope(args.GetIsolate());
@@ -23,7 +23,7 @@ namespace Xmaxplatform {
 
 				Basetypes::name ret (ustr128);
 
-				v8::Handle<v8::Value> jsret = CppObjToJs<V8u128>(args.GetIsolate(), args.GetIsolate()->GetCurrentContext(), (V8u128*)&ret);
+				v8::Handle<v8::Value> jsret = CppObjToJs<V8u128>(args.GetIsolate(), args.GetIsolate()->GetCurrentContext(), (V8u128)ret);
 
 				args.GetReturnValue().Set(jsret);
 

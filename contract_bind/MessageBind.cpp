@@ -145,8 +145,7 @@ namespace Xmaxplatform {
 				if (strcmp(totype, "u128") == 0) {
 					uint128 ret;					
 					MsgGet(code, type, jsvm_xmax::get().current_validate_context->msg.data, key, ret);
-					V8u128* pV8u128 = new V8u128(ret);
-					args.GetReturnValue().Set(CppObjToJs(args.GetIsolate(), args.GetIsolate()->GetCurrentContext(), pV8u128));
+					args.GetReturnValue().Set(CppObjToJs(args.GetIsolate(), args.GetIsolate()->GetCurrentContext(), (V8u128)ret));
 					return;
 				}
 

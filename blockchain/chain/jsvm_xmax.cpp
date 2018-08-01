@@ -210,8 +210,8 @@ namespace Xmaxplatform {
 				Handle<v8::Value> params[2];
 				V8u128 v8code(code);
 				V8u128 v8type(type);
-				params[0] = CppObjToJs<V8u128>(m_pIsolate, context, &v8code);
-				params[1] = CppObjToJs<V8u128>(m_pIsolate, context, &v8type);
+				params[0] = CppObjToJs<V8u128>(m_pIsolate, context, v8code);
+				params[1] = CppObjToJs<V8u128>(m_pIsolate, context, v8type);
 				CallJsFoo(m_pIsolate, context, foo, 2, params);
 			}
 			catch (const Runtime::Exception& e) {

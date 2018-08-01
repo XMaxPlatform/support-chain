@@ -20,8 +20,9 @@ namespace Xmaxplatform {
 		int32_t validate(void* keyptr, void* valueptr, int32_t valuelen, Function func) {
 
 			static const uint32_t keylen = numberOfKeys * sizeof(KeyType);
-
-			FC_ASSERT(valuelen >= keylen, "insufficient data passed");
+			uint32_t testiii = keylen;
+			int numkeiii = numberOfKeys;
+		//	FC_ASSERT(valuelen >= keylen, "insufficient data passed");
 
 			auto& jsvm = jsvm_xmax::get();
 			FC_ASSERT(jsvm.current_message_context, "no apply context found");
@@ -140,7 +141,8 @@ namespace Xmaxplatform {
 				bool bIsObject = js_data_value->IsObject();
 				if (bIsObject)
 				{
-					scope = *JsObjToCpp<V8u128>(args.GetIsolate(), js_data_value);
+					V8u128* ret = JsObjToCpp<V8u128>(args.GetIsolate(), js_data_value);
+					scope = *ret;
 				}
 			}
 
@@ -161,20 +163,32 @@ namespace Xmaxplatform {
 				bool bIsObject = js_data_value->IsObject();
 				if (bIsObject)
 				{
-					i64key = I64JS2CPP(args.GetIsolate(), js_data_value);
+					i64key = I64JS2CPP(args.GetIsolate(), js_data_value); //*JsObjToCpp<V8u128>(args.GetIsolate(), js_data_value);
+				}
+				else
+				{
+					Local<v8::Integer> v8int = Local<v8::Integer>::Cast(js_data_value);
+					i64key = v8int->Value();;
 				}
 			}
 
 			int64_t value;
 			{
-				Handle<v8::Value> js_data_value = args[3];
+				Local<v8::Value> js_data_value = args[3];
 
 				bool bIsObject = js_data_value->IsObject();
 				if (bIsObject)
 				{
 					value = I64JS2CPP(args.GetIsolate(), js_data_value);
 				}
+				else
+				{
+					Local<v8::Integer> v8int = Local<v8::Integer>::Cast(js_data_value);
+					value = v8int->Value();;
+				}
 			}
+
+			//key_value_index::value_type::key_type
 			
 			VERIFY_TABLE(i64)
 			UPDATE_RECORD(store_record, key_value_index, &i64key,&value, 8);

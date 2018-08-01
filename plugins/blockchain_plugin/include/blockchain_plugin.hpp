@@ -216,8 +216,9 @@ namespace Xmaxplatform {
 				abis.set_abi(abi);
 
 				const auto& idx = d.get_index<IndexType, Scope>();
+				int size = idx.size();
 				auto lower = idx.lower_bound(boost::make_tuple(p.scope, p.code, p.table));
-				auto upper = idx.upper_bound(boost::make_tuple(p.scope, p.code, name(uint64_t(p.table) + 1)));
+				auto upper = idx.upper_bound(boost::make_tuple(p.scope, p.code, name(uint128(p.table) + 1)));
 
 				if (p.lower_bound.size())
 					lower = idx.lower_bound(boost::make_tuple(p.scope, p.code, p.table, fc::variant(p.lower_bound).as<typename IndexType::value_type::key_type>()));

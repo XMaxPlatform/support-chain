@@ -15,7 +15,8 @@ namespace Xmaxplatform {
 			
 			static ObjType* Unwrap(v8::Handle<v8::Object> jsObj) {
 				v8::Handle<External> ptr = Handle<External>::Cast(jsObj->GetInternalField(0));
-				return static_cast<ObjType*>(ptr->Value());
+				void* testvalue = ptr->Value();
+				return static_cast<ObjType*>(testvalue);
 			}
 
 			static void Wrap(v8::Isolate* isolate, ObjType* cpp_object, v8::Handle<v8::Object>& object) {

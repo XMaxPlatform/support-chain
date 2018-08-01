@@ -4,6 +4,7 @@
 #include "Int64Bind.h"
 #include "jsvm_objbind/UInt128Bind.h"
 #include "DBBind.h"
+#include "UtilBind.h"
 
 using namespace v8;
 namespace Xmaxplatform {
@@ -25,6 +26,7 @@ namespace Xmaxplatform {
 			bindfoo(GetMsgData);
 			bindfoo(LoadRecord);
 			bindfoo(StoreRecord);
+			bindfoo(StrToName);
 			return std::move(ret);
 		}
 

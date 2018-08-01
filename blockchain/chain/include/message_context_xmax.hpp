@@ -26,6 +26,16 @@ public:
         mutable_db(db), used_authorizations(msg.authorization.size(), false),
         next_pending_transaction_serial(0), next_pending_message_serial(0){}
 
+   message_context_xmax(chain_xmax& con,
+	   Basechain::database& db,
+	   const Chain::transaction& t,
+	   const Chain::message_xmax& m,
+	   const Basetypes::account_name& code,
+	   uint32_t depth)
+	   : _chain_xmax(con), db(db), trx(t), msg(m), code(code), apply_depth(depth), mutable_controller(con),
+	   mutable_db(db), used_authorizations(msg.authorization.size(), false),
+	   next_pending_transaction_serial(0), next_pending_message_serial(0) {}
+
    template <typename ObjectType>
    int32_t store_record( name scope, name code, name table, typename ObjectType::key_type* keys, char* value, uint32_t valuelen ) {
       require_scope( scope );
