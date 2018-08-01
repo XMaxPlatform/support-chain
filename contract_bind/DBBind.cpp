@@ -120,7 +120,7 @@ namespace Xmaxplatform {
 				}
 			}
 			int64_t value;
-			VERIFY_TABLE(i64)
+			VERIFY_TABLE(i128)
 			READ_RECORD(load_record, key_value_index, by_scope_primary, &i64key, &value, 8);
 
 			args.GetReturnValue().Set(I64Cpp2JS(args.GetIsolate(),args.GetIsolate()->GetCurrentContext(),value));
@@ -155,8 +155,8 @@ namespace Xmaxplatform {
 					table = *JsObjToCpp<V8u128>(args.GetIsolate(), js_data_value);
 				}
 			}
-
-			name i64key;
+			uint128  test = 0;
+			name i64key =(uint128) 0;
 			{
 				Handle<v8::Value> js_data_value = args[2];
 
@@ -168,7 +168,7 @@ namespace Xmaxplatform {
 				else
 				{
 					Local<v8::Integer> v8int = Local<v8::Integer>::Cast(js_data_value);
-					i64key = v8int->Value();
+					i64key = (uint128)v8int->Value();
 				}
 			}
 
@@ -189,8 +189,8 @@ namespace Xmaxplatform {
 			}
 
 			//key_value_index::value_type::key_type
-			
-			VERIFY_TABLE(i64)
+			int64 test64 = i64key;
+			VERIFY_TABLE(i128)
 			UPDATE_RECORD(store_record, key_value_index, &i64key,&value, 8);
 			const bool created = (ret == -1); 
 			int64_t& storage = jsvm_xmax::get().table_storage; 

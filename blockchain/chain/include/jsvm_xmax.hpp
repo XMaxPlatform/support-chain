@@ -13,9 +13,9 @@ namespace Xmaxplatform {
 		public:
 			enum key_type {
 				str,
-				i64,
+				i128,
 				i128i128,
-				i64i64i64,
+				//i64i64i64,
 				i128i128i128,
 				invalid_key_type
 			};

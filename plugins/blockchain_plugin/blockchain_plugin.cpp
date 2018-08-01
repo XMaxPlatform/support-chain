@@ -192,11 +192,11 @@ namespace Xmaxplatform {
 namespace Chain_APIs{
 
 
-	const string read_only::KEYi64 = "i64";
+	const string read_only::KEYi128 = "i128";
 	const string read_only::KEYstr = "str";
 	const string read_only::KEYi128i128 = "i128i128";
 	const string read_only::KEYi128i128i128 = "i128i128i128";
-	const string read_only::KEYi64i64i64 = "i64i64i64";
+	//const string read_only::KEYi64i64i64 = "i64i64i64";
 	const string read_only::PRIMARY = "primary";
 	const string read_only::SECONDARY = "secondary";
 	const string read_only::TERTIARY = "tertiary";
@@ -352,7 +352,7 @@ namespace Chain_APIs{
 		auto table_type = getTableType(abi, p.table);
 		auto table_key = PRIMARY;
 
-		if (table_type == KEYi64) {
+		if (table_type == KEYi128) {
 			return get_table_rows_ex<Chain::key_value_index, Chain::by_scope_primary>(p, abi);
 		}
 		else if (table_type == KEYstr) {
@@ -372,14 +372,14 @@ namespace Chain_APIs{
 			if (table_key == TERTIARY)
 				return get_table_rows_ex<Chain::key128x128x128_value_index, Chain::by_scope_tertiary>(p, abi);
 		}
-		else if (table_type == KEYi64i64i64) {
-			if (table_key == PRIMARY)
-				return get_table_rows_ex<Chain::key64x64x64_value_index, Chain::by_scope_primary>(p, abi);
-			if (table_key == SECONDARY)
-				return get_table_rows_ex<Chain::key64x64x64_value_index, Chain::by_scope_secondary>(p, abi);
-			if (table_key == TERTIARY)
-				return get_table_rows_ex<Chain::key64x64x64_value_index, Chain::by_scope_tertiary>(p, abi);
-		}
+// 		else if (table_type == KEYi64i64i64) {
+// 			if (table_key == PRIMARY)
+// 				return get_table_rows_ex<Chain::key64x64x64_value_index, Chain::by_scope_primary>(p, abi);
+// 			if (table_key == SECONDARY)
+// 				return get_table_rows_ex<Chain::key64x64x64_value_index, Chain::by_scope_secondary>(p, abi);
+// 			if (table_key == TERTIARY)
+// 				return get_table_rows_ex<Chain::key64x64x64_value_index, Chain::by_scope_tertiary>(p, abi);
+// 		}
 		FC_ASSERT(false, "invalid table type/key ${type}/${key}", ("type", table_type)("key", table_key)("code_abi", abi));
 	}
 
