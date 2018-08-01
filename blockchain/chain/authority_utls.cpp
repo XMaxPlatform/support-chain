@@ -53,14 +53,19 @@ namespace Chain {
 			return weights >= auth.threshold;
 		}
 
-		const authority_object& get_permission(database& db, const account_auth& auth)
+		const authority_object& get_authority_object(const database& db, const Basetypes::account_permission& auth)
 		{
 			try {
-				FC_ASSERT(!auth.account.empty() && !auth.permission.empty(), "Invalid authority");
+				FC_ASSERT(!auth.account.empty() && !auth.authority.empty(), "Invalid authority");
 
-				return db.get<authority_object, by_owner>(std::make_tuple(auth.account, auth.permission));
+				return db.get<authority_object, by_owner>(std::make_tuple(auth.account, auth.authority));
 
 			} FC_CAPTURE_AND_RETHROW(("auth", auth))
+		}
+
+		bool check_authority_name(authority_name name)
+		{
+			return name.to_string().find(Config::xmax_contract_string) != 0;
 		}
 
 

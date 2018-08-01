@@ -14,15 +14,15 @@ namespace  Basechain {
 namespace Xmaxplatform {
 namespace Chain {
 
-
-
 	namespace utils
 	{
 		void check_authorization(const std::vector<Basetypes::message>& messages, const flat_set<public_key_type>& keys);
 
 		bool validate_weight(const authority& auth);
 
-		const authority_object& get_permission(Basechain::database& db, const account_auth& auth);
+		const authority_object& get_authority_object(const Basechain::database& db, const Basetypes::account_permission& auth);
+
+		bool check_authority_name(authority_name name);
 	}
 
 }
