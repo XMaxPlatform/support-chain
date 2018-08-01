@@ -33,9 +33,9 @@ namespace Chain {
 		public_key_type key;
 	};
 
-	struct acc_auth
+	struct account_auth
 	{
-		acc_auth(account_name acc, authority_name per)
+		account_auth(account_name acc, authority_name per)
 			: account(acc), permission(per)
 		{
 
@@ -52,7 +52,7 @@ namespace Chain {
 		{
 
 		}
-		acc_auth auth;
+		account_auth auth;
 	};
 
 
@@ -83,6 +83,8 @@ namespace Chain {
 	};
 
 
-	void check_authorization(const std::vector<Basetypes::message>& messages, const flat_set<public_key>& keys);
+	void check_authorization(const std::vector<Basetypes::message>& messages, const flat_set<public_key_type>& keys);
+
+	bool validate_authorization(const authority& auth);
 }
 }

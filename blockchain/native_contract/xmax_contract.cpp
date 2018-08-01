@@ -96,6 +96,50 @@ void handle_xmax_addaccount(message_context_xmax& context) {
 	create_account_internal(context.msg.as<Types::addaccount>(), context.mutable_db, context.current_time());
 }
 
+void handle_xmax_updateauth(Chain::message_context_xmax& context)
+{
+	Types::updateauth msg = context.msg.as<Types::updateauth>();
+
+	context.require_authorization(msg.account);
+
+	auto& data_db = context.db;
+
+	XMAX_ASSERT(!msg.permission.empty(), message_validate_exception, "Cannot create authority with empty name");
+
+	XMAX_ASSERT(msg.permission.to_string().find(Config::xmax_contract_string) != 0, message_validate_exception,
+		"Permission names cannot be started with 'xmax'.");
+
+	XMAX_ASSERT(msg.permission != msg.parent, message_validate_exception, "Cannot set an authority as its own parent");
+
+	data_db.get<account_object, by_name>(msg.account);
+
+	XMAX_ASSERT(validate_authorization(msg.new_authority), message_validate_exception, "Invalid authority: ${auth}", ("auth", msg.new_authority));
+
+
+	if (msg.permission == Config::xmax_active_auth)
+		XMAX_ASSERT(msg.parent == config::xmax_owner_auth, message_validate_exception, "Cannot change active authority's parent from owner", ("msg.parent", msg.parent));
+
+	if (msg.permission == Config::xmax_owner_auth)
+		XMAX_ASSERT(msg.parent.empty(), message_validate_exception, "Cannot change owner authority's parent");
+	else
+		XMAX_ASSERT(!msg.parent.empty(), message_validate_exception, "Only owner permission can have empty parent");
+
+
+}
+void handle_xmax_deleteauth(Chain::message_context_xmax& context)
+{
+	Types::deleteauth msg = context.msg.as<Types::deleteauth>();
+}
+void handle_xmax_linkauth(Chain::message_context_xmax& context)
+{
+	Types::linkauth msg = context.msg.as<Types::linkauth>();
+}
+void handle_xmax_unlinkauth(Chain::message_context_xmax& context)
+{
+	Types::unlinkauth msg = context.msg.as<Types::unlinkauth>();
+}
+
+
 void handle_xmax_transfer(message_context_xmax& context) {
    auto transfer = context.msg.as<Types::transfer>();
 
