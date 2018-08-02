@@ -169,7 +169,7 @@ void handle_xmax_updateauth(Chain::message_context_xmax& context)
 	}
 	else // new auth.
 	{
-
+		utils::new_authority_object(context.mutable_db, msg.account, msg.permission, parent_id, msg.new_authority, context.chain.building_block_timestamp().time_point());
 	}
 
 
