@@ -171,22 +171,32 @@ void handle_xmax_updateauth(Chain::message_context_xmax& context)
 	{
 		utils::new_authority_object(context.mutable_db, msg.account, msg.permission, parent_id, msg.new_authority, context.chain.building_block_timestamp().time_point());
 	}
-
-
 }
+
 void handle_xmax_deleteauth(Chain::message_context_xmax& context)
 {
 	Types::deleteauth msg = context.msg.as<Types::deleteauth>();
+
+	context.require_authorization(msg.account);
+
+	XMAX_ASSERT(msg.permission != Config::xmax_active_name, message_validate_exception, "Cannot delete active authority");
+	XMAX_ASSERT(msg.permission != Config::xmax_owner_name, message_validate_exception, "Cannot delete owner authority");
+
+	const auto& auth = utils::get_authority_object(context.db, { msg.account, msg.permission });
+
+	utils::remove_authority_object(context.mutable_db, auth);
+
 }
+
 void handle_xmax_linkauth(Chain::message_context_xmax& context)
 {
 	Types::linkauth msg = context.msg.as<Types::linkauth>();
 }
+
 void handle_xmax_unlinkauth(Chain::message_context_xmax& context)
 {
 	Types::unlinkauth msg = context.msg.as<Types::unlinkauth>();
 }
-
 
 void handle_xmax_transfer(message_context_xmax& context) {
    auto transfer = context.msg.as<Types::transfer>();
