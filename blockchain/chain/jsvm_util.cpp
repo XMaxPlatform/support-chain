@@ -8,16 +8,6 @@ namespace Xmaxplatform {
 
 	namespace Chain {
 
-		void EnterJsContext(Isolate* pIsolate,v8::Local<v8::ObjectTemplate>& global,DoWorkInJsCtx dowork)
-		{
-			
-			Local<Context> context = Context::New(pIsolate, NULL, global);
-			Context::Scope context_scope(context);
-
-			dowork(global, context, context_scope);
-		}
-
-
 		PersistentCpyableContext CreateJsContext(v8::Isolate* pIsolate, v8::Local<v8::ObjectTemplate>& global)
 		{
 			V8_ParseWithOutPlugin();
