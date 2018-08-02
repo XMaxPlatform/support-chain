@@ -17,12 +17,12 @@
 namespace Xmaxplatform { namespace Chain {
 
 void message_context_xmax::get_active_builders(Basetypes::account_name *builders, uint32_t datalen) {
-   const auto& gsc = _chain_xmax.get_static_config();
+   const auto& gsc = chain.get_static_config();
    memcpy(builders, gsc.current_builders.builders.data(), std::min(sizeof(account_name)*gsc.current_builders.builders.size(),(size_t)datalen));
 }
 
 time message_context_xmax::current_time() const {
-   return mutable_controller.head_block_time();
+   return mutable_chain.head_block_time();
 }
 
 Xmaxplatform::Chain::message_context_xmax::pending_message& message_context_xmax::get_pending_message(pending_message::handle_type handle)

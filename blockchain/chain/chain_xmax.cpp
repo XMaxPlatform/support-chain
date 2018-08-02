@@ -310,6 +310,12 @@ namespace Xmaxplatform { namespace Chain {
 			return _context->block_head->block_num;
 		}
 
+		chain_timestamp chain_xmax::building_block_timestamp() const
+		{
+			FC_ASSERT(_context->building_block, "no pending block");
+			return _context->building_block->pack->new_header.timestamp;
+		}
+
 		uint32_t chain_xmax::last_irreversible_block_num() const
 		{
 			return _context->last_irreversible_block_num;
