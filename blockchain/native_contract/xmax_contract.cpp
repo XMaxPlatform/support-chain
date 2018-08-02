@@ -182,6 +182,8 @@ void handle_xmax_deleteauth(Chain::message_context_xmax& context)
 	XMAX_ASSERT(msg.permission != Config::xmax_active_name, message_validate_exception, "Cannot delete active authority");
 	XMAX_ASSERT(msg.permission != Config::xmax_owner_name, message_validate_exception, "Cannot delete owner authority");
 
+	utils::remove_linked_object(context.mutable_db, msg.account, msg.permission);
+
 	const auto& auth = utils::get_authority_object(context.db, { msg.account, msg.permission });
 
 	utils::remove_authority_object(context.mutable_db, auth);

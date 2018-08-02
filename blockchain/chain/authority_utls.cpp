@@ -3,7 +3,9 @@
 *  @copyright defined in xmax/LICENSE
 */
 #include <blockchain_exceptions.hpp>
+#include <objects/linked_permission_object.hpp>
 #include <authoritys_utils.hpp>
+
 namespace Xmaxplatform {
 namespace Chain {
 
@@ -103,6 +105,17 @@ namespace Chain {
 		void remove_authority_object(Basechain::database& db, const authority_object& obj)
 		{
 			db.remove(obj);
+		}
+
+		void remove_linked_object(Basechain::database& db, account_name account, authority_name auth)
+		{
+			// linked permission
+			const auto& index = db.get_index<linked_permission_index, by_permission>();
+			auto range = index.equal_range(std::make_tuple(account, auth));
+			XMAX_ASSERT(range.first == range.second, message_validate_exception,
+				"Cannot delete a linked authority. Please Unlink it first. This authority is linked to ${code}::${type}.",
+				("code", string(range.first->code))("type", string(range.first->func)));
+			
 		}
 
 		bool check_authority_name(authority_name name)
