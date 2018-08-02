@@ -33,7 +33,7 @@
 namespace Xmaxplatform {
     namespace Native_contract {
 using namespace Chain;
-namespace config = ::Xmaxplatform::Config;
+namespace Config = ::Xmaxplatform::Config;
 namespace Chain = ::Xmaxplatform::Chain;
 using namespace ::Xmaxplatform::Basetypes;
 
@@ -41,7 +41,7 @@ typedef mutable_db_table <xmx_token_object, by_owner_name> xmax_token_table;
 typedef mutable_db_table <resource_token_object, by_owner_name> resource_token_table;
 
 
-void validate_authority(const message_context_xmax& context, const authority& auth) {
+void validate_authority(const message_context_xmax& context, const Basetypes::authority& auth) {
 
 	for (const account_permission_weight& a : auth.accounts)
 	{
@@ -49,7 +49,7 @@ void validate_authority(const message_context_xmax& context, const authority& au
 		XMAX_ASSERT( acct != nullptr, message_validate_exception, "account '${account}' does not exist", ("account", a.permission.account) );
 
 		if (a.permission.authority == Config::xmax_owner_name || a.permission.authority == Config::xmax_active_name)
-			continue; // account was already checked to exist, so its owner and active permissions should exist
+			continue; // all account has owner and active permissions.
 
 		try {
 			utils::get_authority_object(context.db, a.permission);
@@ -131,25 +131,46 @@ void handle_xmax_updateauth(Chain::message_context_xmax& context)
 
 	XMAX_ASSERT(!msg.permission.empty(), message_validate_exception, "Cannot create authority with empty name");
 
-	XMAX_ASSERT(utils::check_authority_name(msg.permission), message_validate_exception, "Permission names cannot be started with 'xmax'.");
+	XMAX_ASSERT(utils::check_authority_name(msg.permission), message_validate_exception, "Permission names cannot be started with 'xmax'");
 
 	XMAX_ASSERT(msg.permission != msg.parent, message_validate_exception, "Cannot set an authority as its own parent");
 
-	data_db.get<account_object, by_name>(msg.account);
 
-	XMAX_ASSERT(utils::validate_weight(msg.new_authority), message_validate_exception, "Invalid authority: ${auth}", ("auth", msg.new_authority));
+	const account_object& acc = data_db.get<account_object, by_name>(msg.account); // check account.
 
-
-	if (msg.permission == Config::xmax_active_name)
-		XMAX_ASSERT(msg.parent == config::xmax_owner_name, message_validate_exception, "Cannot change active authority's parent from owner", ("msg.parent", msg.parent));
+	XMAX_ASSERT(utils::validate_weight_format(msg.new_authority), message_validate_exception, "Invalid authority: ${auth}", ("auth", msg.new_authority));
 
 	if (msg.permission == Config::xmax_owner_name)
-		XMAX_ASSERT(msg.parent.empty(), message_validate_exception, "Cannot change owner authority's parent");
+		XMAX_ASSERT(msg.parent.empty(), message_validate_exception, "Owner authority's parent must be empty");
 	else
-		XMAX_ASSERT(!msg.parent.empty(), message_validate_exception, "Only owner permission can have empty parent");
+		XMAX_ASSERT(!msg.parent.empty(), message_validate_exception, "Only owner authority's parent can be empty");
+
+	if (msg.permission == Config::xmax_active_name)
+		XMAX_ASSERT(msg.parent == Config::xmax_owner_name, message_validate_exception, "Active authority's parent must be owner", ("msg.parent", msg.parent));
 
 
 	validate_authority(context, msg.new_authority);
+
+	const authority_object* old_auth = utils::find_authority_object(context.db, {msg.account, msg.permission});
+
+	authority_object::id_type parent_id = 0;
+	if (msg.permission != Config::xmax_owner_name)
+	{
+		auto auth = utils::get_authority_object(context.db, { msg.account, msg.parent });
+		parent_id = auth.id;
+	}
+
+	if (old_auth) // update auth.
+	{
+		XMAX_ASSERT(parent_id == old_auth->parent, message_validate_exception, "Changing parent authority is not supported");
+
+		utils::modify_authority_object(context.mutable_db, *old_auth, msg.new_authority, context.chain.building_block_timestamp().time_point());
+
+	}
+	else // new auth.
+	{
+
+	}
 
 
 }
@@ -204,7 +225,7 @@ void handle_xmax_lock(message_context_xmax& context) {
 
     context.require_scope(lock.to);
     context.require_scope(lock.from);
-    context.require_scope(config::xmax_contract_name);
+    context.require_scope(Config::xmax_contract_name);
 
     context.require_authorization(lock.from);
 
@@ -281,7 +302,7 @@ void handle_xmax_setjscode(Chain::message_context_xmax& context)
 		a.set_abi(msg.code_abi);
 	});
 
-	message_context_xmax init_context(context.mutable_controller, context.mutable_db, context.trx, context.msg, msg.account,0);
+	message_context_xmax init_context(context.mutable_chain, context.mutable_db, context.trx, context.msg, msg.account,0);
 	jsvm_xmax::get().init(init_context);
 
 }
@@ -315,7 +336,7 @@ void handle_xmax_setcode(message_context_xmax& context) {
 		a.set_abi(msg.code_abi);
 	});
 
-	message_context_xmax init_context(context.mutable_controller, context.mutable_db, context.trx, context.msg, 0);
+	message_context_xmax init_context(context.mutable_chain, context.mutable_db, context.trx, context.msg, 0);
 	vm_xmax::get().init(init_context);
 }
 

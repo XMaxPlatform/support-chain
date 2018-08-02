@@ -77,6 +77,8 @@ namespace Xmaxplatform { namespace Chain {
 	   xmax_type_block_id	head_block_id()const;
 	   uint32_t				last_irreversible_block_num() const;
 
+	   chain_timestamp		building_block_timestamp() const;
+
 	   signed_block_ptr		block_from_num(uint32_t num) const;
 	   signed_block_ptr		block_from_id(xmax_type_block_id id) const;
 	   xmax_type_block_id	block_id_from_num(uint32_t num) const;

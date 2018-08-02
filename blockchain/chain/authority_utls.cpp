@@ -23,7 +23,7 @@ namespace Chain {
 			}
 		}
 
-		bool validate_weight(const authority& auth)
+		bool validate_weight_format(const authority& auth)
 		{
 			auth_weight weights = 0;
 
@@ -33,23 +33,30 @@ namespace Chain {
 			if (auth.threshold == 0)
 				return false;
 
+			if (!auth.keys.empty())
 			{
-				const key_permission_weight* prev = nullptr;
-				for (const auto& k : auth.keys) {
-					if (prev && !(prev->key < k.key)) return false; // TODO: keys must be sorted.
-					weights += k.weight;
-					prev = &k;
+				weights += auth.keys[0].weight;
+				for (int i = 1; i < auth.keys.size(); ++i)
+				{
+					if (!(auth.keys[i - 1].key < auth.keys[i].key))
+						return false; // TODO: keys must be sorted.
+
+					weights += auth.keys[i].weight;
 				}
 			}
 
+			if (!auth.accounts.empty())
 			{
-				const account_permission_weight* prev = nullptr;
-				for (const auto& a : auth.accounts) {
-					if (prev && (prev->permission >= a.permission)) return false; // TODO: accounts must be sorted.
-					weights += a.weight;
-					prev = &a;
+				weights += auth.accounts[0].weight;
+				for (int i = 1; i < auth.accounts.size(); ++i)
+				{
+					if (!(auth.accounts[i - 1].permission < auth.accounts[i].permission))
+						return false; // TODO: keys must be sorted.
+
+					weights += auth.accounts[i].weight;
 				}
 			}
+
 			return weights >= auth.threshold;
 		}
 
@@ -61,6 +68,41 @@ namespace Chain {
 				return db.get<authority_object, by_owner>(std::make_tuple(auth.account, auth.authority));
 
 			} FC_CAPTURE_AND_RETHROW(("auth", auth))
+		}
+
+		const authority_object* find_authority_object(const Basechain::database& db, const Basetypes::account_auth& auth)
+		{
+			try {
+				FC_ASSERT(!auth.account.empty() && !auth.authority.empty(), "Invalid authority");
+
+				return db.find<authority_object, by_owner>(std::make_tuple(auth.account, auth.authority));
+
+			} FC_CAPTURE_AND_RETHROW(("auth", auth))
+		}
+
+		void modify_authority_object(Basechain::database& db, const authority_object& obj, const Basetypes::authority& new_auth, time t)
+		{
+			db.modify(obj, [&](authority_object& po) {
+				po.authoritys = new_auth;
+				po.last_updated = t;
+			});
+		}
+
+		const authority_object& new_authority_object(Basechain::database& db, account_name account, authority_name name,
+			authority_object::id_type parent, authority&& auth, time t)
+		{
+			return db.create<authority_object>([&](authority_object& po) {
+				po.owner_name = account;
+				po.auth_name = name;
+				po.parent = parent;
+				po.authoritys = auth;
+				po.last_updated = t;
+			});
+		}
+
+		void remove_authority_object(Basechain::database& db, const authority_object& obj)
+		{
+			db.remove(obj);
 		}
 
 		bool check_authority_name(authority_name name)

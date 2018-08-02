@@ -22,7 +22,7 @@ public:
                  const Chain::transaction& t,
                  const Chain::message_xmax& m,
 				 uint32_t depth)
-      : _chain_xmax(con), db(db), trx(t), msg(m), code(m.code), apply_depth(depth), mutable_controller(con),
+      : chain(con), db(db), trx(t), msg(m), code(m.code), apply_depth(depth), mutable_chain(con),
         mutable_db(db), used_authorizations(msg.authorization.size(), false),
         next_pending_transaction_serial(0), next_pending_message_serial(0){}
 
@@ -32,7 +32,7 @@ public:
 	   const Chain::message_xmax& m,
 	   const Basetypes::account_name& code,
 	   uint32_t depth)
-	   : _chain_xmax(con), db(db), trx(t), msg(m), code(code), apply_depth(depth), mutable_controller(con),
+	   : chain(con), db(db), trx(t), msg(m), code(code), apply_depth(depth), mutable_chain(con),
 	   mutable_db(db), used_authorizations(msg.authorization.size(), false),
 	   next_pending_transaction_serial(0), next_pending_message_serial(0) {}
 
@@ -322,13 +322,13 @@ public:
 	   code = c;
    }
 
-   const chain_xmax&      _chain_xmax;
+   const chain_xmax&      chain;
    const Basechain::database&   db;  ///< database where state is stored
    const Chain::transaction&    trx; ///< used to gather the valid read/write scopes
    const Chain::message_xmax&        msg; ///< message being applied
    Basetypes::account_name           code; ///< the code that is currently running
    uint32_t							 apply_depth;
-   chain_xmax&    mutable_controller;
+   chain_xmax&    mutable_chain;
    Basechain::database& mutable_db;
 
    std::deque<account_name>             notified;
