@@ -20,6 +20,7 @@ namespace Xmaxplatform {
 
 		PersistentCpyableContext CreateJsContext(v8::Isolate* pIsolate, v8::Local<v8::ObjectTemplate>& global)
 		{
+			V8_ParseWithOutPlugin();
 			Local<Context> context = Context::New(pIsolate, NULL, global);
 			PersistentCpyableContext ret(pIsolate, context);
 			return ret;
