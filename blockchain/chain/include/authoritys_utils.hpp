@@ -31,6 +31,8 @@ namespace Chain {
 
 		void remove_authority_object(Basechain::database& db, const authority_object& obj);
 
+		void remove_linked_object(Basechain::database& db, account_name account, authority_name auth);
+
 		bool check_authority_name(authority_name name);
 	}
 
