@@ -27,7 +27,7 @@ namespace Chain {
 
 	struct by_action_name;
 	struct by_permission_name;
-	using permission_link_index = Basechain::shared_multi_index_container <
+	using linked_permission_index = Basechain::shared_multi_index_container <
 		linked_permission_object,
 		indexed_by<
 		ordered_unique<tag<by_id>,
@@ -55,6 +55,6 @@ namespace Chain {
 }
 } //
 
-BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::linked_permission_object, Xmaxplatform::Chain::permission_link_index)
+BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::linked_permission_object, Xmaxplatform::Chain::linked_permission_index)
 
 FC_REFLECT(Xmaxplatform::Chain::linked_permission_object, (id)(account)(code)(func)(required_auth))
