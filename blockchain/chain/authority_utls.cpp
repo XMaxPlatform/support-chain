@@ -89,7 +89,7 @@ namespace Chain {
 		}
 
 		const authority_object& new_authority_object(Basechain::database& db, account_name account, authority_name name,
-			authority_object::id_type parent, authority&& auth, time t)
+			authority_object::id_type parent, const authority& auth, time t)
 		{
 			return db.create<authority_object>([&](authority_object& po) {
 				po.owner_name = account;

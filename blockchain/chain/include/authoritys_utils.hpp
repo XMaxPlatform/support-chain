@@ -27,7 +27,7 @@ namespace Chain {
 		void modify_authority_object(Basechain::database& db, const authority_object& obj, const Basetypes::authority& new_auth, time t);
 
 		const authority_object& new_authority_object(Basechain::database& db, account_name account, authority_name name,
-			authority_object::id_type parent, authority&& auth, time t);
+			authority_object::id_type parent, const authority& auth, time t);
 
 		void remove_authority_object(Basechain::database& db, const authority_object& obj);
 

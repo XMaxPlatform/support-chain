@@ -161,6 +161,7 @@ namespace Xmaxplatform { namespace Chain {
             account_object_type,
 			account_status_object_type,
 			authority_object_type,
+			linked_permission_object_type,
 			builder_object_type,
             builder_info_object_type,
             vote_info_object_type,
