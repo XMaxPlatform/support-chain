@@ -10,62 +10,6 @@
 using namespace v8;
 namespace Xmaxplatform {
 	namespace Chain {
-		/*
-		V8Msg* NewV8MsgFunction(const FunctionCallbackInfo<v8::Value>& args)
-		{
-			return new V8Msg();
-		}
-
-		void V8MsgWeakExternalReferenceCallback(const WeakCallbackInfo<V8Msg>& data)
-		{
-			if (V8Msg* cpp_object = data.GetParameter())
-			{
-				delete cpp_object;
-			}
-		}
-
-		void V8MsgFunctionInvocationCallback(const FunctionCallbackInfo<v8::Value>& args)
-		{
-			if (!args.IsConstructCall())
-				return args.GetReturnValue().Set(Undefined(args.GetIsolate()));
-
-			V8Msg* cpp_object = NewV8MsgFunction(args);
-			if (!cpp_object)
-				return;
-
-			Handle<Object> object = args.This();
-			Local<External>  ee = External::New(args.GetIsolate(), cpp_object);
-			object->SetInternalField(0, ee);
-			Persistent<External> ret = Persistent<External>(args.GetIsolate(), ee);
-
-			ret.SetWeak(cpp_object, V8MsgWeakExternalReferenceCallback, WeakCallbackType::kParameter);
-
-			args.GetReturnValue().Set(Undefined(args.GetIsolate()));
-		}
-
-		void SetupV8MsgObjectToJs(Isolate* isolate, Handle<ObjectTemplate> global)
-		{
-			Handle<FunctionTemplate> msg_templ = FunctionTemplate::New(isolate, &V8MsgFunctionInvocationCallback);
-
-			msg_templ->SetClassName(String::NewFromUtf8(
-				isolate,
-				"V8msg",
-				NewStringType::kNormal).ToLocalChecked());
-			msg_templ->InstanceTemplate()->SetInternalFieldCount(1);
-
-			Handle<ObjectTemplate> msg_proto = msg_templ->PrototypeTemplate();
-
-			msg_proto->Set(String::NewFromUtf8(
-				isolate,
-				"GetData",
-				NewStringType::kNormal).ToLocalChecked(), FunctionTemplate::New(isolate, GetData));
-
-			msg_proto->Set(String::NewFromUtf8(
-				isolate,
-				"V8i64",
-				NewStringType::kNormal).ToLocalChecked(), msg_templ);
-		}*/
-
 		template<typename T>
 		void MsgGet(name code, name type, const vector<char>& bin, const char* key, T& result)
 		{
@@ -81,11 +25,6 @@ namespace Xmaxplatform {
 
 		void GetMsgData(const v8::FunctionCallbackInfo<v8::Value>& args)
 		{
-//			Local<Object> self = args.Holder();
-
-//			Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-//			void* ptr = wrap->Value();
-
 			if (args.Length()!=4)
 			{
 				args.GetIsolate()->ThrowException(v8::Exception::Error(String::NewFromUtf8(args.GetIsolate(), "argument error!")));
@@ -95,7 +34,6 @@ namespace Xmaxplatform {
 			const char* totype;
 			
 			{
-				//v8::HandleScope handle_scope(args.GetIsolate());
 				HandleScope scope(args.GetIsolate());
 				{
 					Handle<v8::Value> js_data_value = args[0];
@@ -126,6 +64,7 @@ namespace Xmaxplatform {
 					v8::String::Utf8Value str(args[3]);
 					totype = StringJS2CPP(str);
 				}
+
 				if (strcmp(totype,"int")==0)
 				{
 					int ret;
@@ -133,16 +72,14 @@ namespace Xmaxplatform {
 					args.GetReturnValue().Set(Int32::New(args.GetIsolate(), ret));
 					return;
 				}
-				
-				if (strcmp(totype, "i64") == 0)
+				else if (strcmp(totype, "i64") == 0)
 				{
 					int64_t ret;
 					MsgGet(code, type, jsvm_xmax::get().current_validate_context->msg.data, key, ret);
 					args.GetReturnValue().Set(I64Cpp2JS(args.GetIsolate(), args.GetIsolate()->GetCurrentContext(), ret));
 					return;
 				}
-
-				if (strcmp(totype, "u128") == 0) {
+				else if (strcmp(totype, "u128") == 0) {
 					uint128 ret;					
 					MsgGet(code, type, jsvm_xmax::get().current_validate_context->msg.data, key, ret);
 					args.GetReturnValue().Set(CppObjToJs(args.GetIsolate(), args.GetIsolate()->GetCurrentContext(), (V8u128)ret));

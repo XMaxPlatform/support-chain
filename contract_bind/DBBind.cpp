@@ -156,19 +156,23 @@ namespace Xmaxplatform {
 				}
 			}
 			uint128  test = 0;
-			name i64key =(uint128) 0;
+			name ikey =(uint128) 0;
 			{
 				Handle<v8::Value> js_data_value = args[2];
 
 				bool bIsObject = js_data_value->IsObject();
 				if (bIsObject)
 				{
-					i64key = *JsObjToCpp<V8u128>(args.GetIsolate(), js_data_value);
+					if (IsType(js_data_value,V8u128::TypeID()) )
+					{
+						ikey = *JsObjToCpp<V8u128>(args.GetIsolate(), js_data_value);
+					}
+					
 				}
 				else
 				{
 					Local<v8::Integer> v8int = Local<v8::Integer>::Cast(js_data_value);
-					i64key = (uint128)v8int->Value();
+					ikey = (uint128)v8int->Value();
 				}
 			}
 
@@ -187,11 +191,9 @@ namespace Xmaxplatform {
 					value = v8int->Value();;
 				}
 			}
-
-			//key_value_index::value_type::key_type
-			int64 test64 = i64key;
+			
 			VERIFY_TABLE(i128)
-			UPDATE_RECORD(store_record, key_value_index, &i64key,&value, 8);
+			UPDATE_RECORD(store_record, key_value_index, &ikey,&value, 8);
 			const bool created = (ret == -1); 
 			int64_t& storage = jsvm_xmax::get().table_storage; 
 			if (created) 

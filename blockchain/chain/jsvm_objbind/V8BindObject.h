@@ -3,14 +3,15 @@
 #include <map>
 #include <libplatform/libplatform.h>
 #include <v8.h>
-
+#include "V8BindBase.h"
 
 namespace Xmaxplatform {
 	namespace Chain {
 		
 		template <typename ObjType>
-		class V8BindObject {
+		class V8BindObject:public  V8BindBase {
 		public:
+
 			//V8 bind
 			
 			static ObjType* Unwrap(v8::Handle<v8::Object> jsObj) {
@@ -30,6 +31,10 @@ namespace Xmaxplatform {
 			}
 
 			static constexpr const char* TypeName() {
+				static_assert(false, "Need to implemented in the derived class.");
+			}
+
+			static _CONST_EXPR_ inline Basetypes::name TypeID() {
 				static_assert(false, "Need to implemented in the derived class.");
 			}
 

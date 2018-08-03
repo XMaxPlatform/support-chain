@@ -16,8 +16,6 @@ namespace Xmaxplatform {
 			
 			const char* ustr128;
 			{
-				//Handle<v8::Value> js_data_value = args[0];
-
 				v8::String::Utf8Value str(args[0]);
 				ustr128 = StringJS2CPP(str);
 
@@ -26,11 +24,7 @@ namespace Xmaxplatform {
 				v8::Handle<v8::Value> jsret = CppObjToJs<V8u128>(args.GetIsolate(), args.GetIsolate()->GetCurrentContext(), (V8u128)ret);
 
 				args.GetReturnValue().Set(jsret);
-
 			}
-
-
-
 		}
 
 	}

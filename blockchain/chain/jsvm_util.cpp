@@ -2,6 +2,7 @@
 #include "jsvm_util.hpp"
 #include <iostream>
 #include <blockchain_exceptions.hpp>
+#include "jsvm_objbind/V8BindBase.h"
 
 using namespace v8;
 namespace Xmaxplatform {
@@ -129,6 +130,21 @@ namespace Xmaxplatform {
 				return ret;
 			}
 			return 0;
+		}
+
+		bool IsType(v8::Handle<v8::Value> obj, Basetypes::name _type)
+		{
+			bool bIsObject = obj->IsObject();
+			if (bIsObject) {
+				Handle<Object> jsObj = Handle<Object>::Cast(obj);
+				v8::Handle<External> ptr = Local<External>::Cast(jsObj->GetInternalField(0));
+				V8BindBase* basePtr = (V8BindBase*)ptr->Value();
+				if (basePtr->GetTypeID() == _type)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		namespace FooBind
