@@ -165,6 +165,14 @@ struct minterc20
 	token_name asset_symbol
 	mint_amount asset
 
+struct revokeerc20
+	token_name asset_symbol
+
+struct transfererc20
+	token_name asset_symbol
+	to	account_name
+	value asset
+
 struct issueerc721
 	creator	account_name
 	owner     authority
@@ -175,9 +183,5 @@ struct minterc721
 	token_name asset_symbol
 	token_id fixed_string32
 
-struct revokeerc20
-	token_name asset_symbol
-
 struct revokeerc721
 	token_name asset_symbol
-

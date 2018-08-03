@@ -42,6 +42,7 @@
 #include <objects/builder_object.hpp>
 #include <objects/global_status_objects.hpp>
 #include <objects/erc20_token_object.hpp>
+#include <objects/erc20_token_account_object.hpp>
 #include <objects/erc721_token_object.hpp>
 #include <objects/erc721_token_account_object.hpp>
 
@@ -144,6 +145,7 @@ namespace Xmaxplatform { namespace Chain {
 			_context->block_db.add_index<global_msg_status_index>();
 
 			_context->block_db.add_index<erc20_token_multi_index>();
+			_context->block_db.add_index<erc20_token_account_multi_index>();
 			_context->block_db.add_index<erc721_token_multi_index>();
 			_context->block_db.add_index<erc721_token_account_multi_index>();
 

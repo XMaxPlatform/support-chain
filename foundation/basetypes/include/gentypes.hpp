@@ -676,6 +676,46 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
+    struct revokeerc20 { 
+        revokeerc20() = default;
+        revokeerc20(const asset_symbol& token_name)
+           : token_name(token_name) {}
+
+        asset_symbol                     token_name;
+    };
+
+    template<> struct get_struct<revokeerc20> { 
+        static const struct_t& type() { 
+           static struct_t result = { "revokeerc20", "", {
+                {"token_name", "asset_symbol"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct transfererc20 { 
+        transfererc20() = default;
+        transfererc20(const asset_symbol& token_name, const account_name& to, const asset& value)
+           : token_name(token_name), to(to), value(value) {}
+
+        asset_symbol                     token_name;
+        account_name                     to;
+        asset                            value;
+    };
+
+    template<> struct get_struct<transfererc20> { 
+        static const struct_t& type() { 
+           static struct_t result = { "transfererc20", "", {
+                {"token_name", "asset_symbol"},
+                {"to", "account_name"},
+                {"value", "asset"},
+              }
+           };
+           return result;
+         }
+    };
+
     struct issueerc721 { 
         issueerc721() = default;
         issueerc721(const account_name& creator, const authority& owner, const authority& active, const asset_symbol& token_name)
@@ -714,24 +754,6 @@ namespace Xmaxplatform { namespace Basetypes {
            static struct_t result = { "minterc721", "", {
                 {"token_name", "asset_symbol"},
                 {"token_id", "fixed_string32"},
-              }
-           };
-           return result;
-         }
-    };
-
-    struct revokeerc20 { 
-        revokeerc20() = default;
-        revokeerc20(const asset_symbol& token_name)
-           : token_name(token_name) {}
-
-        asset_symbol                     token_name;
-    };
-
-    template<> struct get_struct<revokeerc20> { 
-        static const struct_t& type() { 
-           static struct_t result = { "revokeerc20", "", {
-                {"token_name", "asset_symbol"},
               }
            };
            return result;
@@ -787,7 +809,8 @@ FC_REFLECT( Xmaxplatform::Basetypes::regproxy                         , (proxy) 
 FC_REFLECT( Xmaxplatform::Basetypes::unregproxy                       , (proxy) )
 FC_REFLECT( Xmaxplatform::Basetypes::issueerc20                       , (creator)(owner)(active)(token_name)(total_balance) )
 FC_REFLECT( Xmaxplatform::Basetypes::minterc20                        , (token_name)(mint_amount) )
+FC_REFLECT( Xmaxplatform::Basetypes::revokeerc20                      , (token_name) )
+FC_REFLECT( Xmaxplatform::Basetypes::transfererc20                    , (token_name)(to)(value) )
 FC_REFLECT( Xmaxplatform::Basetypes::issueerc721                      , (creator)(owner)(active)(token_name) )
 FC_REFLECT( Xmaxplatform::Basetypes::minterc721                       , (token_name)(token_id) )
-FC_REFLECT( Xmaxplatform::Basetypes::revokeerc20                      , (token_name) )
 FC_REFLECT( Xmaxplatform::Basetypes::revokeerc721                     , (token_name) )

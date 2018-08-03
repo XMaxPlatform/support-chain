@@ -17,6 +17,7 @@
 #include <objects/chain_object_table.hpp>
 #include <objects/static_config_object.hpp>
 #include <objects/erc20_token_object.hpp>
+#include <objects/erc20_token_account_object.hpp>
 #include <objects/erc721_token_object.hpp>
 #include <objects/erc721_token_account_object.hpp>
 #include <xmax_voting.hpp>
@@ -41,7 +42,7 @@ typedef mutable_db_table <xmx_token_object, by_owner_name> xmax_token_table;
 typedef mutable_db_table <resource_token_object, by_owner_name> resource_token_table;
 
 
-void validate_authority(const message_context_xmax& context, const Basetypes::authority& auth) {
+static void validate_authority(const message_context_xmax& context, const Basetypes::authority& auth) {
 
 	for (const account_permission_weight& a : auth.accounts)
 	{
@@ -62,6 +63,18 @@ void validate_authority(const message_context_xmax& context, const Basetypes::au
 			);
 		}
 	}
+}
+
+template <class ErcObjectType>
+static void validate_token_not_revoke(const ErcObjectType& erc_object) {
+	XMAX_ASSERT(erc_object.revoked == 0, message_validate_exception,
+		"ERC token:${token_name} already revoked!", ("token_name", erc_object.token_name));
+}
+
+
+static void validate_name(const name& n) {
+	XMAX_ASSERT(n.valid(), message_validate_exception,
+		"Name:${name} is invalid", ("name", n));
 }
 
 //Utility functions
@@ -369,11 +382,6 @@ void handle_xmax_unregproxy(message_context_xmax& context)    {
     xmax_voting::unreg_proxy(context);
 }
 
-template <class ErcObjectType>
-void validate_token_not_revoke(const ErcObjectType& erc_object) {
-	XMAX_ASSERT(erc_object.revoked == 0, message_validate_exception,
-		"ERC token:${token_name} already revoked!", ("token_name", erc_object.token_name));
-}
 
 //--------------------------------------------------
 void handle_xmax_issueerc20(Chain::message_context_xmax& context) {
@@ -485,6 +493,50 @@ void handle_xmax_revokeerc20(Chain::message_context_xmax& context) {
 
 }
 
+
+//--------------------------------------------------
+void handle_xmax_transfererc20(Chain::message_context_xmax& context)
+{
+	auto& db = context.mutable_db;
+	auto transfer_erc20 = context.msg.as<Types::transfererc20>();
+
+	//Todo: Check owner authorization
+
+	validate_name(transfer_erc20.to);
+
+	auto& erc20_obj = db.get<erc20_token_object, by_token_name>(transfer_erc20.token_name);
+	validate_token_not_revoke(erc20_obj);
+
+	//Validate transfer amount
+	XMAX_ASSERT(erc20_obj.balance >= transfer_erc20.value.amount,
+		message_validate_exception,
+		"The ERC20 token: ${token_name} transfer amount: ${amount} invalid.",
+		("token_name", transfer_erc20.token_name)("amount", transfer_erc20.value));
+
+	//Create token account if no exist
+
+	auto erc20_index = MakeErcTokenIndex(transfer_erc20.token_name, transfer_erc20.to);
+	auto token_account_ptr = db.find<erc20_token_account_object, by_token_and_owner>(erc20_index);
+	if (!token_account_ptr)
+	{		
+		db.create<erc20_token_account_object>([&transfer_erc20](erc20_token_account_object &obj) {
+			obj.balance = 0;
+			obj.owner_name = transfer_erc20.to;
+			obj.token_name = transfer_erc20.token_name;			
+		});
+	}
+
+	const auto& token_account = db.get<erc20_token_account_object, by_token_and_owner>(erc20_index);
+	db.modify(erc20_obj, [&transfer_erc20](erc20_token_object& obj) {
+		obj.balance -= transfer_erc20.value.amount;
+	});
+
+	db.modify(token_account, [&transfer_erc20](erc20_token_account_object& account) {
+		account.balance += transfer_erc20.value.amount;
+	});	
+	
+	//TODO: emit Transfer event
+}
 
 //--------------------------------------------------
 void handle_xmax_revokeerc721(Chain::message_context_xmax& context) {
