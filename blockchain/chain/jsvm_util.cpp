@@ -153,9 +153,9 @@ namespace Xmaxplatform {
 			{
 				bool first = true;
 				//for (int i = 0; i < args.Length(); i++) {
-					v8::HandleScope handle_scope(args.GetIsolate());
-					HandleScope scope(args.GetIsolate());
-					args.GetIsolate()->ThrowException(v8::Exception::Error(String::NewFromUtf8(args.GetIsolate(), "error string here")));
+				v8::HandleScope handle_scope(args.GetIsolate());
+				HandleScope scope(args.GetIsolate());
+				args.GetIsolate()->ThrowException(v8::Exception::Error(String::NewFromUtf8(args.GetIsolate(), "error string here")));
 
 			}
 		}
