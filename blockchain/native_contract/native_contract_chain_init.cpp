@@ -47,6 +47,7 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 	SET_APP_HANDLER(xmax, xmax, issueerc20, Xmaxplatform);
 	SET_APP_HANDLER(xmax, xmax, minterc20, Xmaxplatform);
 	SET_APP_HANDLER(xmax, xmax, revokeerc20, Xmaxplatform);
+	SET_APP_HANDLER(xmax, xmax, transfererc20, Xmaxplatform);
 	SET_APP_HANDLER(xmax, xmax, issueerc721, Xmaxplatform);
 	SET_APP_HANDLER(xmax, xmax, minterc721, Xmaxplatform);	
 	SET_APP_HANDLER(xmax, xmax, revokeerc721, Xmaxplatform);
@@ -75,6 +76,7 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 	xmax_abi.actions.push_back(Types::action{ name("issueerc20"), "issueerc20" });
 	xmax_abi.actions.push_back(Types::action{ name("minterc20"), "minterc20" });
 	xmax_abi.actions.push_back(Types::action{ name("revokeerc20"), "revokeerc20" });
+	xmax_abi.actions.push_back(Types::action{ name("transfererc20"), "transfererc20" });
 	xmax_abi.actions.push_back(Types::action{ name("issueerc721"), "issueerc721" });
 	xmax_abi.actions.push_back(Types::action{ name("minterc721"), "minterc721" });
 	xmax_abi.actions.push_back(Types::action{ name("revokeerc721"), "revokeerc721" });
@@ -93,6 +95,7 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc20>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::minterc20>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::revokeerc20>::type());
+	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transfererc20>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc721>::type());
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::minterc721>::type());	
 	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::revokeerc721>::type());
