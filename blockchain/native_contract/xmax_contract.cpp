@@ -538,6 +538,41 @@ void handle_xmax_transfererc20(Chain::message_context_xmax& context)
 	//TODO: emit Transfer event
 }
 
+
+//--------------------------------------------------
+void handle_xmax_transferfromerc20(Chain::message_context_xmax& context)
+{
+	auto& db = context.mutable_db;
+	auto transfer_erc20 = context.msg.as<Types::transferfromerc20>();
+
+	//TODO: Check owner authorization
+	
+	validate_name(transfer_erc20.from);
+	validate_name(transfer_erc20.to);
+	
+	auto& erc20_obj = db.get<erc20_token_object, by_token_name>(transfer_erc20.token_name);
+	validate_token_not_revoke(erc20_obj);
+
+	auto& from_token_account = db.get<erc20_token_account_object, by_token_and_owner>(MakeErcTokenIndex(transfer_erc20.token_name, transfer_erc20.from));
+	auto& to_token_account = db.get<erc20_token_account_object, by_token_and_owner>(MakeErcTokenIndex(transfer_erc20.token_name, transfer_erc20.to));
+
+	//Validate transfer amount
+	XMAX_ASSERT(transfer_erc20.value.amount <= from_token_account.balance,
+		message_validate_exception,
+		"Not enough balance for transfering ${amount} ERC20 token:${token_name} at account:${account}",
+		("token_name", transfer_erc20.token_name)("amount", transfer_erc20.value.amount)("account", transfer_erc20.from));
+
+	db.modify(from_token_account, [&transfer_erc20](erc20_token_account_object& from_acc){
+		from_acc.balance -= transfer_erc20.value.amount;
+	});
+
+	db.modify(to_token_account, [&transfer_erc20](erc20_token_account_object& to_acc) {
+		to_acc.balance += transfer_erc20.value.amount;
+	});
+
+	//TODO: emit transfer event
+}
+
 //--------------------------------------------------
 void handle_xmax_revokeerc721(Chain::message_context_xmax& context) {
 	auto& db = context.mutable_db;

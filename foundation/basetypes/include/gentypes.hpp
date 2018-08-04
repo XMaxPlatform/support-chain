@@ -716,6 +716,30 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
+    struct transferfromerc20 { 
+        transferfromerc20() = default;
+        transferfromerc20(const asset_symbol& token_name, const account_name& from, const account_name& to, const asset& value)
+           : token_name(token_name), from(from), to(to), value(value) {}
+
+        asset_symbol                     token_name;
+        account_name                     from;
+        account_name                     to;
+        asset                            value;
+    };
+
+    template<> struct get_struct<transferfromerc20> { 
+        static const struct_t& type() { 
+           static struct_t result = { "transferfromerc20", "", {
+                {"token_name", "asset_symbol"},
+                {"from", "account_name"},
+                {"to", "account_name"},
+                {"value", "asset"},
+              }
+           };
+           return result;
+         }
+    };
+
     struct issueerc721 { 
         issueerc721() = default;
         issueerc721(const account_name& creator, const authority& owner, const authority& active, const asset_symbol& token_name)
@@ -811,6 +835,7 @@ FC_REFLECT( Xmaxplatform::Basetypes::issueerc20                       , (creator
 FC_REFLECT( Xmaxplatform::Basetypes::minterc20                        , (token_name)(mint_amount) )
 FC_REFLECT( Xmaxplatform::Basetypes::revokeerc20                      , (token_name) )
 FC_REFLECT( Xmaxplatform::Basetypes::transfererc20                    , (token_name)(to)(value) )
+FC_REFLECT( Xmaxplatform::Basetypes::transferfromerc20                , (token_name)(from)(to)(value) )
 FC_REFLECT( Xmaxplatform::Basetypes::issueerc721                      , (creator)(owner)(active)(token_name) )
 FC_REFLECT( Xmaxplatform::Basetypes::minterc721                       , (token_name)(token_id) )
 FC_REFLECT( Xmaxplatform::Basetypes::revokeerc721                     , (token_name) )

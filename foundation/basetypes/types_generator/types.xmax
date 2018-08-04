@@ -173,6 +173,12 @@ struct transfererc20
 	to	account_name
 	value asset
 
+struct transferfromerc20
+	token_name asset_symbol
+	from	account_name
+	to	account_name
+	value asset
+
 struct issueerc721
 	creator	account_name
 	owner     authority
