@@ -12,7 +12,7 @@ namespace Xmaxplatform {
 				}
 
 				T c = a * b;
-				XMAX_ASSERT(c / a == b);
+				XMAX_ASSERT(c / a == b, invalid_operator_exception, "Safe math operator beyond valid range.");
 				return c;
 			}
 
@@ -23,14 +23,14 @@ namespace Xmaxplatform {
 
 			template<typename T>
 			T sub(T a, T b) {				
-				XMAX_ASSERT(b <= a);
+				XMAX_ASSERT(b <= a, invalid_operator_exception, "Safe math operator beyond valid range.");
 				return a - b;
 			}
 
 			template<typename T>
 			T add(T a, T b) {
 				T c = a + b;
-				XMAX_ASSERT(c >= a);
+				XMAX_ASSERT(c >= a, invalid_operator_exception, "Safe math operator beyond valid range.");
 				return c;
 			}
 

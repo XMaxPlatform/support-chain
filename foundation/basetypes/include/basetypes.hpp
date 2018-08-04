@@ -102,5 +102,7 @@ namespace Xmaxplatform { namespace Basetypes {
                                      4040000, "Requested field name is invalid")
         FC_DECLARE_DERIVED_EXCEPTION(invalid_schema_exception, type_exception,
                                      4050000, "Schema is invalid")
+		FC_DECLARE_DERIVED_EXCEPTION(invalid_operator_exception, type_exception,
+									 4060000, "Operator is invalid")
 
     } } // Xmaxplatform::Basetypes
