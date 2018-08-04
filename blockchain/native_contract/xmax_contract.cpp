@@ -22,6 +22,7 @@
 #include <objects/erc721_token_account_object.hpp>
 #include <xmax_voting.hpp>
 #include <vm_xmax.hpp>
+#include <safemath.hpp>
 
 #include <abi_serializer.hpp>
 
@@ -36,6 +37,7 @@ namespace Xmaxplatform {
 using namespace Chain;
 namespace Config = ::Xmaxplatform::Config;
 namespace Chain = ::Xmaxplatform::Chain;
+namespace SafeMath = Xmaxplatform::Basetypes::SafeMath;
 using namespace ::Xmaxplatform::Basetypes;
 
 typedef mutable_db_table <xmx_token_object, by_owner_name> xmax_token_table;
@@ -528,11 +530,11 @@ void handle_xmax_transfererc20(Chain::message_context_xmax& context)
 
 	const auto& token_account = db.get<erc20_token_account_object, by_token_and_owner>(erc20_index);
 	db.modify(erc20_obj, [&transfer_erc20](erc20_token_object& obj) {
-		obj.balance -= transfer_erc20.value.amount;
+		obj.balance = SafeMath::sub(obj.balance, transfer_erc20.value.amount);				
 	});
 
-	db.modify(token_account, [&transfer_erc20](erc20_token_account_object& account) {
-		account.balance += transfer_erc20.value.amount;
+	db.modify(token_account, [&transfer_erc20](erc20_token_account_object& account) {		
+		account.balance = SafeMath::add(account.balance, transfer_erc20.value.amount);
 	});	
 	
 	//TODO: emit Transfer event
@@ -562,12 +564,12 @@ void handle_xmax_transferfromerc20(Chain::message_context_xmax& context)
 		"Not enough balance for transfering ${amount} ERC20 token:${token_name} at account:${account}",
 		("token_name", transfer_erc20.token_name)("amount", transfer_erc20.value.amount)("account", transfer_erc20.from));
 
-	db.modify(from_token_account, [&transfer_erc20](erc20_token_account_object& from_acc){
-		from_acc.balance -= transfer_erc20.value.amount;
+	db.modify(from_token_account, [&transfer_erc20](erc20_token_account_object& from_acc){		
+		from_acc.balance = SafeMath::sub(from_acc.balance, transfer_erc20.value.amount);
 	});
 
 	db.modify(to_token_account, [&transfer_erc20](erc20_token_account_object& to_acc) {
-		to_acc.balance += transfer_erc20.value.amount;
+		to_acc.balance = SafeMath::add(to_acc.balance, transfer_erc20.value.amount);		
 	});
 
 	//TODO: emit transfer event
