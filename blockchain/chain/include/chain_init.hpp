@@ -15,6 +15,15 @@ namespace Xmaxplatform { namespace Chain {
 	struct chain_xmax;
 	class builder_object;
 
+
+	class message_data
+	{
+	public:
+		message_xmax msg;
+		std::vector<account_name> scopes;
+	};
+
+
     class chain_init {
     public:
         virtual ~chain_init();
@@ -27,7 +36,7 @@ namespace Xmaxplatform { namespace Chain {
 
         virtual void register_handlers(chain_xmax &chain, database &db) = 0;
 
-        virtual vector<message_xmax> prepare_data(chain_xmax &chain, database &db) = 0;
+        virtual vector<message_data> prepare_data(chain_xmax &chain, database &db) = 0;
     };
 
 } }
