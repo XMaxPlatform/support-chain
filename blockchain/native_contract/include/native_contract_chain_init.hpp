@@ -24,7 +24,7 @@ public:
    virtual Chain::xmax_builder_infos get_chain_init_builders() const override;
 
    virtual void register_handlers(Chain::chain_xmax &chain, Basechain::database &db) override;
-   virtual std::vector<Chain::message_xmax> prepare_data(Chain::chain_xmax &chain,
+   virtual std::vector<Chain::message_data> prepare_data(Chain::chain_xmax &chain,
                                                          Basechain::database &db) override;
 
    static Basetypes::abi xmax_contract_abi();

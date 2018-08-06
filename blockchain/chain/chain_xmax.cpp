@@ -211,10 +211,14 @@ namespace Xmaxplatform { namespace Chain {
 
 					signed_transaction signed_trx;
 
-					std::for_each(messages.begin(), messages.end(), [&](const message_xmax& m) {
+					std::set<account_name> scopes;
 
-						signed_trx.messages.push_back(m);
+					std::for_each(messages.begin(), messages.end(), [&](const message_data& m) {
+						signed_trx.messages.push_back(m.msg);
+						scopes.insert(m.scopes.begin(), m.scopes.end());
 					});
+
+					signed_trx.scope.assign(scopes.begin(), scopes.end());
 
 					transaction_request_ptr request = std::make_shared<transaction_request>(signed_trx);
 					apply_transaction_impl(request);

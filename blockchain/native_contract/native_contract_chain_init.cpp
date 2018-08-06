@@ -107,9 +107,9 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
    return xmax_abi;
 }
 
-std::vector<message_xmax> native_contract_chain_init::prepare_data(chain_xmax &chain,
+std::vector<Chain::message_data> native_contract_chain_init::prepare_data(chain_xmax &chain,
                                                                    Basechain::database &db) {
-   std::vector<message_xmax> messages_to_process;
+	std::vector<Chain::message_data> messages_to_process;
 
 
    auto CreateNativeAccount = [this, &db](name name, auto xmxtoken) {
@@ -137,34 +137,42 @@ std::vector<message_xmax> native_contract_chain_init::prepare_data(chain_xmax &c
    for (const auto& acct : genesis.initial_accounts) {
 
 	   account_name acc_name = acct.name;
-
-	   message_xmax msg1(Config::xmax_contract_name,
+	   message_data data;
+	   data.msg = message_xmax(Config::xmax_contract_name,
 		   vector<Basetypes::account_auth>{ {acc_name, "active"}},
 		   "addaccount", Basetypes::addaccount(Config::xmax_contract_name, acc_name,
 			   KeyAuthority(acct.owner_key),
 			   KeyAuthority(acct.active_key),
 			   acct.staking_balance));
 
-	   messages_to_process.emplace_back(std::move(msg1));
+	   messages_to_process.emplace_back(std::move(data));
+
+
+
 	   if (acct.xmx_token > 0) {
-		   message_xmax msg2(Config::xmax_contract_name,
+		   message_data data2;
+
+		   data2.msg = message_xmax(Config::xmax_contract_name,
 			   vector<Basetypes::account_auth>{ {acc_name, "active"}},
 			   "transfer", Basetypes::transfer(Config::xmax_contract_name, acct.name,
 				   acct.xmx_token.amount, "Genesis Allocation"));
-		   messages_to_process.emplace_back(std::move(msg2));
 
+		   data2.scopes.push_back(acc_name);
+		   data2.scopes.push_back(Config::xmax_contract_name);
 
+		   messages_to_process.emplace_back(std::move(data2));
 	   }
    }
 
    for (const auto& blder : genesis.initial_builders)
    {
+	   message_data data;
 	   account_name acc_name = blder.owner_name;
-	   message_xmax msg(Config::xmax_contract_name,
+	   data.msg = message_xmax(Config::xmax_contract_name,
 		   vector<Basetypes::account_auth>{ {acc_name, "active"}},
 		   "regbuilder", Basetypes::regbuilder(acc_name, blder.block_signing_key));
 
-	   messages_to_process.emplace_back(std::move(msg));
+	   messages_to_process.emplace_back(std::move(data));
    }
 
    return messages_to_process;
