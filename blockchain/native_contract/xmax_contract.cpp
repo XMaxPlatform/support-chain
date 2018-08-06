@@ -12,6 +12,7 @@
 #include <objects/object_utility.hpp>
 #include <objects/account_object.hpp>
 #include <objects/authority_object.hpp>
+#include <objects/linked_permission_object.hpp>
 #include <objects/xmx_token_object.hpp>
 #include <objects/resource_token_object.hpp>
 #include <objects/chain_object_table.hpp>
@@ -62,6 +63,14 @@ void validate_authority(const message_context_xmax& context, const Basetypes::au
 			);
 		}
 	}
+}
+
+static const account_object& account_assert(const Basechain::database& db, const account_name accout)
+{
+	const account_object* acc = db.find<account_object, by_name>(accout);
+	XMAX_ASSERT(acc != nullptr, message_validate_exception,
+		"Account not found: ${account}", ("account", accout));
+	return *acc;
 }
 
 //Utility functions
@@ -115,7 +124,6 @@ static void create_account_internal(Types::addaccount& create, Basechain::databa
 }
 
 
-
 //API handler implementations
 void handle_xmax_addaccount(message_context_xmax& context) {	
 	create_account_internal(context.msg.as<Types::addaccount>(), context.mutable_db, context.current_time());
@@ -136,7 +144,7 @@ void handle_xmax_updateauth(Chain::message_context_xmax& context)
 	XMAX_ASSERT(msg.permission != msg.parent, message_validate_exception, "Cannot set an authority as its own parent");
 
 
-	const account_object& acc = data_db.get<account_object, by_name>(msg.account); // check account.
+	account_assert(data_db, msg.account); // check account.
 
 	XMAX_ASSERT(utils::validate_weight_format(msg.new_authority), message_validate_exception, "Invalid authority: ${auth}", ("auth", msg.new_authority));
 
@@ -193,6 +201,42 @@ void handle_xmax_deleteauth(Chain::message_context_xmax& context)
 void handle_xmax_linkauth(Chain::message_context_xmax& context)
 {
 	Types::linkauth msg = context.msg.as<Types::linkauth>();
+	try {
+		XMAX_ASSERT(!msg.requirement.empty(), message_validate_exception, "Required authority name cannot be empty");
+
+		context.require_authorization(msg.account);
+
+		account_assert(context.mutable_db, msg.account);
+		account_assert(context.mutable_db, msg.code);
+
+		{
+			const authority_object* auth = context.db.find<authority_object, by_owner>(msg.requirement);
+			XMAX_ASSERT(auth != nullptr, message_validate_exception, "Auth not found: ${auth}", ("auth", msg.requirement));
+		}
+
+		auto tlkey = std::make_tuple(msg.account, msg.code, msg.type);
+
+		const auto linked = context.db.find<linked_permission_object, by_func>(tlkey);
+
+		if (linked)
+		{
+			XMAX_ASSERT(linked->required_auth != msg.requirement, message_validate_exception, "Auth used: ${auth}", ("auth", msg.requirement));
+			context.mutable_db.modify(*linked, [auth = msg.requirement](linked_permission_object& linked) {
+				linked.required_auth = auth;
+			});
+		}
+		else
+		{
+			context.mutable_db.create<linked_permission_object>([&msg](linked_permission_object& link) {
+				link.account = msg.account;
+				link.code = msg.code;
+				link.func = msg.type;
+				link.required_auth = msg.requirement;
+			});
+		}
+		  
+
+	} FC_CAPTURE_AND_RETHROW((msg))
 }
 
 void handle_xmax_unlinkauth(Chain::message_context_xmax& context)
