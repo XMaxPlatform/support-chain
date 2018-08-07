@@ -80,6 +80,7 @@ namespace Xmaxplatform { namespace Chain {
 	   chain_timestamp		building_block_timestamp() const;
 
 	   signed_block_ptr		block_from_num(uint32_t num) const;
+	   signed_block_ptr		confirmed_block_from_num(uint32_t num) const;
 	   signed_block_ptr		block_from_id(xmax_type_block_id id) const;
 	   xmax_type_block_id	block_id_from_num(uint32_t num) const;
 

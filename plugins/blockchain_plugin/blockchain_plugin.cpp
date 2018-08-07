@@ -159,6 +159,7 @@ namespace Xmaxplatform {
 														CHAIN_RO_CALL(get_table_rows, 200),
 														CHAIN_RO_CALL(get_info, 200),
 														CHAIN_RO_CALL(get_block, 200),
+														CHAIN_RO_CALL(get_block_header, 200),
 														CHAIN_RO_CALL(get_code, 200),
 														CHAIN_RO_CALL(get_required_keys, 200),
 														CHAIN_RO_CALL(erc20_total_supply, 200),
@@ -239,6 +240,23 @@ namespace Chain_APIs{
 	}
 
 
+	Xmaxplatform::Chain_APIs::read_only::get_blockHeader_results read_only::get_block_header(const get_blockHeader_params& params) const
+	{
+		try {
+			if (auto block = _chain.confirmed_block_from_num(fc::to_uint64(params.block_num_or_id)))
+			{
+				Xmaxplatform::Chain::signed_block_header* block_header = (Xmaxplatform::Chain::signed_block_header*)block.get();
+				return *block_header;
+			}
+				
+		}
+		catch (fc::bad_cast_exception) {/* do nothing */ }
+		catch (std::out_of_range) {/* do nothing */ }
+
+		FC_THROW_EXCEPTION(Chain::unknown_block_exception,
+			"Could not find block: ${block}", ("block", params.block_num_or_id));
+	}
+
 	//--------------------------------------------------
 	Xmaxplatform::Chain_APIs::read_only::get_code_results read_only::get_code(const get_code_params& params) const
 	{
@@ -251,6 +269,7 @@ namespace Chain_APIs{
 			result.wast = Chain::ConvertFromWasmToWast((const uint8_t*)accnt.code.data(), accnt.code.size());
 			result.code_hash = fc::sha256::hash(accnt.code.data(), accnt.code.size());
 		}
+
 		Xmaxplatform::Basetypes::abi abi;
 		if (Basetypes::abi_serializer::to_abi(accnt.abi, abi)) {
 			result.abi = std::move(abi);

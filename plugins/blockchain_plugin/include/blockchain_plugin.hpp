@@ -109,6 +109,25 @@ namespace Xmaxplatform {
 
 			get_block_results get_block(const get_block_params& params) const;
 
+			struct get_blockHeader_params {
+				string block_num_or_id;
+			};
+
+			struct get_blockHeader_results : public Chain::signed_block_header {
+				get_blockHeader_results(const Chain::signed_block_header& b)
+					:signed_block_header(b),
+					id(b.id()),
+					block_num(b.block_num()),
+					ref_block_prefix(id._hash[1])
+				{}
+
+				Chain::xmax_type_block_id id;
+				Chain::xmax_type_block_num	 block_num = 0;
+				uint32_t             ref_block_prefix = 0;
+			};
+
+			get_blockHeader_results get_block_header(const get_blockHeader_params& params) const;
+
 			
 
 			struct get_code_results {
@@ -321,6 +340,11 @@ FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_table_rows_result, (rows)(mo
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_block_params, (block_num_or_id))
 
 FC_REFLECT_DERIVED(Xmaxplatform::Chain_APIs::read_only::get_block_results, (Xmaxplatform::Chain::signed_block), (id)(block_num)(ref_block_prefix));
+
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_blockHeader_params, (block_num_or_id))
+
+FC_REFLECT_DERIVED(Xmaxplatform::Chain_APIs::read_only::get_blockHeader_results, (Xmaxplatform::Chain::signed_block_header), (id)(block_num)(ref_block_prefix));
+
 
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_info_results,
 (server_version)(head_block_num)(last_irreversible_block_num)(head_block_id)(head_block_time))

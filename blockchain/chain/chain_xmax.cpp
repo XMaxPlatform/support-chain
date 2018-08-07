@@ -348,6 +348,20 @@ namespace Xmaxplatform { namespace Chain {
 
 			} FC_LOG_AND_RETHROW()
 		}
+
+		signed_block_ptr chain_xmax::confirmed_block_from_num(uint32_t num) const
+		{
+			try {
+			
+				signed_block_ptr block = _context->chain_log.read_by_num(num);
+				uint32_t blockNum = block->block_num();
+				FC_ASSERT(blockNum == num, "Wrong block was read from block log.");
+
+				return block;
+
+			} FC_LOG_AND_RETHROW()
+		}
+
 		signed_block_ptr chain_xmax::block_from_id(xmax_type_block_id id) const
 		{
 			try {
