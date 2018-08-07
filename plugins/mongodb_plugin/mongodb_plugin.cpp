@@ -103,10 +103,10 @@ namespace Xmaxplatform {
 		inline void _insert_block_transactions(const signed_block& block, bsoncxx::builder::stream::document& block_doc);
 		template <class T>
 		bool _insert_single_transaction(T& trans_arr_ctx, const signed_block& block, uint32_t trans_idx, 
-			const Chain::processed_transaction& trans, mongocxx::bulk_write& bulk_trans);
+			const Chain::signed_transaction& trans, mongocxx::bulk_write& bulk_trans);
 		template <class TRANS_CTX_TYPE>
 		inline void _insert_single_message(int32_t idx, TRANS_CTX_TYPE& trans_ctx, const signed_block& block, 
-			mongocxx::bulk_write& bulk_msgs, const Xmaxplatform::Basetypes::message& message, const Chain::processed_transaction& trans);
+			mongocxx::bulk_write& bulk_msgs, const Xmaxplatform::Basetypes::message& message, const Chain::signed_transaction& trans);
 
 		//Update methods
 		void _update_msg_transfer(const Chain::message_xmax& msg);
@@ -296,6 +296,12 @@ namespace Xmaxplatform {
 				FC_THROW("Unable to find account ${n}", ("n", name));
 			}
 			return *account;
+		}
+
+		auto find_transaction(mongocxx::collection& trans, const std::string& trx_id_str) {
+			using bsoncxx::builder::basic::make_document;
+			using bsoncxx::builder::basic::kvp;
+			return trans.find_one(make_document(kvp("transaction_id", trx_id_str)));
 		}
 
 
@@ -651,6 +657,7 @@ namespace Xmaxplatform {
 		
 		using namespace bsoncxx::builder;
 		using namespace bsoncxx::types;
+		using namespace Xmaxplatform::Chain;
 
 		auto trans_arr_ctx = block_doc << "transactions" << stream::open_array;
 
@@ -661,20 +668,35 @@ namespace Xmaxplatform {
 		uint32_t trans_idx = 0;
 		bool transactions_in_block = false;
 
-		/*for (auto& v_threads : block.threads)
+		auto trans = mongo_client[mongodb_name][col_transactions_name];
+
+		
+		for (const auto& receipt : block.receipts)
 		{
-			for (auto& thread : v_threads) 
-			{
-				for (const auto& trans : thread.user_input)
+			string trx_id_str;
+
+			if (receipt.trx.contains<transaction_package>()) {
+				const auto& packed_trx = receipt.trx.get<transaction_package>();
+				const auto& trx = packed_trx.body;
+				const auto& id = trx.id();
+				trx_id_str = id.str();
+
+				if (_insert_single_transaction(trans_arr_ctx, block, trans_idx, trx, bulk_trans))
 				{
-					if (_insert_single_transaction(trans_arr_ctx, block, trans_idx, trans, bulk_trans))
-					{
-						transactions_in_block = true;
-					}
-					++trans_idx;
+					transactions_in_block = true;
 				}
+				++trans_idx;
 			}
-		}*/
+			else {
+				const auto& trx_id = receipt.trx.get<xmax_type_transaction_id>();
+				trx_id_str = trx_id.str();
+				//TODO: record the id info
+			}
+
+			auto op_result = find_transaction(trans, trx_id_str);
+
+		}
+
 
 		auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
 			std::chrono::microseconds{ fc::time_point::now().time_since_epoch().count() });
@@ -690,7 +712,7 @@ namespace Xmaxplatform {
 			elog("Insert failed for the block ${bid}", ("bid", block_id));
 		}
 
-		auto trans = mongo_client[mongodb_name][col_transactions_name];
+		
 		if (transactions_in_block) {
 			auto result = trans.bulk_write(bulk_trans);
 			if (!result) {
@@ -705,7 +727,7 @@ namespace Xmaxplatform {
 	//--------------------------------------------------
 	template <class T>
 	bool mongodb_plugin_impl::_insert_single_transaction(T& trans_arr_ctx, const signed_block& block, uint32_t trans_idx, 
-		const Chain::processed_transaction& trans, mongocxx::bulk_write& bulk_trans)
+		const Chain::signed_transaction& trans, mongocxx::bulk_write& bulk_trans)
 	{
 		using namespace bsoncxx::builder;
 		using namespace bsoncxx::types;
@@ -778,7 +800,7 @@ namespace Xmaxplatform {
 	//--------------------------------------------------
 	template <class TRANS_CTX_TYPE>
 	inline void mongodb_plugin_impl::_insert_single_message(int32_t idx, TRANS_CTX_TYPE& trans_ctx, const signed_block& block, 
-		mongocxx::bulk_write& bulk_msgs, const Xmaxplatform::Basetypes::message& message, const Chain::processed_transaction& trans)
+		mongocxx::bulk_write& bulk_msgs, const Xmaxplatform::Basetypes::message& message, const Chain::signed_transaction& trans)
 	{
 		using namespace bsoncxx::builder;
 		using namespace bsoncxx::types;
