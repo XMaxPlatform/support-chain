@@ -257,6 +257,15 @@ void handle_xmax_linkauth(Chain::message_context_xmax& context)
 void handle_xmax_unlinkauth(Chain::message_context_xmax& context)
 {
 	Types::unlinkauth msg = context.msg.as<Types::unlinkauth>();
+
+	context.require_authorization(msg.account);
+
+	auto tlkey = std::make_tuple(msg.account, msg.code, msg.type);
+
+	const auto linked = context.db.find<linked_permission_object, by_func>(tlkey);
+
+	XMAX_ASSERT(linked != nullptr, message_validate_exception, "Linked permission not found");
+	context.mutable_db.remove(*linked);
 }
 
 void handle_xmax_transfer(message_context_xmax& context) {

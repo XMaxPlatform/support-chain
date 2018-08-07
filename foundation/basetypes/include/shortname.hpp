@@ -116,6 +116,11 @@ namespace ShortCode{
 			}
 			return namecode;
 		}
+		static name_code to_name_code(const std::string& str)
+		{
+			return to_name_code(str.c_str());
+		}
+
 		void set(name_code c);
 		void set(const char* str);
 		void set(const string& str);

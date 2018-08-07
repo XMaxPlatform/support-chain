@@ -10,7 +10,6 @@
 namespace Xmaxplatform {
 namespace Chain {
 
-
 	namespace utils
 	{
 		chain_timestamp get_delta_slot_time(chain_timestamp begin_time, uint32_t delta_slot);

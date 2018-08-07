@@ -11,6 +11,11 @@ namespace Chain {
 
 	using Basechain::database;
 
+	//static const func_name updateauth_name = STN(std::string(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::updateauth>::type().name));
+	//static const func_name deleteauth_name = STN(std::string(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::deleteauth>::type().name));
+	//static const func_name linkauth_name = STN(std::string(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::linkauth>::type().name));
+	//static const func_name unlinkauth_name = STN(std::string(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unlinkauth>::type().name));
+
 	namespace utils
 	{
 		void check_authorization(const std::vector<Basetypes::message>& messages, const flat_set<public_key_type>& keys)
