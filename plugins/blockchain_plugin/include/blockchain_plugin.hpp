@@ -109,12 +109,12 @@ namespace Xmaxplatform {
 
 			get_block_results get_block(const get_block_params& params) const;
 
-			struct get_blockHeader_params {
+			struct get_block_header_params {
 				string block_num_or_id;
 			};
 
-			struct get_blockHeader_results : public Chain::signed_block_header {
-				get_blockHeader_results(const Chain::signed_block_header& b)
+			struct get_block_header_results : public Chain::signed_block_header {
+				get_block_header_results(const Chain::signed_block_header& b)
 					:signed_block_header(b),
 					id(b.id()),
 					block_num(b.block_num()),
@@ -126,7 +126,7 @@ namespace Xmaxplatform {
 				uint32_t             ref_block_prefix = 0;
 			};
 
-			get_blockHeader_results get_block_header(const get_blockHeader_params& params) const;
+			get_block_header_results get_block_header(const get_block_header_params& params) const;
 
 			
 
@@ -341,9 +341,9 @@ FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_block_params, (block_num_or_
 
 FC_REFLECT_DERIVED(Xmaxplatform::Chain_APIs::read_only::get_block_results, (Xmaxplatform::Chain::signed_block), (id)(block_num)(ref_block_prefix));
 
-FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_blockHeader_params, (block_num_or_id))
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_block_header_params, (block_num_or_id))
 
-FC_REFLECT_DERIVED(Xmaxplatform::Chain_APIs::read_only::get_blockHeader_results, (Xmaxplatform::Chain::signed_block_header), (id)(block_num)(ref_block_prefix));
+FC_REFLECT_DERIVED(Xmaxplatform::Chain_APIs::read_only::get_block_header_results, (Xmaxplatform::Chain::signed_block_header), (id)(block_num)(ref_block_prefix));
 
 
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_info_results,

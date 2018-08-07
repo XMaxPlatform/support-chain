@@ -240,7 +240,7 @@ namespace Chain_APIs{
 	}
 
 
-	Xmaxplatform::Chain_APIs::read_only::get_blockHeader_results read_only::get_block_header(const get_blockHeader_params& params) const
+	Xmaxplatform::Chain_APIs::read_only::get_block_header_results read_only::get_block_header(const get_block_header_params& params) const
 	{
 		try {
 			if (auto block = _chain.confirmed_block_from_num(fc::to_uint64(params.block_num_or_id)))
