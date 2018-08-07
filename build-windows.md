@@ -224,8 +224,10 @@ Set:
 ```bash
 # Load the testnet genesis state, which creates some initial block producers with the default key
 genesis-json = genesis.json     
+import-builders = import-builders.json
 
-plugin = Xmaxplatform::chaindata_plugin
+
+plugin = Xmaxplatform::chainnet_plugin
 plugin = Xmaxplatform::chainhttp_plugin
 plugin = Xmaxplatform::blockchain_plugin
 plugin = Xmaxplatform::blockbuilder_plugin
