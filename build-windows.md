@@ -235,7 +235,7 @@ plugin = Xmaxplatform::contractutil_plugin
 
 # setting for mongodb.
 plugin = Xmaxplatform::mongodb_plugin
-mongodb-uri = mongodb://localhost:27017
+mongo-uri = mongodb://localhost:27017
 
 ```
 
