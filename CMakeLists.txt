@@ -177,3 +177,12 @@ if(WIN32 AND NOT ("${OPENSSL_ROOT_DIR}" STREQUAL ""))
         FILES_MATCHING PATTERN "libcrypto-1_1-x64.dll")        
 endif()
 
+
+
+if(WIN32)
+add_custom_target(copy_dependent_dlls)
+add_custom_command(TARGET copy_dependent_dlls POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/libraries/v8/library/$<LOWER_CASE:$<CONFIG>>"
+       "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>")
+endif(WIN32)
