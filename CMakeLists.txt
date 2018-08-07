@@ -185,4 +185,6 @@ add_custom_command(TARGET copy_dependent_dlls POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/libraries/v8/library/$<LOWER_CASE:$<CONFIG>>"
        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>")
+
+set_target_properties(copy_dependent_dlls PROPERTIES FOLDER "Tools")       
 endif(WIN32)

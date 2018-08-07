@@ -7,3 +7,5 @@ set(PublicHeaders
 	Timing.h
 	UTF8.h)
 add_custom_target(Inline SOURCES ${PublicHeaders})
+
+set_target_properties(Inline PROPERTIES FOLDER "3.Virtual Machine")

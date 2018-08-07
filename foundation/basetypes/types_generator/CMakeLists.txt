@@ -25,5 +25,7 @@ add_custom_command(OUTPUT "${GEN_TYPES_HEADER}"
 			COMMAND $<TARGET_FILE:types_generator> ${CMAKE_CURRENT_SOURCE_DIR}/types.xmax ${GEN_TYPES_HEADER}
 			DEPENDS types.xmax types_generator
 			)
+			
+add_custom_target(generate_types_header ALL DEPENDS ${GEN_TYPES_HEADER} SOURCES types.xmax) 			
 
-add_custom_target(generateTypesHeader ALL DEPENDS ${GEN_TYPES_HEADER} SOURCES types.xmax) 			
+set_target_properties(generate_types_header PROPERTIES FOLDER "Tools")
