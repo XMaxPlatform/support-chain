@@ -632,8 +632,8 @@ namespace Xmaxplatform {
 		const auto block_id_str = block_id.str();
 		const auto prev_block_id = block.previous.str();
 		auto block_num = block.block_num();
-
-
+		  
+		  
 		auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
 			std::chrono::microseconds{ fc::time_point::now().time_since_epoch().count() });
 
@@ -642,7 +642,7 @@ namespace Xmaxplatform {
 			<< "block_id" << block_id_str
 			<< "prev_block_id" << prev_block_id
 			<< "timestamp" << b_date{ std::chrono::milliseconds{ std::chrono::seconds{Chain::chain_timestamp::to_time_point(block.timestamp).sec_since_epoch()}} }
-			//<< "transaction_merkle_root" << block.transaction_merkle_root.str()
+			<< "transaction_merkle_root" << block.trxs_mroot.str() 
 			<< "builder_account_name" << block.builder.to_string();
 		
 		_insert_block_transactions(block, block_doc);
@@ -818,7 +818,7 @@ namespace Xmaxplatform {
 			for (const auto& auth : message.authorization) {
 				subarr.append([&auth](bsoncxx::builder::basic::sub_document subdoc) {
 					subdoc.append(kvp("account", auth.account.to_string()),
-						kvp("permission", auth.permission.to_string()));
+						kvp("permission", auth.authority.to_string()));
 				});
 			}
 		}));
