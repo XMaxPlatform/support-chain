@@ -268,36 +268,39 @@ namespace Xmaxplatform {
 
 			// signed transaction with private key.
 
-			const auto& po = var_params.get_object();
+			const variant_object& po = var_params.get_object();
 
-			std::string callerPK;
+			std::vector<std::string> callerPKs;
 			fc::microseconds duration_sec = fc::seconds(60);
 
 
 #define GET_FIELD( VO, FIELD, RESULT ) if( VO.contains(FIELD) ) fc::from_variant( VO[FIELD], RESULT )
 
-			GET_FIELD(po, "sign_key", callerPK);
+			GET_FIELD(po, "sign_keys", callerPKs);
 			GET_FIELD(po, "duration_sec", duration_sec);
 
 #undef GET_FIELD 
-			fc::optional<fc::ecc::private_key> caller_priv_key = Utilities::wif_to_key(callerPK);
-			if (caller_priv_key.valid())
+
+			if (Basetypes::time(fc::microseconds(0)) == trx.expiration)
 			{
-				if (Basetypes::time(fc::microseconds(0)) == trx.expiration)
-				{
-					trx.expiration = chain_plugin.getchain().head_block_time() + duration_sec;
-				}
-				if (0 == trx.ref_block_num || 0 == trx.ref_block_prefix)
-				{
-					transaction_set_reference_block(trx, chain_plugin.getchain().head_block_id());
-				}
-
-				Chain::chain_id_type chainid;
-				app().get_plugin<blockchain_plugin>().get_chain_id(chainid);
-
-				trx.sign(*caller_priv_key, chainid);
+				trx.expiration = chain_plugin.getchain().head_block_time() + duration_sec;
+			}
+			if (0 == trx.ref_block_num || 0 == trx.ref_block_prefix)
+			{
+				transaction_set_reference_block(trx, chain_plugin.getchain().head_block_id());
 			}
 
+			Chain::chain_id_type chainid;
+			app().get_plugin<blockchain_plugin>().get_chain_id(chainid);
+
+			for (const auto& str : callerPKs)
+			{
+				fc::optional<fc::ecc::private_key> caller_priv_key = Utilities::wif_to_key(str);
+				if (caller_priv_key.valid())
+				{
+					trx.sign(*caller_priv_key, chainid);
+				}
+			}
 
 			Chain::transaction_package_ptr new_package = std::make_shared<Chain::transaction_package>(trx);
 
