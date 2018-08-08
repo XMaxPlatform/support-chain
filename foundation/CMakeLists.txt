@@ -1,4 +1,5 @@
 add_subdirectory( baseapp )
+add_subdirectory( basecli )
 add_subdirectory( basechain )
 add_subdirectory( basetypes )
 add_subdirectory( utilities )
