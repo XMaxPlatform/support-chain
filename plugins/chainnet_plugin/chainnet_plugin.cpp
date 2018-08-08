@@ -988,7 +988,7 @@ namespace Xmaxplatform {
    {
 	   cfg.add_options()
 		   ("chainnet_plugin-log-level", bpo::value<Chain::string>()->default_value("all"), "Log level: one of 'all', 'debug', 'info', 'warn', 'error', or 'off'")
-		   ("p2p-listen-endpoint", bpo::value<Chain::string>()->default_value("0.0.0.0:19876"), "Host:port used to listen incoming p2p connections.")
+		   ("p2p-listen-endpoint", bpo::value<Chain::string>()->default_value("0.0.0.0:17001"), "Host:port used to listen incoming p2p connections.")
 		   ("p2p-peer-address", bpo::value< Chain::vector<Chain::string> >()->composing(), "The public endpoint of a peer node to connect to. Multiple p2p-peer-address can be used if need to compose a network.")
 		   ("max-clients", bpo::value<int>()->default_value(def_max_clients), "Maximum clients from which connections are accepted, (0)zero means unlimit")
 		   ("connection-cleanup-period", bpo::value<int>()->default_value(def_conn_retry_wait), "Seconds to wait before cleaning up dead connections")

@@ -88,7 +88,7 @@ namespace Xmaxplatform {
 
    void chainhttp_plugin::set_program_options(options_description&, options_description& cfg) {
       cfg.add_options()
-            ("http-server-address", bpo::value<string>()->default_value("127.0.0.1:18888"),
+            ("http-server-address", bpo::value<string>()->default_value("0.0.0.0:18801"),
              "The local IP and port to listen for incoming http connections.")
 
             ("access-control-allow-origin", bpo::value<string>()->notifier([this](const string& v) {

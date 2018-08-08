@@ -1155,7 +1155,7 @@ namespace Xmaxplatform { namespace Chain {
 				validate_uniqueness(request->signed_trx);
 
 				return true;
-			} FC_CAPTURE_AND_RETHROW((request->signed_trx))
+			} FC_CAPTURE_AND_LOG((request->signed_trx))
 
 			return false;
 		}
