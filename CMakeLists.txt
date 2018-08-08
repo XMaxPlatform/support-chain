@@ -180,11 +180,30 @@ endif()
 
 
 if(WIN32)
+set(V8_DEPENDCIES_DLLS  "${CMAKE_CURRENT_SOURCE_DIR}/libraries/v8/library/$<LOWER_CASE:$<CONFIG>>")
+
 add_custom_target(copy_dependent_dlls)
 add_custom_command(TARGET copy_dependent_dlls POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_CURRENT_SOURCE_DIR}/libraries/v8/library/$<LOWER_CASE:$<CONFIG>>"
-       "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>")
+        ${V8_DEPENDCIES_DLLS}
+       "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>")       
 
 set_target_properties(copy_dependent_dlls PROPERTIES FOLDER "Tools")       
+
+
+INSTALL( DIRECTORY
+${V8_DEPENDCIES_DLLS}/
+DESTINATION
+bin
+)
+
+
 endif(WIN32)
+
+
+INSTALL(FILES 
+"${CMAKE_CURRENT_SOURCE_DIR}/genesis.json"
+"${CMAKE_CURRENT_SOURCE_DIR}/import-builders.json"
+DESTINATION
+bin
+)
