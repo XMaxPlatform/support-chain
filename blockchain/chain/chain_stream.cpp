@@ -10,12 +10,24 @@
 #define LOG_WRITE (std::ios::out | std::ios::binary | std::ios::app)
 #define LOG_READ_WRITE (std::ios::in | std::ios::out | std::ios::binary | std::ios::app)
 
+
+
+
 namespace block_detail
 {
+	//
+	// ----------- block stream -------------------------
+	// [block 1][desc 1][eof][block 2][desc 2][eof] ... [block n][desc n][eof]
+	// ------------ index stream ------------------------
+	// [index 1][index 2] ... [index n]
+	//
+
+
 	using namespace Xmaxplatform::Chain;
 	typedef uint32_t block_end_eof_type;
 	static const block_end_eof_type block_end_eof = 0xb10cedef;
-	struct block_desc
+
+	struct alignas(64) block_desc
 	{
 		uint64_t num;
 		uint64_t pos;
@@ -29,20 +41,29 @@ namespace block_detail
 		}
 	};
 
-	struct block_index
+	struct alignas(64) block_index
 	{
-		xmax_type_block_id id;
 		uint64_t num;
 		uint64_t pos;
+		uint64_t size;
+		xmax_type_block_id id;
 
 		block_index()
 			: pos(0)
 			, num(0)
+			, size(0)
 		{
 
 		}
 	};
+}
 
+FC_REFLECT(block_detail::block_desc, (num)(pos)(size))
+
+FC_REFLECT(block_detail::block_index, (num)(pos)(size)(id))
+
+namespace block_detail
+{
 	enum IO_Code
 	{
 		IO_Read,
@@ -104,6 +125,7 @@ namespace block_detail
 	static void read_block_desc(std::fstream& stream, block_desc& val)
 	{
 		stream.read((char*)&val, sizeof(block_desc));
+
 	}
 
 	static void write_block_desc(std::fstream& stream, const block_desc& val)
@@ -141,6 +163,7 @@ namespace block_detail
 		block_index index;
 		index.pos = pos;
 		index.num = num;
+		index.size = data.size();
 		index.id = id;
 
 		FC_ASSERT(idx_pos == sizeof(block_index) * (desc.num - 1),
@@ -184,10 +207,6 @@ static void clear_file_stream(const fc::path& file, std::fstream& stream)
 	fc::remove_all(file);
 	open_file_stream(file, stream);
 }
-
-FC_REFLECT(block_detail::block_desc, (num)(pos))
-
-FC_REFLECT(block_detail::block_index, (num)(pos))
 
 namespace Xmaxplatform { namespace Chain {
 
