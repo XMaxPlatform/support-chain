@@ -193,6 +193,7 @@ set_target_properties(copy_dependent_dlls PROPERTIES FOLDER "Tools")
 
 INSTALL( DIRECTORY
 ${V8_DEPENDCIES_DLLS}/
+${CMAKE_CURRENT_SOURCE_DIR}/libraries/win32/
 DESTINATION
 bin
 )
