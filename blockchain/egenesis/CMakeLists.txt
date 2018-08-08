@@ -18,7 +18,7 @@ get_property(EMBED_GENESIS_BIN_DIR TARGET embed_genesis PROPERTY RUNTIME_OUTPUT_
 
 
 if("${EMBED_GENESIS_BIN_DIR}" STREQUAL "")
-        set(EMBED_GENESIS_BIN_DIR ${CMAKE_CURRENT_BINARY_DIR})
+        set(EMBED_GENESIS_BIN_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endif()
 
 message(STATUS "EMBED_GENESIS_BIN_DIR:" ${EMBED_GENESIS_BIN_DIR})
@@ -67,7 +67,7 @@ add_custom_command(
       "${CMAKE_CURRENT_BINARY_DIR}/egenesis_brief.cpp"
       "${CMAKE_CURRENT_BINARY_DIR}/egenesis_full.cpp"
    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-   COMMAND ${EMBED_GENESIS_BIN_DIR}/embed_genesis ${embed_genesis_args}
+   COMMAND $<TARGET_FILE:embed_genesis> ${embed_genesis_args}
    DEPENDS
       "${XMAX_EGENESIS_JSON}"
       "egenesis_brief.cpp.tmpl"
