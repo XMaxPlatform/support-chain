@@ -35,21 +35,26 @@ namespace Basecli {
 	public:
 		using valtype = string;
 		valtype* valptr = nullptr;
+		bool required = false;
+		bool bset = false;
 
-		void setup(valtype& t)
+		void setup(valtype& t, bool r)
 		{
 			valptr = &t;
+			required = r;
 		}
 
 		void parse(const string& strval)
 		{
 			CLI_ASSERT(valptr);
 			*valptr = strval;
+			bset = true;
 		}
 
 		virtual void reset() override
 		{
 			valptr->clear();
+			bset = false;
 		}
 	};
 

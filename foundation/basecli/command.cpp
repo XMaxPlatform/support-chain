@@ -57,22 +57,39 @@ namespace Basecli {
 		return sp;
 	}
 
-	void command::add_option(string names, string& val, string desc)
+	void command::check_params()
 	{
-		check_dic(options);
-		new_widget<optionwidget>(*options, names, std::move(desc))->setup(val);
+		if (!params)
+		{
+			params = std::make_unique<paramters>();
+		}
+	}
+
+	void command::add_option(string names, string& val, string desc, bool required)
+	{
+		check_params();
+		optionptr ow = new_widget<optionwidget>(params->options, names, std::move(desc));
+		ow->setup(val, required);
+
+		if (required)
+		{
+			params->requireds.push_back(ow);
+		}
 	}
 
 	void command::add_flag(string names, bool& val, string desc)
 	{
-		check_dic(flags);
+		check_params();
 
-		new_widget<flagwidget>(*flags, names, std::move(desc))->setup(val);
+		new_widget<flagwidget>(params->flags, names, std::move(desc))->setup(val);
 	}
 
 	commandptr command::add_subcommand(string names, string desc)
 	{
-		check_dic(subs);
+		if (!subs)
+		{
+			subs = std::make_unique<dic<commandinstptr>>();
+		}
 		return new_widget<command>(*subs, names, std::move(desc));
 	}
 
@@ -83,11 +100,11 @@ namespace Basecli {
 
 	bool command::try_flags(cmdstack& stack)
 	{
-		if (flags && stack.noend())
+		if (!params->flags.empty() && stack.noend())
 		{
 			const string& name = stack.current();
-			auto itr = flags->find(name);
-			if (itr != flags->end())
+			auto itr = params->flags.find(name);
+			if (itr != params->flags.end())
 			{
 				stack.next();
 				itr->second->mark();
@@ -97,13 +114,18 @@ namespace Basecli {
 		return false;
 	}
 
+	void command::log_help()
+	{
+		logstart << desc << logend;
+	}
+
 	bool command::try_options(cmdstack& stack)
 	{
-		if (options&& stack.noend())
+		if (!params->options.empty()&& stack.noend())
 		{
 			const string& name = stack.current();
-			auto itr = options->find(name);
-			if (itr != options->end() && stack.hasnext())
+			auto itr = params->options.find(name);
+			if (itr != params->options.end() && stack.hasnext())
 			{
 				stack.next();
 				itr->second->parse(stack.current());
@@ -130,20 +152,18 @@ namespace Basecli {
 
 	void command::apply(cmdstack& stack)
 	{
-		if (options)
+		if (params)
 		{
-			for (auto itr : *options)
+			for (auto itr : params->options)
+			{
+				itr.second->reset();
+			}
+			for (auto itr : params->flags)
 			{
 				itr.second->reset();
 			}
 		}
-		if (flags)
-		{
-			for (auto itr : *flags)
-			{
-				itr.second->reset();
-			}
-		}
+
 		if (!try_subs(stack))
 		{
 			try_self(stack);
@@ -156,7 +176,7 @@ namespace Basecli {
 		{
 			if (utils::check_help(stack.current()))
 			{
-				logstart << desc << logend;
+				log_help();			
 				return true;
 			}
 		}
@@ -171,7 +191,7 @@ namespace Basecli {
 			return;
 		}
 
-		while (stack.noend())
+		while (params && stack.noend())
 		{
 			bool found = try_flags(stack);
 			if (!found)
@@ -180,6 +200,18 @@ namespace Basecli {
 			}
 
 			stack.next();
+		}
+
+		if (params)
+		{
+			for (const auto& itr : params->requireds)
+			{
+				if (itr->required && ! itr->bset)
+				{
+					log_help();
+					return;
+				}
+			}
 		}
 
 		if (cbk)

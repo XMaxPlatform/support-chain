@@ -16,7 +16,6 @@ int main(int argc, char** argv)
 
 	bool hello;
 	cmd_test->add_flag("--hello, -o", hello, "hello world.");
-
 	app.run();
 
 	return 0;

@@ -19,7 +19,7 @@ namespace Basecli {
 	{
 	public:
 
-		virtual void add_option(string names, string& val, string desc) override;
+		virtual void add_option(string names, string& val, string desc, bool required) override;
 		virtual void add_flag(string names, bool& val, string desc) override;
 		virtual commandptr add_subcommand(string names, string desc) override;
 
@@ -30,6 +30,10 @@ namespace Basecli {
 		friend class appcli;
 
 	private:
+
+		void check_params();
+
+		void log_help();
 
 		void apply(cmdstack& stack);
 
@@ -43,8 +47,17 @@ namespace Basecli {
 
 		template<typename T, typename T2>
 		T* new_widget(dic<T2*>& dc, const string& names, string&& desc);
-		dicptr<optionptr> options;
-		dicptr<flagptr>	flags;
+
+		struct paramters
+		{
+			dic<optionptr> options;
+			dic<flagptr>	flags;
+			std::vector<optionptr> requireds;
+		};
+
+		using paramterptr = std::unique_ptr<paramters>;
+		paramterptr params;
+
 		dicptr<commandinstptr> subs;
 
 		callback cbk;

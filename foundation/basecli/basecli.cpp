@@ -29,7 +29,7 @@ namespace Basecli
 	{
 		cmdstack stack(cmds);
 
-		while (brunning && stack.noend())
+		if (brunning && stack.noend())
 		{
 			syscmds.apply(stack);
 			if (brunning && stack.noend())
@@ -47,6 +47,7 @@ namespace Basecli
 
 		while (brunning)
 		{
+			logstart << ">>>";
 			std::getline(std::cin, input);
 			ins = utils::split(input);
 			parse_commands(ins);
