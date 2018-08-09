@@ -913,7 +913,7 @@ namespace Xmaxplatform { namespace Chain {
 		{
 			signed_block_header& building_header = _context->building_block->pack->new_header;
 			// make final block from block pack.
-			_context->building_block->pack->block = std::make_shared<signed_block>();
+			//_context->building_block->pack->block = std::make_shared<signed_block>();
 
 			signed_block_header* final_block = _context->building_block->pack->block.get();
 
