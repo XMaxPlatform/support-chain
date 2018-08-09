@@ -10,4 +10,9 @@ namespace Basecli
 	{
 		return true;
 	}
+
+	command* appcli::add_command(string names, string desc)
+	{
+		return rootcmd.add_subcommand(names, desc);
+	}
 }
