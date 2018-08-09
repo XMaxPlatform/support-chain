@@ -11,3 +11,11 @@ target_link_libraries(client_tools
                     PRIVATE basetypes xmaxutilities)
 
 set_target_properties( client_tools PROPERTIES FOLDER "Tools")
+
+install( TARGETS 
+client_tools
+
+RUNTIME DESTINATION bin 
+LIBRARY DESTINATION lib 
+ARCHIVE DESTINATION lib 
+)
