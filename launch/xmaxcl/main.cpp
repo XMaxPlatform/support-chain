@@ -4,18 +4,29 @@
  */
 
 #include <basecli.hpp>
+#include <iostream>
 
 
 using namespace Basecli;
+
+
+void print_block_info()
+{
+	std::cout << "print_block_info" << std::endl;
+}
+
 
 int main(int argc, char** argv)
 {
 	appcli app;
 
-	auto cmd_test = app.add_command("test", "this is a test cmd.");
+	auto block_info = app.add_command("block-info", "get block info.");
 
-	bool hello;
-	cmd_test->add_flag("--hello, -o", hello, "hello world.");
+	block_info->set_callback([&]() {
+		print_block_info();
+	});
+
+	app.run_commands(argc, argv);
 	app.run();
 
 	return 0;

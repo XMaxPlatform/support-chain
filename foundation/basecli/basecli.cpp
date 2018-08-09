@@ -25,7 +25,9 @@ namespace Basecli
 		return rootcmds.add_subcommand(names, desc);
 	}
 
-	void appcli::parse_commands(const std::vector<string>& cmds)
+
+
+	void appcli::run_commands_impl(const std::vector<string>& cmds)
 	{
 		cmdstack stack(cmds);
 
@@ -39,6 +41,25 @@ namespace Basecli
 		}
 	}
 
+	void appcli::run_commands(int argc, char** argv)
+	{
+		std::vector<string> ins;
+
+		for (int i = 0; i < argc; ++i)
+		{
+			ins.emplace_back(string(argv[i]));
+		}
+	}
+
+	void appcli::run_commands(const std::vector<string>& cmds)
+	{
+		brunning = true;
+
+		run_commands_impl(cmds);
+
+		brunning = false;
+	}
+
 	void appcli::run()
 	{
 		brunning = true;
@@ -50,7 +71,7 @@ namespace Basecli
 			logstart << ">>>";
 			std::getline(std::cin, input);
 			ins = utils::split(input);
-			parse_commands(ins);
+			run_commands_impl(ins);
 		}
 
 	}

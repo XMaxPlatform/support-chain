@@ -18,11 +18,12 @@ namespace Basecli {
 
 		void run();
 
-		void parse_commands(const std::vector<string>& cmds);
+		void run_commands(int argc, char** argv);
+
+		void run_commands(const std::vector<string>& cmds);
 
 	protected:
-
-		command* one_command();
+		void run_commands_impl(const std::vector<string>& cmds);
 
 		command rootcmds;
 
