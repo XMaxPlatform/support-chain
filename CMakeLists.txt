@@ -136,6 +136,7 @@ ELSE( WIN32 ) # Apple AND Linux
     # uncomment this line to tell GDB about macros (slows compile times)
     # set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -gdwarf-2 -g3" )
 
+    set(V8_DEPENDCIES_DLLS  "${CMAKE_CURRENT_SOURCE_DIR}/libraries/v8/library/$<LOWER_CASE:$<CONFIG>>")
 ENDIF( WIN32 )
 
 
@@ -167,6 +168,7 @@ if(USE_V8_VM)
 add_subdirectory(contract_bind)
 endif()
 add_subdirectory( tests )
+add_subdirectory(tools)
 
 if(WIN32 AND NOT ("${OPENSSL_ROOT_DIR}" STREQUAL ""))    
 
@@ -180,16 +182,8 @@ endif()
 
 
 if(WIN32)
-set(V8_DEPENDCIES_DLLS  "${CMAKE_CURRENT_SOURCE_DIR}/libraries/v8/library/$<LOWER_CASE:$<CONFIG>>")
 
-add_custom_target(copy_dependent_dlls)
-add_custom_command(TARGET copy_dependent_dlls POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${V8_DEPENDCIES_DLLS}
-       "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>")       
-
-set_target_properties(copy_dependent_dlls PROPERTIES FOLDER "Tools")       
-
+   
 
 INSTALL( DIRECTORY
 ${V8_DEPENDCIES_DLLS}/
@@ -197,7 +191,6 @@ ${CMAKE_CURRENT_SOURCE_DIR}/libraries/win32/
 DESTINATION
 bin
 )
-
 
 endif(WIN32)
 
