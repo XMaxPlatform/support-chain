@@ -12,12 +12,22 @@ namespace Basecli {
 	class appcli
 	{
 	public:
+		appcli();
 
-		command* add_command(string names, string desc);
+		commandptr add_command(string names, string desc);
 
-		bool init(int argc, char** argv);
+		void run();
+
+		void parse_commands(const std::vector<string>& cmds);
 
 	protected:
-		command rootcmd;
+
+		command* one_command();
+
+		command rootcmds;
+
+		command syscmds;
+
+		bool brunning = false;
 	};
 }

@@ -8,30 +8,46 @@
 
 #include <bases.hpp>
 #include <widget.hpp>
+#include <cmdstack.hpp>
 
 namespace Basecli {
 	class command;
 
-	using delegate_t = std::function<void()>;
+	using commandinstptr = command*;
 
-	using commandptr = command*;
-
-	class command : public widget
+	class command : public widget , public icommand
 	{
 	public:
 
-		void add_option(string names, string& val, string desc);
-		void add_flag(string names, bool& val, string desc);
-		commandptr add_subcommand(string names, string desc);
+		virtual void add_option(string names, string& val, string desc) override;
+		virtual void add_flag(string names, bool& val, string desc) override;
+		virtual commandptr add_subcommand(string names, string desc) override;
 
-		//void add_delegate(delegate_t d);
+		virtual void set_callback(callback c) override;
 
 		using ws = std::vector<std::unique_ptr<widget>>;
+
+		friend class appcli;
+
 	private:
-		dicptr<optionptr> opts;
-		dicptr<flagptr>	fgs;
-		dicptr<commandptr> subs;
-		dicptr<delegate_t> delegates;
+
+		void apply(cmdstack& stack);
+
+		void try_self(cmdstack& stack);
+
+		bool try_options(cmdstack& stack);
+		bool try_flags(cmdstack& stack);
+		bool try_subs(cmdstack& stack);
+
+		bool try_sys(cmdstack& stack);
+
+		template<typename T, typename T2>
+		T* new_widget(dic<T2*>& dc, const string& names, string&& desc);
+		dicptr<optionptr> options;
+		dicptr<flagptr>	flags;
+		dicptr<commandinstptr> subs;
+
+		callback cbk;
 
 		ws widgets;
 	};

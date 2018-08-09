@@ -5,37 +5,81 @@
 #pragma once
 
 #include <bases.hpp>
-
+#include <utils.hpp>
+#include <vector>
 namespace Basecli {
 
 	class widget
 	{
 	public:
-		std::vector<string> ns;
+		friend class command;
 
+		virtual ~widget(){}
+	protected:
+		std::vector<string> ns;
+		string allname;
 		string desc;
 
-	protected:
-		widget();
+		widget() {}
 	};
 
-	template<typename valtype>
-	class widgeto : public widget
+	class valwidget : public widget
 	{
 	public:
+		virtual void reset() = 0;
+	};
+
+
+	class optionwidget : public valwidget
+	{
+	public:
+		using valtype = string;
 		valtype* valptr = nullptr;
 
 		void setup(valtype& t)
 		{
 			valptr = &t;
 		}
+
+		void parse(const string& strval)
+		{
+			CLI_ASSERT(valptr);
+			*valptr = strval;
+		}
+
+		virtual void reset() override
+		{
+			valptr->clear();
+		}
 	};
 
-	using option = widgeto<string>;
+	class flagwidget : public valwidget
+	{
+	public:
+		using valtype = bool;
+		valtype* valptr = nullptr;
 
-	using flag = widgeto<bool>;
+		void setup(valtype& t)
+		{
+			valptr = &t;
+		}
 
-	using optionptr = option*;
-	using flagptr = flag*;
+		void mark()
+		{
+			CLI_ASSERT(valptr);
+			*valptr = true;
+		}
+
+		virtual void reset() override
+		{
+			*valptr = false;
+		}
+
+
+	};
+
+	using optionptr = optionwidget*;
+	using flagptr = flagwidget*;
+	using widgetvalptr = valwidget*;
 
 }
