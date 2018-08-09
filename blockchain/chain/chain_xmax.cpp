@@ -382,6 +382,13 @@ namespace Xmaxplatform { namespace Chain {
 		{
 			return head_block_pack()->block;
 		}
+
+		Xmaxplatform::Chain::signed_block_ptr chain_xmax::confirmed_head_block() const
+		{
+			signed_block_ptr block = _context->chain_log.get_head();
+			return block;
+		}
+
 		block_pack_ptr chain_xmax::head_block_pack() const
 		{
 			return _context->block_head;

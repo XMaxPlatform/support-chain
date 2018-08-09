@@ -42,10 +42,11 @@ namespace Xmaxplatform {
 
 			struct get_info_results {
 
-				get_info_results(const string& v, uint32_t hbn, uint32_t libn, 
+				get_info_results(const string& v, uint32_t hbn, uint32_t chbn, uint32_t libn,
 					const Chain::xmax_type_block_id& hbi, const Basetypes::time& hbt) :
 					server_version(v),
 					head_block_num(hbn),
+					confirmed_head_block_num(chbn),
 					last_irreversible_block_num(libn),
 					head_block_id(hbi),
 					head_block_time(hbt)
@@ -54,7 +55,8 @@ namespace Xmaxplatform {
 				}
 
 				string                server_version;
-				uint32_t              head_block_num = 0;		
+				uint32_t              head_block_num = 0;	
+				uint32_t              confirmed_head_block_num = 0;
 				uint32_t              last_irreversible_block_num = 0;
 				Chain::xmax_type_block_id  head_block_id;
 				Basetypes::time    head_block_time;
@@ -113,17 +115,21 @@ namespace Xmaxplatform {
 				string block_num_or_id;
 			};
 
-			struct get_block_header_results : public Chain::signed_block_header {
+			struct get_block_header_results
+			{
 				get_block_header_results(const Chain::signed_block_header& b)
-					:signed_block_header(b),
-					id(b.id()),
-					block_num(b.block_num()),
-					ref_block_prefix(id._hash[1])
+					:previous(b.previous),
+					trxs_mroot(b.trxs_mroot),
+					builder(b.builder),
+					timestamp(b.timestamp.get_stamp()),
+					builder_signature(b.builder_signature)
 				{}
 
-				Chain::xmax_type_block_id id;
-				Chain::xmax_type_block_num	 block_num = 0;
-				uint32_t             ref_block_prefix = 0;
+				Xmaxplatform::Chain::xmax_type_block_id            previous;
+				Xmaxplatform::Chain::xmax_type_merkle_root         trxs_mroot;
+				account_name										builder;
+				uint32_t                                            timestamp;
+				Xmaxplatform::Chain::xmax_type_signature			builder_signature;
 			};
 
 			get_block_header_results get_block_header(const get_block_header_params& params) const;
@@ -343,11 +349,11 @@ FC_REFLECT_DERIVED(Xmaxplatform::Chain_APIs::read_only::get_block_results, (Xmax
 
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_block_header_params, (block_num_or_id))
 
-FC_REFLECT_DERIVED(Xmaxplatform::Chain_APIs::read_only::get_block_header_results, (Xmaxplatform::Chain::signed_block_header), (id)(block_num)(ref_block_prefix));
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_block_header_results, (previous)(trxs_mroot)(builder)(timestamp)(builder_signature));
 
 
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_info_results,
-(server_version)(head_block_num)(last_irreversible_block_num)(head_block_id)(head_block_time))
+(server_version)(head_block_num)(confirmed_head_block_num)(last_irreversible_block_num)(head_block_id)(head_block_time))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_write::push_transaction_results, (transaction_id)(processed)(events))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_required_keys_params, (transaction)(available_keys))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_required_keys_result, (required_keys))

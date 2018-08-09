@@ -69,6 +69,7 @@ namespace Xmaxplatform { namespace Chain {
        const dynamic_states_object&         get_dynamic_states()const;
 
 	   signed_block_ptr		head_block() const;
+	   signed_block_ptr     confirmed_head_block() const;
 	   block_pack_ptr		head_block_pack() const;
 
        time					head_block_time() const;

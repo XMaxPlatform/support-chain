@@ -213,7 +213,8 @@ namespace Chain_APIs{
 		};
 
 		return get_info_results( itoh(static_cast<uint32_t>(app().version())),
-			_chain.head_block_num(),		
+			_chain.head_block_num(),	
+			_chain.confirmed_head_block()->block_num(),
 			_chain.last_irreversible_block_num(),
 			_chain.head_block_id(),
 			_chain.head_block_time()

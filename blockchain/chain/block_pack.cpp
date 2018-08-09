@@ -82,7 +82,7 @@ namespace Chain {
 		// -----------------------------------
 		main_chain = mainchain;
 		round_slot = new_slot;
-		new_round = round_slot < Config::blocks_per_round;
+		new_round = round_slot >= Config::blocks_per_round;
 		if (new_round)
 		{
 			if (!pre_pack.new_builders.is_empty())
