@@ -8,6 +8,6 @@ target_include_directories(client_tools PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMA
 
 target_link_libraries(client_tools 
                     PRIVATE fc ${Boost_LIBRARIES} 
-                    PRIVATE baseapp)
+                    PRIVATE basetypes xmaxutilities)
 
 set_target_properties( client_tools PROPERTIES FOLDER "Tools")
