@@ -283,11 +283,12 @@ namespace Xmaxplatform { namespace Chain {
             setup_data_indexes();
             init.register_handlers(*this, _context->block_db);
 
-			initialize_chain(init);
-
 			if (finalize_func) {
 				on_finalize_block.connect(*finalize_func);
 			}
+
+			initialize_chain(init);
+			
         }
 
         chain_xmax::~chain_xmax() {
