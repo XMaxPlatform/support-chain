@@ -51,6 +51,12 @@ namespace Xmaxplatform {
 				;
 
 		cfg.add_options()
+			("transaction-log", bpo::value<bool>()->default_value(false), "print transaction log")
+			("confirm-log", bpo::value<bool>()->default_value(false), "print confirm log")
+			("irreversible-log", bpo::value<bool>()->default_value(false), "print irreversible log")
+			;
+
+		cfg.add_options()
 			("readonly", bpo::value<bool>()->default_value(false), "open data mode")
 			("block-state-dir", bpo::value<Basechain::bfs::path>()->default_value("chainstate"),
 				"the location of xmax chain block state memory files (absolute path or relative to application data dir)")
@@ -91,6 +97,9 @@ namespace Xmaxplatform {
 			else
 				my->config.fork_memory_dir = sfd;
 		}
+		my->config.transaction_log = options.at("transaction-log").as<bool>();
+		my->config.confirm_log = options.at("confirm-log").as<bool>();
+		my->config.irreversible_log = options.at("irreversible-log").as<bool>();
 
 		my->config.shared_memory_size = options.at("block-state-size").as<uint64_t>() * size_mb;
 		my->config.open_flag = options.at("readonly").as<bool>();

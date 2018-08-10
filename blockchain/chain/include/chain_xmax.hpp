@@ -46,9 +46,14 @@ namespace Xmaxplatform { namespace Chain {
 		   bool open_flag = false;
 		   bool builder_mode = true;
 		   uint64_t  shared_memory_size = 0;
+		   bool transaction_log = false;
+		   bool confirm_log = false;
+		   bool irreversible_log = false;
+
 		   Basechain::bfs::path block_memory_dir;
 		   Basechain::bfs::path fork_memory_dir;
 		   Basechain::bfs::path block_log_dir;
+
 		   Chain::chain_id_type      chain_id;
 		   uint32_t	skip_flags = Config::skip_nothing;
 	   };

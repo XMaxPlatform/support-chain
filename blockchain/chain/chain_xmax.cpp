@@ -1044,6 +1044,11 @@ namespace Xmaxplatform { namespace Chain {
 
 			_context->block_db.commit(block_num);
 			_context->block_db.flush();
+
+			if (_context->config.irreversible_log)
+			{
+				ilog("new irreversible block: ${num}", ("num", block_num));
+			}
 		}
 
 		void chain_xmax::on_irreversible(block_pack_ptr pack)

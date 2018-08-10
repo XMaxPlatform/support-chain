@@ -262,7 +262,7 @@ namespace Chain {
 			{
 				if ((*it)->last_confirmed_id == last_confirmed_id)
 				{
-					if ((*it)->irreversible_confirmed)
+					if (!(*it)->irreversible_confirmed)
 					{
 						confiremdlist.push_back((*it)->block_id);
 					}
