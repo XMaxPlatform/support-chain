@@ -8,8 +8,8 @@
 
 #define MAKE_TOKEN_NAME(C1, C2, C3) (int64_t(4) | (uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24))
 
-/// xmax with 4 digits of precision
-#define XMX_SYMBOL  (int64_t(4) | (uint64_t('X') << 8) | (uint64_t('M') << 16) | (uint64_t('X') << 24))
+/// xmax with 8 digits of precision
+#define XMX_SYMBOL  (int64_t(8) | (uint64_t('X') << 8) | (uint64_t('M') << 16) | (uint64_t('X') << 24))
 
 /// Defined to be largest power of 10 that fits in 53 bits of precision
 #define XMAX_MAX_SHARE_SUPPLY   int64_t(1'000'000'000'000'000ll)
