@@ -1040,7 +1040,7 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::_irreversible_block(const block_pack_ptr& pack)
 		{
-			uint32_t block_num = pack->block->block_num();
+ 			uint32_t block_num = pack->block->block_num();
 
 			_context->last_irreversible_block_num = block_num;
 

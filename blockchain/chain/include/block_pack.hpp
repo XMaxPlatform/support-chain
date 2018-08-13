@@ -94,7 +94,7 @@ FC_REFLECT(Xmaxplatform::Chain::block_brief, (builder)(block_num)(block_id))
 
 FC_REFLECT(Xmaxplatform::Chain::block_raw, (block_num)(block_id)(new_header)
 (bld_info)(round_slot)(current_builders)(new_builders)(confirmations)(main_chain)
-(last_block_num)(last_confirmed_num)(last_confirmed_id)
+(last_block_num)(last_confirmed_num)(last_confirmed_id)(irreversible_confirmed)
 (dpos_irreversible_num)(dpos_irreversible_id)(last_block_of_builders))
 
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::block_pack, (Xmaxplatform::Chain::block_raw), (validated)(new_round)(block))
