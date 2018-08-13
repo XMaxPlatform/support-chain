@@ -4,6 +4,7 @@
  */
 
 #include <basecli.hpp>
+#include <chain_get.hpp>
 #include <iostream>
 
 
@@ -12,7 +13,7 @@ using namespace Basecli;
 
 void print_block_info()
 {
-	std::cout << "print_block_info" << std::endl;
+	std::cout << chain_get::block_struct_info() << std::endl;
 }
 
 

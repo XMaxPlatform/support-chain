@@ -11,57 +11,6 @@
 #define LOG_READ_WRITE (std::ios::in | std::ios::out | std::ios::binary | std::ios::app)
 
 
-
-
-namespace block_detail
-{
-	//
-	// ----------- block stream -------------------------
-	// [block 1][desc 1][eof][block 2][desc 2][eof] ... [block n][desc n][eof]
-	// ------------ index stream ------------------------
-	// [index 1][index 2] ... [index n]
-	//
-
-
-	using namespace Xmaxplatform::Chain;
-	typedef uint32_t block_end_eof_type;
-	static const block_end_eof_type block_end_eof = 0xb10cedef;
-
-	struct alignas(64) block_desc
-	{
-		uint64_t num;
-		uint64_t pos;
-		uint64_t size;
-		block_desc()
-			: num(0)
-			, pos(0)
-			, size(0)
-		{
-
-		}
-	};
-
-	struct alignas(64) block_index
-	{
-		uint64_t num;
-		uint64_t pos;
-		uint64_t size;
-		xmax_type_block_id id;
-
-		block_index()
-			: pos(0)
-			, num(0)
-			, size(0)
-		{
-
-		}
-	};
-}
-
-FC_REFLECT(block_detail::block_desc, (num)(pos)(size))
-
-FC_REFLECT(block_detail::block_index, (num)(pos)(size)(id))
-
 namespace block_detail
 {
 	enum IO_Code
@@ -136,6 +85,10 @@ namespace block_detail
 	static void read_block_index(std::fstream& stream, block_index& val)
 	{
 		stream.read((char*)&val, sizeof(block_index));
+	}
+	static void read_block_indices(std::fstream& stream, block_index val[], int64_t count)
+	{
+		stream.read((char*)val, sizeof(block_index) * count);
 	}
 
 	static void write_block_index(std::fstream& stream, const block_index& val)
@@ -343,7 +296,61 @@ namespace Xmaxplatform { namespace Chain {
 			}
 			return signed_block_ptr();
 		}
+
+		std::vector<block_detail::block_index> read_indices(int64_t begin_num, int64_t block_count) const
+		{
+			std::vector<block_detail::block_index> idxs;
+
+			std::fstream& idxstream = const_cast<std::fstream&>(index_stream);
+			block_detail::to_last_block_index(idxstream, block_detail::IO_Read);
+
+			if (idxstream.tellg() <= 0)
+			{
+				return idxs;
+			}
+
+			block_detail::block_index last_idx;
+			block_detail::read_block_index(idxstream, last_idx);
+
+			int64_t cc = last_idx.num - begin_num + 1;
+			if (cc < 1)
+			{
+				return idxs;
+			}
+			int64_t count = (cc < block_count) ? cc : block_count;
+
+			block_detail::to_last_block_index(idxstream, block_detail::IO_Read);
+
+			uint64_t bias = sizeof(block_detail::block_index) * (last_idx.num - begin_num);
+
+			idxs.resize(count);
+
+			block_detail::stream_seek(idxstream, -bias, std::ios::cur, block_detail::IO_Read);
+			block_detail::read_block_indices(idxstream, &idxs[0], count);
+
+			return idxs;
+		}
+
+		int64_t last_block_num() const
+		{
+			std::fstream& idxstream = const_cast<std::fstream&>(index_stream);
+
+			block_detail::to_last_block_index(idxstream, block_detail::IO_Read);
+
+			if (idxstream.tellg() <= 0)
+			{
+				return 0;
+			}
+
+			block_detail::block_index last_idx;
+			block_detail::read_block_index(idxstream, last_idx);
+
+			return last_idx.num;
+		}
+
 	};
+
+
 
 
 	chain_stream::chain_stream(const fc::path& data_dir)
@@ -371,6 +378,16 @@ namespace Xmaxplatform { namespace Chain {
 	signed_block_ptr chain_stream::read_by_num(uint32_t num) const
 	{
 		return stream_impl->read_block(num);
+	}
+
+	int64_t chain_stream::last_block_num() const
+	{
+		return stream_impl->last_block_num();
+	}
+
+	std::vector<block_detail::block_index> chain_stream::read_indices(int64_t begin_num, int64_t block_count) const
+	{
+		return stream_impl->read_indices(begin_num, block_count);
 	}
 }
 }
