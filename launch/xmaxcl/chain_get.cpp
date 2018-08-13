@@ -24,7 +24,7 @@ namespace chain_get
 		return info.str();
 	}
 
-	std::string list_block_size(const std::string& block_log_dir, int64_t begin_num, int64_t block_count)
+	std::string list_blocks(const std::string& block_log_dir, int64_t begin_num, int64_t block_count)
 	{
 		std::stringstream info;
 
