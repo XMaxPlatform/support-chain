@@ -6,7 +6,7 @@
 #include <fc/exception/exception.hpp>
 #include <basetypes.hpp>
 
-#define MAKE_TOKEN_NAME(C1, C2, C3) (int64_t(4) | (uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24))
+#define MAKE_TOKEN_NAME(C1, C2, C3, DECIMALS) (int64_t(DECIMALS) | (uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24))
 
 /// xmax with 8 digits of precision
 #define XMX_SYMBOL  (int64_t(8) | (uint64_t('X') << 8) | (uint64_t('M') << 16) | (uint64_t('X') << 24))
@@ -19,9 +19,9 @@ namespace Xmaxplatform { namespace Basetypes {
    using asset_symbol = uint64_t;
    using share_type   = int64;
 
-   inline asset_symbol token_name_from_string(const string& token_str) {
+   inline asset_symbol token_name_from_string(const string& token_str, int decimals_precision) {
 	   XMAX_ASSERT(token_str.size() == 3, invalid_field_name_exception, "Token name invalide: ${name}", ("name", token_str));
-	   return asset_symbol(MAKE_TOKEN_NAME(token_str[0], token_str[1], token_str[2]));
+	   return asset_symbol(MAKE_TOKEN_NAME(token_str[0], token_str[1], token_str[2], decimals_precision));
    }
 
    struct asset
