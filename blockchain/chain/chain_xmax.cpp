@@ -917,20 +917,23 @@ namespace Xmaxplatform { namespace Chain {
 			confirm_func(conf);
 		}
 
-		void chain_xmax::_make_fianl_block()
+		void chain_xmax::_make_final_block()
 		{
 			signed_block_header& building_header = _context->building_block->pack->new_header;
 			// make final block from block pack.
 			//_context->building_block->pack->block = std::make_shared<signed_block>();
 
-			signed_block_header* final_block = _context->building_block->pack->block.get();
+			signed_block_header* final_block_header = _context->building_block->pack->block.get();
 
-			(*final_block) = building_header;
+			(*final_block_header) = building_header;
+
+			auto& final_block = _context->building_block->pack->block;
+			final_block->block_size = fc::raw::pack_size(*final_block.get());
 		}
 
 		void chain_xmax::_final_block()
 		{
-			_make_fianl_block();
+			_make_final_block();
 
 			_update_final_state(_context->building_block->pack);
 

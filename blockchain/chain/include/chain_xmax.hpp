@@ -139,7 +139,7 @@ namespace Xmaxplatform { namespace Chain {
 	   void _start_first_build(chain_timestamp init_stamp);
        void _generate_block();
 	   void _sign_block(const private_key_type& sign_private_key);
-	   void _make_fianl_block();
+	   void _make_final_block();
 	   void _validate_block(const signed_block_ptr next_block);
 	   void _broadcast_confirmation(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func);
 	   void _final_block();

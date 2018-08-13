@@ -637,13 +637,15 @@ namespace Xmaxplatform {
 		auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
 			std::chrono::microseconds{ fc::time_point::now().time_since_epoch().count() });
 
+		auto block_size = block.block_size;
 
 		block_doc << "block_num" << b_int32{ static_cast<int32_t>(block_num) }
 			<< "block_id" << block_id_str
 			<< "prev_block_id" << prev_block_id
+			<< "block_size" << b_int32{ static_cast<int32_t>(block_size) }
 			<< "timestamp" << b_date{ std::chrono::milliseconds{ std::chrono::seconds{Chain::chain_timestamp::to_time_point(block.timestamp).sec_since_epoch()}} }
 			<< "transaction_merkle_root" << block.trxs_mroot.str() 
-			<< "builder_account_name" << block.builder.to_string();
+			<< "builder_account_name" << block.builder.to_string();			
 		
 		_insert_block_transactions(block, block_doc);
 		

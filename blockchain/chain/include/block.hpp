@@ -74,6 +74,7 @@ namespace Xmaxplatform { namespace Chain {
         struct signed_block : public signed_block_header
         {
 			std::vector<transaction_receipt> receipts;
+			uint32_t block_size{ 0 };
         };
 
 		struct signed_block_list
@@ -110,7 +111,7 @@ FC_REFLECT_DERIVED(Xmaxplatform::Chain::transaction_receipt, (Xmaxplatform::Chai
 
 FC_REFLECT(Xmaxplatform::Chain::block_header, (previous)(timestamp)(trxs_mroot)(builder)(next_builders))
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block_header, (Xmaxplatform::Chain::block_header), (builder_signature))
-FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block, (Xmaxplatform::Chain::signed_block_header), (receipts))
+FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_block, (Xmaxplatform::Chain::signed_block_header), (receipts)(block_size))
 
 FC_REFLECT(Xmaxplatform::Chain::block_confirmation_header, (block_id)(verifier))
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::block_confirmation, (Xmaxplatform::Chain::block_confirmation_header), (builder_signature))
