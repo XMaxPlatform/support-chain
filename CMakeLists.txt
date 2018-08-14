@@ -86,7 +86,7 @@ IF( WIN32 )
 
     # Probably cmake has a bug and vcxproj generated for executable in Debug conf. has disabled debug info
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /DEBUG")
-
+    set(V8_DEPENDCIES_DLLS  "${CMAKE_CURRENT_SOURCE_DIR}/libraries/v8/library/$<LOWER_CASE:$<CONFIG>>")
 ELSE( WIN32 ) # Apple AND Linux
 
     find_library(READLINE_LIBRARIES NAMES readline)
@@ -136,7 +136,7 @@ ELSE( WIN32 ) # Apple AND Linux
     # uncomment this line to tell GDB about macros (slows compile times)
     # set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -gdwarf-2 -g3" )
 
-    set(V8_DEPENDCIES_DLLS  "${CMAKE_CURRENT_SOURCE_DIR}/libraries/v8/library/$<LOWER_CASE:$<CONFIG>>")
+   
 ENDIF( WIN32 )
 
 
