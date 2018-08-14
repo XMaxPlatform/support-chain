@@ -8,6 +8,19 @@
 
 #define MAKE_TOKEN_NAME(C1, C2, C3, DECIMALS) (int64_t(DECIMALS) | (uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24))
 
+
+
+#define GET_MACRO(_1, _2, _3, _4, _5, _6, _7, NAME, ...) NAME
+#define PACK_TOKEN_NAME3(C1, C2, C3)  ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24))
+#define PACK_TOKEN_NAME4(C1, C2, C3, C4)  ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24) | (uint64_t(C4) << 32))
+#define PACK_TOKEN_NAME5(C1, C2, C3, C4, C5)  ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24) | (uint64_t(C4) << 32) | (uint64_t(C5) << 40))
+#define PACK_TOKEN_NAME6(C1, C2, C3, C4, C5, C6)  ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24) | (uint64_t(C4) << 32) | (uint64_t(C5) << 40) | (uint64_t(C6) << 48))
+#define PACK_TOKEN_NAME7(C1, C2, C3, C4, C5, C6, C7)  ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24) | (uint64_t(C4) << 32) | (uint64_t(C5) << 40) | (uint64_t(C6) << 48) | (uint64_t(C7) << 56))
+
+#define PACK_TOKEN_NAME(...) GET_MACRO(__VA_ARGS__, PACK_TOKEN_NAME7, PACK_TOKEN_NAME6, PACK_TOKEN_NAME5, PACK_TOKEN_NAME4, PACK_TOKEN_NAME3)(__VA_ARGS__)
+#define MAKE_TOKEN_SYMBOL(DECIMALS, ...) (int64_t(DECIMALS) | PACK_TOKEN_NAME(__VA_ARGS__))
+
+
 /// xmax with 8 digits of precision
 #define XMX_SYMBOL  (int64_t(8) | (uint64_t('X') << 8) | (uint64_t('M') << 16) | (uint64_t('X') << 24))
 
@@ -19,9 +32,16 @@ namespace Xmaxplatform { namespace Basetypes {
    using asset_symbol = uint64_t;
    using share_type   = int64;
 
+
    inline asset_symbol token_name_from_string(const string& token_str, int decimals_precision) {
-	   XMAX_ASSERT(token_str.size() == 3, invalid_field_name_exception, "Token name invalide: ${name}", ("name", token_str));
-	   return asset_symbol(MAKE_TOKEN_NAME(token_str[0], token_str[1], token_str[2], decimals_precision));
+	   auto char_count = token_str.size();
+	   XMAX_ASSERT(char_count <= 7 && char_count >= 3, invalid_field_name_exception, "Token name invalide: ${name}", ("name", token_str));
+	   asset_symbol res = int64_t(decimals_precision);
+	   for (unsigned int i = 0; i < char_count; ++i)
+	   {
+		   res |= token_str[i] << 8 * (i + 1);
+	   }	   
+	   return asset_symbol(res);
    }
 
    struct asset
