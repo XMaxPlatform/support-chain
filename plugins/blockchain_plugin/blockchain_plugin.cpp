@@ -353,7 +353,7 @@ namespace Chain_APIs{
         const auto &data = _chain.get_database();
         const auto &token = data.get<xmx_token_object, by_owner_name>(params.account_name);
 
-        result.xmx_token = asset(token.xmx_token, XMX_SYMBOL);
+        result.xmx_token = asset(token.xmx_token, MAIN_SYMBOL);
 
         return result;
     }

@@ -67,7 +67,7 @@ namespace Xmaxplatform {
 
             struct get_account_results {
                 name                       account_name;
-                asset                      xmx_token = asset(0,XMX_SYMBOL);
+                asset                      xmx_token = asset(0,MAIN_SYMBOL);
             };
             struct get_account_params {
                 Basetypes::name account_name;
