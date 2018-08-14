@@ -25,7 +25,7 @@
 #define MAIN_SYMBOL  (int64_t(8) | (uint64_t('X') << 8) | (uint64_t('M') << 16) | (uint64_t('X') << 24))
 
 /// Defined to be largest power of 10 that fits in 53 bits of precision
-#define XMAX_MAX_SHARE_SUPPLY   int64_t(1'000'000'000'000'000ll)
+#define MAIN_TOKEN_MAX_SHARE_SUPPLY   int64_t(1'000'000'000'000'000ll)
 
 namespace Xmaxplatform { namespace Basetypes {
 

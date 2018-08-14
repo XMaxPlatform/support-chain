@@ -150,8 +150,8 @@ namespace Xmaxplatform { namespace Basetypes {
          return price{ base, quote };
       } FC_CAPTURE_AND_RETHROW( (base)(quote) ) }
 
-      price price::max( asset_symbol base, asset_symbol quote ) { return asset( share_type(XMAX_MAX_SHARE_SUPPLY), base ) / asset( share_type(1), quote); }
-      price price::min( asset_symbol base, asset_symbol quote ) { return asset( 1, base ) / asset( XMAX_MAX_SHARE_SUPPLY, quote); }
+      price price::max( asset_symbol base, asset_symbol quote ) { return asset( share_type(MAIN_TOKEN_MAX_SHARE_SUPPLY), base ) / asset( share_type(1), quote); }
+      price price::min( asset_symbol base, asset_symbol quote ) { return asset( 1, base ) / asset( MAIN_TOKEN_MAX_SHARE_SUPPLY, quote); }
 
       bool price::is_null() const { return *this == price(); }
 
