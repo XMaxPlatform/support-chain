@@ -632,12 +632,12 @@ namespace Xmaxplatform {
 		const auto block_id_str = block_id.str();
 		const auto prev_block_id = block.previous.str();
 		auto block_num = block.block_num();
-		  
+		
 		  
 		auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
 			std::chrono::microseconds{ fc::time_point::now().time_since_epoch().count() });
 
-		auto block_size = block.block_size;
+		auto block_size = fc::raw::pack_size(block);
 
 		block_doc << "block_num" << b_int32{ static_cast<int32_t>(block_num) }
 			<< "block_id" << block_id_str
