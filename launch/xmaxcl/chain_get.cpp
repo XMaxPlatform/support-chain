@@ -15,11 +15,26 @@ namespace chain_get
 	{
 		std::stringstream info;
 		info << "block info:";
-		signed_block emptyblock;
+		{
+			signed_block emptyblock;
 
-		std::vector<char> data = fc::raw::pack(emptyblock);
+			std::vector<char> data = fc::raw::pack(emptyblock);
 
-		info << "\n empty block size: " << data.size() << " bytes";
+			info << "\n empty block size: " << data.size() << " bytes";
+		}
+		{
+			transaction_receipt emptyreceipt;
+
+			std::vector<char> data = fc::raw::pack(emptyreceipt);
+			info << "\n empty transaction size: " << data.size() << " bytes";
+		}
+
+		{
+			Xmaxplatform::Basetypes::message emptymessage;
+
+			std::vector<char> data = fc::raw::pack(emptymessage);
+			info << "\n empty message size: " << data.size() << " bytes";
+		}
 
 		return info.str();
 	}
@@ -37,7 +52,6 @@ namespace chain_get
 			return info.str();
 		}
 
-
 		chain_stream stream(block_log_dir);
 
 		int64_t last_num = stream.last_block_num();
@@ -53,20 +67,27 @@ namespace chain_get
 
 		if (cc < block_count)
 		{
-			info << "\n No more blocks, " << "starting from block " << begin_num << "."
+			info << "\nNo more blocks, " << "starting from block " << begin_num << "."
 				<< "\nThe last block num is " << last_num << ".";
 
 			return info.str();
 		}
+		info << "\n Last block num: " << last_num;
+
 
 		std::vector<block_detail::block_index> idxs = stream.read_indices(begin_num, block_count);
 
 		for ( const block_detail::block_index idx : idxs)
-		{
+		{		
 			info << "\n\nBlock [num: " << idx.num << ", size: " << idx.size << "]";
 			if (verbose)
 			{
+				auto block = stream.read_by_num(idx.num);
+				
 				info << "\n{" << "id: " << idx.id.str() << "}";
+				info << "\n{" << "time: " << block->timestamp.time_point().operator fc::string() << "}";
+				info << "\n{" << "builder: " << block->builder.to_string() << "}";
+				info << "\n{" << "trx: " << block->receipts.size() << "}";
 			}
 
 		}

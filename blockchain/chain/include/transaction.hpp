@@ -129,7 +129,7 @@ namespace Xmaxplatform { namespace Chain {
 
 	   xmax_type_summary cal_digest() const;
 
-	   package_code code;
+	   fc::enum_type<uint8_t, package_code> code;
 	   signed_transaction body;
    };
 
@@ -138,6 +138,7 @@ namespace Xmaxplatform { namespace Chain {
 } } // Xmaxplatform::Chain
 
 FC_REFLECT_DERIVED(Xmaxplatform::Chain::signed_transaction, (Xmaxplatform::Basetypes::signed_transaction), )
-FC_REFLECT(Xmaxplatform::Chain::transaction_package, (body))
+FC_REFLECT_ENUM(Xmaxplatform::Chain::transaction_package::package_code, (empty)(original)(zlib))
+FC_REFLECT(Xmaxplatform::Chain::transaction_package, (code)(body))
 
 FC_REFLECT(Xmaxplatform::Chain::event_output, (name)(code)(type)(data))
