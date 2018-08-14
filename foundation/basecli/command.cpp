@@ -4,6 +4,7 @@
 */
 #include <command.hpp>
 #include <utils.hpp>
+#include <set>
 
 namespace Basecli {
 
@@ -90,7 +91,9 @@ namespace Basecli {
 		{
 			subs = std::make_unique<dic<commandinstptr>>();
 		}
-		return new_widget<command>(*subs, names, std::move(desc));
+		auto cmd = new_widget<command>(*subs, names, std::move(desc));
+		cmd->bsys_cmd = bsys_cmd;
+		return cmd;
 	}
 
 	void command::set_callback(callback c)
@@ -116,7 +119,65 @@ namespace Basecli {
 
 	void command::log_help()
 	{
+		static const string required = "required";
+		static const string optional = "optional";
+
+		if (bsys_cmd)
+		{
+			return;
+		}
+
 		logstart << desc << logend;
+
+		if (params && !params->options.empty())
+		{
+			std::set<optionptr> tmps;
+			for (const auto& opt : params->options)
+			{
+				tmps.insert(opt.second);
+			}
+			logstart << "options: " << logend;
+			for (const auto& opt : tmps)
+			{
+				const optionwidget* wd = opt;
+				const string& fg = wd->required ? required : optional;
+
+				logstart << wd->allname << "[" << fg << "]: " << wd->desc << logend;
+			}
+		}
+		if (params && !params->flags.empty())
+		{
+			std::set<flagptr> tmps;
+			for (const auto& opt : params->flags)
+			{
+				tmps.insert(opt.second);
+			}
+
+			logstart << "flags: " << logend;
+			for (const auto& fl : tmps)
+			{
+				const flagwidget* wd = fl;
+
+				logstart << wd->allname << ": " << wd->desc << logend;
+			}
+		}
+
+		if (subs && !subs->empty())
+		{
+			std::set<command*> tmps;
+			for (const auto& opt : *subs)
+			{
+				tmps.insert(opt.second);
+			}
+
+			logstart << "sub commands: " << logend;
+			for (const auto& cmd : tmps)
+			{
+				const command* wd = cmd;
+
+				logstart << wd->allname << ": " << wd->desc << logend;
+			}
+		}
 	}
 
 	bool command::try_options(cmdstack& stack)
@@ -217,6 +278,10 @@ namespace Basecli {
 		if (cbk)
 		{
 			cbk();
+		}
+		else
+		{
+			log_help();
 		}
 	}
 

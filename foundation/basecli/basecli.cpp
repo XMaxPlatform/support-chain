@@ -12,7 +12,7 @@ namespace Basecli
 	appcli::appcli()
 	{
 		// init sys commands.
-
+		syscmds.bsys_cmd = true;
 		auto exitc = syscmds.add_subcommand("exit", "exit the cli.");
 
 		exitc->set_callback([&]() {

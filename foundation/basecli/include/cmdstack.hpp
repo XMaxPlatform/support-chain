@@ -7,8 +7,9 @@
 #include <bases.hpp>
 
 namespace Basecli {
-
+	class command;
 	using cmdvec = std::vector<string>;
+
 	class cmdstack
 	{
 	public:

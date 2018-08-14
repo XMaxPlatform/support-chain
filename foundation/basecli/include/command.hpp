@@ -63,5 +63,7 @@ namespace Basecli {
 		callback cbk;
 
 		ws widgets;
+
+		bool bsys_cmd = false;
 	};
 }

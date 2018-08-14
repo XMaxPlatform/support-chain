@@ -24,14 +24,14 @@ namespace chain_get
 		return info.str();
 	}
 
-	std::string list_blocks(const std::string& block_log_dir, int64_t begin_num, int64_t block_count)
+	std::string list_blocks(const std::string& block_log_dir, int64_t begin_num, int64_t block_count, bool verbose)
 	{
 		std::stringstream info;
 
 		info << "List " << block_count << " block digests, starting from block num " << begin_num << " ......";
 
 
-		if (begin_num < 0 || block_count < 1)
+		if (begin_num <= 0 || block_count < 1)
 		{
 			info << "\nError input.";
 			return info.str();
@@ -46,9 +46,8 @@ namespace chain_get
 
 		if (cc < 1)
 		{
-			info << "\nThere is not num " << begin_num << " of block."
+			info << "\nNo num " << begin_num << " of block."
 				<< "\nThe last block num is " << last_num << ".";
-
 			return info.str();
 		}
 
@@ -64,7 +63,12 @@ namespace chain_get
 
 		for ( const block_detail::block_index idx : idxs)
 		{
-			info << "\nBlock£ºnum "<< idx.num << ", size: "<< idx.size << ", id "<< idx.id.str();
+			info << "\n\nBlock [num: " << idx.num << ", size: " << idx.size << "]";
+			if (verbose)
+			{
+				info << "\n{" << "id: " << idx.id.str() << "}";
+			}
+
 		}
 
 		return info.str();

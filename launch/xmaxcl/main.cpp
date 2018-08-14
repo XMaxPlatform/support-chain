@@ -6,11 +6,33 @@
 #include <fc/io/json.hpp>
 #include <basecli.hpp>
 #include <chain_get.hpp>
+
 #include <iostream>
 
+#include <boost/filesystem.hpp>
 
 using namespace Basecli;
 
+namespace math
+{
+	int64_t to_int64(const std::string& str)
+	{
+		if (str.empty())
+		{
+			return 0;
+		}
+		return fc::to_int64(str);
+	}
+
+	int64_t to_int64(const std::string& str, int64_t defval)
+	{
+		if (str.empty())
+		{
+			return defval;
+		}
+		return fc::to_int64(str);
+	}
+}
 
 
 int main(int argc, char** argv)
@@ -33,20 +55,32 @@ int main(int argc, char** argv)
 		std::string path;
 		std::string beg;
 		std::string count;
-		list_blocks->add_option("--path", path, "log path", true);
-		list_blocks->add_option("--begin", beg, "begin block number", true);
-		list_blocks->add_option("--count", count, "list count of blocks, default is '1'.", false);
+		bool flag;
+		list_blocks->add_option("--path,-p", path, "log path", false);
+		list_blocks->add_option("--begin,-b", beg, "begin block number", true);
+		list_blocks->add_option("--count,-c", count, "list count of blocks, default is '1'.", false);
+		list_blocks->add_flag("--verbose,-v", flag, "list all info of block.");
 
 		list_blocks->set_callback([&]() {
 			try {
-				const int64_t ibeg = fc::json::from_string(beg).as<fc::variant>().as_int64();
-				const int64_t icount = fc::json::from_string(count).as<fc::variant>().as_int64();
+				const int64_t ibeg = math::to_int64(beg);
+				const int64_t icount = math::to_int64(count, 1);
 
-				std::cout << chain_get::list_blocks(path, ibeg, icount) << std::endl;
+				if (path.empty())
+				{
+					auto fpath = boost::filesystem::current_path() / "data-dir/blocks";
+					path = fpath.string();
+				}
+
+				std::cout << chain_get::list_blocks(path, ibeg, icount, flag) << std::endl;
 			}
 			catch (const std::exception& e)
 			{
 				std::cout <<"error: "<< e.what() << std::endl;
+			}
+			catch (const fc::exception& e)
+			{
+				std::cout << "error: " << e.what() << std::endl;
 			}
 		
 		});
