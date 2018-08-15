@@ -2,7 +2,7 @@
 #include <xmaxlib/core.h>
 
 // xmax with 4 digits of precision
-#define MAIN_SYMBOL  (int64_t(4) | (uint64_t('X') << 8) | (uint64_t('M') << 16) | (uint64_t('X') << 24))
+#define MAIN_SYMBOL  (int64_t(8) | (uint64_t('S') << 8) | (uint64_t('U') << 16) | (uint64_t('P') << 24))
 #define ASSET_SYMBOL_NONE (uint64_t)0
 
 namespace xmax {

@@ -22,7 +22,7 @@
 
 
 /// xmax with 8 digits of precision
-#define MAIN_SYMBOL  (int64_t(8) | (uint64_t('X') << 8) | (uint64_t('M') << 16) | (uint64_t('X') << 24))
+#define MAIN_SYMBOL  MAKE_TOKEN_SYMBOL(8, 'S', 'U', 'P')
 
 /// Defined to be largest power of 10 that fits in 53 bits of precision
 #define MAIN_TOKEN_MAX_SHARE_SUPPLY   int64_t(1'000'000'000'000'000ll)
