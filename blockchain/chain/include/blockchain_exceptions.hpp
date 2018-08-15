@@ -24,6 +24,7 @@ namespace Xmaxplatform { namespace Chain {
    FC_DECLARE_DERIVED_EXCEPTION( unknown_block_exception,           Xmaxplatform::Chain::chain_exception, 3110000, "unknown block" )
    FC_DECLARE_DERIVED_EXCEPTION( confirmation_validate_exception,	Xmaxplatform::Chain::chain_exception, 3120000, "confirmation validation exception")
    FC_DECLARE_DERIVED_EXCEPTION( block_attack_exception,			Xmaxplatform::Chain::chain_exception, 3130000, "malicious block attack exception")
+   FC_DECLARE_DERIVED_EXCEPTION( authorization_exception,			Xmaxplatform::Chain::chain_exception, 3140000, "authorization exception")
 
    FC_DECLARE_DERIVED_EXCEPTION( block_tx_output_exception,         Xmaxplatform::Chain::block_validate_exception, 3020001, "transaction outputs in block do not match transaction outputs from applying block" )
    

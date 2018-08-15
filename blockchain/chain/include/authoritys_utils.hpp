@@ -16,7 +16,7 @@ namespace Chain {
 
 	namespace utils
 	{
-		void check_authorization(const std::vector<Basetypes::message>& messages, const flat_set<public_key_type>& keys);
+		void check_authorization(const Basechain::database& db, const std::vector<Basetypes::message>& messages, const flat_set<public_key_type>& keys);
 
 		bool validate_weight_format(const authority& auth);
 

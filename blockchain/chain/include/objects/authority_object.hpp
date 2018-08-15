@@ -15,16 +15,16 @@ namespace Chain {
 		OBJECT_CCTOR(authority_object, (authoritys))
 	public:
 		id_type				id;	
-		account_name		owner_name;
-		authority_name		auth_name;
+		account_name		owner_name;		// the name of owner account.
+ 		authority_name		auth_name;		// the name of this authority object.
 
-		id_type				parent;
-		mapped_authoritys	authoritys;
+		id_type				parent;			// the id of parent authority object.
+		mapped_authoritys	authoritys;		// config of authorization.
 		time				last_updated;
 	};
 
 	struct by_owner;
-	using permission_index = Basechain::shared_multi_index_container<
+	using authority_index = Basechain::shared_multi_index_container<
 		authority_object,
 		indexed_by<
 		ordered_unique<tag<by_id>, member<authority_object, authority_object::id_type, &authority_object::id>>,
@@ -40,7 +40,7 @@ namespace Chain {
 }
 
 
-BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::authority_object, Xmaxplatform::Chain::permission_index)
+BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::authority_object, Xmaxplatform::Chain::authority_index)
 
 FC_REFLECT(Basechain::oid<Xmaxplatform::Chain::authority_object>, (_id))
 

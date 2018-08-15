@@ -122,7 +122,7 @@ namespace Xmaxplatform { namespace Chain {
 
         void chain_xmax::setup_data_indexes() {
             _context->block_db.add_index<account_index>();
-			_context->block_db.add_index<permission_index>();
+			_context->block_db.add_index<authority_index>();
 
             _context->block_db.add_index<key_value_index>();
             _context->block_db.add_index<keystr_value_index>();
@@ -542,7 +542,7 @@ namespace Xmaxplatform { namespace Chain {
 				transaction_response_ptr response;
 				transaction_context_xmax Impl(*this, request->signed_trx);
 
-				utils::check_authorization(request->signed_trx.messages, request->signed_trx.get_signature_keys(_context->config.chain_id));
+				utils::check_authorization(_context->block_db, request->signed_trx.messages, request->signed_trx.get_signature_keys(_context->config.chain_id));
 
 
 				Impl.exec();

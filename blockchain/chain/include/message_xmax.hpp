@@ -22,6 +22,17 @@ struct message_xmax : public Basetypes::message {
 
    message_xmax(const Basetypes::message& m) : Basetypes::message(m) {}
 
+
+   inline static message_xmax& cast(Basetypes::message& msg)
+   {
+	   return static_cast<message_xmax&>(msg);
+   }
+
+   inline static const message_xmax& cast(const Basetypes::message& msg)
+   {
+	   return static_cast<const message_xmax&>(msg);
+   }
+
    template<typename T>
    void set_packed(const Basetypes::func_name& t, const T& value) {
       type = t;
