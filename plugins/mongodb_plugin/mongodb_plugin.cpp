@@ -392,17 +392,17 @@ namespace Xmaxplatform {
 		auto from_account = find_account(accounts, transfer.from);
 		auto to_account = find_account(accounts, transfer.to);
 
-		asset from_balance = asset::from_string(from_account.view()["xmx_token"].get_utf8().value.to_string());
-		asset to_balance = asset::from_string(to_account.view()["xmx_token"].get_utf8().value.to_string());
+		asset from_balance = asset::from_string(from_account.view()["main_token"].get_utf8().value.to_string());
+		asset to_balance = asset::from_string(to_account.view()["main_token"].get_utf8().value.to_string());
 		from_balance -= Xmaxplatform::Basetypes::share_type(transfer.amount);
 		to_balance += Xmaxplatform::Basetypes::share_type(transfer.amount);
 
 		document update_from{};
-		update_from << "$set" << open_document << "xmx_token" << from_balance.to_string()
+		update_from << "$set" << open_document << "main_token" << from_balance.to_string()
 			<< "updatedTime" << b_date{ now }
 		<< close_document;
 		document update_to{};
-		update_to << "$set" << open_document << "xmx_token" << to_balance.to_string()
+		update_to << "$set" << open_document << "main_token" << to_balance.to_string()
 			<< "updatedTime" << b_date{ now }
 		<< close_document;
 
@@ -432,16 +432,16 @@ namespace Xmaxplatform {
 		}
 		// decrease creator by deposit amount
 		auto from_view = from_account->view();
-		asset from_balance = asset::from_string(from_view["xmx_token"].get_utf8().value.to_string());
+		asset from_balance = asset::from_string(from_view["main_token"].get_utf8().value.to_string());
 		from_balance -= addaccount.deposit;
 		document update_from{};
-		update_from << "$set" << open_document << "xmx_token" << from_balance.to_string() << close_document;
+		update_from << "$set" << open_document << "main_token" << from_balance.to_string() << close_document;
 		accounts.update_one(find_from.view(), update_from.view());
 
 		// create new account with staked deposit amount
 		bsoncxx::builder::stream::document doc{};
 		doc << "name" << addaccount.name.to_string()
-			<< "xmx_token" << asset().to_string()
+			<< "main_token" << asset().to_string()
 			<< "staked_token" << addaccount.deposit.to_string()
 			<< "unstaking_token" << asset().to_string()
 			<< "createdTime" << b_date{ now }
@@ -464,13 +464,13 @@ namespace Xmaxplatform {
 		auto from_account = find_account(accounts, lock.from);
 		auto to_account = find_account(accounts, lock.to);
 
-		asset from_balance = asset::from_string(from_account.view()["xmx_token"].get_utf8().value.to_string());
+		asset from_balance = asset::from_string(from_account.view()["main_token"].get_utf8().value.to_string());
 		asset to_balance = asset::from_string(to_account.view()["staked_token"].get_utf8().value.to_string());
 		from_balance -= lock.amount;
 		to_balance += lock.amount;
 
 		document update_from{};
-		update_from << "$set" << open_document << "xmx_token" << from_balance.to_string()
+		update_from << "$set" << open_document << "main_token" << from_balance.to_string()
 			<< "updatedTime" << b_date{ now }
 		<< close_document;
 		document update_to{};
@@ -524,14 +524,14 @@ namespace Xmaxplatform {
 		auto claim = msg.as<Basetypes::claim>();
 		auto from_account = find_account(accounts, claim.account);
 
-		asset token = asset::from_string(from_account.view()["xmx_token"].get_utf8().value.to_string());
+		asset token = asset::from_string(from_account.view()["main_token"].get_utf8().value.to_string());
 		asset unstack_token = asset::from_string(from_account.view()["unstacking_token"].get_utf8().value.to_string());
 		unstack_token -= claim.amount;
 		token += claim.amount;
 
 		document update_from{};
 		update_from << "$set" << open_document
-			<< "xmx_token" << token.to_string()
+			<< "main_token" << token.to_string()
 			<< "unstacking_token" << unstack_token.to_string()
 			<< "updatedTime" << b_date{ now }
 		<< close_document;
@@ -879,7 +879,7 @@ namespace Xmaxplatform {
 		auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
 			std::chrono::microseconds{ fc::time_point::now().time_since_epoch().count() });
 		doc << "name" << Config::xmax_contract_name.to_string()
-			<< "xmx_token" << asset(Config::initial_token_supply).to_string()
+			<< "main_token" << asset(Config::initial_token_supply).to_string()
 			<< "staked_token" << asset().to_string()
 			<< "unstaking_token" << asset().to_string()
 			<< "abi" << bsoncxx::from_json(fc::json::to_string(xmax_abi))

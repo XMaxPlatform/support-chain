@@ -67,7 +67,7 @@ namespace Xmaxplatform {
 
             struct get_account_results {
                 name                       account_name;
-                asset                      xmx_token = asset(0,MAIN_SYMBOL);
+                asset                      main_token = asset(0,MAIN_SYMBOL);
             };
             struct get_account_params {
                 Basetypes::name account_name;
@@ -335,7 +335,7 @@ private:
 
 FC_REFLECT(Xmaxplatform::Chain_APIs::empty, )
 
-FC_REFLECT( Xmaxplatform::Chain_APIs::read_only::get_account_results, (account_name)(xmx_token) )
+FC_REFLECT( Xmaxplatform::Chain_APIs::read_only::get_account_results, (account_name)(main_token) )
 
 FC_REFLECT( Xmaxplatform::Chain_APIs::read_only::get_account_params, (account_name) )
 

@@ -20,7 +20,7 @@ class xmx_token_object : public Basechain::object<xmx_token_object_type, xmx_tok
 
    id_type id;
     Basetypes::account_name owner_name;
-    Basetypes::share_type xmx_token = 0;
+    Basetypes::share_type main_token = 0;
 };
 
 struct by_owner_name;

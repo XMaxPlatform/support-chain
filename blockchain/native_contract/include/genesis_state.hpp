@@ -27,13 +27,13 @@ struct genesis_state_type {
                            uint64_t liquid_bal = 0,
                            const public_key& owner_key = public_key(),
                            const public_key& active_key = public_key())
-         : name(name), staking_balance(staking_bal), xmx_token(liquid_bal),
+         : name(name), staking_balance(staking_bal), main_token(liquid_bal),
            owner_key(owner_key),
            active_key(active_key == public_key()? owner_key : active_key)
       {}
       string          name;
       asset           staking_balance;
-      asset           xmx_token;
+      asset           main_token;
       public_key owner_key;
       public_key active_key;
    };
@@ -85,7 +85,7 @@ struct genesis_state_type {
 } } // namespace Xmaxplatform::Native_contract
 
 FC_REFLECT(Xmaxplatform::Native_contract::genesis_state_type::initial_account_type,
-           (name)(staking_balance)(xmx_token)(owner_key)(active_key))
+           (name)(staking_balance)(main_token)(owner_key)(active_key))
 
 FC_REFLECT(Xmaxplatform::Native_contract::genesis_state_type::initial_builder_type, (owner_name)(block_signing_key))
 

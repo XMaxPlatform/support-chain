@@ -103,17 +103,17 @@ static void create_account_internal(Types::addaccount& create, Basechain::databa
 
 	const auto& creatorToken = db.get<xmx_token_object, by_owner_name>(create.creator);
 
-	XMAX_ASSERT(creatorToken.xmx_token >= create.deposit.amount, message_validate_exception,
+	XMAX_ASSERT(creatorToken.main_token >= create.deposit.amount, message_validate_exception,
 		"Creator '${c}' has insufficient funds to make account creation deposit of ${a}",
 		("c", create.creator)("a", create.deposit));
 
 	db.modify(creatorToken, [&create](xmx_token_object& b) {
-		b.xmx_token -= create.deposit.amount;
+		b.main_token -= create.deposit.amount;
 	});
 
 	db.create<xmx_token_object>([&create](xmx_token_object& b) {
 		b.owner_name = create.name;
-		b.xmx_token = 0; //create.deposit.amount; TODO: make sure we credit this in @staked
+		b.main_token = 0; //create.deposit.amount; TODO: make sure we credit this in @staked
 	});
 
 	auto owner_p = db.create<authority_object>([&](authority_object& obj)
@@ -285,15 +285,15 @@ void handle_xmax_transfer(message_context_xmax& context) {
       auto& db = context.mutable_db;
       const auto& from = db.get<xmx_token_object, by_owner_name>(transfer.from);
 
-      XMAX_ASSERT(from.xmx_token >= transfer.amount, message_precondition_exception, "Insufficient Funds",
-                 ("from.xmx_token",from.xmx_token)("transfer.amount",transfer.amount));
+      XMAX_ASSERT(from.main_token >= transfer.amount, message_precondition_exception, "Insufficient Funds",
+                 ("from.main_token",from.main_token)("transfer.amount",transfer.amount));
 
       const auto& to = db.get<xmx_token_object, by_owner_name>(transfer.to);
       db.modify(from, [&](xmx_token_object& a) {
-         a.xmx_token -= share_type(transfer.amount);
+         a.main_token -= share_type(transfer.amount);
       });
       db.modify(to, [&](xmx_token_object& a) {
-         a.xmx_token += share_type(transfer.amount);
+         a.main_token += share_type(transfer.amount);
       });
    } FC_CAPTURE_AND_RETHROW( (transfer) ) 
 }
@@ -317,13 +317,13 @@ void handle_xmax_lock(message_context_xmax& context) {
 
     const xmx_token_object& locker = xmax_token_tbl.get(lock.from);
 
-    XMAX_ASSERT( locker.xmx_token >= lock.amount, message_precondition_exception,
-                 "Account ${a} lacks sufficient funds to lock ${amt} XMX", ("a", lock.from)("amt", lock.amount)("available",locker.xmx_token) );
+    XMAX_ASSERT( locker.main_token >= lock.amount, message_precondition_exception,
+                 "Account ${a} lacks sufficient funds to lock ${amt} XMX", ("a", lock.from)("amt", lock.amount)("available",locker.main_token) );
 
     const auto& resource_token = resource_token_tbl.get(lock.to);
 
     xmax_token_tbl.modify(locker, [&lock](xmx_token_object& a) {
-        a.xmx_token -= share_type(lock.amount);
+        a.main_token -= share_type(lock.amount);
     });
 
     resource_token_tbl.modify(resource_token, [&lock](resource_token_object& a){

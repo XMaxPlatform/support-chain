@@ -112,7 +112,7 @@ std::vector<Chain::message_data> native_contract_chain_init::prepare_data(chain_
 	std::vector<Chain::message_data> messages_to_process;
 
 
-   auto CreateNativeAccount = [this, &db](name name, auto xmxtoken) {
+   auto CreateNativeAccount = [this, &db](name name, auto main_token) {
 
        db.create<account_object>([this, &name](account_object& a) {
            a.name = name;
@@ -123,9 +123,9 @@ std::vector<Chain::message_data> native_contract_chain_init::prepare_data(chain_
            }
        });
 
-      db.create<Xmaxplatform::Chain::xmx_token_object>([&name, xmxtoken]( auto& b) {
+      db.create<Xmaxplatform::Chain::xmx_token_object>([&name, main_token]( auto& b) {
          b.owner_name = name;
-         b.xmx_token = xmxtoken;
+         b.main_token = main_token;
       });
    };
    CreateNativeAccount(Config::xmax_contract_name, Config::initial_token_supply);
@@ -149,13 +149,13 @@ std::vector<Chain::message_data> native_contract_chain_init::prepare_data(chain_
 
 
 
-	   if (acct.xmx_token > 0) {
+	   if (acct.main_token > 0) {
 		   message_data data2;
 
 		   data2.msg = message_xmax(Config::xmax_contract_name,
 			   vector<Basetypes::account_auth>{ {acc_name, Config::xmax_active_name}},
 			   "transfer", Basetypes::transfer(Config::xmax_contract_name, acct.name,
-				   acct.xmx_token.amount, "Genesis Allocation"));
+				   acct.main_token.amount, "Genesis Allocation"));
 
 		   data2.scopes.push_back(acc_name);
 		   data2.scopes.push_back(Config::xmax_contract_name);
