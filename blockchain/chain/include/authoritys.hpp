@@ -36,12 +36,12 @@ namespace Chain {
 	struct account_auth
 	{
 		account_auth(account_name acc, authority_name per)
-			: account(acc), permission(per)
+			: account(acc), authority(per)
 		{
 
 		}
 		account_name account;
-		authority_name permission;
+		authority_name authority;
 	};
 
 	struct account_permission : public permission_weight
