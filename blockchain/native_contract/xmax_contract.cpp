@@ -318,7 +318,7 @@ void handle_xmax_lock(message_context_xmax& context) {
     const xmx_token_object& locker = xmax_token_tbl.get(lock.from);
 
     XMAX_ASSERT( locker.main_token >= lock.amount, message_precondition_exception,
-                 "Account ${a} lacks sufficient funds to lock ${amt} XMX", ("a", lock.from)("amt", lock.amount)("available",locker.main_token) );
+                 "Account ${a} lacks sufficient funds to lock ${amt} SUP", ("a", lock.from)("amt", lock.amount)("available",locker.main_token) );
 
     const auto& resource_token = resource_token_tbl.get(lock.to);
 

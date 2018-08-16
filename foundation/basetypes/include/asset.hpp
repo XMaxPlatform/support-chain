@@ -6,18 +6,28 @@
 #include <fc/exception/exception.hpp>
 #include <basetypes.hpp>
 
-#define MAKE_TOKEN_NAME(C1, C2, C3, DECIMALS) (int64_t(DECIMALS) | (uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24))
 
+constexpr uint64_t PACK_TOKEN_NAME(char C1, char C2, char C3) { 
+	return (uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24); 
+}
 
+constexpr uint64_t PACK_TOKEN_NAME(char C1, char C2, char C3, char C4) { 
+	return (uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24) | (uint64_t(C4) << 32); 
+}
 
-#define GET_MACRO(_1, _2, _3, _4, _5, _6, _7, NAME, ...) NAME
-#define PACK_TOKEN_NAME3(C1, C2, C3)  ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24))
-#define PACK_TOKEN_NAME4(C1, C2, C3, C4)  ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24) | (uint64_t(C4) << 32))
-#define PACK_TOKEN_NAME5(C1, C2, C3, C4, C5)  ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24) | (uint64_t(C4) << 32) | (uint64_t(C5) << 40))
-#define PACK_TOKEN_NAME6(C1, C2, C3, C4, C5, C6)  ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24) | (uint64_t(C4) << 32) | (uint64_t(C5) << 40) | (uint64_t(C6) << 48))
-#define PACK_TOKEN_NAME7(C1, C2, C3, C4, C5, C6, C7)  ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24) | (uint64_t(C4) << 32) | (uint64_t(C5) << 40) | (uint64_t(C6) << 48) | (uint64_t(C7) << 56))
+constexpr uint64_t PACK_TOKEN_NAME(char C1, char C2, char C3, char C4, char C5) {
+	return ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24) | (uint64_t(C4) << 32) | (uint64_t(C5) << 40));
+}
 
-#define PACK_TOKEN_NAME(...) GET_MACRO(__VA_ARGS__, PACK_TOKEN_NAME7, PACK_TOKEN_NAME6, PACK_TOKEN_NAME5, PACK_TOKEN_NAME4, PACK_TOKEN_NAME3)(__VA_ARGS__)
+constexpr uint64_t PACK_TOKEN_NAME(char C1, char C2, char C3, char C4, char C5, char C6) {
+	return ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24) | (uint64_t(C4) << 32) | (uint64_t(C5) << 40) | (uint64_t(C6) << 48));
+}
+
+constexpr uint64_t PACK_TOKEN_NAME(char C1, char C2, char C3, char C4, char C5, char C6, char C7) {
+	return ((uint64_t(C1) << 8) | (uint64_t(C2) << 16) | (uint64_t(C3) << 24) | (uint64_t(C4) << 32) | (uint64_t(C5) << 40) | (uint64_t(C6) << 48) | (uint64_t(C7) << 56));
+}
+
+#define PACK_TOKEN_NAME(...) PACK_TOKEN_NAME(__VA_ARGS__)
 #define MAKE_TOKEN_SYMBOL(DECIMALS, ...) (int64_t(DECIMALS) | PACK_TOKEN_NAME(__VA_ARGS__))
 
 
