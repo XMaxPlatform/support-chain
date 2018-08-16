@@ -11,6 +11,7 @@
 
 #include <objects/object_utility.hpp>
 #include <objects/account_object.hpp>
+#include <objects/contract_object.hpp>
 #include <objects/authority_object.hpp>
 #include <objects/linked_permission_object.hpp>
 #include <objects/xmx_token_object.hpp>
@@ -371,8 +372,8 @@ void handle_xmax_setjscode(Chain::message_context_xmax& context)
 
 	abi_serializer(msg.code_abi).validate();
 
-	const auto& account = db.get<account_object, by_name>(msg.account);
-	db.modify(account, [&](auto& a) {
+	const auto& contract = db.get<contract_object, by_name>(msg.account);
+	db.modify(contract, [&](auto& a) {
 	
 		a.code_version = fc::sha256::hash(msg.code.data(), msg.code.size());
 		a.code.resize(0);
@@ -402,9 +403,9 @@ void handle_xmax_setcode(message_context_xmax& context) {
 	abi_serializer(msg.code_abi).validate();
 
 
-	const auto& account = db.get<account_object, by_name>(msg.account);
+	const auto& contract = db.get<contract_object, by_name>(msg.account);
 	//   wlog( "set code: ${size}", ("size",msg.code.size()));
-	db.modify(account, [&](auto& a) {
+	db.modify(contract, [&](auto& a) {
 		/** TODO: consider whether a microsecond level local timestamp is sufficient to detect code version changes*/
 		//warning TODO : update setcode message to include the hash, then validate it in validate
 		a.code_version = fc::sha256::hash(msg.code.data(), msg.code.size());

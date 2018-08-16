@@ -36,6 +36,8 @@
 #include <objects/transaction_object.hpp>
 #include <objects/block_summary_object.hpp>
 #include <objects/account_object.hpp>
+#include <objects/contract_object.hpp>
+
 #include <objects/vote_objects.hpp>
 #include <objects/resource_token_object.hpp>
 #include <objects/xmx_token_object.hpp>
@@ -122,6 +124,7 @@ namespace Xmaxplatform { namespace Chain {
 
         void chain_xmax::setup_data_indexes() {
             _context->block_db.add_index<account_index>();
+			_context->block_db.add_index<contract_index>();
 			_context->block_db.add_index<authority_index>();
 
             _context->block_db.add_index<key_value_index>();

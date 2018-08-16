@@ -7,27 +7,35 @@
 
 #include "multi_index_includes.hpp"
 
+
+
+
+namespace Xmaxplatform {
+namespace Chain {
+	enum account_type : uint8_t
+	{
+		acc_personal = 0,
+		acc_contract = 1,
+		acc_erc20 = 10,
+		acc_erc721 = 11,
+	};
+
+}
+}
+FC_REFLECT_ENUM(Xmaxplatform::Chain::account_type, (acc_personal)(acc_contract)(acc_erc20)(acc_erc721))
+
+
+
 namespace Xmaxplatform { namespace Chain {
 
    class account_object : public Basechain::object<account_object_type, account_object> {
       OBJECT_CCTOR(account_object,(code)(abi))
-
+   public:
+	  using acc_type = fc::enum_type<uint8_t, account_type>;
       id_type             id;
       account_name        name;
-      uint8_t             vm_type      = 0;
-      uint8_t             vm_version   = 0;
-      fc::sha256          code_version;
+	  acc_type			  type = 0;
       time                creation_date;
-	  mapped_vector<char> code;
-	  mapped_vector<char> abi;
-
-      void set_abi( const Xmaxplatform::Basetypes::abi& _abi ) {
-         // Added resize(0) here to avoid bug in boost vector container
-         abi.resize( 0 );
-         abi.resize( fc::raw::pack_size( _abi ) );
-         fc::datastream<char*> ds( abi.data(), abi.size() );
-         fc::raw::pack( ds, _abi );
-      }
    };
    using account_id_type = account_object::id_type;
 
@@ -46,4 +54,4 @@ BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::account_object, Xmaxplatform::Chai
 
 FC_REFLECT(Basechain::oid<Xmaxplatform::Chain::account_object>, (_id))
 
-FC_REFLECT(Xmaxplatform::Chain::account_object, (id)(name)(vm_type)(vm_version)(code_version)(code)(creation_date))
+FC_REFLECT(Xmaxplatform::Chain::account_object, (id)(name)(type)(creation_date))
