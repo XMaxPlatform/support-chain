@@ -29,7 +29,7 @@ FC_REFLECT_ENUM(Xmaxplatform::Chain::account_type, (acc_personal)(acc_contract)(
 namespace Xmaxplatform { namespace Chain {
 
    class account_object : public Basechain::object<account_object_type, account_object> {
-      OBJECT_CCTOR(account_object,(code)(abi))
+      OBJECT_CCTOR(account_object)
    public:
 	  using acc_type = fc::enum_type<uint8_t, account_type>;
       id_type             id;
