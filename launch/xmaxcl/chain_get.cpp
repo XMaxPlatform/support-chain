@@ -83,11 +83,25 @@ namespace chain_get
 			if (verbose)
 			{
 				auto block = stream.read_by_num(idx.num);
-				
+
+				int msgs = 0;
+
+				for (const transaction_receipt& trx : block->receipts)
+				{
+					if (trx.trx.contains<transaction_package>())
+					{
+						const transaction_package& pck = trx.trx.get<transaction_package>();
+						msgs += pck.body.messages.size();
+					}
+
+				}
 				info << "\n{" << "id: " << idx.id.str() << "}";
 				info << "\n{" << "time: " << block->timestamp.time_point().operator fc::string() << "}";
 				info << "\n{" << "builder: " << block->builder.to_string() << "}";
 				info << "\n{" << "trx: " << block->receipts.size() << "}";
+				info << "\n{" << "msg: " << msgs << "}";
+
+
 			}
 
 		}
