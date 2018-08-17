@@ -23,7 +23,7 @@ using Chain::blockchain_setup;
 struct genesis_state_type {
    struct initial_account_type {
       initial_account_type(const string& name = string(),
-                           uint64_t staking_bal = 0,
+                           uint64_t staking_bal = 1,
                            uint64_t liquid_bal = 0,
                            const public_key& owner_key = public_key(),
                            const public_key& active_key = public_key())

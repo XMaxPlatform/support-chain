@@ -97,6 +97,9 @@ static void create_account_internal(Types::addaccount& create, Basechain::databa
 		"Cannot create account named ${name}, as that name is already taken",
 		("name", create.name));
 
+	XMAX_ASSERT(create.deposit.amount > 0, message_validate_exception,
+		"account creation deposit must > 0, deposit: ${a}", ("a", create.deposit));
+
 	const auto& new_account = db.create<account_object>([&create, &current_time](account_object& a) {
 		a.name = create.name;
 		a.creation_date = current_time;
@@ -114,7 +117,7 @@ static void create_account_internal(Types::addaccount& create, Basechain::databa
 
 	db.create<xmx_token_object>([&create](xmx_token_object& b) {
 		b.owner_name = create.name;
-		b.main_token = 0; //create.deposit.amount; TODO: make sure we credit this in @staked
+		b.main_token = create.deposit.amount;
 	});
 
 	auto owner_p = db.create<authority_object>([&](authority_object& obj)
