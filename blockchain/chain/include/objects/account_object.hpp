@@ -15,7 +15,8 @@ namespace Chain {
 	enum account_type : uint8_t
 	{
 		acc_personal = 0,
-		acc_contract = 1,
+		acc_system = 1,
+		acc_contract = 2,
 		acc_erc20 = 10,
 		acc_erc721 = 11,
 	};

@@ -1,6 +1,13 @@
 if(WIN32)
 	message(STATUS "-------------- Window config --------------")
 	
+
+	if(MSVC)
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Zm2000")
+	endif()
+	if(MSVC)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm2000")
+	endif()
 	
 
 	if("${XMAX_ROOT_DIR}" STREQUAL "")

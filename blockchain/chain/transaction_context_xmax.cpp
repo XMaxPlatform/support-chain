@@ -7,6 +7,7 @@
 #include <vm_xmax.hpp>
 #include <transaction_context_xmax.hpp>
 #include <objects/global_status_objects.hpp>
+#include <objects/contract_object.hpp>
 
 namespace Xmaxplatform {
 namespace Chain {
@@ -79,7 +80,7 @@ namespace Chain {
 			}
 			else
 			{
-				const auto& recipient = context.db.get<account_object, by_name>(context.code);
+				const auto& recipient = context.db.get<contract_object, by_name>(context.code);
 				if (recipient.code.size()) {
 					idump((context.code)(context.msg.type));
 					const uint32_t execution_time = 10000;//TODO

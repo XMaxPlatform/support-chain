@@ -3,20 +3,6 @@
  *  @copyright defined in xmax/LICENSE
  */
 
-
-#include <blockchain_types.hpp>
-#include <block.hpp>
-#include <blockchain_exceptions.hpp>
-#include <basechain.hpp>
-#include <forkchain.hpp>
-#include <chain_utils.hpp>
-#include <chain_init.hpp>
-#include <chain_xmax.hpp>
-#include <xmax_voting.hpp>
-#include <authoritys_utils.hpp>
-
-#include <rand.hpp>
-
 #include <fc/smart_ref_impl.hpp>
 #include <fc/uint128.hpp>
 #include <fc/crypto/digest.hpp>
@@ -32,6 +18,18 @@
 #include <iostream>
 #include <chrono>
 
+#include <blockchain_exceptions.hpp>
+#include <block.hpp>
+#include <forkchain.hpp>
+#include <chain_utils.hpp>
+#include <chain_init.hpp>
+#include <xmax_voting.hpp>
+#include <authoritys_utils.hpp>
+
+#include <rand.hpp>
+
+
+
 #include <objects/authority_object.hpp>
 #include <objects/transaction_object.hpp>
 #include <objects/block_summary_object.hpp>
@@ -40,13 +38,8 @@
 
 #include <objects/vote_objects.hpp>
 #include <objects/resource_token_object.hpp>
-#include <objects/xmx_token_object.hpp>
 #include <objects/builder_object.hpp>
 #include <objects/global_status_objects.hpp>
-#include <objects/erc20_token_object.hpp>
-#include <objects/erc20_token_account_object.hpp>
-#include <objects/erc721_token_object.hpp>
-#include <objects/erc721_token_account_object.hpp>
 
 #include <transaction_context_xmax.hpp>
 #include <pending_block.hpp>
@@ -56,7 +49,9 @@
 
 #include <abi_serializer.hpp>
 
+#include <xmax_indexes.hpp>
 
+#include <chain_xmax.hpp>
 
 namespace Xmaxplatform { namespace Chain {
 
@@ -120,39 +115,6 @@ namespace Xmaxplatform { namespace Chain {
 		//}
 
 	};
-
-
-        void chain_xmax::setup_data_indexes() {
-            _context->block_db.add_index<account_index>();
-			_context->block_db.add_index<contract_index>();
-			_context->block_db.add_index<authority_index>();
-
-            _context->block_db.add_index<key_value_index>();
-            _context->block_db.add_index<keystr_value_index>();
-            _context->block_db.add_index<key128x128_value_index>();
-            _context->block_db.add_index<key64x64x64_value_index>();
-
-			_context->block_db.add_index<transaction_multi_index>();
-			_context->block_db.add_index<block_summary_multi_index>();
-
-            _context->block_db.add_index<static_config_multi_index>();
-            _context->block_db.add_index<dynamic_states_multi_index>();
-            _context->block_db.add_index<xmx_token_multi_index>();
-
-			_context->block_db.add_index<voter_info_index>();
-			_context->block_db.add_index<builder_info_index>();
-			_context->block_db.add_index<builder_multi_index>();
-			_context->block_db.add_index<resource_token_multi_index>();
-
-			_context->block_db.add_index<global_trx_status_index>();
-			_context->block_db.add_index<global_msg_status_index>();
-
-			_context->block_db.add_index<erc20_token_multi_index>();
-			_context->block_db.add_index<erc20_token_account_multi_index>();
-			_context->block_db.add_index<erc721_token_multi_index>();
-			_context->block_db.add_index<erc721_token_account_multi_index>();
-
-        }
 
         void chain_xmax::initialize_chain(chain_init& initer)
         { 
@@ -283,7 +245,7 @@ namespace Xmaxplatform { namespace Chain {
         chain_xmax::chain_xmax(chain_init& init, const xmax_config& config, const finalize_block_func& finalize_func)
 		: _context(new chain_context(config, 1000)) {
 
-            setup_data_indexes();
+            setup_xmax_indexes(_context->block_db);
             init.register_handlers(*this, _context->block_db);
 
 			if (finalize_func) {
@@ -466,7 +428,7 @@ namespace Xmaxplatform { namespace Chain {
 		vector<char> chain_xmax::message_to_binary(name code, name type, const fc::variant& obj)const
 		{
 			try {
-				const auto& code_account = _context->block_db.get<account_object, by_name>(code);
+				const auto& code_account = _context->block_db.get<contract_object, by_name>(code);
 				Xmaxplatform::Basetypes::abi abi;
 				if (Basetypes::abi_serializer::to_abi(code_account.abi, abi)) {
 					Basetypes::abi_serializer abis(abi);
@@ -478,7 +440,7 @@ namespace Xmaxplatform { namespace Chain {
 
 		fc::variant chain_xmax::message_from_binary(name code, name type, const vector<char>& bin) const
 		{
-			const auto& code_account = _context->block_db.get<account_object, by_name>(code);
+			const auto& code_account = _context->block_db.get<contract_object, by_name>(code);
 			Xmaxplatform::Basetypes::abi abi;
 			if (Basetypes::abi_serializer::to_abi(code_account.abi, abi)) {
 				Basetypes::abi_serializer abis(abi);
@@ -490,7 +452,7 @@ namespace Xmaxplatform { namespace Chain {
 
 		//--------------------------------------------------
 		fc::variant chain_xmax::event_from_binary(name code, type_name tname, const vector<char>& bin) const {
-			const auto& code_account = _context->block_db.get<account_object, by_name>(code);
+			const auto& code_account = _context->block_db.get<contract_object, by_name>(code);
 			Xmaxplatform::Basetypes::abi abi;
 			if (Basetypes::abi_serializer::to_abi(code_account.abi, abi)) {
 				Basetypes::abi_serializer abis(abi);

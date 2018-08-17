@@ -5,6 +5,7 @@
 #pragma once
 #include <fc/time.hpp>
 #include <basechain.hpp>
+#include <transaction_response.hpp>
 #include <message_xmax.hpp>
 namespace Xmaxplatform {
 namespace Chain {

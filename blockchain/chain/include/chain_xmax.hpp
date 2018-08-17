@@ -128,7 +128,6 @@ namespace Xmaxplatform { namespace Chain {
 
 	   std::unique_ptr<chain_context>   _context;
 
-       void setup_data_indexes();
        void initialize_chain(chain_init& initer);
 	   void first_initialize(chain_init& initer);
 	   void initialize_impl(chain_init& initer);

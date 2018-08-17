@@ -7,6 +7,7 @@
 #include <fc/array.hpp>
 
 #include <blockchain_types.hpp>
+#include <blockchain_setup.hpp>
 #include <builder_rule.hpp>
 
 #include <basechain.hpp>

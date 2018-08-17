@@ -6,6 +6,7 @@
 #include <blockchain_exceptions.hpp>
 #include <chain_xmax.hpp>
 #include <xmax_contract.hpp>
+#include <objects/contract_object.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/algorithm/copy.hpp>
 
@@ -116,12 +117,16 @@ std::vector<Chain::message_data> native_contract_chain_init::prepare_data(chain_
 
        db.create<account_object>([this, &name](account_object& a) {
            a.name = name;
+		   a.type = account_type::acc_system;
            a.creation_date = genesis.initial_timestamp;
-
-           if( name == Config::xmax_contract_name ) {
-              a.set_abi(xmax_contract_abi());
-           }
        });
+	   if (name == Config::xmax_contract_name) {
+		   db.create<contract_object>([this, &name](contract_object& a) {
+			   a.name = name;
+			   a.set_abi(xmax_contract_abi());	   
+		   });
+	   }
+
 
       db.create<Xmaxplatform::Chain::xmx_token_object>([&name, main_token]( auto& b) {
          b.owner_name = name;

@@ -9,6 +9,7 @@
 #include <vm_native_interface.hpp>
 #include <objects/key_value_object.hpp>
 #include <objects/account_object.hpp>
+#include <objects/contract_object.hpp>
 #include <objects/xmx_token_object.hpp>
 #include <abi_serializer.hpp>
 #include <chrono>
@@ -296,7 +297,7 @@ namespace Xmaxplatform { namespace Chain {
 
 
    void vm_xmax::load( const account_name& name, const Basechain::database& db ) {
-      const auto& recipient = db.get<account_object,by_name>( name );
+      const auto& recipient = db.get<contract_object,by_name>( name );
   //    idump(("recipient")(name(name))(recipient.code_version));
 
       auto& state = instances[name];

@@ -1,12 +1,18 @@
 #pragma once
 #include <fc/io/raw.hpp>
-
-#include <transaction.hpp>
 #include <fc/uint128.hpp>
 
-#include <boost/multi_index/mem_fun.hpp>
+#include <basechain.hpp>
+#include <transaction.hpp>
 
+#include <boost/multi_index/mem_fun.hpp>
 #include "multi_index_includes.hpp"
+
+
+
+
+
+
 
 namespace Xmaxplatform {
 	namespace Chain {
