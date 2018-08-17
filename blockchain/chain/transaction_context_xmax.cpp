@@ -80,14 +80,18 @@ namespace Chain {
 			}
 			else
 			{
-				const auto& recipient = context.db.get<contract_object, by_name>(context.code);
-				if (recipient.code.size()) {
-					idump((context.code)(context.msg.type));
-					const uint32_t execution_time = 10000;//TODO
-					try {
-						vm_xmax::get().apply(context, execution_time, true);
+				const account_object& acc = context.db.get<account_object, by_name>(context.code);
+				if (acc.type == account_type::acc_contract)
+				{
+					const auto& recipient = context.db.get<contract_object, by_name>(context.code);
+					if (recipient.code.size()) {
+						idump((context.code)(context.msg.type));
+						const uint32_t execution_time = 10000;//TODO
+						try {
+							vm_xmax::get().apply(context, execution_time, true);
+						}
+						FC_CAPTURE_AND_LOG((context.msg))
 					}
-					FC_CAPTURE_AND_LOG((context.msg))
 				}
 			}
 		} FC_CAPTURE_AND_RETHROW((context.msg))

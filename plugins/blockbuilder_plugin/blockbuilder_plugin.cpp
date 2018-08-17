@@ -211,7 +211,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 			}
 			case block_build_condition::not_my_turn:
 			{
-				ilog("not my turn to build block.");
+				ilog("not my turn to build block, builder_info: ${builder_info}", (capture));
 				break;
 			}
 			case block_build_condition::no_private_key:
@@ -285,7 +285,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 		// not ower builder.
 		if (_builders.find(current_builder.builder_name) == _builders.end())
 		{
-			capture("current_builder", current_builder);
+			capture("builder_info", current_builder);
 			return block_build_condition::not_my_turn;
 		}
 		// 

@@ -14,6 +14,7 @@
 #include <chain_xmax.hpp>
 #include <wast_to_wasm.hpp>
 #include <mongodb_plugin.hpp>
+#include <objects/contract_object.hpp>
 #include <objects/erc20_token_object.hpp>
 #include <objects/object_utility.hpp>
 #include <objects/erc20_token_account_object.hpp>
@@ -273,7 +274,7 @@ namespace Chain_APIs{
 		get_code_results result;
 		result.account_name = params.account_name;
 		const auto& d = _chain.get_database();
-		const auto& accnt = d.get<Chain::account_object, Chain::by_name>(params.account_name);
+		const auto& accnt = d.get<Chain::contract_object, Chain::by_name>(params.account_name);
 
 		if (accnt.code.size()) {
 			result.wast = Chain::ConvertFromWasmToWast((const uint8_t*)accnt.code.data(), accnt.code.size());
@@ -360,7 +361,7 @@ namespace Chain_APIs{
 
 	Basetypes::abi getAbi(const Chain::chain_xmax& db, const name& account) {
 		const auto& d = db.get_database();
-		const auto& code_accnt = d.get<Chain::account_object, Chain::by_name>(account);
+		const auto& code_accnt = d.get<Chain::contract_object, Chain::by_name>(account);
 
 		Xmaxplatform::Basetypes::abi abi;
 		Basetypes::abi_serializer::to_abi(code_accnt.abi, abi);
