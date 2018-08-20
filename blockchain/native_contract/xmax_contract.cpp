@@ -89,9 +89,25 @@ static void validate_name(const name& n) {
 		"Name:${name} is invalid", ("name", n));
 }
 
-//Utility functions
-static void create_account_internal(Types::addaccount& create, Basechain::database& db, time& current_time) {
-		
+static const account_object& xmax_new_account(Basechain::database& db, account_name creator, time creation_time,  account_type acc_type)
+{
+	const auto& new_account = db.create<account_object>([&](account_object& a) {
+		a.name = creator;
+		a.type = acc_type;
+		a.creation_date = creation_time;
+	});
+
+	return new_account;
+}
+
+//API handler implementations
+void handle_xmax_addaccount(message_context_xmax& context) {
+	Types::addaccount create = context.msg.as<Types::addaccount>();
+	Basechain::database& db = context.mutable_db;
+	time current_time = context.current_time();
+
+	context.require_authorization(create.creator);
+
 	auto existing_account = db.find<account_object, by_name>(create.name);
 	XMAX_ASSERT(existing_account == nullptr, account_name_exists_exception,
 		"Cannot create account named ${name}, as that name is already taken",
@@ -100,10 +116,8 @@ static void create_account_internal(Types::addaccount& create, Basechain::databa
 	XMAX_ASSERT(create.deposit.amount > 0, message_validate_exception,
 		"account creation deposit must > 0, deposit: ${a}", ("a", create.deposit));
 
-	const auto& new_account = db.create<account_object>([&create, &current_time](account_object& a) {
-		a.name = create.name;
-		a.creation_date = current_time;
-	});
+	const auto& new_account = xmax_new_account(db, create.creator, current_time, Chain::acc_personal);
+
 
 	const auto& creatorToken = db.get<xmx_token_object, by_owner_name>(create.creator);
 
@@ -143,9 +157,59 @@ static void create_account_internal(Types::addaccount& create, Basechain::databa
 }
 
 
-//API handler implementations
-void handle_xmax_addaccount(message_context_xmax& context) {	
-	create_account_internal(context.msg.as<Types::addaccount>(), context.mutable_db, context.current_time());
+void handle_xmax_addcontract(Chain::message_context_xmax& context)
+{
+	const Types::addcontract& msgdata = context.msg.as<Types::addcontract>();
+	Basechain::database& db = context.mutable_db;
+	time current_time = context.current_time();
+
+	account_name contract_name = msgdata.name;
+
+	context.require_authorization(msgdata.creator);
+
+	const auto& new_account = xmax_new_account(db, contract_name, current_time, Chain::acc_contract);
+
+	abi_serializer(msgdata.code_abi).validate();
+
+	const auto& contract = db.get<contract_object, by_name>(contract_name);
+	db.modify(contract, [&](contract_object& a) {
+
+		a.code_version = fc::sha256::hash(msgdata.code.data(), msgdata.code.size());
+		a.code.resize(0);
+		a.code.resize(msgdata.code.size());
+		memcpy(a.code.data(), msgdata.code.data(), msgdata.code.size());
+
+		a.set_abi(msgdata.code_abi);
+	});
+
+	message_context_xmax init_context(context.mutable_chain, context.mutable_db, context.trx, context.msg, contract_name, 0);
+	jsvm_xmax::get().init(init_context);
+
+}
+
+void handle_xmax_adderc20(Chain::message_context_xmax& context)
+{
+	const Types::adderc20& msgdata = context.msg.as<Types::adderc20>();
+	Basechain::database& db = context.mutable_db;
+	time current_time = context.current_time();
+
+	account_name contract_name = msgdata.name;
+
+	context.require_authorization(msgdata.creator);
+
+	const auto& new_account = xmax_new_account(db, contract_name, current_time, Chain::acc_erc20);
+}
+void handle_xmax_adderc721(Chain::message_context_xmax& context)
+{
+	const Types::adderc20& msgdata = context.msg.as<Types::adderc20>();
+	Basechain::database& db = context.mutable_db;
+	time current_time = context.current_time();
+
+	account_name contract_name = msgdata.name;
+
+	context.require_authorization(msgdata.creator);
+
+	const auto& new_account = xmax_new_account(db, contract_name, current_time, Chain::acc_erc721);
 }
 
 void handle_xmax_updateauth(Chain::message_context_xmax& context)

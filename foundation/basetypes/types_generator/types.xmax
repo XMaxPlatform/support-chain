@@ -105,6 +105,20 @@ struct addaccount
    active    authority
    deposit   asset
 
+struct addcontract
+   creator   account_name
+   name      account_name
+   code            bytes        # the apply
+   code_abi        abi          # the interface description of the code
+
+struct adderc20
+   creator   account_name
+   name      account_name
+
+struct adderc721
+   creator   account_name
+   name      account_name
+
 struct setcode
    account         account_name # the account that is handling the message
    vm_type         uint8        # the virtual machine type

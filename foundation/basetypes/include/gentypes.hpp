@@ -418,6 +418,70 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
+    struct addcontract { 
+        addcontract() = default;
+        addcontract(const account_name& creator, const account_name& name, const bytes& code, const abi& code_abi)
+           : creator(creator), name(name), code(code), code_abi(code_abi) {}
+
+        account_name                     creator;
+        account_name                     name;
+        bytes                            code;
+        abi                              code_abi;
+    };
+
+    template<> struct get_struct<addcontract> { 
+        static const struct_t& type() { 
+           static struct_t result = { "addcontract", "", {
+                {"creator", "account_name"},
+                {"name", "account_name"},
+                {"code", "bytes"},
+                {"code_abi", "abi"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct adderc20 { 
+        adderc20() = default;
+        adderc20(const account_name& creator, const account_name& name)
+           : creator(creator), name(name) {}
+
+        account_name                     creator;
+        account_name                     name;
+    };
+
+    template<> struct get_struct<adderc20> { 
+        static const struct_t& type() { 
+           static struct_t result = { "adderc20", "", {
+                {"creator", "account_name"},
+                {"name", "account_name"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct adderc721 { 
+        adderc721() = default;
+        adderc721(const account_name& creator, const account_name& name)
+           : creator(creator), name(name) {}
+
+        account_name                     creator;
+        account_name                     name;
+    };
+
+    template<> struct get_struct<adderc721> { 
+        static const struct_t& type() { 
+           static struct_t result = { "adderc721", "", {
+                {"creator", "account_name"},
+                {"name", "account_name"},
+              }
+           };
+           return result;
+         }
+    };
+
     struct setcode { 
         setcode() = default;
         setcode(const account_name& account, const uint8& vm_type, const uint8& vm_version, const bytes& code, const abi& code_abi)
@@ -821,6 +885,9 @@ FC_REFLECT( Xmaxplatform::Basetypes::lock                             , (from)(t
 FC_REFLECT( Xmaxplatform::Basetypes::unlock                           , (account)(amount) )
 FC_REFLECT( Xmaxplatform::Basetypes::claim                            , (account)(amount) )
 FC_REFLECT( Xmaxplatform::Basetypes::addaccount                       , (creator)(name)(owner)(active)(deposit) )
+FC_REFLECT( Xmaxplatform::Basetypes::addcontract                      , (creator)(name)(code)(code_abi) )
+FC_REFLECT( Xmaxplatform::Basetypes::adderc20                         , (creator)(name) )
+FC_REFLECT( Xmaxplatform::Basetypes::adderc721                        , (creator)(name) )
 FC_REFLECT( Xmaxplatform::Basetypes::setcode                          , (account)(vm_type)(vm_version)(code)(code_abi) )
 FC_REFLECT( Xmaxplatform::Basetypes::updateauth                       , (account)(permission)(parent)(new_authority) )
 FC_REFLECT( Xmaxplatform::Basetypes::deleteauth                       , (account)(permission) )

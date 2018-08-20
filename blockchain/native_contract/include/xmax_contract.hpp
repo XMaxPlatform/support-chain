@@ -18,6 +18,10 @@ namespace Types = ::Xmaxplatform::Basetypes;
 
 
 void handle_xmax_addaccount(Chain::message_context_xmax& context);
+void handle_xmax_addcontract(Chain::message_context_xmax& context);
+void handle_xmax_adderc20(Chain::message_context_xmax& context);
+void handle_xmax_adderc721(Chain::message_context_xmax& context);
+
 void handle_xmax_updateauth(Chain::message_context_xmax& context);
 void handle_xmax_deleteauth(Chain::message_context_xmax& context);
 void handle_xmax_linkauth(Chain::message_context_xmax& context);
