@@ -45,6 +45,7 @@ void xmax_system_unregproxy(Chain::message_context_xmax& context);
 //ERC20 interfaces
 void xmax_erc20_issue(Chain::message_context_xmax& context);
 void xmax_erc20_mint(Chain::message_context_xmax& context);
+void xmax_erc20_stopmint(Chain::message_context_xmax& context);
 void xmax_erc20_revoke(Chain::message_context_xmax& context);
 void xmax_erc20_transfer(Chain::message_context_xmax& context);
 void xmax_erc20_transferfrom(Chain::message_context_xmax& context);

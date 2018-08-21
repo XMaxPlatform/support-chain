@@ -585,7 +585,7 @@ void xmax_erc20_mint(Chain::message_context_xmax& context)
 	});
 }
 //--------------------------------------------------
-void handle_xmax_stopminterc20(Chain::message_context_xmax& context)
+void xmax_erc20_stopmint(Chain::message_context_xmax& context)
 {
 	auto& db = context.mutable_db;
 	auto stopminterc20 = context.msg.as<Types::stopminterc20>();
