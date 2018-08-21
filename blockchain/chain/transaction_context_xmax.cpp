@@ -12,6 +12,34 @@
 namespace Xmaxplatform {
 namespace Chain {
 
+	static native_scope get_native_scope(account_type acc_type)
+	{
+		switch (acc_type)
+		{
+		case account_type::acc_personal:
+		{
+			return native_scope::native_system;
+		}
+		case account_type::acc_system:
+		{
+			return native_scope::native_system;
+		}
+		case account_type::acc_erc20:
+		{
+			return native_scope::native_erc20;
+		}
+		case account_type::acc_erc721:
+		{
+			return native_scope::native_erc721;
+		}
+		default:
+		{
+			return native_scope::native_invalid;
+		}
+		}
+	}
+
+
 	transaction_context_xmax::transaction_context_xmax(chain_xmax& _chain, const signed_transaction& _trx, fc::time_point _start /* = fc::time_point::now() */)
 		: chain(_chain)
 		, trx(_trx)
@@ -72,27 +100,29 @@ namespace Chain {
 	message_response transaction_context_xmax::exec_one_message(message_context_xmax& context)
 	{
 		try {
-			
-			auto handler = chain.find_message_handler(context.code, context.msg.type);
-			if (handler)
+			const account_object& acc = context.db.get<account_object, by_name>(context.code);
+
+			if (acc.type != acc_contract)
 			{
+				native_scope scope = get_native_scope(acc.type);
+				XMAX_ASSERT(scope != native_scope::native_invalid, transaction_exception,
+					"Unknown native scope type '${type}' of account '${acc_name}'.", ("type", (int)scope)("acc_name", acc.name.to_string()));
+
+				auto handler = chain.find_message_handler(scope, context.msg.type);
+				XMAX_ASSERT(handler, transaction_exception, "There is not function '${name}' in account '${acc_name}'.", ("name", context.msg.type)("acc_name", acc.name.to_string()));
 				handler(context);
 			}
 			else
-			{
-				const account_object& acc = context.db.get<account_object, by_name>(context.code);
-				if (acc.type == account_type::acc_contract)
-				{
-					const auto& recipient = context.db.get<contract_object, by_name>(context.code);
-					if (recipient.code.size()) {
-						idump((context.code)(context.msg.type));
-						const uint32_t execution_time = 10000;//TODO
-						try {
-							vm_xmax::get().apply(context, execution_time, true);
-						}
-						FC_CAPTURE_AND_LOG((context.msg))
-					}
+			{				
+				const auto& recipient = context.db.get<contract_object, by_name>(context.code);
+				XMAX_ASSERT(recipient.code.size(), transaction_exception, "contract of '${name}' is not found.", ("name", context.code.to_string()));
+	
+				idump((context.code)(context.msg.type));
+				const uint32_t execution_time = 10000;//TODO
+				try {
+					vm_xmax::get().apply(context, execution_time, true);
 				}
+				FC_CAPTURE_AND_LOG((context.msg))		
 			}
 		} FC_CAPTURE_AND_RETHROW((context.msg))
 

@@ -16,6 +16,7 @@
 #include <block.hpp>
 #include <block_pack.hpp>
 #include <blockchain_setup.hpp>
+#include <native_handler.hpp>
 #include <objects/static_config_object.hpp>
 #include <objects/dynamic_states_object.hpp>
 #include <objects/xmx_token_object.hpp>
@@ -197,9 +198,9 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void broadcast_confirmation(account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func);
 
-       void set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v );
+       void set_message_handler(const native_scope& scope, const func_name& func, native_handler v);
 
-	   msg_handler find_message_handler(const account_name& contract, const account_name& scope);
+	   native_handler find_message_handler(const native_scope& scope, const func_name& func);
 
 	   void on_irreversible(block_pack_ptr pack);
 

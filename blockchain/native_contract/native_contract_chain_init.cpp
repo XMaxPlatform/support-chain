@@ -33,29 +33,33 @@ xmax_builder_infos native_contract_chain_init::get_chain_init_builders() const {
 void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain::database &db) {
 
 #define SET_APP_HANDLER( contract, scope, action, nspace ) \
-   chain.set_message_handler( #contract, #scope, #action, &BOOST_PP_CAT(nspace::Native_contract::handle_, BOOST_PP_CAT(contract, BOOST_PP_CAT(_,action) ) ) )
-    SET_APP_HANDLER( xmax, xmax, addaccount, Xmaxplatform );
-    SET_APP_HANDLER( xmax, xmax, transfer, Xmaxplatform );
+   chain.set_message_handler(scope, #action, &BOOST_PP_CAT(nspace::Native_contract::handle_, BOOST_PP_CAT(contract, BOOST_PP_CAT(_,action) ) ) )
+	SET_APP_HANDLER(xmax, native_scope::native_system, addaccount, Xmaxplatform);
+	SET_APP_HANDLER(xmax, native_scope::native_system, addcontract, Xmaxplatform);
+	SET_APP_HANDLER(xmax, native_scope::native_system, adderc20, Xmaxplatform);
+	SET_APP_HANDLER(xmax, native_scope::native_system, adderc721, Xmaxplatform);
+
+    SET_APP_HANDLER( xmax, native_scope::native_system, transfer, Xmaxplatform );
 	
-    SET_APP_HANDLER( xmax, xmax, lock, Xmaxplatform );
-    SET_APP_HANDLER( xmax, xmax, unlock, Xmaxplatform );
-    SET_APP_HANDLER( xmax, xmax, votebuilder, Xmaxplatform );
-    SET_APP_HANDLER( xmax, xmax, regbuilder, Xmaxplatform );
-    SET_APP_HANDLER( xmax, xmax, unregbuilder, Xmaxplatform );
-    SET_APP_HANDLER( xmax, xmax, regproxy, Xmaxplatform );
-    SET_APP_HANDLER( xmax, xmax, unregproxy, Xmaxplatform );
-	SET_APP_HANDLER(xmax, xmax, setcode, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, issueerc20, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, minterc20, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, revokeerc20, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, transfererc20, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, transferfromerc20, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, issueerc721, Xmaxplatform);
-	SET_APP_HANDLER(xmax, xmax, minterc721, Xmaxplatform);	
-	SET_APP_HANDLER(xmax, xmax, revokeerc721, Xmaxplatform);
+    SET_APP_HANDLER( xmax, native_scope::native_system, lock, Xmaxplatform );
+    SET_APP_HANDLER( xmax, native_scope::native_system, unlock, Xmaxplatform );
+    SET_APP_HANDLER( xmax, native_scope::native_system, votebuilder, Xmaxplatform );
+    SET_APP_HANDLER( xmax, native_scope::native_system, regbuilder, Xmaxplatform );
+    SET_APP_HANDLER( xmax, native_scope::native_system, unregbuilder, Xmaxplatform );
+    SET_APP_HANDLER( xmax, native_scope::native_system, regproxy, Xmaxplatform );
+    SET_APP_HANDLER( xmax, native_scope::native_system, unregproxy, Xmaxplatform );
+	SET_APP_HANDLER(xmax, native_scope::native_system, setcode, Xmaxplatform);
+	SET_APP_HANDLER(xmax, native_scope::native_system, issueerc20, Xmaxplatform);
+	SET_APP_HANDLER(xmax, native_scope::native_system, minterc20, Xmaxplatform);
+	SET_APP_HANDLER(xmax, native_scope::native_system, revokeerc20, Xmaxplatform);
+	SET_APP_HANDLER(xmax, native_scope::native_system, transfererc20, Xmaxplatform);
+	SET_APP_HANDLER(xmax, native_scope::native_system, transferfromerc20, Xmaxplatform);
+	SET_APP_HANDLER(xmax, native_scope::native_system, issueerc721, Xmaxplatform);
+	SET_APP_HANDLER(xmax, native_scope::native_system, minterc721, Xmaxplatform);
+	SET_APP_HANDLER(xmax, native_scope::native_system, revokeerc721, Xmaxplatform);
 
 #ifdef USE_V8
-	SET_APP_HANDLER(xmax, xmax, setjscode, Xmaxplatform);
+	SET_APP_HANDLER(xmax, native_scope::native_system, setjscode, Xmaxplatform);
 #endif
 }
 
@@ -144,12 +148,11 @@ std::vector<Chain::message_data> native_contract_chain_init::prepare_data(chain_
 	   account_name acc_name = acct.name;
 	   message_data data;
 	   data.msg = message_xmax(Config::xmax_contract_name,
-		   vector<Basetypes::account_auth>{ {acc_name, Config::xmax_active_name}},
+		   vector<Basetypes::account_auth>{ {Config::xmax_contract_name, Config::xmax_active_name}},
 		   "addaccount", Basetypes::addaccount(Config::xmax_contract_name, acc_name,
 			   KeyAuthority(acct.owner_key),
 			   KeyAuthority(acct.active_key),
 			   acct.staking_balance));
-
 	   messages_to_process.emplace_back(std::move(data));
 
 
@@ -158,7 +161,7 @@ std::vector<Chain::message_data> native_contract_chain_init::prepare_data(chain_
 		   message_data data2;
 
 		   data2.msg = message_xmax(Config::xmax_contract_name,
-			   vector<Basetypes::account_auth>{ {acc_name, Config::xmax_active_name}},
+			   vector<Basetypes::account_auth>{ {Config::xmax_contract_name, Config::xmax_active_name}},
 			   "transfer", Basetypes::transfer(Config::xmax_contract_name, acct.name,
 				   acct.main_token.amount, "Genesis Allocation"));
 

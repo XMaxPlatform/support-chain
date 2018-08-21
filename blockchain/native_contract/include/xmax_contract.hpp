@@ -57,6 +57,9 @@ void handle_xmax_minterc721(Chain::message_context_xmax& context);
 void handle_xmax_revokeerc721(Chain::message_context_xmax& context);
 
 
+
+
+
 } // namespace Native_contract
 } // namespace Xmaxplatform
 

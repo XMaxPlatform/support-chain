@@ -111,19 +111,19 @@ void handle_xmax_addaccount(message_context_xmax& context) {
 	auto existing_account = db.find<account_object, by_name>(create.name);
 	XMAX_ASSERT(existing_account == nullptr, account_name_exists_exception,
 		"Cannot create account named ${name}, as that name is already taken",
-		("name", create.name));
+		("name", create.name.to_string()));
 
 	XMAX_ASSERT(create.deposit.amount > 0, message_validate_exception,
 		"account creation deposit must > 0, deposit: ${a}", ("a", create.deposit));
 
-	const auto& new_account = xmax_new_account(db, create.creator, current_time, Chain::acc_personal);
+	const auto& new_account = xmax_new_account(db, create.name, current_time, Chain::acc_personal);
 
 
 	const auto& creatorToken = db.get<xmx_token_object, by_owner_name>(create.creator);
 
 	XMAX_ASSERT(creatorToken.main_token >= create.deposit.amount, message_validate_exception,
 		"Creator '${c}' has insufficient funds to make account creation deposit of ${a}",
-		("c", create.creator)("a", create.deposit));
+		("c", create.creator.to_string())("a", create.deposit));
 
 	db.modify(creatorToken, [&create](xmx_token_object& b) {
 		b.main_token -= create.deposit.amount;

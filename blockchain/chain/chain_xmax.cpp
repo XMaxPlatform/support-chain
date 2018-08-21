@@ -58,7 +58,7 @@ namespace Xmaxplatform { namespace Chain {
 	class chain_context
 	{
 	public:
-		typedef pair<account_name, Basetypes::name> handler_key;
+		//typedef pair<account_name, Basetypes::name> handler_key;
 		optional<pending_block>				building_block;
 		block_pack_ptr						block_head;
 		chain_stream						chain_log;
@@ -70,7 +70,7 @@ namespace Xmaxplatform { namespace Chain {
 		const uint32_t                   pending_txn_depth_limit;
 		uint64_t                         skip_flags = 0;
 
-		map< account_name, map<handler_key, msg_handler> >  message_handlers;
+		map<handler_key, native_handler>  message_handlers;
 
 		vector<transaction_request_ptr>         pending_transactions;
 
@@ -1027,23 +1027,21 @@ namespace Xmaxplatform { namespace Chain {
 			_irreversible_block(pack);
 		}
 
-        void chain_xmax::set_message_handler( const account_name& contract, const account_name& scope, const action_name& action, msg_handler v ) {
-			_context->message_handlers[contract][std::make_pair(scope,action)] = v;
+        void chain_xmax::set_message_handler(const native_scope& scope, const func_name& func, native_handler v){
+			_context->message_handlers[std::make_pair(scope, func)] = v;
         }
 
-		msg_handler chain_xmax::find_message_handler(const account_name& contract, const account_name& scope)
+		native_handler chain_xmax::find_message_handler(const native_scope& scope, const func_name& func)
 		{
 			/// context.code => the execution namespace
 			/// message.code / message.type => Event
-			auto contract_handlers_itr = _context->message_handlers.find(contract);
+			auto contract_handlers_itr = _context->message_handlers.find(std::make_pair(scope, func));
 			if (contract_handlers_itr != _context->message_handlers.end()) {
-				auto message_handler_itr = contract_handlers_itr->second.find({ contract, scope });
-				if (message_handler_itr != contract_handlers_itr->second.end()) {				
-					return message_handler_itr->second;
-				}
+
+				return contract_handlers_itr->second;
 			}
 
-			return msg_handler();
+			return native_handler();
 		}
 
 		void chain_xmax::process_confirmation(const block_confirmation& conf)

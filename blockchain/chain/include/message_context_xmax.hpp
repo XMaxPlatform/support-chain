@@ -6,7 +6,7 @@
 
 #include <message_xmax.hpp>
 #include <transaction.hpp>
-#include <xmaxtypes.hpp>
+#include <native_handler.hpp>
 #include <record_functions.hpp>
 
 namespace  Basechain { class database; }
@@ -382,7 +382,5 @@ public:
    pending_message& create_pending_message(const account_name& code, const func_name& type, const bytes& data);
    void release_pending_message(pending_message::handle_type handle);
 };
-
-using msg_handler = std::function<void(message_context_xmax&)>;
 
 } } // namespace Xmaxplatform::Chain
