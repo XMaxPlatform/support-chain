@@ -198,9 +198,9 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void broadcast_confirmation(account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func);
 
-       void set_message_handler(const native_scope& scope, const func_name& func, native_handler v);
+       void set_native_handler(const native_scope& scope, const func_name& func, native_handler v);
 
-	   native_handler find_message_handler(const native_scope& scope, const func_name& func);
+	   native_handler find_native_handler(const native_scope& scope, const func_name& func);
 
 	   void on_irreversible(block_pack_ptr pack);
 

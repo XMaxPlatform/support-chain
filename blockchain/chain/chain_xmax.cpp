@@ -71,6 +71,7 @@ namespace Xmaxplatform { namespace Chain {
 		uint64_t                         skip_flags = 0;
 
 		map<handler_key, native_handler>  message_handlers;
+		//map<handler_key, Basetypes::abi>  message_handlers;
 
 		vector<transaction_request_ptr>         pending_transactions;
 
@@ -1027,11 +1028,11 @@ namespace Xmaxplatform { namespace Chain {
 			_irreversible_block(pack);
 		}
 
-        void chain_xmax::set_message_handler(const native_scope& scope, const func_name& func, native_handler v){
+        void chain_xmax::set_native_handler(const native_scope& scope, const func_name& func, native_handler v){
 			_context->message_handlers[std::make_pair(scope, func)] = v;
         }
 
-		native_handler chain_xmax::find_message_handler(const native_scope& scope, const func_name& func)
+		native_handler chain_xmax::find_native_handler(const native_scope& scope, const func_name& func)
 		{
 			/// context.code => the execution namespace
 			/// message.code / message.type => Event

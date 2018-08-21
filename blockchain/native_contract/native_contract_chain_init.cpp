@@ -32,34 +32,36 @@ xmax_builder_infos native_contract_chain_init::get_chain_init_builders() const {
 
 void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain::database &db) {
 
-#define SET_APP_HANDLER( contract, scope, action, nspace ) \
-   chain.set_message_handler(scope, #action, &BOOST_PP_CAT(nspace::Native_contract::handle_, BOOST_PP_CAT(contract, BOOST_PP_CAT(_,action) ) ) )
-	SET_APP_HANDLER(xmax, native_scope::native_system, addaccount, Xmaxplatform);
-	SET_APP_HANDLER(xmax, native_scope::native_system, addcontract, Xmaxplatform);
-	SET_APP_HANDLER(xmax, native_scope::native_system, adderc20, Xmaxplatform);
-	SET_APP_HANDLER(xmax, native_scope::native_system, adderc721, Xmaxplatform);
+#define SET_APP_HANDLER( contract, scope, func, nspace ) \
+   chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::  ## contract ##_## scope ##_## func)
 
-    SET_APP_HANDLER( xmax, native_scope::native_system, transfer, Xmaxplatform );
+
+	SET_APP_HANDLER(xmax, system, addaccount);
+	SET_APP_HANDLER(xmax, system, addcontract);
+	SET_APP_HANDLER(xmax, system, adderc20);
+	SET_APP_HANDLER(xmax, system, adderc721);
+
+    SET_APP_HANDLER( xmax, system, transfer );
 	
-    SET_APP_HANDLER( xmax, native_scope::native_system, lock, Xmaxplatform );
-    SET_APP_HANDLER( xmax, native_scope::native_system, unlock, Xmaxplatform );
-    SET_APP_HANDLER( xmax, native_scope::native_system, votebuilder, Xmaxplatform );
-    SET_APP_HANDLER( xmax, native_scope::native_system, regbuilder, Xmaxplatform );
-    SET_APP_HANDLER( xmax, native_scope::native_system, unregbuilder, Xmaxplatform );
-    SET_APP_HANDLER( xmax, native_scope::native_system, regproxy, Xmaxplatform );
-    SET_APP_HANDLER( xmax, native_scope::native_system, unregproxy, Xmaxplatform );
-	SET_APP_HANDLER(xmax, native_scope::native_system, setcode, Xmaxplatform);
-	SET_APP_HANDLER(xmax, native_scope::native_system, issueerc20, Xmaxplatform);
-	SET_APP_HANDLER(xmax, native_scope::native_system, minterc20, Xmaxplatform);
-	SET_APP_HANDLER(xmax, native_scope::native_system, revokeerc20, Xmaxplatform);
-	SET_APP_HANDLER(xmax, native_scope::native_system, transfererc20, Xmaxplatform);
-	SET_APP_HANDLER(xmax, native_scope::native_system, transferfromerc20, Xmaxplatform);
-	SET_APP_HANDLER(xmax, native_scope::native_system, issueerc721, Xmaxplatform);
-	SET_APP_HANDLER(xmax, native_scope::native_system, minterc721, Xmaxplatform);
-	SET_APP_HANDLER(xmax, native_scope::native_system, revokeerc721, Xmaxplatform);
+    SET_APP_HANDLER( xmax, system, lock );
+    SET_APP_HANDLER( xmax, system, unlock );
+    SET_APP_HANDLER( xmax, system, votebuilder );
+    SET_APP_HANDLER( xmax, system, regbuilder );
+    SET_APP_HANDLER( xmax, system, unregbuilder );
+    SET_APP_HANDLER( xmax, system, regproxy );
+    SET_APP_HANDLER( xmax, system, unregproxy );
+	SET_APP_HANDLER(xmax, system, setcode);
+	SET_APP_HANDLER(xmax, erc20, issue);
+	SET_APP_HANDLER(xmax, erc20, mint);
+	SET_APP_HANDLER(xmax, erc20, revoke);
+	SET_APP_HANDLER(xmax, erc20, transfer);
+	SET_APP_HANDLER(xmax, erc20, transferfrom);
+	SET_APP_HANDLER(xmax, erc721, issue);
+	SET_APP_HANDLER(xmax, erc721, mint);
+	SET_APP_HANDLER(xmax, erc721, revoke);
 
 #ifdef USE_V8
-	SET_APP_HANDLER(xmax, native_scope::native_system, setjscode, Xmaxplatform);
+	chain.set_native_handler(native_scope::native_system, "setcode", &Xmaxplatform::Native_contract::xmax_system_setjscode);
 #endif
 }
 
@@ -79,6 +81,8 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 	xmax_abi.actions.push_back(Types::action{ name("unregbuilder"), "unregbuilder" });
 	xmax_abi.actions.push_back(Types::action{ name("regproxy"), "regproxy" });
 	xmax_abi.actions.push_back(Types::action{ name("unregproxy"), "unregproxy" });
+
+
 	xmax_abi.actions.push_back(Types::action{ name("issueerc20"), "issueerc20" });
 	xmax_abi.actions.push_back(Types::action{ name("minterc20"), "minterc20" });
 	xmax_abi.actions.push_back(Types::action{ name("revokeerc20"), "revokeerc20" });

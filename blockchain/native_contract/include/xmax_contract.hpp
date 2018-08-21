@@ -16,46 +16,44 @@ namespace Chain = ::Xmaxplatform::Chain;
 namespace Types = ::Xmaxplatform::Basetypes;
 
 
+void xmax_system_addaccount(Chain::message_context_xmax& context);
+void xmax_system_addcontract(Chain::message_context_xmax& context);
+void xmax_system_adderc20(Chain::message_context_xmax& context);
+void xmax_system_adderc721(Chain::message_context_xmax& context);
 
-void handle_xmax_addaccount(Chain::message_context_xmax& context);
-void handle_xmax_addcontract(Chain::message_context_xmax& context);
-void handle_xmax_adderc20(Chain::message_context_xmax& context);
-void handle_xmax_adderc721(Chain::message_context_xmax& context);
+void xmax_system_updateauth(Chain::message_context_xmax& context);
+void xmax_system_deleteauth(Chain::message_context_xmax& context);
+void xmax_system_linkauth(Chain::message_context_xmax& context);
+void xmax_system_unlinkauth(Chain::message_context_xmax& context);
 
-void handle_xmax_updateauth(Chain::message_context_xmax& context);
-void handle_xmax_deleteauth(Chain::message_context_xmax& context);
-void handle_xmax_linkauth(Chain::message_context_xmax& context);
-void handle_xmax_unlinkauth(Chain::message_context_xmax& context);
+void xmax_system_transfer(Chain::message_context_xmax& context);
+void xmax_system_lock(Chain::message_context_xmax& context);
+void xmax_system_unlock(Chain::message_context_xmax& context);
 
-void handle_xmax_transfer(Chain::message_context_xmax& context);
-void handle_xmax_lock(Chain::message_context_xmax& context);
-void handle_xmax_unlock(Chain::message_context_xmax& context);
-
-void handle_xmax_setcode(Chain::message_context_xmax& context);
+void xmax_system_setcode(Chain::message_context_xmax& context);
 
 #ifdef USE_V8
-void handle_xmax_setjscode(Chain::message_context_xmax& context);
+void xmax_system_setjscode(Chain::message_context_xmax& context);
 #endif
 
-void handle_xmax_votebuilder(Chain::message_context_xmax& context);
-void handle_xmax_regbuilder(Chain::message_context_xmax& context);
-void handle_xmax_unregbuilder(Chain::message_context_xmax& context);
-void handle_xmax_regproxy(Chain::message_context_xmax& context);
-void handle_xmax_unregproxy(Chain::message_context_xmax& context);
+void xmax_system_votebuilder(Chain::message_context_xmax& context);
+void xmax_system_regbuilder(Chain::message_context_xmax& context);
+void xmax_system_unregbuilder(Chain::message_context_xmax& context);
+void xmax_system_regproxy(Chain::message_context_xmax& context);
+void xmax_system_unregproxy(Chain::message_context_xmax& context);
 
 //ERC20 interfaces
-void handle_xmax_issueerc20(Chain::message_context_xmax& context);
-void handle_xmax_minterc20(Chain::message_context_xmax& context);
-void handle_xmax_stopminterc20(Chain::message_context_xmax& context);
-void handle_xmax_revokeerc20(Chain::message_context_xmax& context);
-void handle_xmax_transfererc20(Chain::message_context_xmax& context);
-void handle_xmax_transferfromerc20(Chain::message_context_xmax& context);
+void xmax_erc20_issue(Chain::message_context_xmax& context);
+void xmax_erc20_mint(Chain::message_context_xmax& context);
+void xmax_erc20_revoke(Chain::message_context_xmax& context);
+void xmax_erc20_transfer(Chain::message_context_xmax& context);
+void xmax_erc20_transferfrom(Chain::message_context_xmax& context);
 
 
 //ERC721 interfaces
-void handle_xmax_issueerc721(Chain::message_context_xmax& context);
-void handle_xmax_minterc721(Chain::message_context_xmax& context);
-void handle_xmax_revokeerc721(Chain::message_context_xmax& context);
+void xmax_erc721_issue(Chain::message_context_xmax& context);
+void xmax_erc721_mint(Chain::message_context_xmax& context);
+void xmax_erc721_revoke(Chain::message_context_xmax& context);
 
 
 

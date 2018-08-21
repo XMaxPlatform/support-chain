@@ -106,7 +106,7 @@ static const account_object& xmax_new_account(Basechain::database& db, account_n
 }
 
 //API handler implementations
-void handle_xmax_addaccount(message_context_xmax& context) {
+void xmax_system_addaccount(message_context_xmax& context) {
 	Types::addaccount create = context.msg.as<Types::addaccount>();
 	Basechain::database& db = context.mutable_db;
 	time current_time = context.current_time();
@@ -162,7 +162,7 @@ void handle_xmax_addaccount(message_context_xmax& context) {
 }
 
 
-void handle_xmax_addcontract(Chain::message_context_xmax& context)
+void xmax_system_addcontract(Chain::message_context_xmax& context)
 {
 	const Types::addcontract& msgdata = context.msg.as<Types::addcontract>();
 	Basechain::database& db = context.mutable_db;
@@ -192,7 +192,7 @@ void handle_xmax_addcontract(Chain::message_context_xmax& context)
 
 }
 
-void handle_xmax_adderc20(Chain::message_context_xmax& context)
+void xmax_system_adderc20(Chain::message_context_xmax& context)
 {
 	const Types::adderc20& msgdata = context.msg.as<Types::adderc20>();
 	Basechain::database& db = context.mutable_db;
@@ -204,7 +204,7 @@ void handle_xmax_adderc20(Chain::message_context_xmax& context)
 
 	const auto& new_account = xmax_new_account(db, contract_name, current_time, Chain::acc_erc20);
 }
-void handle_xmax_adderc721(Chain::message_context_xmax& context)
+void xmax_system_adderc721(Chain::message_context_xmax& context)
 {
 	const Types::adderc20& msgdata = context.msg.as<Types::adderc20>();
 	Basechain::database& db = context.mutable_db;
@@ -217,7 +217,7 @@ void handle_xmax_adderc721(Chain::message_context_xmax& context)
 	const auto& new_account = xmax_new_account(db, contract_name, current_time, Chain::acc_erc721);
 }
 
-void handle_xmax_updateauth(Chain::message_context_xmax& context)
+void xmax_system_updateauth(Chain::message_context_xmax& context)
 {
 	Types::updateauth msg = context.msg.as<Types::updateauth>();
 
@@ -269,7 +269,7 @@ void handle_xmax_updateauth(Chain::message_context_xmax& context)
 	}
 }
 
-void handle_xmax_deleteauth(Chain::message_context_xmax& context)
+void xmax_system_deleteauth(Chain::message_context_xmax& context)
 {
 	Types::deleteauth msg = context.msg.as<Types::deleteauth>();
 
@@ -286,7 +286,7 @@ void handle_xmax_deleteauth(Chain::message_context_xmax& context)
 
 }
 
-void handle_xmax_linkauth(Chain::message_context_xmax& context)
+void xmax_system_linkauth(Chain::message_context_xmax& context)
 {
 	Types::linkauth msg = context.msg.as<Types::linkauth>();
 	try {
@@ -327,7 +327,7 @@ void handle_xmax_linkauth(Chain::message_context_xmax& context)
 	} FC_CAPTURE_AND_RETHROW((msg))
 }
 
-void handle_xmax_unlinkauth(Chain::message_context_xmax& context)
+void xmax_system_unlinkauth(Chain::message_context_xmax& context)
 {
 	Types::unlinkauth msg = context.msg.as<Types::unlinkauth>();
 
@@ -341,7 +341,7 @@ void handle_xmax_unlinkauth(Chain::message_context_xmax& context)
 	context.mutable_db.remove(*linked);
 }
 
-void handle_xmax_transfer(message_context_xmax& context) {
+void xmax_system_transfer(message_context_xmax& context) {
    auto transfer = context.msg.as<Types::transfer>();
 
    try {
@@ -371,7 +371,7 @@ void handle_xmax_transfer(message_context_xmax& context) {
    } FC_CAPTURE_AND_RETHROW( (transfer) ) 
 }
 
-void handle_xmax_lock(message_context_xmax& context) {
+void xmax_system_lock(message_context_xmax& context) {
     auto lock = context.msg.as<Types::lock>();
 
     XMAX_ASSERT(lock.amount > 0, message_validate_exception, "Locked amount must be positive");
@@ -407,7 +407,7 @@ void handle_xmax_lock(message_context_xmax& context) {
     xmax_voting::increase_votes(context, lock.to, share_type(lock.amount));
 }
 
-void handle_xmax_unlock(message_context_xmax& context)      {
+void xmax_system_unlock(message_context_xmax& context)      {
     auto unlock = context.msg.as<Types::unlock>();
 
     context.require_authorization(unlock.account);
@@ -432,7 +432,7 @@ void handle_xmax_unlock(message_context_xmax& context)      {
 }
 
 #ifdef USE_V8
-void handle_xmax_setjscode(Chain::message_context_xmax& context)
+void xmax_system_setjscode(Chain::message_context_xmax& context)
 {
 	auto& db = context.mutable_db;
 	auto  msg = context.msg.as<Types::setcode>();
@@ -461,7 +461,7 @@ void handle_xmax_setjscode(Chain::message_context_xmax& context)
 }
 #endif
 
-void handle_xmax_setcode(message_context_xmax& context) {
+void xmax_system_setcode(message_context_xmax& context) {
 	auto& db = context.mutable_db;
 	auto  msg = context.msg.as<Types::setcode>();
 
@@ -494,25 +494,25 @@ void handle_xmax_setcode(message_context_xmax& context) {
 }
 
 
-void handle_xmax_votebuilder(message_context_xmax& context)    {
+void xmax_system_votebuilder(message_context_xmax& context)    {
     xmax_voting::vote_builder(context);
 }
-void handle_xmax_regbuilder(message_context_xmax& context)    {
+void xmax_system_regbuilder(message_context_xmax& context)    {
     xmax_voting::reg_builder(context);
 }
-void handle_xmax_unregbuilder(message_context_xmax& context)    {
+void xmax_system_unregbuilder(message_context_xmax& context)    {
     xmax_voting::unreg_builder(context);
 }
-void handle_xmax_regproxy(message_context_xmax& context)    {
+void xmax_system_regproxy(message_context_xmax& context)    {
     xmax_voting::reg_proxy(context);
 }
-void handle_xmax_unregproxy(message_context_xmax& context)    {
+void xmax_system_unregproxy(message_context_xmax& context)    {
     xmax_voting::unreg_proxy(context);
 }
 
 
 //--------------------------------------------------
-void handle_xmax_issueerc20(Chain::message_context_xmax& context) {
+void xmax_erc20_issue(Chain::message_context_xmax& context) {
 	auto& db = context.mutable_db;
 	auto issue_erc20 = context.msg.as<Types::issueerc20>();
 
@@ -539,7 +539,7 @@ void handle_xmax_issueerc20(Chain::message_context_xmax& context) {
 
 
 //--------------------------------------------------
-void handle_xmax_issueerc721(Chain::message_context_xmax& context) {
+void xmax_erc721_issue(Chain::message_context_xmax& context) {
 	auto& db = context.mutable_db;
 	auto issue_erc721 = context.msg.as<Types::issueerc721>();
 
@@ -564,7 +564,7 @@ void handle_xmax_issueerc721(Chain::message_context_xmax& context) {
 
 
 //--------------------------------------------------
-void handle_xmax_minterc20(Chain::message_context_xmax& context)
+void xmax_erc20_mint(Chain::message_context_xmax& context)
 {
 	auto& db = context.mutable_db;
 	auto minterc20 = context.msg.as<Types::minterc20>();
@@ -604,7 +604,7 @@ void handle_xmax_stopminterc20(Chain::message_context_xmax& context)
 	});
 }
 //--------------------------------------------------
-void handle_xmax_minterc721(Chain::message_context_xmax& context)
+void xmax_erc721_mint(Chain::message_context_xmax& context)
 {
 	auto& db = context.mutable_db;
 	auto minterc721 = context.msg.as<Types::minterc721>();
@@ -629,7 +629,7 @@ void handle_xmax_minterc721(Chain::message_context_xmax& context)
 }
 
 //--------------------------------------------------
-void handle_xmax_revokeerc20(Chain::message_context_xmax& context) {
+void xmax_erc20_revoke(Chain::message_context_xmax& context) {
 	auto& db = context.mutable_db;
 	auto revokeerc2o = context.msg.as<Types::revokeerc20>();
 
@@ -646,7 +646,7 @@ void handle_xmax_revokeerc20(Chain::message_context_xmax& context) {
 
 
 //--------------------------------------------------
-void handle_xmax_transfererc20(Chain::message_context_xmax& context)
+void xmax_erc20_transfer(Chain::message_context_xmax& context)
 {
 	auto& db = context.mutable_db;
 	auto transfer_erc20 = context.msg.as<Types::transfererc20>();
@@ -691,7 +691,7 @@ void handle_xmax_transfererc20(Chain::message_context_xmax& context)
 
 
 //--------------------------------------------------
-void handle_xmax_transferfromerc20(Chain::message_context_xmax& context)
+void xmax_erc20_transferfrom(Chain::message_context_xmax& context)
 {
 	auto& db = context.mutable_db;
 	auto transfer_erc20 = context.msg.as<Types::transferfromerc20>();
@@ -726,7 +726,7 @@ void handle_xmax_transferfromerc20(Chain::message_context_xmax& context)
 }
 
 //--------------------------------------------------
-void handle_xmax_revokeerc721(Chain::message_context_xmax& context) {
+void xmax_erc721_revoke(Chain::message_context_xmax& context) {
 	auto& db = context.mutable_db;
 	auto revokeerc721 = context.msg.as<Types::revokeerc721>();
 

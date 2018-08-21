@@ -108,7 +108,7 @@ namespace Chain {
 				XMAX_ASSERT(scope != native_scope::native_invalid, transaction_exception,
 					"Unknown native scope type '${type}' of account '${acc_name}'.", ("type", (int)scope)("acc_name", acc.name.to_string()));
 
-				auto handler = chain.find_message_handler(scope, context.msg.type);
+				auto handler = chain.find_native_handler(scope, context.msg.type);
 				XMAX_ASSERT(handler, transaction_exception, "There is not function '${name}' in account '${acc_name}'.", ("name", context.msg.type)("acc_name", acc.name.to_string()));
 				handler(context);
 			}
