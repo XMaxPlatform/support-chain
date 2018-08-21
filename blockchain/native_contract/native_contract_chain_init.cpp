@@ -30,118 +30,143 @@ xmax_builder_infos native_contract_chain_init::get_chain_init_builders() const {
 	return result;
 }
 
-void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain::database &db) {
-
 #define SET_APP_HANDLER( contract, scope, func, nspace ) \
    chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::  ## contract ##_## scope ##_## func)
 
 
-	SET_APP_HANDLER(xmax, system, addaccount);
-	SET_APP_HANDLER(xmax, system, addcontract);
-	SET_APP_HANDLER(xmax, system, adderc20);
-	SET_APP_HANDLER(xmax, system, adderc721);
+#define SET_SYSTEM_HANDLER( abi, scope, func, nspace ) \
+   chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::xmax_## scope ##_## func);\
+    abi.actions.push_back( Types::action{name( #func ), #func } );\
+	abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes:: ##func## >::type())
 
-    SET_APP_HANDLER( xmax, system, transfer );
+#define SET_ERC_HANDLER( abi, scope, func, nspace ) \
+   chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::xmax_## scope ##_## func);\
+    abi.actions.push_back( Types::action{name( #func ), (std::string(#func) + std::string(#scope)).c_str() } );\
+	abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes:: ##func## scope >::type())
+
+
+void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain::database &db) {
+
+	Basetypes::abi sys_abi;
+	sys_abi.types.push_back(Types::type_def{ "share_type","int64" });
+
+	SET_SYSTEM_HANDLER(sys_abi, system, addaccount);
+	SET_SYSTEM_HANDLER(sys_abi, system, addcontract);
+	SET_SYSTEM_HANDLER(sys_abi, system, adderc20);
+	SET_SYSTEM_HANDLER(sys_abi, system, adderc721);
+
+	SET_SYSTEM_HANDLER(sys_abi, system, transfer);
 	
-    SET_APP_HANDLER( xmax, system, lock );
-    SET_APP_HANDLER( xmax, system, unlock );
-    SET_APP_HANDLER( xmax, system, votebuilder );
-    SET_APP_HANDLER( xmax, system, regbuilder );
-    SET_APP_HANDLER( xmax, system, unregbuilder );
-    SET_APP_HANDLER( xmax, system, regproxy );
-    SET_APP_HANDLER( xmax, system, unregproxy );
-	SET_APP_HANDLER(xmax, system, setcode);
-	SET_APP_HANDLER(xmax, erc20, issue);
-	SET_APP_HANDLER(xmax, erc20, mint);
-	SET_APP_HANDLER(xmax, erc20, revoke);
-	SET_APP_HANDLER(xmax, erc20, transfer);
-	SET_APP_HANDLER(xmax, erc20, transferfrom);
-	SET_APP_HANDLER(xmax, erc721, issue);
-	SET_APP_HANDLER(xmax, erc721, mint);
-	SET_APP_HANDLER(xmax, erc721, revoke);
+	SET_SYSTEM_HANDLER(sys_abi, system, lock);
+	SET_SYSTEM_HANDLER(sys_abi, system, unlock);
+	SET_SYSTEM_HANDLER(sys_abi, system, votebuilder);
+	SET_SYSTEM_HANDLER(sys_abi, system, regbuilder);
+	SET_SYSTEM_HANDLER(sys_abi, system, unregbuilder);
+	SET_SYSTEM_HANDLER(sys_abi, system, regproxy);
+	SET_SYSTEM_HANDLER(sys_abi, system, unregproxy);
+
+	SET_SYSTEM_HANDLER(sys_abi, system, setcode);
 
 #ifdef USE_V8
 	chain.set_native_handler(native_scope::native_system, "setcode", &Xmaxplatform::Native_contract::xmax_system_setjscode);
 #endif
+
+
+
+	Basetypes::abi erc20_abi;
+	SET_ERC_HANDLER(erc20_abi, erc20, issue);
+	SET_ERC_HANDLER(erc20_abi, erc20, mint);
+	SET_ERC_HANDLER(erc20_abi, erc20, revoke);
+	SET_ERC_HANDLER(erc20_abi, erc20, transfer);
+	SET_ERC_HANDLER(erc20_abi, erc20, transferfrom);
+
+	Basetypes::abi erc721_abi;
+	SET_ERC_HANDLER(erc721_abi, erc721, issue);
+	SET_ERC_HANDLER(erc721_abi, erc721, mint);
+	SET_ERC_HANDLER(erc721_abi, erc721, revoke);
+
+	chain.set_native_abi(native_scope::native_system, std::move(sys_abi));
+	chain.set_native_abi(native_scope::native_erc20, std::move(erc20_abi));
+	chain.set_native_abi(native_scope::native_erc721, std::move(erc721_abi));
 }
 
-        Basetypes::abi native_contract_chain_init::xmax_contract_abi()
-{
-   Basetypes::abi xmax_abi;
-    
-   xmax_abi.types.push_back( Types::type_def{"share_type","int64"} );
+//        Basetypes::abi native_contract_chain_init::xmax_contract_abi()
+//{
+//   Basetypes::abi xmax_abi;
+//    
+//   xmax_abi.types.push_back( Types::type_def{"share_type","int64"} );
+//
+//    xmax_abi.actions.push_back( Types::action{name("transfer"), "transfer"} );
+//    xmax_abi.actions.push_back( Types::action{name("addaccount"), "addaccount"} );
+//	xmax_abi.actions.push_back( Types::action{name("setcode"), "setcode" });   
+//	xmax_abi.actions.push_back(Types::action{ name("lock"), "lock" });
+//	xmax_abi.actions.push_back(Types::action{ name("unlock"), "unlock" });
+//	xmax_abi.actions.push_back(Types::action{ name("votebuilder"), "votebuilder" });
+//	xmax_abi.actions.push_back(Types::action{ name("regbuilder"), "regbuilder" });
+//	xmax_abi.actions.push_back(Types::action{ name("unregbuilder"), "unregbuilder" });
+//	xmax_abi.actions.push_back(Types::action{ name("regproxy"), "regproxy" });
+//	xmax_abi.actions.push_back(Types::action{ name("unregproxy"), "unregproxy" });
+//
+//
+//	xmax_abi.actions.push_back(Types::action{ name("issueerc20"), "issueerc20" });
+//	xmax_abi.actions.push_back(Types::action{ name("minterc20"), "minterc20" });
+//	xmax_abi.actions.push_back(Types::action{ name("revokeerc20"), "revokeerc20" });
+//	xmax_abi.actions.push_back(Types::action{ name("transfererc20"), "transfererc20" });
+//	xmax_abi.actions.push_back(Types::action{ name("transferfromerc20"), "transferfromerc20" });
+//	xmax_abi.actions.push_back(Types::action{ name("issueerc721"), "issueerc721" });
+//	xmax_abi.actions.push_back(Types::action{ name("minterc721"), "minterc721" });
+//	xmax_abi.actions.push_back(Types::action{ name("revokeerc721"), "revokeerc721" });
+//	xmax_abi.actions.push_back(Types::action{ name("revoketoken"), "revoketoken" });
+//
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transfer>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::addaccount>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::setcode>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::lock>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unlock>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::votebuilder>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::regbuilder>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unregbuilder>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::regproxy>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unregproxy>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc20>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::minterc20>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::revokeerc20>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transfererc20>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transferfromerc20>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc721>::type());
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::minterc721>::type());	
+//	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::revokeerc721>::type());
+//
+//
+//   return xmax_abi;
+//}
 
-    xmax_abi.actions.push_back( Types::action{name("transfer"), "transfer"} );
-    xmax_abi.actions.push_back( Types::action{name("addaccount"), "addaccount"} );
-	xmax_abi.actions.push_back( Types::action{name("setcode"), "setcode" });   
-	xmax_abi.actions.push_back(Types::action{ name("lock"), "lock" });
-	xmax_abi.actions.push_back(Types::action{ name("unlock"), "unlock" });
-	xmax_abi.actions.push_back(Types::action{ name("votebuilder"), "votebuilder" });
-	xmax_abi.actions.push_back(Types::action{ name("regbuilder"), "regbuilder" });
-	xmax_abi.actions.push_back(Types::action{ name("unregbuilder"), "unregbuilder" });
-	xmax_abi.actions.push_back(Types::action{ name("regproxy"), "regproxy" });
-	xmax_abi.actions.push_back(Types::action{ name("unregproxy"), "unregproxy" });
+static void create_native_account(Basechain::database &db, account_name name, share_type main_token, time creation_date) {
+
+	db.create<account_object>([&](account_object& a) {
+		a.name = name;
+		a.type = account_type::acc_system;
+		a.creation_date = creation_date;
+	});
+	//if (name == Config::xmax_contract_name) {
+	//	db.create<contract_object>([this, &name](contract_object& a) {
+	//		a.name = name;
+	//		a.set_abi(xmax_contract_abi());
+	//	});
+	//}
 
 
-	xmax_abi.actions.push_back(Types::action{ name("issueerc20"), "issueerc20" });
-	xmax_abi.actions.push_back(Types::action{ name("minterc20"), "minterc20" });
-	xmax_abi.actions.push_back(Types::action{ name("revokeerc20"), "revokeerc20" });
-	xmax_abi.actions.push_back(Types::action{ name("transfererc20"), "transfererc20" });
-	xmax_abi.actions.push_back(Types::action{ name("transferfromerc20"), "transferfromerc20" });
-	xmax_abi.actions.push_back(Types::action{ name("issueerc721"), "issueerc721" });
-	xmax_abi.actions.push_back(Types::action{ name("minterc721"), "minterc721" });
-	xmax_abi.actions.push_back(Types::action{ name("revokeerc721"), "revokeerc721" });
-	xmax_abi.actions.push_back(Types::action{ name("revoketoken"), "revoketoken" });
-
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transfer>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::addaccount>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::setcode>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::lock>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unlock>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::votebuilder>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::regbuilder>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unregbuilder>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::regproxy>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::unregproxy>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc20>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::minterc20>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::revokeerc20>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transfererc20>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::transferfromerc20>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::issueerc721>::type());
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::minterc721>::type());	
-	xmax_abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes::revokeerc721>::type());
-
-
-   return xmax_abi;
-}
+	db.create<Xmaxplatform::Chain::xmx_token_object>([&name, main_token](auto& b) {
+		b.owner_name = name;
+		b.main_token = main_token;
+	});
+};
 
 std::vector<Chain::message_data> native_contract_chain_init::prepare_data(chain_xmax &chain,
                                                                    Basechain::database &db) {
 	std::vector<Chain::message_data> messages_to_process;
 
-
-   auto CreateNativeAccount = [this, &db](name name, auto main_token) {
-
-       db.create<account_object>([this, &name](account_object& a) {
-           a.name = name;
-		   a.type = account_type::acc_system;
-           a.creation_date = genesis.initial_timestamp;
-       });
-	   if (name == Config::xmax_contract_name) {
-		   db.create<contract_object>([this, &name](contract_object& a) {
-			   a.name = name;
-			   a.set_abi(xmax_contract_abi());	   
-		   });
-	   }
-
-
-      db.create<Xmaxplatform::Chain::xmx_token_object>([&name, main_token]( auto& b) {
-         b.owner_name = name;
-         b.main_token = main_token;
-      });
-   };
-   CreateNativeAccount(Config::xmax_contract_name, Config::initial_token_supply);
+   create_native_account(db, Config::xmax_contract_name, Config::initial_token_supply, genesis.initial_timestamp);
 
    // Queue up messages which will run contracts to create the initial accounts
    auto KeyAuthority = [](public_key k) {

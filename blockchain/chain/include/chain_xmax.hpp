@@ -107,7 +107,6 @@ namespace Xmaxplatform { namespace Chain {
 	   fc::variant        message_from_binary(name code, name type, const vector<char>& bin)const;
 	   fc::variant        event_from_binary(name code, type_name tname, const vector<char>& bin)const;
 
-
 	   transaction_response_ptr push_transaction(const signed_transaction& trx, uint32_t skip = Config::skip_nothing);
 
 	   transaction_response_ptr push_transaction(transaction_request_ptr request);
@@ -200,7 +199,13 @@ namespace Xmaxplatform { namespace Chain {
 
        void set_native_handler(const native_scope& scope, const func_name& func, native_handler v);
 
-	   native_handler find_native_handler(const native_scope& scope, const func_name& func);
+	   void set_native_abi(const native_scope& scope, Basetypes::abi&& abi);
+
+	   native_handler find_native_handler(const native_scope& scope, const func_name& func) const;
+
+	   bool find_account_abi(Xmaxplatform::Basetypes::abi& abi, name code) const;
+
+	   const Xmaxplatform::Basetypes::abi* find_native_abi(native_scope scope) const;
 
 	   void on_irreversible(block_pack_ptr pack);
 

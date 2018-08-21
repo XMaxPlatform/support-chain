@@ -71,7 +71,7 @@ namespace Xmaxplatform { namespace Chain {
 		uint64_t                         skip_flags = 0;
 
 		map<handler_key, native_handler>  message_handlers;
-		//map<handler_key, Basetypes::abi>  message_handlers;
+		map<native_scope, Basetypes::abi>  abi_handlers;
 
 		vector<transaction_request_ptr>         pending_transactions;
 
@@ -429,9 +429,8 @@ namespace Xmaxplatform { namespace Chain {
 		vector<char> chain_xmax::message_to_binary(name code, name type, const fc::variant& obj)const
 		{
 			try {
-				const auto& code_account = _context->block_db.get<contract_object, by_name>(code);
 				Xmaxplatform::Basetypes::abi abi;
-				if (Basetypes::abi_serializer::to_abi(code_account.abi, abi)) {
+				if (find_account_abi(abi, code)) {
 					Basetypes::abi_serializer abis(abi);
 					return abis.variant_to_binary(abis.get_action_type(type), obj);
 				}
@@ -441,21 +440,18 @@ namespace Xmaxplatform { namespace Chain {
 
 		fc::variant chain_xmax::message_from_binary(name code, name type, const vector<char>& bin) const
 		{
-			const auto& code_account = _context->block_db.get<contract_object, by_name>(code);
 			Xmaxplatform::Basetypes::abi abi;
-			if (Basetypes::abi_serializer::to_abi(code_account.abi, abi)) {
+			if (find_account_abi(abi, code)) {
 				Basetypes::abi_serializer abis(abi);
 				return abis.binary_to_variant(abis.get_action_type(type), bin);
 			}
 			return fc::variant();
 		}
 
-
 		//--------------------------------------------------
 		fc::variant chain_xmax::event_from_binary(name code, type_name tname, const vector<char>& bin) const {
-			const auto& code_account = _context->block_db.get<contract_object, by_name>(code);
 			Xmaxplatform::Basetypes::abi abi;
-			if (Basetypes::abi_serializer::to_abi(code_account.abi, abi)) {
+			if (find_account_abi(abi, code)) {
 				Basetypes::abi_serializer abis(abi);
 				return abis.binary_to_variant(tname, bin);
 			}
@@ -1043,6 +1039,32 @@ namespace Xmaxplatform { namespace Chain {
 			}
 
 			return native_handler();
+		}
+
+		bool chain_xmax::find_account_abi(Xmaxplatform::Basetypes::abi& abi, name code) const
+		{
+			const auto& account = _context->block_db.get<account_object, by_name>(code);
+
+			native_scope scope = get_native_scope(account.type);
+
+			if (const auto sysabi = find_native_abi(scope))
+			{
+				abi = *sysabi;
+				return true;
+			}
+
+			const auto& code_account = _context->block_db.get<contract_object, by_name>(code);
+			Xmaxplatform::Basetypes::abi abi;
+			return (Basetypes::abi_serializer::to_abi(code_account.abi, abi));		
+		}
+
+		const Xmaxplatform::Basetypes::abi* chain_xmax::find_native_abi(native_scope scope) const
+		{
+			const auto itr = _context->abi_handlers.find(scope);
+			if (itr != _context->abi_handlers.end()) {
+				return &itr->second;
+			}
+			return nullptr;
 		}
 
 		void chain_xmax::process_confirmation(const block_confirmation& conf)
