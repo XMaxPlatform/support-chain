@@ -179,6 +179,9 @@ struct minterc20
 	token_name asset_symbol
 	mint_amount asset
 
+struct stopminterc20	
+	token_name asset_symbol
+
 struct revokeerc20
 	token_name asset_symbol
 

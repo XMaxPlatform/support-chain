@@ -740,6 +740,24 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
+    struct stopminterc20 { 
+        stopminterc20() = default;
+        stopminterc20(const asset_symbol& token_name)
+           : token_name(token_name) {}
+
+        asset_symbol                     token_name;
+    };
+
+    template<> struct get_struct<stopminterc20> { 
+        static const struct_t& type() { 
+           static struct_t result = { "stopminterc20", "", {
+                {"token_name", "asset_symbol"},
+              }
+           };
+           return result;
+         }
+    };
+
     struct revokeerc20 { 
         revokeerc20() = default;
         revokeerc20(const asset_symbol& token_name)
@@ -900,6 +918,7 @@ FC_REFLECT( Xmaxplatform::Basetypes::regproxy                         , (proxy) 
 FC_REFLECT( Xmaxplatform::Basetypes::unregproxy                       , (proxy) )
 FC_REFLECT( Xmaxplatform::Basetypes::issueerc20                       , (creator)(owner)(active)(token_name)(total_balance) )
 FC_REFLECT( Xmaxplatform::Basetypes::minterc20                        , (token_name)(mint_amount) )
+FC_REFLECT( Xmaxplatform::Basetypes::stopminterc20                    , (token_name) )
 FC_REFLECT( Xmaxplatform::Basetypes::revokeerc20                      , (token_name) )
 FC_REFLECT( Xmaxplatform::Basetypes::transfererc20                    , (token_name)(to)(value) )
 FC_REFLECT( Xmaxplatform::Basetypes::transferfromerc20                , (token_name)(from)(to)(value) )

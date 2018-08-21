@@ -83,6 +83,11 @@ static void validate_token_not_revoke(const ErcObjectType& erc_object) {
 		"ERC token:${token_name} already revoked!", ("token_name", erc_object.token_name));
 }
 
+template <class ErcObjectType>
+static void validate_token_canmint(const ErcObjectType& erc_object) {
+	XMAX_ASSERT(erc_object.stopmint == 0, message_validate_exception,
+		"ERC token:${token_name} already revoked!", ("token_name", erc_object.token_name));
+}
 
 static void validate_name(const name& n) {
 	XMAX_ASSERT(n.valid(), message_validate_exception,
@@ -512,7 +517,7 @@ void handle_xmax_issueerc20(Chain::message_context_xmax& context) {
 	auto issue_erc20 = context.msg.as<Types::issueerc20>();
 
 	//Todo: Check creator authorization
-
+	context.require_authorization(issue_erc20.creator);
 	//Todo: Check keys authority validation
 
 	//Check existence
@@ -569,12 +574,35 @@ void handle_xmax_minterc20(Chain::message_context_xmax& context)
 	//Check precondition
 	auto& existing_token_obj = db.get<erc20_token_object, by_token_name>(minterc20.token_name);
 	validate_token_not_revoke(existing_token_obj);
+
+	validate_token_canmint(existing_token_obj);
+	//Check owner authorization
+	context.require_authorization(existing_token_obj.owner_name);//must signed by token sender.
+
 	db.modify(existing_token_obj, [&minterc20](erc20_token_object& obj) {
 		obj.total_supply += minterc20.mint_amount.amount;
 		obj.balance += minterc20.mint_amount.amount;
 	});
 }
+//--------------------------------------------------
+void handle_xmax_stopminterc20(Chain::message_context_xmax& context)
+{
+	auto& db = context.mutable_db;
+	auto stopminterc20 = context.msg.as<Types::stopminterc20>();
 
+	//Check precondition
+	auto& existing_token_obj = db.get<erc20_token_object, by_token_name>(stopminterc20.token_name);
+
+	validate_token_not_revoke(existing_token_obj);
+
+	//Check owner authorization
+	context.require_authorization(existing_token_obj.owner_name);//must signed by token sender.
+	validate_token_canmint(existing_token_obj);
+
+	db.modify(existing_token_obj, [](erc20_token_object& obj) {
+		obj.stopmint = 1;
+	});
+}
 //--------------------------------------------------
 void handle_xmax_minterc721(Chain::message_context_xmax& context)
 {
@@ -668,7 +696,8 @@ void handle_xmax_transferfromerc20(Chain::message_context_xmax& context)
 	auto& db = context.mutable_db;
 	auto transfer_erc20 = context.msg.as<Types::transferfromerc20>();
 
-	//TODO: Check owner authorization
+	//Check sender authorization
+	context.require_authorization(transfer_erc20.from);//must signed by token sender.
 	
 	validate_name(transfer_erc20.from);
 	validate_name(transfer_erc20.to);
