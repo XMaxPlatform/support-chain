@@ -5,19 +5,22 @@
 #pragma once
 #include <blockchain_types.hpp>
 #include <account_type.hpp>
-
+#include <mapped_ptr.hpp>
+#include <objects/account_contract.hpp>
 #include "multi_index_includes.hpp"
 
 namespace Xmaxplatform { namespace Chain {
 
    class account_object : public Basechain::object<account_object_type, account_object> {
-      OBJECT_CCTOR(account_object)
+	   OBJECT_CCTOR(account_object, (contract))
    public:
 	  using acc_type = fc::enum_type<uint8_t, account_type>;
       id_type             id;
       account_name        name;
 	  acc_type			  type = 0;
       time                creation_date;
+
+	  mapped_ptr<account_contract> contract;
    };
    using account_id_type = account_object::id_type;
 
@@ -36,4 +39,4 @@ BASECHAIN_SET_INDEX_TYPE(Xmaxplatform::Chain::account_object, Xmaxplatform::Chai
 
 FC_REFLECT(Basechain::oid<Xmaxplatform::Chain::account_object>, (_id))
 
-FC_REFLECT(Xmaxplatform::Chain::account_object, (id)(name)(type)(creation_date))
+FC_REFLECT(Xmaxplatform::Chain::account_object, (id)(name)(type)(creation_date)(contract))

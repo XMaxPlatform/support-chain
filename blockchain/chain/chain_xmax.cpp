@@ -1054,7 +1054,6 @@ namespace Xmaxplatform { namespace Chain {
 			}
 
 			const auto& code_account = _context->block_db.get<contract_object, by_name>(code);
-			Xmaxplatform::Basetypes::abi abi;
 			return (Basetypes::abi_serializer::to_abi(code_account.abi, abi));		
 		}
 

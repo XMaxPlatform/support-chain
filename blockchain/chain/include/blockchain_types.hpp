@@ -24,6 +24,7 @@
 #include <fc/smart_ref_fwd.hpp>
 #include <fc/crypto/ripemd160.hpp>
 #include <fc/fixed_string.hpp>
+#include <optional_ptr.hpp>
 
 #include <memory>
 #include <vector>
