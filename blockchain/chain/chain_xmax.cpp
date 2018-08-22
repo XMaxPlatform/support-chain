@@ -1028,7 +1028,7 @@ namespace Xmaxplatform { namespace Chain {
 			_context->message_handlers[std::make_pair(scope, func)] = v;
         }
 
-		native_handler chain_xmax::find_native_handler(const native_scope& scope, const func_name& func)
+		native_handler chain_xmax::find_native_handler(const native_scope& scope, const func_name& func) const
 		{
 			/// context.code => the execution namespace
 			/// message.code / message.type => Event
