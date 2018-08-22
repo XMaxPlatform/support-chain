@@ -206,5 +206,11 @@ struct minterc721
 	token_name asset_symbol
 	token_id fixed_string32
 
+struct transferfromerc721	
+	token_name asset_symbol
+	token_id fixed_string32
+	from	account_name
+	to	account_name
+
 struct revokeerc721
 	token_name asset_symbol

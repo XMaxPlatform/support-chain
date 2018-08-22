@@ -54,6 +54,7 @@ void xmax_erc20_transferfrom(Chain::message_context_xmax& context);
 //ERC721 interfaces
 void xmax_erc721_issue(Chain::message_context_xmax& context);
 void xmax_erc721_mint(Chain::message_context_xmax& context);
+void xmax_erc721_transferfrom(Chain::message_context_xmax& context);
 void xmax_erc721_revoke(Chain::message_context_xmax& context);
 
 
