@@ -14,7 +14,6 @@
 #include <chain_xmax.hpp>
 #include <wast_to_wasm.hpp>
 #include <mongodb_plugin.hpp>
-#include <objects/contract_object.hpp>
 #include <objects/erc20_token_object.hpp>
 #include <objects/object_utility.hpp>
 #include <objects/erc20_token_account_object.hpp>
@@ -274,16 +273,16 @@ namespace Chain_APIs{
 		get_code_results result;
 		result.account_name = params.account_name;
 		const auto& d = _chain.get_database();
-		const auto& accnt = d.get<Chain::contract_object, Chain::by_name>(params.account_name);
+		const auto& accnt = d.get<Chain::account_object, Chain::by_name>(params.account_name);
 
-		if (accnt.code.size()) {
-			result.wast = Chain::ConvertFromWasmToWast((const uint8_t*)accnt.code.data(), accnt.code.size());
-			result.code_hash = fc::sha256::hash(accnt.code.data(), accnt.code.size());
-		}
+		if (accnt.contract) {
+			result.wast = Chain::ConvertFromWasmToWast((const uint8_t*)accnt.contract->code.data(), accnt.contract->code.size());
+			result.code_hash = fc::sha256::hash(accnt.contract->code.data(), accnt.contract->code.size());
 
-		Xmaxplatform::Basetypes::abi abi;
-		if (Basetypes::abi_serializer::to_abi(accnt.abi, abi)) {
-			result.abi = std::move(abi);
+			Xmaxplatform::Basetypes::abi abi;
+			if (Basetypes::abi_serializer::to_abi(accnt.contract->abi, abi)) {
+				result.abi = std::move(abi);
+			}
 		}
 		return result;
 	}
@@ -361,10 +360,13 @@ namespace Chain_APIs{
 
 	Basetypes::abi getAbi(const Chain::chain_xmax& db, const name& account) {
 		const auto& d = db.get_database();
-		const auto& code_accnt = d.get<Chain::contract_object, Chain::by_name>(account);
+		const auto& code_accnt = d.get<Chain::account_object, Chain::by_name>(account);
 
 		Xmaxplatform::Basetypes::abi abi;
-		Basetypes::abi_serializer::to_abi(code_accnt.abi, abi);
+		if (code_accnt.contract)
+		{
+			Basetypes::abi_serializer::to_abi(code_accnt.contract->abi, abi);
+		}
 		return abi;
 	}
 

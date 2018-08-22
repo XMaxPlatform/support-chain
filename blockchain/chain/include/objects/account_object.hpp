@@ -21,6 +21,15 @@ namespace Xmaxplatform { namespace Chain {
       time                creation_date;
 
 	  mapped_ptr<account_contract> contract;
+
+	  template<typename T>
+	  void set_contract(const T& code, const Xmaxplatform::Basetypes::abi& abi)
+	  {
+		  set_contract((const char*)(code.data()), code.size(), abi);
+	  }
+
+   private:
+	   void set_contract(const char* code, size_t len, const Xmaxplatform::Basetypes::abi& abi);
    };
    using account_id_type = account_object::id_type;
 

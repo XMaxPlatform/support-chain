@@ -9,7 +9,6 @@
 #include <objects/transaction_object.hpp>
 #include <objects/block_summary_object.hpp>
 #include <objects/account_object.hpp>
-#include <objects/contract_object.hpp>
 #include <objects/static_config_object.hpp>
 #include <objects/dynamic_states_object.hpp>
 
@@ -34,7 +33,6 @@ namespace Chain {
 
 	void setup_xmax_indexes(Basechain::database& db) {
 		db.add_index<account_index>();
-		db.add_index<contract_index>();
 		db.add_index<authority_index>();
 
 		db.add_index<key_value_index>();

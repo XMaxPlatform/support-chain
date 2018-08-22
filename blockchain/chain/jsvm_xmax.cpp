@@ -16,7 +16,6 @@
 #include <boost/lexical_cast.hpp>
 #include <fc/utf8.hpp>
 #include <objects/account_object.hpp>
-#include <objects/contract_object.hpp>
 #if WIN32
 #include <fc/int128.hpp>
 #endif
@@ -230,11 +229,10 @@ namespace Xmaxplatform {
 
 		void jsvm_xmax::load(const account_name& name, const Basechain::database& db)
 		{
-			const auto& accountobj = db.get<contract_object, by_name>(name);
+			const auto& obj = db.get<account_object, by_name>(name);
 
-			message_context_xmax& msg_contxt = *jsvm_xmax::get().current_message_context;
-			const auto& recipient = msg_contxt.db.get<contract_object, by_name>(msg_contxt.code);
-			LoadScript(name, recipient.code.data(), accountobj.abi, accountobj.code_version);
+
+			LoadScript(name, obj.contract->code.data(), obj.contract->abi, obj.contract->code_version);
 		}
 
 		void jsvm_xmax::LoadScript(account_name name, const char* code,const mapped_vector<char>& abi,const fc::sha256& code_version)

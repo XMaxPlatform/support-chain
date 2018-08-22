@@ -11,7 +11,6 @@
 
 #include <objects/object_utility.hpp>
 #include <objects/account_object.hpp>
-#include <objects/contract_object.hpp>
 #include <objects/authority_object.hpp>
 #include <objects/linked_permission_object.hpp>
 #include <objects/xmx_token_object.hpp>
@@ -185,15 +184,10 @@ void xmax_system_addcontract(Chain::message_context_xmax& context)
 
 	abi_serializer(msgdata.code_abi).validate();
 
-	const auto& contract = db.get<contract_object, by_name>(contract_name);
-	db.modify(contract, [&](contract_object& a) {
+	const auto& contract = db.get<account_object, by_name>(contract_name);
+	db.modify(contract, [&](account_object& a) {
 
-		a.code_version = fc::sha256::hash(msgdata.code.data(), msgdata.code.size());
-		a.code.resize(0);
-		a.code.resize(msgdata.code.size());
-		memcpy(a.code.data(), msgdata.code.data(), msgdata.code.size());
-
-		a.set_abi(msgdata.code_abi);
+		a.set_contract(msgdata.code, msgdata.code_abi);
 	});
 
 	message_context_xmax init_context(context.mutable_chain, context.mutable_db, context.trx, context.msg, contract_name, 0);
@@ -453,15 +447,10 @@ void xmax_system_setjscode(Chain::message_context_xmax& context)
 
 	abi_serializer(msg.code_abi).validate();
 
-	const auto& contract = db.get<contract_object, by_name>(msg.account);
-	db.modify(contract, [&](auto& a) {
-	
-		a.code_version = fc::sha256::hash(msg.code.data(), msg.code.size());
-		a.code.resize(0);
-		a.code.resize(msg.code.size());
-		memcpy(a.code.data(), msg.code.data(), msg.code.size());
+	const auto& contract = db.get<account_object, by_name>(msg.account);
+	db.modify(contract, [&](account_object& a) {
 
-		a.set_abi(msg.code_abi);
+		a.set_contract(msg.code, msg.code_abi);
 	});
 
 	message_context_xmax init_context(context.mutable_chain, context.mutable_db, context.trx, context.msg, msg.account,0);
@@ -484,18 +473,11 @@ void xmax_system_setcode(message_context_xmax& context) {
 	abi_serializer(msg.code_abi).validate();
 
 
-	const auto& contract = db.get<contract_object, by_name>(msg.account);
+	const auto& contract = db.get<account_object, by_name>(msg.account);
 	//   wlog( "set code: ${size}", ("size",msg.code.size()));
-	db.modify(contract, [&](auto& a) {
-		/** TODO: consider whether a microsecond level local timestamp is sufficient to detect code version changes*/
-		//warning TODO : update setcode message to include the hash, then validate it in validate
-		a.code_version = fc::sha256::hash(msg.code.data(), msg.code.size());
-		// Added resize(0) here to avoid bug in boost vector container
-		a.code.resize(0);
-		a.code.resize(msg.code.size());
-		memcpy(a.code.data(), msg.code.data(), msg.code.size());
+	db.modify(contract, [&](account_object& a) {
 
-		a.set_abi(msg.code_abi);
+		a.set_contract(msg.code, msg.code_abi);
 	});
 
 	message_context_xmax init_context(context.mutable_chain, context.mutable_db, context.trx, context.msg, 0);

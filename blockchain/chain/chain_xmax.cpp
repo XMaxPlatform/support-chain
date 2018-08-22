@@ -34,7 +34,6 @@
 #include <objects/transaction_object.hpp>
 #include <objects/block_summary_object.hpp>
 #include <objects/account_object.hpp>
-#include <objects/contract_object.hpp>
 
 #include <objects/vote_objects.hpp>
 #include <objects/resource_token_object.hpp>
@@ -1028,6 +1027,11 @@ namespace Xmaxplatform { namespace Chain {
 			_context->message_handlers[std::make_pair(scope, func)] = v;
         }
 
+		void chain_xmax::set_native_abi(const native_scope& scope, Basetypes::abi&& abi)
+		{
+			_context->abi_handlers[scope] = std::forward<Basetypes::abi>(abi);
+		}
+
 		native_handler chain_xmax::find_native_handler(const native_scope& scope, const func_name& func) const
 		{
 			/// context.code => the execution namespace
@@ -1053,8 +1057,12 @@ namespace Xmaxplatform { namespace Chain {
 				return true;
 			}
 
-			const auto& code_account = _context->block_db.get<contract_object, by_name>(code);
-			return (Basetypes::abi_serializer::to_abi(code_account.abi, abi));		
+			const auto& code_account = _context->block_db.get<account_object, by_name>(code);
+			if (code_account.contract)
+			{
+				return (Basetypes::abi_serializer::to_abi(code_account.contract->abi, abi));
+			}
+			return false;
 		}
 
 		const Xmaxplatform::Basetypes::abi* chain_xmax::find_native_abi(native_scope scope) const

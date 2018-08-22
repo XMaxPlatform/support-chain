@@ -161,7 +161,6 @@ namespace Xmaxplatform { namespace Chain {
 			key128x128x128_value_object_type,
             account_object_type,
 			account_status_object_type,
-			contract_object_type,
 			authority_object_type,
 			linked_permission_object_type,
 			builder_object_type,

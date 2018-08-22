@@ -6,7 +6,6 @@
 #include <blockchain_exceptions.hpp>
 #include <chain_xmax.hpp>
 #include <xmax_contract.hpp>
-#include <objects/contract_object.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/algorithm/copy.hpp>
 
@@ -29,20 +28,23 @@ xmax_builder_infos native_contract_chain_init::get_chain_init_builders() const {
 	}
 	return result;
 }
-
-#define SET_APP_HANDLER( contract, scope, func, nspace ) \
-   chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::  ## contract ##_## scope ##_## func)
-
-
-#define SET_SYSTEM_HANDLER( abi, scope, func, nspace ) \
-   chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::xmax_## scope ##_## func);\
+#define SET_SYSTEM_ABI( abi, scope, func, nspace ) \
     abi.actions.push_back( Types::action{name( #func ), #func } );\
 	abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes:: ##func## >::type())
 
-#define SET_ERC_HANDLER( abi, scope, func, nspace ) \
-   chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::xmax_## scope ##_## func);\
+#define SET_ERC_ABI( abi, scope, func, nspace ) \
     abi.actions.push_back( Types::action{name( #func ), (std::string(#func) + std::string(#scope)).c_str() } );\
 	abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes:: ##func## scope >::type())
+
+
+#define SET_SYSTEM_HANDLER( abi, scope, func, nspace ) \
+	chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::xmax_## scope ##_## func);\
+	SET_SYSTEM_ABI( abi, scope, func, nspace )
+
+#define SET_ERC_HANDLER( abi, scope, func, nspace ) \
+	chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::xmax_## scope ##_## func);\
+	SET_ERC_ABI(abi, scope, func, nspace)
+
 
 
 void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain::database &db) {
@@ -71,8 +73,6 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 	chain.set_native_handler(native_scope::native_system, "setcode", &Xmaxplatform::Native_contract::xmax_system_setjscode);
 #endif
 
-
-
 	Basetypes::abi erc20_abi;
 	SET_ERC_HANDLER(erc20_abi, erc20, issue);
 	SET_ERC_HANDLER(erc20_abi, erc20, mint);
@@ -89,6 +89,8 @@ void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain:
 	chain.set_native_abi(native_scope::native_erc20, std::move(erc20_abi));
 	chain.set_native_abi(native_scope::native_erc721, std::move(erc721_abi));
 }
+
+
 
 //        Basetypes::abi native_contract_chain_init::xmax_contract_abi()
 //{
@@ -148,13 +150,6 @@ static void create_native_account(Basechain::database &db, account_name name, sh
 		a.type = account_type::acc_system;
 		a.creation_date = creation_date;
 	});
-	//if (name == Config::xmax_contract_name) {
-	//	db.create<contract_object>([this, &name](contract_object& a) {
-	//		a.name = name;
-	//		a.set_abi(xmax_contract_abi());
-	//	});
-	//}
-
 
 	db.create<Xmaxplatform::Chain::xmx_token_object>([&name, main_token](auto& b) {
 		b.owner_name = name;

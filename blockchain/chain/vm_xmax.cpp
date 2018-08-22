@@ -9,7 +9,6 @@
 #include <vm_native_interface.hpp>
 #include <objects/key_value_object.hpp>
 #include <objects/account_object.hpp>
-#include <objects/contract_object.hpp>
 #include <objects/xmx_token_object.hpp>
 #include <abi_serializer.hpp>
 #include <chrono>
@@ -297,11 +296,11 @@ namespace Xmaxplatform { namespace Chain {
 
 
    void vm_xmax::load( const account_name& name, const Basechain::database& db ) {
-      const auto& recipient = db.get<contract_object,by_name>( name );
+      const auto& recipient = db.get<account_object,by_name>( name );
   //    idump(("recipient")(name(name))(recipient.code_version));
 
       auto& state = instances[name];
-      if( state.code_version != recipient.code_version ) {
+      if( state.code_version != recipient.contract->code_version ) {
         if( state.instance ) {
 /// TODO: free existing instance and module
 //#warning TODO: free existing module if the code has been updated, currently leak memory
@@ -316,7 +315,7 @@ namespace Xmaxplatform { namespace Chain {
         {
 //          wlog( "LOADING CODE" );
           const auto start = fc::time_point::now();
-          Serialization::MemoryInputStream stream((const U8*)recipient.code.data(),recipient.code.size());
+          Serialization::MemoryInputStream stream((const U8*)recipient.contract->code.data(),recipient.contract->code.size());
           WASM::serializeWithInjection(stream,*state.module);
 
           RootResolver rootResolver;
@@ -342,12 +341,12 @@ namespace Xmaxplatform { namespace Chain {
           state.init_memory.resize(state.mem_end);
           memcpy( state.init_memory.data(), memstart, state.mem_end ); //state.init_memory.size() );
           //std::cerr <<"\n";
-          state.code_version = recipient.code_version;
+          state.code_version = recipient.contract->code_version;
 //          idump((state.code_version));
           const auto init_time = fc::time_point::now();
 
             Basetypes::abi abi;
-          if( Basetypes::abi_serializer::to_abi(recipient.abi, abi) )
+          if( Basetypes::abi_serializer::to_abi(recipient.contract->abi, abi) )
           {
              state.tables_fixed = true;
              for(auto& table : abi.tables)

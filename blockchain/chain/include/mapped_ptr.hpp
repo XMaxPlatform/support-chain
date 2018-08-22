@@ -53,7 +53,11 @@ namespace Xmaxplatform { namespace Chain {
 
 		void init()
 		{
-			assign(value_type());
+			if (valid())
+			{
+				dealloc();
+			}
+			alloc();
 		}
 
 		explicit operator bool() const
@@ -253,7 +257,7 @@ namespace fc {
 			try {
 				bool b; fc::raw::unpack(s, b);
 				if (b) { v = T(); fc::raw::unpack(s, *v); }
-			} FC_RETHROW_EXCEPTIONS(warn, "optional<${type}>", ("type", fc::get_typename<T>::name()))
+			} FC_RETHROW_EXCEPTIONS(warn, "mapped_ptr<${type}>", ("type", fc::get_typename<T>::name()))
 		}
 	}
 
