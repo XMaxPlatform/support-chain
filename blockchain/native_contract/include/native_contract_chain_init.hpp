@@ -26,6 +26,11 @@ public:
    virtual void register_handlers(Chain::chain_xmax &chain, Basechain::database &db) override;
    virtual std::vector<Chain::message_data> prepare_data(Chain::chain_xmax &chain,
                                                          Basechain::database &db) override;
+
+   static Basetypes::abi get_system_abi();
+   static Basetypes::abi get_erc20_abi();
+   static Basetypes::abi get_erc721_abi();
+
 };
 
 } } // namespace Xmaxplatform::Native_contract

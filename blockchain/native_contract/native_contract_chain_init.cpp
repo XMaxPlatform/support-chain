@@ -37,60 +37,90 @@ xmax_builder_infos native_contract_chain_init::get_chain_init_builders() const {
 	abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes:: ##func## scope >::type())
 
 
-#define SET_SYSTEM_HANDLER( abi, scope, func, nspace ) \
+#define REGIST_SYSTEM_HANDLER( abi, scope, func, nspace ) \
 	chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::xmax_## scope ##_## func);\
 	SET_SYSTEM_ABI( abi, scope, func, nspace )
 
-#define SET_ERC_HANDLER( abi, scope, func, nspace ) \
+#define REGIST_ERC_HANDLER( abi, scope, func, nspace ) \
 	chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::xmax_## scope ##_## func);\
 	SET_ERC_ABI(abi, scope, func, nspace)
 
 
 
+#define SYSTEM_CONTRACT_API(UNPACK_MACRO, _abi) {\
+_abi.types.push_back(Types::type_def{ "share_type","int64" }); \
+UNPACK_MACRO(_abi, system, addaccount); \
+UNPACK_MACRO(_abi, system, addcontract); \
+UNPACK_MACRO(_abi, system, adderc20); \
+UNPACK_MACRO(_abi, system, adderc721); \
+UNPACK_MACRO(_abi, system, transfer); \
+UNPACK_MACRO(_abi, system, lock); \
+UNPACK_MACRO(_abi, system, unlock); \
+UNPACK_MACRO(_abi, system, votebuilder); \
+UNPACK_MACRO(_abi, system, regbuilder); \
+UNPACK_MACRO(_abi, system, unregbuilder); \
+UNPACK_MACRO(_abi, system, regproxy); \
+UNPACK_MACRO(_abi, system, unregproxy); \
+UNPACK_MACRO(_abi, system, setcode);}
+
+#define ERC20_CONTRACT_API(UNPACK_MACRO, _abi){ \
+_abi.types.push_back(Types::type_def{ "share_type","int64" }); \
+UNPACK_MACRO(_abi, erc20, issue); \
+UNPACK_MACRO(_abi, erc20, mint); \
+UNPACK_MACRO(_abi, erc20, revoke); \
+UNPACK_MACRO(_abi, erc20, transfer); \
+UNPACK_MACRO(_abi, erc20, transferfrom); }
+
+#define ERC721_CONTRACT_API(UNPACK_MACRO, _abi){\
+_abi.types.push_back(Types::type_def{ "share_type","int64" });\
+UNPACK_MACRO(_abi, erc721, issue);\
+UNPACK_MACRO(_abi, erc721, mint);\
+UNPACK_MACRO(_abi, erc721, revoke);}
+
+
 void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain::database &db) {
 
 	Basetypes::abi sys_abi;
-	sys_abi.types.push_back(Types::type_def{ "share_type","int64" });
 
-	SET_SYSTEM_HANDLER(sys_abi, system, addaccount);
-	SET_SYSTEM_HANDLER(sys_abi, system, addcontract);
-	SET_SYSTEM_HANDLER(sys_abi, system, adderc20);
-	SET_SYSTEM_HANDLER(sys_abi, system, adderc721);
-
-	SET_SYSTEM_HANDLER(sys_abi, system, transfer);
-	
-	SET_SYSTEM_HANDLER(sys_abi, system, lock);
-	SET_SYSTEM_HANDLER(sys_abi, system, unlock);
-	SET_SYSTEM_HANDLER(sys_abi, system, votebuilder);
-	SET_SYSTEM_HANDLER(sys_abi, system, regbuilder);
-	SET_SYSTEM_HANDLER(sys_abi, system, unregbuilder);
-	SET_SYSTEM_HANDLER(sys_abi, system, regproxy);
-	SET_SYSTEM_HANDLER(sys_abi, system, unregproxy);
-
-	SET_SYSTEM_HANDLER(sys_abi, system, setcode);
+	SYSTEM_CONTRACT_API(REGIST_SYSTEM_HANDLER, sys_abi);
 
 #ifdef USE_V8
 	chain.set_native_handler(native_scope::native_system, "setcode", &Xmaxplatform::Native_contract::xmax_system_setjscode);
 #endif
 
 	Basetypes::abi erc20_abi;
-	SET_ERC_HANDLER(erc20_abi, erc20, issue);
-	SET_ERC_HANDLER(erc20_abi, erc20, mint);
-	SET_ERC_HANDLER(erc20_abi, erc20, revoke);
-	SET_ERC_HANDLER(erc20_abi, erc20, transfer);
-	SET_ERC_HANDLER(erc20_abi, erc20, transferfrom);
+	ERC20_CONTRACT_API(REGIST_ERC_HANDLER, erc20_abi);
 
 	Basetypes::abi erc721_abi;
-	SET_ERC_HANDLER(erc721_abi, erc721, issue);
-	SET_ERC_HANDLER(erc721_abi, erc721, mint);
-	SET_ERC_HANDLER(erc721_abi, erc721, revoke);
+	ERC721_CONTRACT_API(REGIST_ERC_HANDLER, erc721_abi);
 
 	chain.set_native_abi(native_scope::native_system, std::move(sys_abi));
 	chain.set_native_abi(native_scope::native_erc20, std::move(erc20_abi));
 	chain.set_native_abi(native_scope::native_erc721, std::move(erc721_abi));
 }
 
+Basetypes::abi native_contract_chain_init::get_system_abi()
+{
+	Basetypes::abi sys_abi;
 
+	SYSTEM_CONTRACT_API(SET_SYSTEM_ABI, sys_abi);
+
+	return sys_abi;
+}
+
+Basetypes::abi native_contract_chain_init::get_erc20_abi()
+{
+	Basetypes::abi erc20_abi;
+	ERC20_CONTRACT_API(SET_ERC_ABI, erc20_abi);
+	return erc20_abi;		
+}
+
+Basetypes::abi native_contract_chain_init::get_erc721_abi()
+{
+	Basetypes::abi erc721_abi;
+	ERC721_CONTRACT_API(SET_ERC_ABI, erc721_abi);
+	return erc721_abi;
+}
 
 //        Basetypes::abi native_contract_chain_init::xmax_contract_abi()
 //{
