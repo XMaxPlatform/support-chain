@@ -54,11 +54,19 @@
 
 namespace Xmaxplatform { namespace Chain {
 
+	struct build_status
+	{
+		int trx_counter = 0;
+		int msg_counter = 0;
+	};
+
+
 	class chain_context
 	{
 	public:
 		//typedef pair<account_name, Basetypes::name> handler_key;
 		optional<pending_block>				building_block;
+		build_status						building_status;
 		block_pack_ptr						block_head;
 		chain_stream						chain_log;
 		chain_xmax::xmax_config				config;
@@ -94,6 +102,12 @@ namespace Xmaxplatform { namespace Chain {
 			building_block.reset();
 			block_db.flush();
 			fork_db.close();
+		}
+
+		void start()
+		{
+			building_block = block_db.start_undo_session(true);
+			building_status = build_status();
 		}
 
 		//template<typename Function>
@@ -517,6 +531,10 @@ namespace Xmaxplatform { namespace Chain {
 				Impl.squash();
 				fc::move_append(_context->building_block->message_receipts, std::move(Impl.msg_receipts));
 				_context->building_block->pack->transactions.push_back(request);
+
+				++_context->building_status.trx_counter;
+				_context->building_status.msg_counter += request->signed_trx.messages.size();
+
 				return response;
 			}
 			catch (const fc::exception& e) {
@@ -599,11 +617,13 @@ namespace Xmaxplatform { namespace Chain {
 
 			const auto& new_block = _context->building_block->pack->block;
 
-			ilog("${builder} generate block #${num}  at ${time}, exectime_ms=${extm}",
+			ilog("${builder} generate block #${num}  at ${time}, exectime_ms=${extm}, trxs=${trxs}, msgs=${msgs}",
 				("builder", new_block->builder)
 				("time", new_block->timestamp)
 				("num", new_block->block_num())
 				("extm", exec_ms.count())
+				("trxs", _context->building_status.trx_counter)
+				("msgs", _context->building_status.msg_counter)
 			);
 
 			_push_fork();
@@ -739,7 +759,7 @@ namespace Xmaxplatform { namespace Chain {
 			builder_rule rule;
 			rule.set_builders(list, 1);
 
-			_context->building_block = _context->block_db.start_undo_session(true);
+			_context->start();
 
 			// start build.
 			_context->building_block->pack = std::make_shared<block_pack>();
@@ -758,7 +778,7 @@ namespace Xmaxplatform { namespace Chain {
 				_context->building_block.reset();
 			});
 
-			_context->building_block = _context->block_db.start_undo_session(true);
+			_context->start();
 
 			try {
 
@@ -805,10 +825,10 @@ namespace Xmaxplatform { namespace Chain {
             try {
 
 				signed_block_header& building_header = _context->building_block->pack->new_header;
-				signed_block& building_block = *_context->building_block->pack->block;
+				signed_block& block = *_context->building_block->pack->block;
 				// merkle
 
-				const auto& trxs = building_block.receipts;
+				const auto& trxs = block.receipts;
 
 				std::vector<xmax_type_summary> hashs;
 				hashs.reserve(trxs.size());
