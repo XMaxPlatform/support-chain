@@ -821,7 +821,7 @@ namespace Xmaxplatform { namespace Chain {
 				capcture.set("builders", namestream.str());
 
 				ilog("next round: ${builders}", (capcture));
-			}``
+			}
 		}
 
         void chain_xmax::_generate_block() {
