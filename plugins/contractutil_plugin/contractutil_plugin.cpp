@@ -239,6 +239,8 @@ namespace Xmaxplatform {
 		   {
 			   std::string tempstrname;
 			   fc::from_variant(vlist[i], tempstrname);
+			   name temp(tempstrname);
+			   scopelist.push_back(temp.namecode_);
 		   }
 
 		   trx.scope = sort_names(std::move(scopelist));

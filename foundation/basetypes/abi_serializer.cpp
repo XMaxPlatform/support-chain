@@ -52,6 +52,7 @@ namespace Xmaxplatform { namespace Basetypes {
       built_in_types.emplace("public_key",    pack_unpack<public_key>());
 
       //asset.hpp
+	  built_in_types.emplace("asset_symbol",  pack_unpack<asset_symbol>());
       built_in_types.emplace("asset",         pack_unpack<asset>());
       built_in_types.emplace("price",         pack_unpack<price>());
      

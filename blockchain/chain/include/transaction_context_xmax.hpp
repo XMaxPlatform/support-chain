@@ -37,7 +37,7 @@ namespace Chain {
 	protected:
 
 		void exec_message(const Chain::message_xmax & msg, uint32_t apply_depth);
-		message_response exec_one_message(message_context_xmax& context);
+		message_response exec_one_message(message_context_xmax& context,bool is_notify);
 
 		chain_xmax&						chain;
 		const signed_transaction&		trx;
