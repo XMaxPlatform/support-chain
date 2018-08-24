@@ -156,6 +156,9 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
     void blockbuilder_plugin_impl::next_block() {
 
+		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
+		chain.flushdb();
+
 		// Next build time.
 		// If we would wait less than "1/10 of block_interval", wait for the whole block interval.
 		fc::time_point now = fc::time_point::now();

@@ -186,6 +186,8 @@ namespace Xmaxplatform { namespace Chain {
 
    public:
 
+	   void flushdb();
+
        void build_block(
                chain_timestamp when,
 			   const private_key_type& sign_private_key
