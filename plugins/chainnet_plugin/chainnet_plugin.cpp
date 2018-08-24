@@ -1521,6 +1521,11 @@ namespace Xmaxplatform {
 			   handshake.last_irreversible_block_num = 0;
 		   }
 	   }
+	   else
+	   {
+		   handshake.last_irreversible_block_num = 1;
+	   }
+
 	   if (handshake.head_num) {
 		   try {
 			   handshake.head_id = cx.block_id_from_num(handshake.head_num);
