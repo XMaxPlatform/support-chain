@@ -8,6 +8,7 @@
 #include <fc/io/raw.hpp>
 #include <fc/fixed_string.hpp>
 #include <fc/reflect/variant.hpp>
+#include <asset.hpp>
 
 namespace fc {
     void to_variant(const Xmaxplatform::Basetypes::name& c, fc::variant& v) { v = std::string(c); }

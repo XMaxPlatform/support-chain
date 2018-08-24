@@ -4,9 +4,9 @@
  */
 #pragma once
 #include <basedef.hpp>
-
 #include <shortname.hpp>
 #include <longname.hpp>
+
 
 #define STN(X) Xmaxplatform::Basetypes::name::to_name_code(#X)
 

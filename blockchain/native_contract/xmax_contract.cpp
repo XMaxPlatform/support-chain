@@ -200,16 +200,32 @@ void xmax_system_adderc20(Chain::message_context_xmax& context)
 	const Types::adderc20& msgdata = context.msg.as<Types::adderc20>();
 	Basechain::database& db = context.mutable_db;
 	time current_time = context.current_time();
+	fc::string strname(msgdata.token_name);
+	account_name contract_name = strname;
 
-	account_name contract_name = msgdata.name;
-
+	context.require_scope(msgdata.creator);
 	context.require_authorization(msgdata.creator);
 
 	const auto& new_account = xmax_new_account(db, contract_name, current_time, Chain::acc_erc20);
+	
+	//Check existence
+	auto existing_token_obj = db.find<erc20_token_object, by_token_name>(msgdata.token_name);
+	XMAX_ASSERT(existing_token_obj == nullptr, message_validate_exception,
+		"Erc20 token:'${t}' already exist, the owner is ${owner}",
+		("t", msgdata.token_name)("owner", existing_token_obj->owner_name));
+
+
+	db.create<erc20_token_object>([&msgdata](erc20_token_object& obj) {
+		obj.token_name = msgdata.token_name;
+		obj.owner_name = msgdata.creator;
+		//obj.balance = issue_erc20.total_balance.amount;
+		obj.balances[msgdata.creator] = msgdata.total_balance.amount;
+		obj.total_supply = msgdata.total_balance.amount;
+	});
 }
 void xmax_system_adderc721(Chain::message_context_xmax& context)
 {
-	const Types::adderc20& msgdata = context.msg.as<Types::adderc20>();
+	const Types::adderc721& msgdata = context.msg.as<Types::adderc721>();
 	Basechain::database& db = context.mutable_db;
 	time current_time = context.current_time();
 

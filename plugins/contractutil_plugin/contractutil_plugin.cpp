@@ -170,6 +170,35 @@ namespace Xmaxplatform {
 		}
 #endif
 
+		void issue_erc20(const std::string& callerPK,const std::string& callername, const std::string& erc20Name, const int& maxCount)
+		{
+			Chain::chain_xmax& cc = app().get_plugin<blockchain_plugin>().getchain();
+			Chain::chain_id_type chainid;
+			app().get_plugin<blockchain_plugin>().get_chain_id(chainid);
+
+			Basetypes::adderc20 handler;
+			handler.creator = Xmaxplatform::Basetypes::name::to_name_code(callername.c_str());
+			handler.total_balance = maxCount;
+			handler.token_name = token_name_from_string(erc20Name.c_str());
+
+			Chain::signed_transaction trx;
+			trx.scope = sort_names({ callername });
+			transaction_emplace_message(trx, 
+				Config::xmax_contract_name, 
+				Basetypes::vector<Basetypes::account_auth>{ {callername, Config::xmax_active_name}},
+				"adderc20", handler);
+
+			std::cout << "adderc20" << std::endl;
+
+			trx.expiration = cc.head_block_time() + fc::seconds(30);
+			transaction_set_reference_block(trx, cc.head_block_id());
+
+			fc::ecc::private_key caller_priv_key = *Utilities::wif_to_key(callerPK);
+			trx.sign(caller_priv_key, chainid);
+			cc.push_transaction(trx);
+
+		}
+
 		void push_transaction(const std::string& callerPK, const std::string& callername, const fc::variant& vscope, const fc::variant& v)
 		{
 			Chain::chain_xmax& cc = app().get_plugin<blockchain_plugin>().getchain();
@@ -325,6 +354,9 @@ namespace Xmaxplatform {
 			CALL(contractutil_plugin, my, push_transaction, INVOKE_V_R_R_R_R(my, push_transaction, std::string, std::string, fc::variant , fc::variant), 200),
 			CALL(contractutil_plugin, my, set_code, INVOKE_V_R_R_R(my, set_code, std::string, std::string,  std::string), 200),
 			CALL(contractutil_plugin, my, fix_push_trx, INVOKE_V_R_R(my, fix_push_trx, fc::variant, fc::variant), 200),
+			CALL(contractutil_plugin, my, issue_erc20, INVOKE_V_R_R_R_R(my, issue_erc20, std::string, std::string, std::string,int), 200),
+
+			
 #ifdef USE_V8
 			CALL(contractutil_plugin, my, set_jscode, INVOKE_V_R_R_R(my, set_jscode, std::string, std::string,  std::string), 200),
 #endif

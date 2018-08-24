@@ -39,19 +39,87 @@ constexpr uint64_t PACK_TOKEN_NAME(char C1, char C2, char C3, char C4, char C5, 
 
 namespace Xmaxplatform { namespace Basetypes {
 
-   using asset_symbol = uint64_t;
+   //using asset_symbol = uint64_t;
    using share_type   = int64;
 
+   uint64_t token_name_from_string(const string& token_str);
+   string token_name_to_string(uint64_t tokename);
 
-   inline asset_symbol token_name_from_string(const string& token_str, int decimals_precision) {
+   class  asset_symbol
+   {
+   public:
+	   asset_symbol():data(0) {}
+
+	   asset_symbol(const uint64_t& _data) :data(_data) {}
+
+	   asset_symbol(const string& token_str) :data(token_name_from_string(token_str)) {}
+
+	   asset_symbol& operator=(uint64_t n) {
+		   data = n;
+		   return *this;
+	   }
+
+	   asset_symbol& operator=(const std::string& n) {
+		   data = token_name_from_string(n);
+		   return *this;
+	   }
+	   asset_symbol& operator=(const char* n) {
+		   data = token_name_from_string(n);
+		   return *this;
+	   }
+
+	   friend bool operator < (const asset_symbol& a, const asset_symbol& b) { return a.data < b.data; }
+	   friend bool operator <= (const asset_symbol& a, const asset_symbol& b) { return a.data <= b.data; }
+	   friend bool operator > (const asset_symbol& a, const asset_symbol& b) { return a.data > b.data; }
+	   friend bool operator >=(const asset_symbol& a, const asset_symbol& b) { return a.data >= b.data; }
+	   friend bool operator == (const asset_symbol& a, const asset_symbol& b) { return a.data == b.data; }
+
+	   friend bool operator == (const asset_symbol& a, uint64_t b) { return a.data == b; }
+	   friend bool operator != (const asset_symbol& a, uint64_t b) { return a.data != b; }
+
+	   friend bool operator != (const asset_symbol& a, const uint64_t& b) { return a.data != b; }
+
+	   template<typename Stream>
+	   friend Stream& operator << (Stream& out, const asset_symbol& n) {
+		   return out << std::string(n);
+	   }
+
+	   std::string to_string() const {
+		   return token_name_to_string(data);
+	   }
+
+	   explicit operator std::string()const
+	   {
+		   return to_string();
+	   }
+
+	   static asset_symbol from_string(const string& from);
+
+	   uint64_t data;
+   };
+
+
+   inline uint64_t token_name_from_string(const string& token_str) {
 	   auto char_count = token_str.size();
 	   XMAX_ASSERT(char_count <= 7 && char_count >= 3, invalid_field_name_exception, "Token name invalide: ${name}", ("name", token_str));
-	   asset_symbol res = int64_t(decimals_precision);
+	   uint64_t res = 0;
 	   for (unsigned int i = 0; i < char_count; ++i)
 	   {
-		   res |= token_str[i] << 8 * (i + 1);
+		   res |= token_str[i] << 8 * (i );
 	   }	   
-	   return asset_symbol(res);
+	   return uint64_t(res);
+   }
+
+   inline string token_name_to_string(uint64_t tokename) {
+	   string ret;
+	   uint64_t mask = 255;
+	   for (unsigned int i = 0; i < 8; ++i)
+	   {	  
+		   char temp = tokename & mask;
+		   tokename = tokename >> 8;
+		   ret.push_back(temp);
+	   }
+	   return std::move(ret);
    }
 
    struct asset
@@ -155,8 +223,11 @@ namespace fc {
     inline void from_variant(const fc::variant& var, Xmaxplatform::Basetypes::asset& vo) {
        vo = Xmaxplatform::Basetypes::asset::from_string(var.get_string());
     }
+	inline void to_variant(const Xmaxplatform::Basetypes::asset_symbol& c, fc::variant& v) { v = std::string(c); }
+	inline void from_variant(const fc::variant& v, Xmaxplatform::Basetypes::asset_symbol& check) { check = v.get_string(); }
 }
 
+FC_REFLECT(Xmaxplatform::Basetypes::asset_symbol, (data))
 FC_REFLECT(Xmaxplatform::Basetypes::asset, (amount)(symbol))
 FC_REFLECT(Xmaxplatform::Basetypes::price, (base)(quote))
 

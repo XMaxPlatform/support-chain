@@ -10,8 +10,8 @@
 
 namespace Xmaxplatform { namespace Chain {
 
-	inline auto MakeErcTokenIndex(const std::string& token_name, const std::string& owner_name, int token_decimals) {
-		return std::make_tuple(Basetypes::token_name_from_string(token_name, token_decimals), xmax::string_to_name(owner_name.c_str()));
+	inline auto MakeErcTokenIndex(const std::string& token_name, const std::string& owner_name) {
+		return std::make_tuple(Basetypes::token_name_from_string(token_name), xmax::string_to_name(owner_name.c_str()));
 	}
 
 	inline auto MakeErcTokenIndex(Xmaxplatform::Basetypes::asset_symbol token_name, Xmaxplatform::Basetypes::account_name owner_name) {
