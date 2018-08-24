@@ -102,10 +102,10 @@ static void validate_name(const name& n) {
 		"Name:${name} is invalid", ("name", n));
 }
 
-static const account_object& xmax_new_account(Basechain::database& db, account_name creator, time creation_time,  account_type acc_type)
+static const account_object& xmax_new_account(Basechain::database& db, account_name accname, time creation_time,  account_type acc_type)
 {
 	const auto& new_account = db.create<account_object>([&](account_object& a) {
-		a.name = creator;
+		a.name = accname;
 		a.type = acc_type;
 		a.creation_date = creation_time;
 	});
