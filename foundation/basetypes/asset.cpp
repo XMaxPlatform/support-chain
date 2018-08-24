@@ -163,4 +163,10 @@ namespace Xmaxplatform { namespace Basetypes {
       } FC_CAPTURE_AND_RETHROW( (base)(quote) ) }
 
 
+	  asset_symbol asset_symbol::from_string(const string& from)
+	  {
+		  asset_symbol ret(from);
+		  return std::move(ret);
+	  }
+
 }}  // Xmaxplatform::Basetypes

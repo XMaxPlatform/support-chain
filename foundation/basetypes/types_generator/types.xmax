@@ -113,7 +113,8 @@ struct addcontract
 
 struct adderc20
    creator   account_name
-   name      account_name
+   name	asset_symbol
+   total_balance	asset
 
 struct adderc721
    creator   account_name

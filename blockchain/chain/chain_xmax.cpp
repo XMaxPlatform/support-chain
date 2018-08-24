@@ -590,6 +590,11 @@ namespace Xmaxplatform { namespace Chain {
 			return flat_set<Xmaxplatform::Chain::public_key_type>(candidateKeys);			
 		}
 
+		void chain_xmax::flushdb()
+		{
+			_context->block_db.flush();
+		}
+
 		void chain_xmax::build_block(
                 chain_timestamp when,
 				const private_key_type& sign_private_key
@@ -816,7 +821,7 @@ namespace Xmaxplatform { namespace Chain {
 				capcture.set("builders", namestream.str());
 
 				ilog("next round: ${builders}", (capcture));
-			}
+			}``
 		}
 
         void chain_xmax::_generate_block() {
@@ -1025,7 +1030,6 @@ namespace Xmaxplatform { namespace Chain {
 			_context->chain_log.append_block(pack->block);
 
 			_context->block_db.commit(block_num);
-			_context->block_db.flush();
 
 			if (_context->config.irreversible_log)
 			{
