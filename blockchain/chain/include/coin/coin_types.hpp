@@ -9,6 +9,8 @@
 namespace Xmaxplatform {
 namespace Chain {
 
-	using coin_account = public_key_type;
+	using coin_address = public_key_type;
+
+	using account_address = coin_address;
 }
 }
