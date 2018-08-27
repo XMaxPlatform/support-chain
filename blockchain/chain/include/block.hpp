@@ -13,9 +13,7 @@ namespace Xmaxplatform { namespace Chain {
         struct block_header
         {
             xmax_type_summary             digest() const;
-			xmax_type_block_num           block_num() const { return num_from_id(previous) + 1; }
-            static xmax_type_block_num num_from_id(const xmax_type_block_id& id);
-
+			xmax_type_block_num           block_num() const;
 
             xmax_type_block_id            previous;
             chain_timestamp               timestamp;

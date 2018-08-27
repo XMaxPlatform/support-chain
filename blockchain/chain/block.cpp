@@ -3,9 +3,7 @@
  *  @copyright defined in xmax/LICENSE
  */
 #include <block.hpp>
-#include <fc/io/raw.hpp>
-#include <fc/bitutil.hpp>
-#include <algorithm>
+#include <chain_utils.hpp>
 
 namespace Xmaxplatform { namespace Chain {
    xmax_type_summary block_header::digest()const
@@ -13,17 +11,14 @@ namespace Xmaxplatform { namespace Chain {
       return xmax_type_summary::hash(*this);
    }
 
-   xmax_type_block_num block_header::num_from_id(const xmax_type_block_id& id)
-   {
-      return fc::endian_reverse_u32(id._hash[0]);
+   xmax_type_block_num block_header::block_num() const 
+   { 
+	   return utils::num_from_id(previous) + 1; 
    }
 
    xmax_type_block_id signed_block_header::id()const
    {
-      xmax_type_block_id result = fc::sha256::hash(*this);
-      result._hash[0] &= 0xffffffff00000000;
-      result._hash[0] += fc::endian_reverse_u32(block_num()); // store the block num in the ID, 160 bits is plenty for the hash
-      return result;
+      return utils::block_id(digest(), block_num());
    }
 
    fc::ecc::public_key signed_block_header::get_signer_key()const
