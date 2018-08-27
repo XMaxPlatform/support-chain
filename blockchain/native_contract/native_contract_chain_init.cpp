@@ -65,16 +65,16 @@ UNPACK_MACRO(_abi, system, setcode);}
 
 #define ERC20_CONTRACT_API(UNPACK_MACRO, _abi){ \
 _abi.types.push_back(Types::type_def{ "share_type","int64" }); \
-UNPACK_MACRO(_abi, erc20, issue); \
 UNPACK_MACRO(_abi, erc20, mint); \
+UNPACK_MACRO(_abi, erc20, stopmint); \
 UNPACK_MACRO(_abi, erc20, revoke); \
-UNPACK_MACRO(_abi, erc20, transfer); \
 UNPACK_MACRO(_abi, erc20, transferfrom); }
 
 #define ERC721_CONTRACT_API(UNPACK_MACRO, _abi){\
 _abi.types.push_back(Types::type_def{ "share_type","int64" });\
-UNPACK_MACRO(_abi, erc721, issue);\
 UNPACK_MACRO(_abi, erc721, mint);\
+UNPACK_MACRO(_abi, erc721, stopmint);\
+UNPACK_MACRO(_abi, erc721, transferfrom);\
 UNPACK_MACRO(_abi, erc721, revoke);}
 
 

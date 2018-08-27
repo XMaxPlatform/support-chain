@@ -229,11 +229,26 @@ void xmax_system_adderc721(Chain::message_context_xmax& context)
 	Basechain::database& db = context.mutable_db;
 	time current_time = context.current_time();
 
-	account_name contract_name = msgdata.name;
+	context.require_scope(msgdata.creator);
+	context.require_authorization(msgdata.creator);
+	fc::string strname(msgdata.token_name);
+	account_name contract_name = strname;
 
 	context.require_authorization(msgdata.creator);
 
 	const auto& new_account = xmax_new_account(db, contract_name, current_time, Chain::acc_erc721);
+
+	//Check precondition
+	auto existing_token_obj = db.find<erc721_token_object, by_token_name>(msgdata.token_name);
+	XMAX_ASSERT(existing_token_obj == nullptr, message_validate_exception,
+		"Erc721 token:'${t}' already exist, the owner is ${owner}",
+		("t", msgdata.token_name)("owner", existing_token_obj->owner_name));
+
+	//Create erc721 token object
+	db.create<erc721_token_object>([&msgdata](erc721_token_object& token) {
+		token.token_name = msgdata.token_name;
+		token.owner_name = msgdata.creator;
+	});
 }
 
 void xmax_system_updateauth(Chain::message_context_xmax& context)
@@ -628,6 +643,7 @@ void xmax_erc721_mint(Chain::message_context_xmax& context)
 
 	const auto& existing_token_obj = db.get<erc721_token_object, by_token_name>(minterc721.token_name);
 	validate_token_not_revoke(existing_token_obj);
+	validate_token_canmint(existing_token_obj);
 
 	// check auth
 	context.require_scope(existing_token_obj.owner_name);
@@ -648,11 +664,29 @@ void xmax_erc721_mint(Chain::message_context_xmax& context)
 		obj.all_tokens.insert(tokenid);
 		//step2
 		obj.token_owners[tokenid] = obj.owner_name;
-		//step3
-	//	obj.owned_tokens[obj.owner_name].insert(tokenid);
-		
 	});
 
+}
+
+void xmax_erc721_stopmint(Chain::message_context_xmax& context)
+{
+	auto& db = context.mutable_db;
+	auto stopminterc721 = context.msg.as<Types::stopminterc721>();
+
+	//Check precondition
+	auto& existing_token_obj = db.get<erc721_token_object, by_token_name>(stopminterc721.token_name);
+
+	validate_token_not_revoke(existing_token_obj);
+
+	//Check owner authorization
+	validate_token_canmint(existing_token_obj);
+	context.require_authorization(existing_token_obj.owner_name);//must signed by token sender.
+	context.require_scope(existing_token_obj.owner_name);
+	context.require_recipient(existing_token_obj.owner_name);
+
+	db.modify(existing_token_obj, [](erc721_token_object& obj) {
+		obj.stopmint = 1;
+	});
 }
 
 void xmax_erc721_transferfrom(Chain::message_context_xmax& context)
@@ -677,22 +711,52 @@ void xmax_erc721_transferfrom(Chain::message_context_xmax& context)
 		iter != existing_token_obj.token_owners.end()
 		&& (*iter).second == transferform721.from,
 		message_validate_exception,
-		"The ERC721 token: ${token_name} with token id:${token_id} has already minted",
+		"The ERC721 token: ${token_name} with token id:${token_id} not belong to from",
 		("token_name", transferform721.token_name)("token_id", transferform721.token_id));
 
+	auto account_to = MakeErcTokenIndex(transferform721.token_name, transferform721.to);
+	auto token_account_ptr_to = db.find<erc721_token_account_object, by_token_and_owner>(account_to);
+	if (!token_account_ptr_to)
+	{
+		db.create<erc721_token_account_object>([&transferform721](erc721_token_account_object &obj) {
+			obj.token_name = transferform721.token_name;
+			obj.account_name = transferform721.to;
+		});
+	}
+
+	auto account_from = MakeErcTokenIndex(transferform721.token_name, transferform721.from);
+	auto token_account_ptr_from = db.find<erc721_token_account_object, by_token_and_owner>(account_from);
+	if (!token_account_ptr_from)
+	{
+		db.create<erc721_token_account_object>([&transferform721](erc721_token_account_object &obj) {
+			obj.token_name = transferform721.token_name;
+			obj.account_name = transferform721.from;
+		});
+	}
+	
+	const auto& token_account_from = db.get<erc721_token_account_object, by_token_and_owner>(account_from);
+	const auto& token_account_to = db.get<erc721_token_account_object, by_token_and_owner>(account_to);
+
+	db.modify(token_account_from, [&transferform721](erc721_token_account_object& obj) {
+		xmax_erc721_id tokenid{ transferform721.token_id };
+		auto iter =	obj.tokens.find(tokenid);
+		XMAX_ASSERT(
+			iter != obj.tokens.end(),
+			message_validate_exception,
+			"The ERC721 token: ${token_name} with token id:${token_id}  not belong to from",
+			("token_name", transferform721.token_name)("token_id", transferform721.token_id));
+		obj.tokens.erase(iter);
+	});
+
+ 	db.modify(token_account_to, [&transferform721](erc721_token_account_object& obj) {
+ 		xmax_erc721_id tokenid{ transferform721.token_id };
+ 		obj.tokens.insert(tokenid);
+ 	});
 
 	db.modify(existing_token_obj, [&transferform721](erc721_token_object& obj) {
 		xmax_erc721_id tokenid{ transferform721.token_id };
-		
-		//step1
-	//	auto iter = obj.owned_tokens[transferform721.from].find(tokenid);
-	//	obj.owned_tokens[transferform721.from].erase(iter);
-		//step2
 		obj.token_owners[tokenid] = transferform721.to;
-		//step3
-	//	obj.owned_tokens[transferform721.to].insert(tokenid);
-		
-		
+
 	});
 }
 
