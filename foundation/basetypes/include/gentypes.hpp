@@ -444,12 +444,13 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct adderc20 { 
         adderc20() = default;
-        adderc20(const account_name& creator, const asset_symbol& token_name, const asset& total_balance)
-           : creator(creator), token_name(token_name), total_balance(total_balance) {}
+        adderc20(const account_name& creator, const asset_symbol& token_name, const asset& total_balance, const uint64& decimal)
+           : creator(creator), token_name(token_name), total_balance(total_balance), decimal(decimal) {}
 
         account_name                     creator;
         asset_symbol                     token_name;
         asset                            total_balance;
+        uint64                           decimal;
     };
 
     template<> struct get_struct<adderc20> { 
@@ -458,6 +459,7 @@ namespace Xmaxplatform { namespace Basetypes {
                 {"creator", "account_name"},
                 {"token_name", "asset_symbol"},
                 {"total_balance", "asset"},
+                {"decimal", "uint64"},
               }
            };
            return result;
@@ -930,7 +932,7 @@ FC_REFLECT( Xmaxplatform::Basetypes::unlock                           , (account
 FC_REFLECT( Xmaxplatform::Basetypes::claim                            , (account)(amount) )
 FC_REFLECT( Xmaxplatform::Basetypes::addaccount                       , (creator)(name)(owner)(active)(deposit) )
 FC_REFLECT( Xmaxplatform::Basetypes::addcontract                      , (creator)(name)(code)(code_abi) )
-FC_REFLECT( Xmaxplatform::Basetypes::adderc20                         , (creator)(token_name)(total_balance) )
+FC_REFLECT( Xmaxplatform::Basetypes::adderc20                         , (creator)(token_name)(total_balance)(decimal) )
 FC_REFLECT( Xmaxplatform::Basetypes::adderc721                        , (creator)(name) )
 FC_REFLECT( Xmaxplatform::Basetypes::setcode                          , (account)(vm_type)(vm_version)(code)(code_abi) )
 FC_REFLECT( Xmaxplatform::Basetypes::updateauth                       , (account)(permission)(parent)(new_authority) )

@@ -23,6 +23,7 @@ namespace Xmaxplatform {
 			Basetypes::account_name owner_name;
 			//Basetypes::share_type balance = 0;
 			Basetypes::share_type total_supply = 0;
+			Basetypes::share_type decimal = 2;
 			int8_t revoked = 0;
 			int8_t stopmint = 0;
 			shared_map<account_name, Basetypes::share_type> balances;
