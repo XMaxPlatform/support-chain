@@ -330,8 +330,6 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
 	void blockbuilder_plugin_impl::confirm_block(Chain::chain_xmax& chain, signed_block_ptr block)
 	{
-		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
-
 		uint32_t order_slot = chain.get_order_slot_at_time(block->timestamp);
 
 		const builder_rule& verifiers = chain.get_verifiers_by_order(order_slot);
