@@ -90,13 +90,14 @@ namespace Xmaxplatform { namespace Chain {
 		};
 
 		struct block_confirmation : public block_confirmation_header {
-			xmax_type_block_id		block_id;
-			account_name			verifier;
+
 			xmax_type_signature		builder_signature;
 
 			fc::ecc::public_key        get_signer_key() const;
 			void sign(const fc::ecc::private_key& signer);
 			bool is_signer_valid(const fc::ecc::public_key &signer_key) const;
+
+			static block_confirmation make_conf(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key);
 		};
 
     } } // Xmaxplatform::Chain

@@ -595,7 +595,7 @@ namespace Xmaxplatform { namespace Chain {
 			_context->block_db.flush();
 		}
 
-		void chain_xmax::build_block(
+		block_pack_ptr chain_xmax::build_block(
                 chain_timestamp when,
 				const private_key_type& sign_private_key
         ) { 
@@ -620,7 +620,9 @@ namespace Xmaxplatform { namespace Chain {
 			auto exec_stop = std::chrono::high_resolution_clock::now();
 			auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_stop - exec_start);
 
-			const auto& new_block = _context->building_block->pack->block;
+			block_pack_ptr pack = _context->building_block->pack;
+
+			const auto& new_block = pack->block;
 
 			ilog("${builder} generate block #${num}  at ${time}, exectime_ms=${extm}, trxs=${trxs}, msgs=${msgs}",
 				("builder", new_block->builder)
@@ -633,11 +635,13 @@ namespace Xmaxplatform { namespace Chain {
 
 			_push_fork();
 			_commit_block();
+
+			return pack;
 		}
 
-		void chain_xmax::confirm_block(const signed_block_ptr next_block)
+		block_pack_ptr chain_xmax::confirm_block(const signed_block_ptr next_block)
 		{
-			_apply_block(next_block, true);
+			return _apply_block(next_block, true);
 		}
 
 		void chain_xmax::push_fork(const signed_block_ptr block)
@@ -654,7 +658,7 @@ namespace Xmaxplatform { namespace Chain {
 			_check_fork();
 		}
 
-		void chain_xmax::_apply_block(signed_block_ptr block, bool fork)
+		block_pack_ptr chain_xmax::_apply_block(signed_block_ptr block, bool fork)
 		{
 			_validate_block_desc(block);
 
@@ -708,7 +712,11 @@ namespace Xmaxplatform { namespace Chain {
 				_push_fork();
 			}
 
+			block_pack_ptr ptr = _context->building_block->pack;
+
 			_commit_block();
+
+			return ptr;
 		}
 
 		void chain_xmax::_pop_block()
@@ -763,11 +771,6 @@ namespace Xmaxplatform { namespace Chain {
 				}
 
 			}
-		}
-
-		void chain_xmax::broadcast_confirmation(account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func)
-		{
-			_broadcast_confirmation(_context->building_block->pack->block_id, account, validate_private_key, confirm_func);
 		}
 
 		void chain_xmax::_abort_build()
@@ -903,26 +906,17 @@ namespace Xmaxplatform { namespace Chain {
 
 				const xmax_type_block_id v_id = _context->building_block->pack->new_header.id();
 			// validate id
-				FC_ASSERT(v_id == id, "bad block");
+				FC_ASSERT(v_id == id, "bad block, id error. num=${num}, builder=${bld}, id=${id}", 
+					("num", _context->building_block->pack->block_num)
+					("bld", next_block->builder.to_string())
+					("id", id)
+				);
 
 				_context->building_block->pack->block_id = v_id;
 
 				_context->building_block->pack->validated = true;
 
 			} FC_CAPTURE_AND_RETHROW((next_block))
-		}
-
-		void chain_xmax::_broadcast_confirmation(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func)
-		{
-			block_confirmation conf;
-			conf.block_id = id;
-			conf.verifier = account;
-
-			conf.sign(validate_private_key);
-
-			push_confirmation(conf);
-
-			confirm_func(conf);
 		}
 
 		void chain_xmax::_make_final_block()

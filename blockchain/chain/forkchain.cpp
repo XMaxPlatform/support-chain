@@ -133,7 +133,7 @@ namespace Chain {
 			xmax_type_block_id id = block->id();
 			auto exist = packs.find(id);
 
-			FC_ASSERT(exist != packs.end(), "this block had exist.(id=${di})", ("id", id));
+			FC_ASSERT(exist != packs.end(), "this block had exist.(id=${id})", ("id", id));
 
 			auto preblock = packs.find(block->previous);
 
