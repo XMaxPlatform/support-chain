@@ -1236,7 +1236,7 @@ namespace Xmaxplatform {
    }
    connection_ptr chainnet_plugin_impl::find_connection( Chain::string host )const {
       for( const auto& c : connections )
-         if( c->peer_addr == host ) return c;
+         if( c->peer_addr == host || c->get_connecting_endpoint() == host) return c;
       return connection_ptr();
    }
 
