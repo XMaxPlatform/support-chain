@@ -640,6 +640,20 @@ namespace Xmaxplatform { namespace Chain {
 			_apply_block(next_block, true);
 		}
 
+		void chain_xmax::push_fork(const signed_block_ptr block)
+		{
+			auto num = block->block_num();
+			auto id = block->id();
+
+			ilog("get a fork block, num=${num}, id=${id},",
+				("num", num)
+				("id", id)
+			);
+
+			_context->fork_db.add_block(block);
+			_check_fork();
+		}
+
 		void chain_xmax::_apply_block(signed_block_ptr block, bool fork)
 		{
 			_validate_block_desc(block);
@@ -674,6 +688,20 @@ namespace Xmaxplatform { namespace Chain {
 			_validate_block(block);
 
 			_final_block();
+
+			auto exec_stop = std::chrono::high_resolution_clock::now();
+			auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_stop - exec_start);
+
+			const auto& new_block = _context->building_block->pack->block;
+
+			ilog("apply block #${num} of '${builder}' at ${time}, exectime_ms=${extm}, trxs=${trxs}, msgs=${msgs}",
+				("builder", new_block->builder)
+				("time", new_block->timestamp)
+				("num", new_block->block_num())
+				("extm", exec_ms.count())
+				("trxs", _context->building_status.trx_counter)
+				("msgs", _context->building_status.msg_counter)
+			);
 
 			if (fork)
 			{
@@ -735,12 +763,6 @@ namespace Xmaxplatform { namespace Chain {
 				}
 
 			}
-		}
-
-		void chain_xmax::push_fork(const signed_block_ptr block)
-		{
-			_context->fork_db.add_block(block);
-			_check_fork();
 		}
 
 		void chain_xmax::broadcast_confirmation(account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func)
