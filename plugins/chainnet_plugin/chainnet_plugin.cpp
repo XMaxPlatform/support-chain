@@ -380,7 +380,7 @@ namespace Xmaxplatform {
                   connection_ptr c = std::make_shared<connection_xmax>( socket );
                   connections.insert( c );
                   start_session( c );
-				  broadcast_connectingip(c);
+				  //broadcast_connectingip(c);
 
                } else {
                   elog( "Error max_client_count ${m} exceeded",
