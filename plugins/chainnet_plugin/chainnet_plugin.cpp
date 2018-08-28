@@ -773,19 +773,53 @@ namespace Xmaxplatform {
 
    void chainnet_plugin_impl::handle_message( connection_ptr c, const signed_block &msg) {
 		//TODO
-	   app().get_plugin<blockbuilder_plugin>().on_recv_message(msg);
+	   try
+	   {
+		   app().get_plugin<blockbuilder_plugin>().on_recv_message(msg);
+	   }
+	   catch (const std::exception &ex) {
+		   elog("Exception in handling recv signed block data from ${p} ${s}", ("p", c->peer_name())("s", ex.what()));
+	   }
+	   catch (const fc::exception &ex) {
+		   elog("Exception in handling read data ${s}", ("p", c->peer_name())("s", ex.to_string()));
+	   }
+	  
+	   
    }
 
    void chainnet_plugin_impl::handle_message(connection_ptr c, const block_confirmation &msg)
-   {
-	   app().get_plugin<blockbuilder_plugin>().on_recv_message(msg);
+   {  
+	   try
+	   {
+		   app().get_plugin<blockbuilder_plugin>().on_recv_message(msg);
+	   }
+	   catch (const std::exception &ex)
+	   {
+		   elog("Exception in handling recv block_confirmation  from ${p} ${s}", ("p", c->peer_name())("s", ex.what()));
+	   }
+	   catch (const fc::exception &ex)
+	   {
+		   elog("Exception in handling recv block_confirmation from ${p} ${s}", ("p", c->peer_name())("s", ex.what()));
+	   }
+	 
    }
 
    void chainnet_plugin_impl::handle_message(connection_ptr c, const signed_block_list &msg)
    {
-	   for (const signed_block sb : msg.blockList)
+	   try
 	   {
-		   app().get_plugin<blockbuilder_plugin>().on_recv_message(sb);
+		   for (const signed_block sb : msg.blockList)
+		   {
+			   app().get_plugin<blockbuilder_plugin>().on_recv_message(sb);
+		   }
+	   }  
+	   catch (const std::exception &ex)
+	   {
+		   elog("Exception in handling recv signed_block_list  from ${p} ${s}", ("p", c->peer_name())("s", ex.what()));
+	   }
+	   catch (const fc::exception &ex)
+	   {
+		   elog("Exception in handling recv signed_block_list from ${p} ${s}", ("p", c->peer_name())("s", ex.what()));
 	   }
    }
 
