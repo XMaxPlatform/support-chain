@@ -42,11 +42,10 @@ namespace Xmaxplatform {
 
 			struct get_info_results {
 
-				get_info_results(const string& v, uint32_t hbn, uint32_t chbn, uint32_t libn,
+				get_info_results(const string& v, uint32_t hbn, uint32_t libn,
 					const Chain::xmax_type_block_id& hbi, const Basetypes::time& hbt) :
 					server_version(v),
 					head_block_num(hbn),
-					confirmed_head_block_num(chbn),
 					last_irreversible_block_num(libn),
 					head_block_id(hbi),
 					head_block_time(hbt)
@@ -56,7 +55,6 @@ namespace Xmaxplatform {
 
 				string                server_version;
 				uint32_t              head_block_num = 0;	
-				uint32_t              confirmed_head_block_num = 0;
 				uint32_t              last_irreversible_block_num = 0;
 				Chain::xmax_type_block_id  head_block_id;
 				Basetypes::time    head_block_time;
@@ -159,19 +157,23 @@ namespace Xmaxplatform {
 
 			get_required_keys_result get_required_keys(const get_required_keys_params& params)const;
 
-			struct erc20_total_supply_params {
+			struct erc20_status_params {
 				asset_symbol token_name;
 			};
 
-			struct erc20_total_supply_result {
+			struct erc20_status_result {
 				uint256 total_supply;
+				uint256 decimal;
+				account_name contract_owner;
+				bool    stopmint;
+				bool revoked;
 			};
 
-			erc20_total_supply_result erc20_total_supply(const erc20_total_supply_params& params) const;
+			erc20_status_result erc20_status(const erc20_status_params& params) const;
 
 			struct erc20_balanceof_params {
 				asset_symbol token_name;
-				account_name owner;
+				name owner;
 			};
 
 			struct erc20_balanceof_result {
@@ -353,14 +355,14 @@ FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_block_header_results, (previ
 
 
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_info_results,
-(server_version)(head_block_num)(confirmed_head_block_num)(last_irreversible_block_num)(head_block_id)(head_block_time))
+(server_version)(head_block_num)(last_irreversible_block_num)(head_block_id)(head_block_time))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_write::push_transaction_results, (transaction_id)(processed)(events))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_required_keys_params, (transaction)(available_keys))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_required_keys_result, (required_keys))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_code_results, (account_name)(code_hash)(wast)(abi))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::get_code_params, (account_name))
-FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_total_supply_params, (token_name))
-FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_total_supply_result, (total_supply))
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_status_params, (token_name))
+FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_status_result, (total_supply)(decimal)(contract_owner)(stopmint)(revoked))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_balanceof_params, (token_name)(owner))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc20_balanceof_result, (balance))
 FC_REFLECT(Xmaxplatform::Chain_APIs::read_only::erc721_ownerof_params, (token_name)(token_id))

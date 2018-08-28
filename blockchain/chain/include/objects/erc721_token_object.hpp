@@ -27,8 +27,6 @@ namespace Xmaxplatform {
 			//---------
 			shared_map<xmax_erc721_id, account_name> token_owners;
 			//---------
-			//shared_map<account_name, shared_set<xmax_erc721_id>> owned_tokens;
-			//---------
 			// Optional mapping for token URIs
 			shared_map<xmax_erc721_id, string> token_urls;
 

@@ -12,6 +12,10 @@ namespace Chain {
 
 	namespace utils
 	{
+		xmax_type_block_num num_from_id(const xmax_type_block_id& id);
+
+		xmax_type_block_id block_id(xmax_type_summary summary, xmax_type_block_num num);
+
 		chain_timestamp get_delta_slot_time(chain_timestamp begin_time, uint32_t delta_slot);
 
 		uint32_t get_delta_slot_at_time(chain_timestamp begin_time, chain_timestamp when);

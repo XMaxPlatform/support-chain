@@ -17,10 +17,9 @@ namespace Xmaxplatform {
 		 */
 		class erc721_token_account_object : public Basechain::object<erc721_token_account_object_type, erc721_token_account_object> {
 			OBJECT_CCTOR(erc721_token_account_object,(tokens))
-
 			id_type id;
 			Basetypes::asset_symbol token_name;
-			Basetypes::account_name owner_name;
+			Basetypes::account_name account_name;
 			shared_set<xmax_erc721_id> tokens;
 		};
 
@@ -46,7 +45,7 @@ namespace Xmaxplatform {
 				composite_key<
 				erc721_token_account_object,
 				member<erc721_token_account_object, Basetypes::asset_symbol, &erc721_token_account_object::token_name>,
-				member<erc721_token_account_object, Basetypes::account_name, &erc721_token_account_object::owner_name>
+				member<erc721_token_account_object, Basetypes::account_name, &erc721_token_account_object::account_name>
 				>
 			>		
 			>//indexed_by

@@ -113,12 +113,13 @@ struct addcontract
 
 struct adderc20
    creator   account_name
-   name	asset_symbol
+   token_name	   asset_symbol
    total_balance	asset
+   decimal      uint64
 
 struct adderc721
    creator   account_name
-   name      account_name
+   token_name      asset_symbol
 
 struct setcode
    account         account_name # the account that is handling the message
@@ -206,6 +207,9 @@ struct issueerc721
 struct minterc721	
 	token_name asset_symbol
 	token_id fixed_string32
+
+struct stopminterc721	
+	token_name asset_symbol
 
 struct transferfromerc721	
 	token_name asset_symbol

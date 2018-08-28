@@ -48,28 +48,28 @@ namespace {
 
 	template <typename MultiIndexType>
 	static inline const erc721_token_object_test& FindErc721ObjFromTable(MultiIndexType& tbl, const std::string& token_name, int token_decimals) {
-		 auto it = tbl.get<by_token_name>().find(token_name_from_string(token_name, token_decimals));
+		 auto it = tbl.get<by_token_name>().find(token_name_from_string(token_name));
 		 return *it;
 	}
 
 	template <typename MultiIndexType>
 	static inline const erc721_token_account_object_test& FindErc721AccountObjFromTable(MultiIndexType& tbl, const std::string& token_name, int token_decimals, const std::string& owner_name) {
-		auto it = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex(token_name, owner_name, token_decimals));
+		auto it = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex(token_name, owner_name));
 		return *it;
 	}
 
 	//*** Erc20 Utility functions
 
 	template <typename MultiIndexType>
-	static void AddErc20ObjToTable(MultiIndexType& tbl, erc20_token_object::id_type id, const std::string& token_name, int token_decimals,
+	static void AddErc20ObjToTable(MultiIndexType& tbl, erc20_token_object_test::id_type id, const std::string& token_name, int token_decimals,
 		const std::string& owner_name, Xmaxplatform::Basetypes::share_type amount) {
 
-		erc20_token_object obj;
+		erc20_token_object_test obj;
 		//erc20_token_object obj;
 		obj.id = id;
-		obj.token_name = token_name_from_string(token_name, token_decimals);
+		obj.token_name = token_name_from_string(token_name);
 		obj.owner_name = xmax::string_to_name(owner_name.c_str());
-		obj.balance = amount;
+		//obj.balance = amount;
 		obj.total_supply = amount;
 		tbl.insert(obj);
 	}
@@ -80,7 +80,7 @@ namespace {
 
 		erc20_token_account_object obj;
 		obj.id = id;
-		obj.token_name = token_name_from_string(token_name, token_decimals);
+		obj.token_name = token_name_from_string(token_name);
 		obj.owner_name = xmax::string_to_name(owner_name.c_str());
 		obj.balance = static_cast<share_type>(init_balance);
 		tbl.insert(obj);
@@ -88,15 +88,15 @@ namespace {
 
 	template <typename MultiIndexType>
 	static void MintErc20Tokens(MultiIndexType& tbl, const std::string& token_name, int token_decimals, int amount) {
-		auto it = tbl.get<by_token_name>().find(token_name_from_string(token_name, token_decimals));
+		auto it = tbl.get<by_token_name>().find(token_name_from_string(token_name));
 
 		XMAX_ASSERT(it != tbl.get<by_token_name>().end(), message_validate_exception,
 			"Erc20 token:${token_name} has not created", ("token_name", token_name));
 
 		share_type t_amount(amount);
 
-		tbl.get<by_token_name>().modify(it, [t_amount](erc20_token_object& o) {
-			o.balance += t_amount;
+		tbl.get<by_token_name>().modify(it, [t_amount](erc20_token_object_test& o) {
+			//o.balance += t_amount;
 			o.total_supply += t_amount;
 		});
 	}
@@ -105,7 +105,7 @@ namespace {
 	static void SendErc20TokensToAccount(MultiIndexType& account_table, const std::string& token_name, int token_decimals, const std::string& owner_name,
 		Xmaxplatform::Basetypes::share_type amount) {
 
-		auto it = account_table.get<by_token_and_owner>().find(MakeErcTokenIndex(token_name, owner_name, token_decimals));
+		auto it = account_table.get<by_token_and_owner>().find(MakeErcTokenIndex(token_name, owner_name));
 		const erc20_token_account_object& obj = *it;
 
 		XMAX_ASSERT(it != account_table.get<by_token_and_owner>().end(), message_validate_exception,
@@ -125,7 +125,7 @@ namespace {
 
 		erc721_token_object_test obj;
 		obj.id = id;		
-		obj.token_name = token_name_from_string(token_name, token_decimals);
+		obj.token_name = token_name_from_string(token_name);
 		obj.owner_name = xmax::string_to_name(owner_name.c_str());
 		//obj.minted_tokens.insert(token_id);
 		tbl.get<by_token_name>().insert(obj);
@@ -136,7 +136,7 @@ namespace {
 		const std::string& owner_name) {
 		erc721_token_account_object_test obj;
 		obj.id = id;
-		obj.token_name = token_name_from_string(token_name, token_decimals);
+		obj.token_name = token_name_from_string(token_name);
 		obj.owner_name = xmax::string_to_name(owner_name.c_str());
 		//obj.tokens.insert(token_id);
 		tbl.insert(obj);
@@ -144,7 +144,7 @@ namespace {
 
 	template <typename MultiIndexType>
 	static void MintErc721Token(MultiIndexType& tbl, const std::string& token_name, int token_decimals, const Xmaxplatform::Chain::xmax_erc721_id& token_id) {
-		auto it = tbl.get<by_token_name>().find(token_name_from_string(token_name, token_decimals));
+		auto it = tbl.get<by_token_name>().find(token_name_from_string(token_name));
 	
 		auto mint_it = it->minted_tokens.find(token_id);
 		XMAX_ASSERT(mint_it == it->minted_tokens.end(), duplicate_type_exception, "Mint ERC721 token already exist : ${name}", ("name", token_name));
@@ -157,7 +157,7 @@ namespace {
 	template <typename MultiIndexType>
 	static void SendErc721TokenToAccount(MultiIndexType& tbl, const std::string& token_name, int token_decimals, const std::string& owner_name,
 		const Xmaxplatform::Chain::xmax_erc721_id& token_id) {
-		auto it = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex(token_name, owner_name, token_decimals));
+		auto it = tbl.get<by_token_and_owner>().find(MakeErcTokenIndex(token_name, owner_name));
 		const erc721_token_account_object_test& obj = *it;
 
 		auto token_it = obj.tokens.find(token_id);
@@ -237,23 +237,23 @@ BOOST_AUTO_TEST_CASE(erc20_test_mint) {
 BOOST_AUTO_TEST_CASE(erc20_test_index) {
 	auto& tbl = GetTestErc20Container();
 	
-	auto it = tbl.get<by_token_name>().find(token_name_from_string("TST", 8));
+	auto it = tbl.get<by_token_name>().find(token_name_from_string("TST"));
 	BOOST_ASSERT(it != tbl.get<by_token_name>().end());
 	auto& obj = *it;
-	BOOST_CHECK(obj.id == erc20_token_object::id_type(1));
-	BOOST_CHECK(obj.balance == 32345);
+	BOOST_CHECK(obj.id == erc20_token_object_test::id_type(1));
+	BOOST_CHECK(obj.total_supply == 32345);
 
-	auto it2 = tbl.get<by_token_name>().find(token_name_from_string("TSA", 8));
+	auto it2 = tbl.get<by_token_name>().find(token_name_from_string("TSA"));
 	BOOST_ASSERT(it2 != tbl.get<by_token_name>().end());
 	auto& obj2 = *it2;
-	BOOST_CHECK(obj2.id == erc20_token_object::id_type(2));
-	BOOST_CHECK(obj2.balance == 23579);
+	BOOST_CHECK(obj2.id == erc20_token_object_test::id_type(2));
+	BOOST_CHECK(obj2.total_supply == 23579);
 
-	auto it3 = tbl.get<by_token_name>().find(token_name_from_string("TSC", 8));
+	auto it3 = tbl.get<by_token_name>().find(token_name_from_string("TSC"));
 	BOOST_ASSERT(it3 != tbl.get<by_token_name>().end());
 	auto& obj3 = *it3;
-	BOOST_CHECK(obj3.id == erc20_token_object::id_type(3));
-	BOOST_CHECK(obj3.balance == 29680);
+	BOOST_CHECK(obj3.id == erc20_token_object_test::id_type(3));
+	BOOST_CHECK(obj3.total_supply == 29680);
 }
 
 BOOST_AUTO_TEST_CASE(erc20_test_account) {
@@ -273,10 +273,10 @@ BOOST_AUTO_TEST_CASE(erc20_test_account_send) {
 	auto& tbl = GetTestErc20TokenAccountTable();
 
 	SendErc20TokensToAccount(tbl, "TSA", 8, "testera", 10000);
-	BOOST_CHECK(tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TSA", "testera", 8))->balance == 22345);
+	BOOST_CHECK(tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TSA", "testera"))->balance == 22345);
 
 	SendErc20TokensToAccount(tbl, "TSB", 8, "testera", 20000);
-	BOOST_CHECK(tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TSB", "testera", 8))->balance == 33579);
+	BOOST_CHECK(tbl.get<by_token_and_owner>().find(MakeErcTokenIndex("TSB", "testera"))->balance == 33579);
 
 	BOOST_CHECK_EXCEPTION({
 		SendErc20TokensToAccount(tbl, "TSC", 8, "testera", 20000);

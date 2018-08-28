@@ -46,7 +46,7 @@ namespace Chain {
 
 		xmax_ctx.notified.push_back(msg.code);
 
-		message_response res = exec_one_message(xmax_ctx);
+		message_response res = exec_one_message(xmax_ctx,false);
 
 		XMAX_ASSERT(xmax_ctx.notified.size() < 1000,
 			transaction_exception, "to many recipient.");
@@ -57,7 +57,7 @@ namespace Chain {
 		{
 			account_name notify_code = xmax_ctx.notified[i];
 			xmax_ctx.change_code(notify_code);
-			message_response res2 = exec_one_message(xmax_ctx);
+			message_response res2 = exec_one_message(xmax_ctx,true);
 
 			response->message_responses.emplace_back(std::move(res2));
 		}
@@ -68,7 +68,7 @@ namespace Chain {
 		}
 	}
 
-	message_response transaction_context_xmax::exec_one_message(message_context_xmax& context)
+	message_response transaction_context_xmax::exec_one_message(message_context_xmax& context,bool is_notify)
 	{
 		try {
 			const account_object& acc = context.db.get<account_object, by_name>(context.code);
@@ -80,8 +80,18 @@ namespace Chain {
 					"Unknown native scope type '${type}' of account '${acc_name}'.", ("type", (int)scope)("acc_name", acc.name.to_string()));
 
 				auto handler = chain.find_native_handler(scope, context.msg.type);
-				XMAX_ASSERT(handler, transaction_exception, "There is not function '${name}' in account '${acc_name}'.", ("name", context.msg.type)("acc_name", acc.name.to_string()));
-				handler(context);
+				if (is_notify)
+				{
+					if (handler)
+					{
+						handler(context);
+					}
+				}
+				else
+				{
+					XMAX_ASSERT(handler, transaction_exception, "There is not function '${name}' in account '${acc_name}'.", ("name", context.msg.type)("acc_name", acc.name.to_string()));
+					handler(context);
+				}
 			}
 			else
 			{				

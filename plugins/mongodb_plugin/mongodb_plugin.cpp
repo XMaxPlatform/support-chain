@@ -868,44 +868,44 @@ namespace Xmaxplatform {
 	//--------------------------------------------------
 	void mongodb_plugin_impl::_init_mongodb_tables()
 	{
-		//using namespace bsoncxx::types;
+		using namespace bsoncxx::types;
 
-		//ilog("Initialize the mongodb tables.");
+		ilog("Initialize the mongodb tables.");
 
-		//xmax_abi = Xmaxplatform::Native_contract::native_contract_chain_init::xmax_contract_abi();
+		xmax_abi = Xmaxplatform::Native_contract::native_contract_chain_init::get_system_abi();
 
-		//bsoncxx::builder::stream::document doc{};
+		bsoncxx::builder::stream::document doc{};
 
-		//auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
-		//	std::chrono::microseconds{ fc::time_point::now().time_since_epoch().count() });
-		//doc << "name" << Config::xmax_contract_name.to_string()
-		//	<< "main_token" << asset(Config::initial_token_supply).to_string()
-		//	<< "staked_token" << asset().to_string()
-		//	<< "unstaking_token" << asset().to_string()
-		//	<< "abi" << bsoncxx::from_json(fc::json::to_string(xmax_abi))
-		//	<< "createdTime" << b_date{ now }
-		//<< "updatedTime" << b_date{ now };
+		auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+			std::chrono::microseconds{ fc::time_point::now().time_since_epoch().count() });
+		doc << "name" << Config::xmax_contract_name.to_string()
+			<< "main_token" << asset(Config::initial_token_supply).to_string()
+			<< "staked_token" << asset().to_string()
+			<< "unstaking_token" << asset().to_string()
+			<< "abi" << bsoncxx::from_json(fc::json::to_string(xmax_abi))
+			<< "createdTime" << b_date{ now }
+		<< "updatedTime" << b_date{ now };
 
-		//if (!accounts.insert_one(doc.view())) {
-		//	elog("Failed to insert account ${n}", ("n", Config::xmax_contract_name.to_string()));
-		//}
+		if (!accounts.insert_one(doc.view())) {
+			elog("Failed to insert account ${n}", ("n", Config::xmax_contract_name.to_string()));
+		}
 
-		//// Accounts indexes
-		//accounts.create_index(bsoncxx::from_json(R"foo({ "name" : 1 })foo"));
+		// Accounts indexes
+		accounts.create_index(bsoncxx::from_json(R"foo({ "name" : 1 })foo"));
 
-		//// Transactions indexes
-		//auto trans = mongo_client[mongodb_name][col_transactions_name]; // Transactions
-		//trans.create_index(bsoncxx::from_json(R"foo({ "transaction_id" : 1 })foo"));
+		// Transactions indexes
+		auto trans = mongo_client[mongodb_name][col_transactions_name]; // Transactions
+		trans.create_index(bsoncxx::from_json(R"foo({ "transaction_id" : 1 })foo"));
 
-		//// Messages indexes
-		//auto msgs = mongo_client[mongodb_name][col_messages_name]; // Messages
-		//msgs.create_index(bsoncxx::from_json(R"foo({ "message_id" : 1 })foo"));
-		//msgs.create_index(bsoncxx::from_json(R"foo({ "transaction_id" : 1 })foo"));
+		// Messages indexes
+		auto msgs = mongo_client[mongodb_name][col_messages_name]; // Messages
+		msgs.create_index(bsoncxx::from_json(R"foo({ "message_id" : 1 })foo"));
+		msgs.create_index(bsoncxx::from_json(R"foo({ "transaction_id" : 1 })foo"));
 
-		//// Blocks indexes
-		//auto blocks = mongo_client[mongodb_name][col_blocks_name]; // Blocks
-		//blocks.create_index(bsoncxx::from_json(R"foo({ "block_num" : 1 })foo"));
-		//blocks.create_index(bsoncxx::from_json(R"foo({ "block_id" : 1 })foo"));
+		// Blocks indexes
+		auto blocks = mongo_client[mongodb_name][col_blocks_name]; // Blocks
+		blocks.create_index(bsoncxx::from_json(R"foo({ "block_num" : 1 })foo"));
+		blocks.create_index(bsoncxx::from_json(R"foo({ "block_id" : 1 })foo"));
 	}
 
 

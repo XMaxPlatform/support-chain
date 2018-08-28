@@ -4,12 +4,28 @@
 */
 
 #include <chain_utils.hpp>
+#include <fc/io/raw.hpp>
+#include <fc/bitutil.hpp>
+#include <algorithm>
 
 namespace Xmaxplatform {
 namespace Chain {
 
 	namespace utils
 	{
+
+		xmax_type_block_num num_from_id(const xmax_type_block_id& id)
+		{
+			return fc::endian_reverse_u32(id._hash[0]);
+		}
+
+		xmax_type_block_id block_id(xmax_type_summary summary, xmax_type_block_num num)
+		{
+			summary._hash[0] &= 0xffffffff00000000;
+			summary._hash[0] += fc::endian_reverse_u32(num); // store the block num in the ID, 160 bits is plenty for the hash
+			return summary;
+		}
+
 		chain_timestamp get_delta_slot_time(chain_timestamp begin_time, uint32_t delta_slot)
 		{
 			begin_time += chain_timestamp::create(delta_slot);

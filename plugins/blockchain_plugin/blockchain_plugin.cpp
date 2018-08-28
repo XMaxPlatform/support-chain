@@ -171,7 +171,7 @@ namespace Xmaxplatform {
 														CHAIN_RO_CALL(get_block_header, 200),
 														CHAIN_RO_CALL(get_code, 200),
 														CHAIN_RO_CALL(get_required_keys, 200),
-														CHAIN_RO_CALL(erc20_total_supply, 200),
+														CHAIN_RO_CALL(erc20_status, 200),
 														CHAIN_RO_CALL(erc20_balanceof, 200),
 														CHAIN_RO_CALL(erc721_balanceof, 200),
 														CHAIN_RO_CALL(erc721_ownerof, 200),
@@ -223,7 +223,6 @@ namespace Chain_APIs{
 
 		return get_info_results( itoh(static_cast<uint32_t>(app().version())),
 			_chain.head_block_num(),	
-			_chain.confirmed_head_block()->block_num(),
 			_chain.last_irreversible_block_num(),
 			_chain.head_block_id(),
 			_chain.head_block_time()
@@ -253,7 +252,7 @@ namespace Chain_APIs{
 	Xmaxplatform::Chain_APIs::read_only::get_block_header_results read_only::get_block_header(const get_block_header_params& params) const
 	{
 		try {
-			if (auto block = _chain.confirmed_block_from_num(fc::to_uint64(params.block_num_or_id)))
+			if (auto block = _chain.block_from_num(fc::to_uint64(params.block_num_or_id)))
 			{
 				Xmaxplatform::Chain::signed_block_header* block_header = (Xmaxplatform::Chain::signed_block_header*)block.get();
 				return *block_header;
@@ -300,14 +299,19 @@ namespace Chain_APIs{
 
 
 	//--------------------------------------------------
-	Xmaxplatform::Chain_APIs::read_only::erc20_total_supply_result read_only::erc20_total_supply(const erc20_total_supply_params& params) const
+	Xmaxplatform::Chain_APIs::read_only::erc20_status_result read_only::erc20_status(const erc20_status_params& params) const
 	{
 		using namespace Xmaxplatform::Chain;
 
 		const auto &data = _chain.get_database();
 		const auto &token = data.get<erc20_token_object, by_token_name>(params.token_name);
-		return erc20_total_supply_result{ static_cast<uint256>(token.total_supply) };
-
+		return erc20_status_result{ 
+			static_cast<uint256>(token.total_supply),
+			static_cast<uint256>(token.decimal),
+			token.owner_name,
+			static_cast<bool>(token.stopmint),
+			static_cast<bool>(token.revoked)
+		};
 	}
 
 
@@ -315,10 +319,20 @@ namespace Chain_APIs{
 	Xmaxplatform::Chain_APIs::read_only::erc20_balanceof_result read_only::erc20_balanceof(const erc20_balanceof_params& params) const
 	{
 		using namespace Xmaxplatform::Chain;
-
 		const auto &data = _chain.get_database();
-		const auto &token_account = data.get<erc20_token_account_object, by_token_and_owner>(MakeErcTokenIndex(params.token_name, params.owner));
-		return erc20_balanceof_result{ static_cast<uint256>(token_account.balance) };
+		const auto& erc20_obj = data.get<erc20_token_object, by_token_name>(params.token_name);
+		//const auto &token_account = data.get<erc20_token_account_object, by_token_and_owner>(MakeErcTokenIndex(params.token_name, params.owner));
+	
+		auto itr = erc20_obj.balances.find(params.owner);
+		if (itr == erc20_obj.balances.end())
+		{
+			return erc20_balanceof_result{ static_cast<uint256>(0) };
+		}
+		else
+		{
+			return erc20_balanceof_result{ static_cast<uint256>((*itr).second) };
+		}
+		
 	}
 
 
@@ -328,6 +342,7 @@ namespace Chain_APIs{
 		using namespace Xmaxplatform::Chain;
 
 		const auto &data = _chain.get_database();
+
 		const auto &token_account = data.get<erc721_token_account_object, by_token_and_owner>(MakeErcTokenIndex(params.token_name, params.owner));
 		return erc721_balanceof_result{ static_cast<uint256>(token_account.tokens.size()) };
 	}
