@@ -647,15 +647,17 @@ namespace Xmaxplatform { namespace Chain {
 		void chain_xmax::push_fork(const signed_block_ptr block)
 		{
 			auto num = block->block_num();
-			auto id = block->id();
+			try {
+				_context->fork_db.add_block(block);
 
-			ilog("get a fork block, num=${num}, id=${id},",
-				("num", num)
-				("id", id)
-			);
 
-			_context->fork_db.add_block(block);
-			_check_fork();
+				ilog("get a fork block, num=${num}, id=${id},",
+					("num", num)
+				);
+				_check_fork();
+
+			}FC_CAPTURE_AND_LOG((num))
+			
 		}
 
 		block_pack_ptr chain_xmax::_apply_block(signed_block_ptr block, bool fork)
