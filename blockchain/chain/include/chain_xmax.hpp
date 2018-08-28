@@ -195,7 +195,7 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void confirm_block(const signed_block_ptr next_block);
 
-	   void push_block(const signed_block_ptr block);
+	   void push_fork(const signed_block_ptr block);
 
 	   void broadcast_confirmation(account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func);
 

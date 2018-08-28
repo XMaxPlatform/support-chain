@@ -737,7 +737,7 @@ namespace Xmaxplatform { namespace Chain {
 			}
 		}
 
-		void chain_xmax::push_block(const signed_block_ptr block)
+		void chain_xmax::push_fork(const signed_block_ptr block)
 		{
 			_context->fork_db.add_block(block);
 			_check_fork();

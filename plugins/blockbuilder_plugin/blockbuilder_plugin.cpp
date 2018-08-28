@@ -37,6 +37,9 @@ private:
 	void start_check();
     void next_block();
 
+	void confirm_block(Chain::chain_xmax& chain, signed_block_ptr block);
+	void fork_block(Chain::chain_xmax& chain, signed_block_ptr block);
+
 	void genesis_block_build();
 	void confirmation_block_self();
     block_build_condition next_block_impl();
@@ -307,8 +310,25 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 		netPlugin.broadcast_block( *chain.head_block() );
         return block_build_condition::generated;
     }
-
 	void blockbuilder_plugin_impl::recieve_block(signed_block_ptr block)
+	{
+		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
+
+		auto num = block->block_num();
+
+		if (chain.head_block_num() == num - 1)
+		{
+			confirm_block(chain, block);
+		}
+		else
+		{
+			FC_ASSERT(chain.last_irreversible_block_num() < num, "bad block num: %{num}, last irreversible num is %{inum} now.", ("num", num)("inum", chain.last_irreversible_block_num()));
+			fork_block(chain, block);
+		}
+
+	}
+
+	void blockbuilder_plugin_impl::confirm_block(Chain::chain_xmax& chain, signed_block_ptr block)
 	{
 		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
 
@@ -342,6 +362,11 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 			}
 		}
 
+	}
+
+	void blockbuilder_plugin_impl::fork_block(Chain::chain_xmax& chain, signed_block_ptr block)
+	{
+		chain.push_fork(block);
 	}
 
 	void blockbuilder_plugin_impl::confirmation_block_self()
