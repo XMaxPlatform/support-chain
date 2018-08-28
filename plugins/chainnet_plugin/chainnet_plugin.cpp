@@ -162,7 +162,9 @@ namespace Xmaxplatform {
       node_transaction_index        local_txns;
 
       shared_ptr<tcp::resolver>     resolver;
+	  boost::asio::deadline_timer _timer;
 
+	  chainnet_plugin_impl(boost::asio::io_service& io);
 
 	  Chain::string connectImpl(const Chain::string& endPoint);
       void connect( connection_ptr c );
@@ -214,6 +216,9 @@ namespace Xmaxplatform {
       void start_conn_timer( );
       void start_txn_timer( );
       void start_monitors( );
+
+	  void start_net();
+	  void start_up();
 
 	  void broadcast_connectingip(connection_ptr cp);
 		
@@ -1011,9 +1016,13 @@ namespace Xmaxplatform {
 
 
    chainnet_plugin::chainnet_plugin()
-      :my( new chainnet_plugin_impl ) {
+      :my( new chainnet_plugin_impl(app().get_io_service()) ) {
 	   cnet_impl = my.get();
    }
+
+   chainnet_plugin_impl::chainnet_plugin_impl(boost::asio::io_service& io)
+	   : _timer(io)
+   {}
 
    chainnet_plugin::~chainnet_plugin() {
    }
@@ -1147,22 +1156,35 @@ namespace Xmaxplatform {
    }
 
    void chainnet_plugin::plugin_startup() {
+	   my->start_up();
+   }
+
+   void chainnet_plugin_impl::start_up()
+   {
+	   int64_t start_delay = 1000000;
+
+	   _timer.expires_from_now(boost::posix_time::microseconds(start_delay));
+	   _timer.async_wait(boost::bind(&chainnet_plugin_impl::start_net, this));
+   }
+
+   void chainnet_plugin_impl::start_net()
+   {
 	   ilog("chainnet_plugin::plugin_startup");
-      if( my->acceptor ) {
-         my->acceptor->open(my->listen_endpoint.protocol());
-         my->acceptor->set_option(tcp::acceptor::reuse_address(true));
-         my->acceptor->bind(my->listen_endpoint);
-         my->acceptor->listen();
-         ilog("starting listener, max clients is ${mc}",("mc",my->max_client_count));
-         my->start_listen_loop();
-      }
+	   if (acceptor) {
+		   acceptor->open(listen_endpoint.protocol());
+		   acceptor->set_option(tcp::acceptor::reuse_address(true));
+		   acceptor->bind(listen_endpoint);
+		   acceptor->listen();
+		   ilog("starting listener, max clients is ${mc}", ("mc", max_client_count));
+		   start_listen_loop();
+	   }
 
-      my->chain_plug->getchain().on_pending_transaction.connect( &chainnet_plugin_impl::transaction_ready);
-      my->start_monitors();
+	   chain_plug->getchain().on_pending_transaction.connect(&chainnet_plugin_impl::transaction_ready);
+	   start_monitors();
 
-      for( auto seed_node : my->supplied_peers ) {
-         connect( seed_node );
-      }
+	   for (auto seed_node : supplied_peers) {
+		   connectImpl(seed_node);
+	   }
    }
 
    void chainnet_plugin::plugin_shutdown() {
