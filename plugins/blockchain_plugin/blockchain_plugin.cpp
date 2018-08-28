@@ -320,19 +320,17 @@ namespace Chain_APIs{
 	{
 		using namespace Xmaxplatform::Chain;
 		const auto &data = _chain.get_database();
-		const auto& erc20_obj = data.get<erc20_token_object, by_token_name>(params.token_name);
+		//const auto& erc20_obj = data.get<erc20_token_object, by_token_name>(params.token_name);
 		//const auto &token_account = data.get<erc20_token_account_object, by_token_and_owner>(MakeErcTokenIndex(params.token_name, params.owner));
-	
-		auto itr = erc20_obj.balances.find(params.owner);
-		if (itr == erc20_obj.balances.end())
+		auto token_account_ptr = data.find<erc20_token_account_object, by_token_and_owner>(std::make_tuple(params.token_name, params.owner));
+		if (token_account_ptr==nullptr)
 		{
 			return erc20_balanceof_result{ static_cast<uint256>(0) };
 		}
-		else
-		{
-			return erc20_balanceof_result{ static_cast<uint256>((*itr).second) };
-		}
-		
+		const auto& token_account = data.get<erc20_token_account_object, by_token_and_owner>(std::make_tuple(params.token_name, params.owner));
+		return erc20_balanceof_result{ token_account.balance };
+
+		return erc20_balanceof_result{ 0 };
 	}
 
 
@@ -340,11 +338,24 @@ namespace Chain_APIs{
 	Xmaxplatform::Chain_APIs::read_only::erc721_balanceof_result read_only::erc721_balanceof(const erc721_balanceof_params& params) const
 	{
 		using namespace Xmaxplatform::Chain;
-
 		const auto &data = _chain.get_database();
 
-		const auto &token_account = data.get<erc721_token_account_object, by_token_and_owner>(MakeErcTokenIndex(params.token_name, params.owner));
-		return erc721_balanceof_result{ static_cast<uint256>(token_account.tokens.size()) };
+		auto token_find_id = std::make_tuple(params.token_name, params.owner);
+		auto token_obj_ptr = data.find<erc721_token_account_object, by_token_and_owner>(token_find_id);
+
+		if (token_obj_ptr == nullptr)
+		{
+			return erc721_balanceof_result{0 };
+		}
+
+		//const auto& token_obj = data.find<erc721_token_account_object, by_token_and_owner>(token_find_id);
+
+		const auto& idx = data.get_index<erc721_token_account_multi_index, by_token_and_owner>();
+
+		auto lower = idx.lower_bound(boost::make_tuple(params.token_name, params.owner));
+		auto upper = idx.upper_bound(boost::make_tuple(params.token_name, params.owner));
+		
+		return erc721_balanceof_result{ std::distance(lower, upper)};
 	}
 
 
@@ -354,9 +365,22 @@ namespace Chain_APIs{
 		using namespace Xmaxplatform::Chain;
 
 		const auto &data = _chain.get_database();
-		const auto &token_obj = data.get<erc721_token_object, by_token_name>(params.token_name);
-		return erc721_ownerof_result{ token_obj.token_owners.at(params.token_id) };
+		//const auto &token_obj = data.get<erc721_token_object, by_token_name>(params.token_name);
+		//return erc721_ownerof_result{ token_obj.token_owners.at(params.token_id) };
 
+		xmax_erc721_id token_id{ params.token_id };
+
+		auto token_find_id = std::make_tuple(params.token_name, token_id);
+		auto token_obj_ptr = data.find<erc721_token_account_object, by_token_and_tokenid>(token_find_id);
+
+		if (token_obj_ptr == nullptr)
+		{
+			FC_THROW_EXCEPTION(message_validate_exception,
+				"Could not find token by this token id" );
+		}
+
+		const auto& token_obj = data.get<erc721_token_account_object, by_token_and_tokenid>(token_find_id);
+		return erc721_ownerof_result{ token_obj.token_owner };
 	}
 
 	read_only::get_account_results read_only::get_account(const get_account_params &params) const {

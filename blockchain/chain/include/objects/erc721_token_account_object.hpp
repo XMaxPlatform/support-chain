@@ -16,11 +16,13 @@ namespace Xmaxplatform {
 		 * @brief The erc721_token_account_object class tracks the ERC20,ERC721 tokens for accounts
 		 */
 		class erc721_token_account_object : public Basechain::object<erc721_token_account_object_type, erc721_token_account_object> {
-			OBJECT_CCTOR(erc721_token_account_object,(tokens))
+			OBJECT_CCTOR(erc721_token_account_object)
 			id_type id;
+			//---------
 			Basetypes::asset_symbol token_name;
-			Basetypes::account_name account_name;
-			shared_set<xmax_erc721_id> tokens;
+			xmax_erc721_id token_id;
+			account_name token_owner;
+			string token_url;
 		};
 
 		class erc721_token_account_object_test : public Basechain::object<erc721_token_account_object_type, erc721_token_account_object_test> {
@@ -33,7 +35,8 @@ namespace Xmaxplatform {
 			std::set<xmax_erc721_id> tokens;
 		};
 		
-		struct by_token_and_owner;		
+		struct by_token_and_owner;	
+		struct by_token_and_tokenid;
 
 		using erc721_token_account_multi_index = Basechain::shared_multi_index_container<
 			erc721_token_account_object,
@@ -45,9 +48,16 @@ namespace Xmaxplatform {
 				composite_key<
 				erc721_token_account_object,
 				member<erc721_token_account_object, Basetypes::asset_symbol, &erc721_token_account_object::token_name>,
-				member<erc721_token_account_object, Basetypes::account_name, &erc721_token_account_object::account_name>
+				member<erc721_token_account_object, Basetypes::account_name, &erc721_token_account_object::token_owner>
 				>
-			>		
+			>,	
+			ordered_unique<tag<by_token_and_tokenid>,
+			composite_key<
+			erc721_token_account_object,
+			member<erc721_token_account_object, Basetypes::asset_symbol, &erc721_token_account_object::token_name>,
+			member<erc721_token_account_object, xmax_erc721_id, &erc721_token_account_object::token_id>
+			>
+			>
 			>//indexed_by
 		>;
 
