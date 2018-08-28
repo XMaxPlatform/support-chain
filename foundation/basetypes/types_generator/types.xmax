@@ -187,11 +187,6 @@ struct stopminterc20
 struct revokeerc20
 	token_name asset_symbol
 
-struct transfererc20
-	token_name asset_symbol
-	to	account_name
-	value asset
-
 struct transferfromerc20
 	token_name asset_symbol
 	from	account_name
