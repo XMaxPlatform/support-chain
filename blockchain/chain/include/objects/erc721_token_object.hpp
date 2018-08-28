@@ -16,23 +16,17 @@ namespace Xmaxplatform {
 		 * @brief The erc721_token_object class tracks the ERC20,ERC721 tokens for accounts
 		 */
 		class erc721_token_object : public Basechain::object<erc721_token_object_type, erc721_token_object> {
-			OBJECT_CCTOR(erc721_token_object,(all_tokens)(token_owners)(token_urls))
+			OBJECT_CCTOR(erc721_token_object)
 
 			id_type id;
 			Basetypes::asset_symbol token_name;
 			Basetypes::account_name owner_name;		
 
-			//---------
-			shared_set<xmax_erc721_id> all_tokens;
-			//---------
-			shared_map<xmax_erc721_id, account_name> token_owners;
-			//---------
-			// Optional mapping for token URIs
-			shared_map<xmax_erc721_id, string> token_urls;
-
 			int8_t revoked = 0;
 			int8_t stopmint = 0;
 		};
+
+
 
 		class erc721_token_object_test : public Basechain::object<erc721_token_object_type, erc721_token_object_test> {
 			OBJECT_CCTOR(erc721_token_object_test, (minted_tokens))

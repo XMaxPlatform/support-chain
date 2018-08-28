@@ -214,13 +214,20 @@ void xmax_system_adderc20(Chain::message_context_xmax& context)
 		"Erc20 token:'${t}' already exist, the owner is ${owner}",
 		("t", msgdata.token_name)("owner", existing_token_obj->owner_name));
 
-
 	db.create<erc20_token_object>([&msgdata](erc20_token_object& obj) {
 		obj.token_name = msgdata.token_name;
 		obj.owner_name = msgdata.creator;
-		//obj.balance = issue_erc20.total_balance.amount;
-		obj.balances[msgdata.creator] = msgdata.total_balance.amount;
 		obj.total_supply = msgdata.total_balance.amount;
+	});
+
+	auto account_owner = MakeErcTokenIndex(msgdata.token_name, msgdata.creator);
+	auto token_account_owner_ptr = db.find<erc20_token_account_object, by_token_and_owner>(account_owner);
+	XMAX_ASSERT(token_account_owner_ptr == nullptr, message_validate_exception, "From account already have tokens!");
+
+	db.create<erc20_token_account_object>([&msgdata](erc20_token_account_object& obj) {
+		obj.balance = msgdata.total_balance.amount;
+		obj.owner_name = msgdata.creator;
+		obj.token_name = msgdata.token_name;
 	});
 }
 void xmax_system_adderc721(Chain::message_context_xmax& context)
@@ -532,64 +539,6 @@ void xmax_system_unregproxy(message_context_xmax& context)    {
     xmax_voting::unreg_proxy(context);
 }
 
-
-//--------------------------------------------------
-void xmax_erc20_issue(Chain::message_context_xmax& context) {
-	auto& db = context.mutable_db;
-	auto issue_erc20 = context.msg.as<Types::issueerc20>();
-
-	//Todo: Check creator authorization
-	context.require_scope(issue_erc20.creator);
-	context.require_authorization(issue_erc20.creator);
-	context.require_recipient(issue_erc20.creator);
-	//Todo: Check keys authority validation
-
-	//Check existence
-	auto existing_token_obj = db.find<erc20_token_object, by_token_name>(issue_erc20.token_name);
-	XMAX_ASSERT(existing_token_obj == nullptr, message_validate_exception,
-		"Erc20 token:'${t}' already exist, the owner is ${owner}",
-		("t", issue_erc20.token_name)("owner", existing_token_obj->owner_name));
-
-
-	db.create<erc20_token_object>([&issue_erc20](erc20_token_object& obj) {		
-		obj.token_name = issue_erc20.token_name;
-		obj.owner_name = issue_erc20.creator;
-		//obj.balance = issue_erc20.total_balance.amount;
-		obj.balances[issue_erc20.creator] = issue_erc20.total_balance.amount;
-		obj.total_supply = issue_erc20.total_balance.amount;
-	});
-
-
-}
-
-
-//--------------------------------------------------
-void xmax_erc721_issue(Chain::message_context_xmax& context) {
-	auto& db = context.mutable_db;
-	auto issue_erc721 = context.msg.as<Types::issueerc721>();
-
-	//Todo: Check creator authorization
-	context.require_scope(issue_erc721.creator);
-	context.require_authorization(issue_erc721.creator);
-	context.require_recipient(issue_erc721.creator);
-	//Todo: validate the owner active recovery authority
-	
-
-	//Check precondition
-	auto existing_token_obj = db.find<erc721_token_object, by_token_name>(issue_erc721.token_name);
-	XMAX_ASSERT(existing_token_obj == nullptr, message_validate_exception,
-		"Erc721 token:'${t}' already exist, the owner is ${owner}",
-		("t", issue_erc721.token_name)("owner", existing_token_obj->owner_name));
-
-	
-	//Create erc721 token object
-	db.create<erc721_token_object>([&issue_erc721](erc721_token_object& token) {
-		token.token_name = issue_erc721.token_name;
-		token.owner_name = issue_erc721.creator;		
-	});	
-}
-
-
 //--------------------------------------------------
 void xmax_erc20_mint(Chain::message_context_xmax& context)
 {
@@ -606,10 +555,18 @@ void xmax_erc20_mint(Chain::message_context_xmax& context)
 	context.require_authorization(existing_token_obj.owner_name);//must signed by token sender.
 	context.require_recipient(existing_token_obj.owner_name);
 
+
+	auto account_owner = MakeErcTokenIndex(minterc20.token_name, existing_token_obj.owner_name);
+	auto token_account_owner_ptr = db.find<erc20_token_account_object, by_token_and_owner>(account_owner);
+	XMAX_ASSERT(token_account_owner_ptr != nullptr, message_validate_exception, "From have no tokens!");
+
+	const auto& token_account_owner = db.get<erc20_token_account_object, by_token_and_owner>(account_owner);
+	db.modify(token_account_owner, [&minterc20](erc20_token_account_object& obj) {
+		obj.balance = SafeMath::add(obj.balance, minterc20.mint_amount.amount);
+	});
+
 	db.modify(existing_token_obj, [&minterc20](erc20_token_object& obj) {
-		obj.total_supply += minterc20.mint_amount.amount;
-		//obj.balance += minterc20.mint_amount.amount;
-		obj.balances[obj.owner_name] = minterc20.mint_amount.amount;
+		obj.total_supply = SafeMath::add(obj.total_supply, minterc20.mint_amount.amount);
 	});
 }
 //--------------------------------------------------
@@ -634,6 +591,70 @@ void xmax_erc20_stopmint(Chain::message_context_xmax& context)
 		obj.stopmint = 1;
 	});
 }
+
+//--------------------------------------------------
+void xmax_erc20_revoke(Chain::message_context_xmax& context) {
+	auto& db = context.mutable_db;
+	auto revokeerc2o = context.msg.as<Types::revokeerc20>();
+
+	//Todo: Check owner authorization
+
+	//Check precondition
+	auto& erc20_obj = db.get<erc20_token_object, by_token_name>(revokeerc2o.token_name);
+	validate_token_not_revoke(erc20_obj);
+	db.modify(erc20_obj, [](erc20_token_object& obj) {
+		obj.revoked = 1;
+	});
+
+}
+//--------------------------------------------------
+void xmax_erc20_transferfrom(Chain::message_context_xmax& context)
+{
+	auto& db = context.mutable_db;
+	auto transfer_erc20 = context.msg.as<Types::transferfromerc20>();
+
+	//Check sender authorization
+	context.require_authorization(transfer_erc20.from);//must signed by token sender.
+
+	context.require_scope(transfer_erc20.from);
+	context.require_scope(transfer_erc20.to);
+	context.require_recipient(transfer_erc20.from);
+	context.require_recipient(transfer_erc20.to);
+
+	validate_name(transfer_erc20.from);
+	validate_name(transfer_erc20.to);
+
+	auto& erc20_obj = db.get<erc20_token_object, by_token_name>(transfer_erc20.token_name);
+	validate_token_not_revoke(erc20_obj);
+
+	auto account_from = MakeErcTokenIndex(transfer_erc20.token_name, transfer_erc20.from);
+	auto token_account_ptr_from = db.find<erc20_token_account_object, by_token_and_owner>(account_from);
+	XMAX_ASSERT(token_account_ptr_from != nullptr, message_validate_exception, "From have no tokens!");
+
+	auto account_to = MakeErcTokenIndex(transfer_erc20.token_name, transfer_erc20.to);
+	auto token_account_ptr_to = db.find<erc20_token_account_object, by_token_and_owner>(account_to);
+	if (!token_account_ptr_to)
+	{
+		db.create<erc20_token_account_object>([&transfer_erc20](erc20_token_account_object &obj) {
+			obj.token_name = transfer_erc20.token_name;
+			obj.owner_name = transfer_erc20.to;
+			obj.balance = 0;
+		});
+	}
+	const auto& token_account_from = db.get<erc20_token_account_object, by_token_and_owner>(account_from);
+	const auto& token_account_to = db.get<erc20_token_account_object, by_token_and_owner>(account_to);
+
+	db.modify(token_account_from, [&transfer_erc20](erc20_token_account_object& obj) {
+		XMAX_ASSERT(obj.balance > transfer_erc20.value.amount, message_validate_exception, "From have no enough tokens!");
+		obj.balance = SafeMath::sub(obj.balance, transfer_erc20.value.amount);
+	});
+
+	db.modify(token_account_to, [&transfer_erc20](erc20_token_account_object& obj) {
+		obj.balance = SafeMath::add(obj.balance, transfer_erc20.value.amount);
+	});
+
+	//TODO: emit transfer event
+}
 //--------------------------------------------------
 void xmax_erc721_mint(Chain::message_context_xmax& context)
 {
@@ -652,20 +673,21 @@ void xmax_erc721_mint(Chain::message_context_xmax& context)
 
 
 	xmax_erc721_id token_id{ minterc721.token_id };
-	XMAX_ASSERT(existing_token_obj.all_tokens.find(token_id) == existing_token_obj.all_tokens.end(),
+	auto account_from = std::make_tuple(minterc721.token_name, token_id); 
+	auto token_obj_ptr = db.find<erc721_token_account_object, by_token_and_tokenid>(account_from);
+
+
+	XMAX_ASSERT(token_obj_ptr==nullptr,
 		message_validate_exception,
 		"The ERC721 token: ${token_name} with token id:${token_id} has already minted",
 		("token_name", minterc721.token_name)("token_id", minterc721.token_id));
 
-
-	db.modify(existing_token_obj, [&minterc721](erc721_token_object& obj) {
-		xmax_erc721_id tokenid{ minterc721.token_id };
-		//step1
-		obj.all_tokens.insert(tokenid);
-		//step2
-		obj.token_owners[tokenid] = obj.owner_name;
+	db.create<erc721_token_account_object>([&minterc721,&existing_token_obj](erc721_token_account_object& token) {
+		token.token_name = minterc721.token_name;
+		token.token_owner = existing_token_obj.owner_name;
+		xmax_erc721_id token_id{ minterc721.token_id };
+		token.token_id = token_id;
 	});
-
 }
 
 void xmax_erc721_stopmint(Chain::message_context_xmax& context)
@@ -705,123 +727,37 @@ void xmax_erc721_transferfrom(Chain::message_context_xmax& context)
 
 	xmax_erc721_id token_id{ transferform721.token_id };
 
-	auto iter = existing_token_obj.token_owners.find(token_id);
-	
-	XMAX_ASSERT(
-		iter != existing_token_obj.token_owners.end()
-		&& (*iter).second == transferform721.from,
+	auto token_find_id = std::make_tuple(transferform721.token_name, token_id);
+	auto token_obj_ptr = db.find<erc721_token_account_object, by_token_and_tokenid>(token_find_id);
+
+
+	XMAX_ASSERT(token_obj_ptr != nullptr,
 		message_validate_exception,
-		"The ERC721 token: ${token_name} with token id:${token_id} not belong to from",
+		"The ERC721 token: ${token_name} with token id:${token_id} has already minted",
 		("token_name", transferform721.token_name)("token_id", transferform721.token_id));
 
-	auto account_to = MakeErcTokenIndex(transferform721.token_name, transferform721.to);
-	auto token_account_ptr_to = db.find<erc721_token_account_object, by_token_and_owner>(account_to);
-	if (!token_account_ptr_to)
-	{
-		db.create<erc721_token_account_object>([&transferform721](erc721_token_account_object &obj) {
-			obj.token_name = transferform721.token_name;
-			obj.account_name = transferform721.to;
-		});
-	}
+	const auto& erc721_token = db.get<erc721_token_account_object, by_token_and_tokenid>(token_find_id);
 
-	auto account_from = MakeErcTokenIndex(transferform721.token_name, transferform721.from);
-	auto token_account_ptr_from = db.find<erc721_token_account_object, by_token_and_owner>(account_from);
-	if (!token_account_ptr_from)
-	{
-		db.create<erc721_token_account_object>([&transferform721](erc721_token_account_object &obj) {
-			obj.token_name = transferform721.token_name;
-			obj.account_name = transferform721.from;
-		});
-	}
-	
-	const auto& token_account_from = db.get<erc721_token_account_object, by_token_and_owner>(account_from);
-	const auto& token_account_to = db.get<erc721_token_account_object, by_token_and_owner>(account_to);
-
-	db.modify(token_account_from, [&transferform721](erc721_token_account_object& obj) {
-		xmax_erc721_id tokenid{ transferform721.token_id };
-		auto iter =	obj.tokens.find(tokenid);
-		XMAX_ASSERT(
-			iter != obj.tokens.end(),
-			message_validate_exception,
-			"The ERC721 token: ${token_name} with token id:${token_id}  not belong to from",
-			("token_name", transferform721.token_name)("token_id", transferform721.token_id));
-		obj.tokens.erase(iter);
-	});
-
- 	db.modify(token_account_to, [&transferform721](erc721_token_account_object& obj) {
- 		xmax_erc721_id tokenid{ transferform721.token_id };
- 		obj.tokens.insert(tokenid);
- 	});
-
-	db.modify(existing_token_obj, [&transferform721](erc721_token_object& obj) {
-		xmax_erc721_id tokenid{ transferform721.token_id };
-		obj.token_owners[tokenid] = transferform721.to;
-
-	});
-}
-
-//--------------------------------------------------
-void xmax_erc20_revoke(Chain::message_context_xmax& context) {
-	auto& db = context.mutable_db;
-	auto revokeerc2o = context.msg.as<Types::revokeerc20>();
-
-	//Todo: Check owner authorization
-
-	//Check precondition
-	auto& erc20_obj = db.get<erc20_token_object, by_token_name>(revokeerc2o.token_name);	
-	validate_token_not_revoke(erc20_obj);
-	db.modify(erc20_obj, [](erc20_token_object& obj) {
-		obj.revoked = 1;
-	});
-
-}
-
-
-//--------------------------------------------------
-void xmax_erc20_transfer(Chain::message_context_xmax& context)
-{
-	//Hence our msg have no msg.sender feild,we can't implement this foo.
-	XMAX_ASSERT(false,
+	XMAX_ASSERT(erc721_token.token_owner == transferform721.from,
 		message_validate_exception,
-		"Hence our msg have no msg.sender feild,we can't implement this foo.");
-}
+		"The ERC721 token: ${token_name} with token id:${token_id} not belong to account::${account}",
+		("token_name", transferform721.token_name)("token_id", transferform721.token_id)("account", transferform721.from));
 
+	XMAX_ASSERT(erc721_token.token_name == transferform721.token_name,
+		message_validate_exception,
+		"token_name table broken! all erc721 in danger!"
+		);
 
-//--------------------------------------------------
-void xmax_erc20_transferfrom(Chain::message_context_xmax& context)
-{
-	auto& db = context.mutable_db;
-	auto transfer_erc20 = context.msg.as<Types::transferfromerc20>();
+	XMAX_ASSERT(erc721_token.token_id == token_id,
+		message_validate_exception,
+		"token_id table broken! all erc721 in danger!"
+		);
 
-	//Check sender authorization
-	context.require_authorization(transfer_erc20.from);//must signed by token sender.
-	
-	context.require_scope(transfer_erc20.from);
-	context.require_scope(transfer_erc20.to);
-	context.require_recipient(transfer_erc20.from);
-	context.require_recipient(transfer_erc20.to);
-
-	validate_name(transfer_erc20.from);
-	validate_name(transfer_erc20.to);
-	
-	auto& erc20_obj = db.get<erc20_token_object, by_token_name>(transfer_erc20.token_name);
-	validate_token_not_revoke(erc20_obj);
-
-	
-	//Validate transfer amount
-	
-
-	db.modify(erc20_obj, [&transfer_erc20](erc20_token_object& token_obj){
-		XMAX_ASSERT(transfer_erc20.value.amount <= GetSharedMapValue(token_obj.balances, transfer_erc20.from),
-			message_validate_exception,
-			"Not enough balance for transfering ${amount} ERC20 token:${token_name} at account:${account}",
-			("token_name", transfer_erc20.token_name)("amount", transfer_erc20.value.amount)("account", transfer_erc20.from));
-
-		token_obj.balances[transfer_erc20.from] = SafeMath::sub(GetSharedMapValue(token_obj.balances, transfer_erc20.from), transfer_erc20.value.amount);
-		token_obj.balances[transfer_erc20.to] = SafeMath::add(GetSharedMapValue(token_obj.balances, transfer_erc20.to), transfer_erc20.value.amount);
+	db.modify(erc721_token, [&transferform721](erc721_token_account_object& obj) {
+		obj.token_owner = transferform721.to;
 	});
-	//TODO: emit transfer event
 }
+
 
 //--------------------------------------------------
 void xmax_erc721_revoke(Chain::message_context_xmax& context) {
