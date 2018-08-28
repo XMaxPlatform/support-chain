@@ -25,6 +25,11 @@
 #include "V8AllBind.h"
 #endif
 
+#ifdef NO_CATCH
+#define SAVE_EXIT 0
+#else
+#define SAVE_EXIT 1
+#endif 
 
 using namespace Baseapp;
 
@@ -53,9 +58,10 @@ void regist_plugins()
 
 int main(int argc, char** argv)
 {
-	try {
-
-
+#if SAVE_EXIT
+	try 
+#endif
+	{
 		regist_plugins();
 
 #ifdef USE_V8
@@ -83,6 +89,7 @@ int main(int argc, char** argv)
 #endif
 
 	}
+#if SAVE_EXIT
 	catch (const fc::exception& e) {
 		elog("${e}", ("e", e.to_detail_string()));
 	}
@@ -95,5 +102,6 @@ int main(int argc, char** argv)
 	catch (...) {
 		elog("unknown exception");
 	}
+#endif
    return 0;
 }

@@ -60,6 +60,17 @@ namespace Xmaxplatform { namespace Chain {
 	   return fc::ecc::public_key(builder_signature, digest(), true/*enforce canonical*/);
    }
 
+   block_confirmation block_confirmation::make_conf(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key)
+   {
+	   block_confirmation conf;
+	   conf.block_id = id;
+	   conf.verifier = account;
+
+	   conf.sign(validate_private_key);
+
+	   return conf;
+   }
+
    void block_confirmation::sign(const fc::ecc::private_key& signer)
    {
 	   builder_signature = signer.sign_compact(digest());

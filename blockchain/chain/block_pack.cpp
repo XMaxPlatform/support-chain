@@ -16,7 +16,8 @@ namespace Chain {
 		{
 			for (const auto& item : confirmations)
 			{
-				FC_ASSERT(item.verifier != conf.verifier, "confirmation had exist.");
+				//FC_ASSERT(item.verifier != conf.verifier, "confirmation had exist.");
+				return;
 			}
 
 			auto key = current_builders.get_sign_key(conf.verifier);
@@ -143,9 +144,9 @@ namespace Chain {
 
 	void block_pack::generate_by_block(signed_block_ptr b)
 	{
-		FC_ASSERT(b->builder == new_header.builder, "wrong builder number.");
-		FC_ASSERT(b->previous == new_header.previous, "wrong previous id.");
-		FC_ASSERT(b->timestamp == new_header.timestamp, "wrong time stamp.");
+		//FC_ASSERT(b->builder == new_header.builder, "wrong builder number.");
+		//FC_ASSERT(b->previous == new_header.previous, "wrong previous id.");
+		//FC_ASSERT(b->timestamp == new_header.timestamp, "wrong time stamp.");
 
 		if (b->next_builders)
 		{

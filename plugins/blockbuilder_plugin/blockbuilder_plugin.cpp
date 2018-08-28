@@ -303,11 +303,11 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
 		}
 
-		chain.build_block(now_timestamp, private_key->second);
+		block_pack_ptr pack = chain.build_block(now_timestamp, private_key->second);
 
        
 		chainnet_plugin& netPlugin = app().get_plugin<chainnet_plugin>();
-		netPlugin.broadcast_block( *chain.head_block() );
+		netPlugin.broadcast_block( *pack->block );
         return block_build_condition::generated;
     }
 	void blockbuilder_plugin_impl::recieve_block(signed_block_ptr block)
@@ -346,16 +346,19 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 			}
 		}
 
-		chain.confirm_block(block);
+		block_pack_ptr pack = chain.confirm_block(block);
 
 		if (keys.size())
 		{
 			chainnet_plugin& netPlugin = app().get_plugin<chainnet_plugin>();
-			broadcast_confirm_func confirm_func = std::bind(&chainnet_plugin::broadcast_confirm, std::ref(netPlugin), std::placeholders::_1);
 
 			for (const auto& key : keys)
 			{
-				chain.broadcast_confirmation(key.first, key.second, confirm_func);
+				block_confirmation conf = block_confirmation::make_conf(pack->block_id, key.first, key.second);
+
+				chain.push_confirmation(conf);
+
+				netPlugin.broadcast_confirm(conf);
 
 			}
 		}

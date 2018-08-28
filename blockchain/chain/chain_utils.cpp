@@ -13,7 +13,6 @@ namespace Chain {
 
 	namespace utils
 	{
-
 		xmax_type_block_num num_from_id(const xmax_type_block_id& id)
 		{
 			return fc::endian_reverse_u32(id._hash[0]);

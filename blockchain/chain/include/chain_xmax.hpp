@@ -36,8 +36,6 @@ namespace Xmaxplatform { namespace Chain {
    class builder_object;
    class chain_context;
 
-   using broadcast_confirm_func = std::function<void(const Chain::block_confirmation&)>;
-
    class chain_xmax {
 
    public:
@@ -140,7 +138,6 @@ namespace Xmaxplatform { namespace Chain {
 	   void _sign_block(const private_key_type& sign_private_key);
 	   void _make_final_block();
 	   void _validate_block(const signed_block_ptr next_block);
-	   void _broadcast_confirmation(xmax_type_block_id id, account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func);
 	   void _final_block();
 	   void _push_fork();
 	   void _commit_block();
@@ -148,7 +145,7 @@ namespace Xmaxplatform { namespace Chain {
 	   void _pop_block();
 	   void _check_fork();
 
-	   void _apply_block(signed_block_ptr block, bool fork);
+	   block_pack_ptr _apply_block(signed_block_ptr block, bool fork);
 
 	   void _validate_block_desc(signed_block_ptr block);
 	   void _update_final_state(const block_pack_ptr& pack);
@@ -188,16 +185,14 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void flushdb();
 
-       void build_block(
+	   block_pack_ptr build_block(
                chain_timestamp when,
 			   const private_key_type& sign_private_key
        );
 
-	   void confirm_block(const signed_block_ptr next_block);
+	   block_pack_ptr confirm_block(const signed_block_ptr next_block);
 
 	   void push_fork(const signed_block_ptr block);
-
-	   void broadcast_confirmation(account_name account, const private_key_type& validate_private_key, broadcast_confirm_func confirm_func);
 
        void set_native_handler(const native_scope& scope, const func_name& func, native_handler v);
 
