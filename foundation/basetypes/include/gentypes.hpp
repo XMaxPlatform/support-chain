@@ -72,8 +72,8 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct transaction { 
         transaction() = default;
-        transaction(const uint16& ref_block_num, const uint32& ref_block_prefix, const time& expiration, const vector<account_name>& scope, const vector<account_name>& read_scope, const vector<message>& messages)
-           : ref_block_num(ref_block_num), ref_block_prefix(ref_block_prefix), expiration(expiration), scope(scope), read_scope(read_scope), messages(messages) {}
+        transaction(const uint16& ref_block_num, const uint32& ref_block_prefix, const time& expiration, const vector<account_name>& scope, const vector<account_name>& read_scope, const vector<message>& messages, const uint64& gas, const uint64& gaslimit)
+           : ref_block_num(ref_block_num), ref_block_prefix(ref_block_prefix), expiration(expiration), scope(scope), read_scope(read_scope), messages(messages), gas(gas), gaslimit(gaslimit) {}
 
         uint16                           ref_block_num;
         uint32                           ref_block_prefix;
@@ -81,6 +81,8 @@ namespace Xmaxplatform { namespace Basetypes {
         vector<account_name>             scope;
         vector<account_name>             read_scope;
         vector<message>                  messages;
+        uint64                           gas;
+        uint64                           gaslimit;
     };
 
     template<> struct get_struct<transaction> { 
@@ -92,6 +94,8 @@ namespace Xmaxplatform { namespace Basetypes {
                 {"scope", "account_name[]"},
                 {"read_scope", "account_name[]"},
                 {"messages", "message[]"},
+                {"gas", "uint64"},
+                {"gaslimit", "uint64"},
               }
            };
            return result;
@@ -912,7 +916,7 @@ namespace Xmaxplatform { namespace Basetypes {
 FC_REFLECT( Xmaxplatform::Basetypes::account_auth                     , (account)(authority) )
 FC_REFLECT( Xmaxplatform::Basetypes::message                          , (code)(type)(authorization)(data) )
 FC_REFLECT( Xmaxplatform::Basetypes::account_permission_weight        , (permission)(weight) )
-FC_REFLECT( Xmaxplatform::Basetypes::transaction                      , (ref_block_num)(ref_block_prefix)(expiration)(scope)(read_scope)(messages) )
+FC_REFLECT( Xmaxplatform::Basetypes::transaction                      , (ref_block_num)(ref_block_prefix)(expiration)(scope)(read_scope)(messages)(gas)(gaslimit) )
 FC_REFLECT_DERIVED( Xmaxplatform::Basetypes::signed_transaction, (Xmaxplatform::Basetypes::transaction), (signatures) )
 FC_REFLECT( Xmaxplatform::Basetypes::key_permission_weight            , (key)(weight) )
 FC_REFLECT( Xmaxplatform::Basetypes::authority                        , (threshold)(keys)(accounts) )

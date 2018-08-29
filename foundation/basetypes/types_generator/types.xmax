@@ -28,6 +28,8 @@ struct transaction
    scope             account_name[]   # the data may be accessed while processing this transaction
    read_scope        account_name[]
    messages          message[]
+   gas               uint64
+   gaslimit          uint64
 
 struct signed_transaction inherits transaction
    signatures     signature[]

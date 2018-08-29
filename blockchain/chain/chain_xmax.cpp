@@ -17,6 +17,7 @@
 #include <functional>
 #include <iostream>
 #include <chrono>
+#include <queue>
 
 #include <blockchain_exceptions.hpp>
 #include <block.hpp>
@@ -52,6 +53,7 @@
 
 #include <chain_xmax.hpp>
 
+
 namespace Xmaxplatform { namespace Chain {
 
 	struct build_status
@@ -80,7 +82,7 @@ namespace Xmaxplatform { namespace Chain {
 		map<handler_key, native_handler>  message_handlers;
 		map<native_scope, Basetypes::abi>  abi_handlers;
 
-		vector<transaction_request_ptr>         pending_transactions;
+		std::priority_queue<transaction_request_ptr,std::vector<transaction_request_ptr>, gas_sort<transaction_request_ptr>>  pending_transactions;
 
 
 		chain_context(const chain_xmax::xmax_config& _config, uint32_t _txn_depth_limit)
@@ -143,6 +145,9 @@ namespace Xmaxplatform { namespace Chain {
 			{
 				initialize_impl(initer);
 			}
+
+			_selected_transaction_count = 0;
+			_selected_transaction_pool.resize(block_max_message_count);
         }
 
 		void chain_xmax::first_initialize(chain_init& initer)
@@ -486,7 +491,7 @@ namespace Xmaxplatform { namespace Chain {
 			{
 				if (!_context->building_block.valid())
 				{
-					_context->pending_transactions.push_back(request);
+					_context->pending_transactions.push(request);
 					return make_response();
 				}
 
@@ -606,11 +611,21 @@ namespace Xmaxplatform { namespace Chain {
 
 			_start_build(when);
 
-			for (auto request : _context->pending_transactions)
+// 			for (auto request : _context->pending_transactions)
+// 			{
+// 				apply_transaction(request);
+// 			}
+// 			_context->pending_transactions.clear();
+
+			select_transactions_by_gas();
+
+			for (int trxi=0; trxi<_selected_transaction_count; trxi++)
 			{
-				apply_transaction(request);
+				apply_transaction( _selected_transaction_pool[trxi] );
+				_selected_transaction_pool[trxi] = nullptr;
 			}
-			_context->pending_transactions.clear();
+			_selected_transaction_count = 0;
+
 			_generate_block();
 
 			_sign_block(sign_private_key);
@@ -1065,7 +1080,7 @@ namespace Xmaxplatform { namespace Chain {
 			_irreversible_block(pack);
 		}
 
-        void chain_xmax::set_native_handler(const native_scope& scope, const func_name& func, native_handler v){
+		void chain_xmax::set_native_handler(const native_scope& scope, const func_name& func, native_handler v) {
 			_context->message_handlers[std::make_pair(scope, func)] = v;
         }
 
@@ -1357,6 +1372,27 @@ namespace Xmaxplatform { namespace Chain {
 			
 		}
 
+		const uint32_t chain_xmax::block_max_message_count = 500;
+
+		void chain_xmax::select_transactions_by_gas()
+		{
+			_selected_transaction_count = 0;
+			uint32_t _selected_message_count = 0;
+			while (!_context->pending_transactions.empty())
+			{
+				transaction_request_ptr top = _context->pending_transactions.top();
+
+				if (_selected_message_count + top->signed_trx.messages.size()>chain_xmax::block_max_message_count)
+				{
+					break;
+				}
+				_selected_transaction_pool[_selected_transaction_count] = top;
+				_selected_transaction_count++;
+				_selected_message_count += top->signed_trx.messages.size();
+				_context->pending_transactions.pop();
+
+			}
+		}
 
 		chain_init::~chain_init() {}
 

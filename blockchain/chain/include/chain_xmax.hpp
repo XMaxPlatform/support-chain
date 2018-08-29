@@ -181,6 +181,8 @@ namespace Xmaxplatform { namespace Chain {
 	   void block_summary(const signed_block& next_block);
 	   void update_or_create_builders(const builder_rule& builders);
 
+	   void select_transactions_by_gas();
+
    public:
 
 	   void flushdb();
@@ -206,6 +208,12 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void on_irreversible(block_pack_ptr pack);
 
+	protected:
+
+	   static const uint32_t block_max_message_count;
+
+	   vector<transaction_request_ptr>         _selected_transaction_pool;
+	   uint32_t                                _selected_transaction_count;
    };
 
 } }
