@@ -73,7 +73,7 @@ endfunction(list_source)
 
 list_root(H_FILES S_FILES "${H_FILES}" "${S_FILES}")
 list_source(H_FILES S_FILES "${H_FILES}" "${S_FILES}" objects)
-list_source(H_FILES S_FILES "${H_FILES}" "${S_FILES}" coin)
+list_source(H_FILES S_FILES "${H_FILES}" "${S_FILES}" cash)
 
 if(USE_V8_VM)
 list_source(H_FILES S_FILES "${H_FILES}" "${S_FILES}" jsvm_objbind)
