@@ -130,16 +130,6 @@ namespace Chain {
 
 		void add_block(signed_block_ptr block)
 		{
-			xmax_type_block_id id = block->id();
-			auto exist = packs.find(id);
-
-			if (exist != packs.end())
-			{
-				ilog("this block had exist.(id=${id})", ("id", id));
-				return;
-			}
-			//FC_ASSERT(exist != packs.end(), "this block had exist.(id=${id})", ("id", id));
-
 			auto preblock = packs.find(block->previous);
 
 			FC_ASSERT(preblock != packs.end(), "previous block not found.(id=${0}, preid=${1})", ("0", id)("1", block->previous));
