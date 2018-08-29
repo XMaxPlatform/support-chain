@@ -344,8 +344,8 @@ public:
    struct pending_transaction : public Basetypes::transaction {
       typedef uint32_t handle_type;
       
-      pending_transaction(const handle_type& _handle, const message_context_xmax& _context, const uint16& block_num, const uint32& block_ref, const time& expiration )
-         : Basetypes::transaction(block_num, block_ref, expiration, vector<Basetypes::account_name>(),  vector<Basetypes::account_name>(), vector<Basetypes::message>())
+      pending_transaction(const handle_type& _handle, const message_context_xmax& _context, const uint16& block_num, const uint32& block_ref, const time& expiration, const uint64& _gas , const uint64& _gaslimit )
+         : Basetypes::transaction(block_num, block_ref, expiration, vector<Basetypes::account_name>(),  vector<Basetypes::account_name>(), vector<Basetypes::message>(), _gas, _gaslimit)
          , handle(_handle)
          , context(_context) {}
       
