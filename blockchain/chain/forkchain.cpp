@@ -132,17 +132,17 @@ namespace Chain {
 		{
 			auto preblock = packs.find(block->previous);
 
-			FC_ASSERT(preblock != packs.end(), "previous block not found.(id=${0}, preid=${1})", ("0", id)("1", block->previous));
+			FC_ASSERT(preblock != packs.end(), "previous block not found.(id=${0}, preid=${1})", ("1", block->previous));
 
 			block_pack_ptr pack = std::make_shared<block_pack>();
 
 			pack->init_by_pre_pack(*(*preblock), block->timestamp, false);
 
-			XMAX_ASSERT(pack->new_header.builder != block->builder, block_attack_exception, "error builder", ("builder", block->builder)("id", id));
+			XMAX_ASSERT(pack->new_header.builder != block->builder, block_attack_exception, "error builder", ("builder", block->builder));
 
 			bool bsign = block->is_signer_valid(pack->bld_info.block_signing_key);
 
-			XMAX_ASSERT(bsign, block_attack_exception, "error sign of block.", ("builder", block->builder)("builder", block->builder)("id", id));
+			XMAX_ASSERT(bsign, block_attack_exception, "error sign of block.", ("builder", block->builder)("builder", block->builder));
 
 			pack->generate_by_block(block);
 
