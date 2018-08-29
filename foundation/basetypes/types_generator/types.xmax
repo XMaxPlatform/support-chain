@@ -4,6 +4,7 @@ typedef name           func_name
 typedef name           event_name
 typedef fixed_string32 message_name
 typedef fixed_string32 type_name
+typedef xmax_type_address account_address
 
 # import account type as localtype
 
@@ -217,3 +218,6 @@ struct transferfromerc721
 
 struct revokeerc721
 	token_name asset_symbol
+
+
+struct transfercash
