@@ -28,54 +28,54 @@ xmax_builder_infos native_contract_chain_init::get_chain_init_builders() const {
 	}
 	return result;
 }
-#define SET_SYSTEM_ABI( abi, scope, func, nspace ) \
+#define SET_SYSTEM_ABI( abi, scope, func, gas_step,nspace ) \
     abi.actions.push_back( Types::action{name( #func ), #func } );\
 	abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes:: ##func## >::type())
 
-#define SET_ERC_ABI( abi, scope, func, nspace ) \
+#define SET_ERC_ABI( abi, scope, func, gas_step,nspace ) \
     abi.actions.push_back( Types::action{name( #func ), (std::string(#func) + std::string(#scope)).c_str() } );\
 	abi.structs.push_back(Xmaxplatform::Basetypes::get_struct<Xmaxplatform::Basetypes:: ##func## scope >::type())
 
 
-#define REGIST_SYSTEM_HANDLER( abi, scope, func, nspace ) \
-	chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::xmax_## scope ##_## func);\
+#define REGIST_SYSTEM_HANDLER( abi, scope, func,gas_step, nspace ) \
+	chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::xmax_## scope ##_## func,gas_step);\
 	SET_SYSTEM_ABI( abi, scope, func, nspace )
 
-#define REGIST_ERC_HANDLER( abi, scope, func, nspace ) \
-	chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::xmax_## scope ##_## func);\
+#define REGIST_ERC_HANDLER( abi, scope, func, gas_step,nspace ) \
+	chain.set_native_handler(native_scope::native_##scope, #func, & Xmaxplatform::Native_contract::xmax_## scope ##_## func,gas_step);\
 	SET_ERC_ABI(abi, scope, func, nspace)
 
 
 
 #define SYSTEM_CONTRACT_API(UNPACK_MACRO, _abi) {\
 _abi.types.push_back(Types::type_def{ "share_type","int64" }); \
-UNPACK_MACRO(_abi, system, addaccount); \
-UNPACK_MACRO(_abi, system, addcontract); \
-UNPACK_MACRO(_abi, system, adderc20); \
-UNPACK_MACRO(_abi, system, adderc721); \
-UNPACK_MACRO(_abi, system, transfer); \
-UNPACK_MACRO(_abi, system, lock); \
-UNPACK_MACRO(_abi, system, unlock); \
-UNPACK_MACRO(_abi, system, votebuilder); \
-UNPACK_MACRO(_abi, system, regbuilder); \
-UNPACK_MACRO(_abi, system, unregbuilder); \
-UNPACK_MACRO(_abi, system, regproxy); \
-UNPACK_MACRO(_abi, system, unregproxy); \
-UNPACK_MACRO(_abi, system, setcode);}
+UNPACK_MACRO(_abi, system, addaccount,0); \
+UNPACK_MACRO(_abi, system, addcontract,5); \
+UNPACK_MACRO(_abi, system, adderc20,5); \
+UNPACK_MACRO(_abi, system, adderc721,5); \
+UNPACK_MACRO(_abi, system, transfer,5); \
+UNPACK_MACRO(_abi, system, lock,5); \
+UNPACK_MACRO(_abi, system, unlock,5); \
+UNPACK_MACRO(_abi, system, votebuilder,5); \
+UNPACK_MACRO(_abi, system, regbuilder,5); \
+UNPACK_MACRO(_abi, system, unregbuilder,5); \
+UNPACK_MACRO(_abi, system, regproxy,5); \
+UNPACK_MACRO(_abi, system, unregproxy,5); \
+UNPACK_MACRO(_abi, system, setcode,5);}
 
 #define ERC20_CONTRACT_API(UNPACK_MACRO, _abi){ \
 _abi.types.push_back(Types::type_def{ "share_type","int64" }); \
-UNPACK_MACRO(_abi, erc20, mint); \
-UNPACK_MACRO(_abi, erc20, stopmint); \
-UNPACK_MACRO(_abi, erc20, revoke); \
-UNPACK_MACRO(_abi, erc20, transferfrom); }
+UNPACK_MACRO(_abi, erc20, mint,5); \
+UNPACK_MACRO(_abi, erc20, stopmint,5); \
+UNPACK_MACRO(_abi, erc20, revoke,5); \
+UNPACK_MACRO(_abi, erc20, transferfrom,5); }
 
 #define ERC721_CONTRACT_API(UNPACK_MACRO, _abi){\
 _abi.types.push_back(Types::type_def{ "share_type","int64" });\
-UNPACK_MACRO(_abi, erc721, mint);\
-UNPACK_MACRO(_abi, erc721, stopmint);\
-UNPACK_MACRO(_abi, erc721, transferfrom);\
-UNPACK_MACRO(_abi, erc721, revoke);}
+UNPACK_MACRO(_abi, erc721, mint,5);\
+UNPACK_MACRO(_abi, erc721, stopmint,5);\
+UNPACK_MACRO(_abi, erc721, transferfrom,5);\
+UNPACK_MACRO(_abi, erc721, revoke,5);}
 
 
 void native_contract_chain_init::register_handlers(chain_xmax &chain, Basechain::database &db) {

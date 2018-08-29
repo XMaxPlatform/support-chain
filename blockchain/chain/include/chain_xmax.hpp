@@ -196,11 +196,13 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void push_fork(const signed_block_ptr block);
 
-       void set_native_handler(const native_scope& scope, const func_name& func, native_handler v);
+       void set_native_handler(const native_scope& scope, const func_name& func, native_handler v,uint64 gas_step = 0);
 
 	   void set_native_abi(const native_scope& scope, Basetypes::abi&& abi);
 
 	   native_handler find_native_handler(const native_scope& scope, const func_name& func) const;
+
+	   uint64 get_native_handler_gasstep(const native_scope& scope, const func_name& func) const;
 
 	   bool find_account_abi(Xmaxplatform::Basetypes::abi& abi, name code) const;
 

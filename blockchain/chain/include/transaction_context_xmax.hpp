@@ -33,11 +33,16 @@ namespace Chain {
 			return response;
 		}
 
+		inline uint64 get_gas_used() const
+		{
+			return gas_used;
+		}
+
 		std::vector<message_receipt> msg_receipts;
 	protected:
 
-		void exec_message(const Chain::message_xmax & msg, uint32_t apply_depth);
-		message_response exec_one_message(message_context_xmax& context,bool is_notify);
+		void exec_message(const Chain::message_xmax & msg, uint32_t apply_depth,uint64& usedgas,uint64 gas,uint64 gaslimit);
+		message_response exec_one_message(message_context_xmax& context,bool is_notify, uint64& usedgas, uint64 gas, uint64 gaslimit);
 
 		chain_xmax&						chain;
 		const signed_transaction&		trx;
@@ -47,7 +52,7 @@ namespace Chain {
 
 		transaction_response_ptr response;
 
-
+		uint64 gas_used;
 	};
 }
 }

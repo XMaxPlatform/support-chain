@@ -16,6 +16,7 @@ namespace Chain {
 		, trx(_trx)
 		, start_time(_start)
 		, dbsession(_chain.get_mutable_database().start_undo_session(true))
+		, gas_used(0)
 	{
 
 	}
@@ -23,11 +24,10 @@ namespace Chain {
 	void transaction_context_xmax::exec()
 	{
 		response = std::make_shared<transaction_response>();
-
 		for (const auto& msg : trx.messages)
 		{
 			const Chain::message_xmax xmxmsg(msg);
-			exec_message(xmxmsg, 0);
+			exec_message(xmxmsg, 0, gas_used,trx.gas,trx.gaslimit);
 		}
 	}
 
@@ -36,7 +36,7 @@ namespace Chain {
 		dbsession.squash();
 	}
 
-	void transaction_context_xmax::exec_message(const Chain::message_xmax& msg, uint32_t apply_depth)
+	void transaction_context_xmax::exec_message(const Chain::message_xmax& msg, uint32_t apply_depth, uint64& usedgas, uint64 gas, uint64 gaslimit)
 	{
 
 		XMAX_ASSERT(apply_depth < Config::max_message_apply_depth,
@@ -46,7 +46,7 @@ namespace Chain {
 
 		xmax_ctx.notified.push_back(msg.code);
 
-		message_response res = exec_one_message(xmax_ctx,false);
+		message_response res = exec_one_message(xmax_ctx,false,usedgas,gas,gaslimit);
 
 		XMAX_ASSERT(xmax_ctx.notified.size() < 1000,
 			transaction_exception, "to many recipient.");
@@ -57,18 +57,18 @@ namespace Chain {
 		{
 			account_name notify_code = xmax_ctx.notified[i];
 			xmax_ctx.change_code(notify_code);
-			message_response res2 = exec_one_message(xmax_ctx,true);
+			message_response res2 = exec_one_message(xmax_ctx,true,usedgas, gas, gaslimit);
 
 			response->message_responses.emplace_back(std::move(res2));
 		}
 
 		for (const auto& it : xmax_ctx.inline_messages)
 		{
-			exec_message(it, apply_depth + 1);
+			exec_message(it, apply_depth + 1, usedgas, gas, gaslimit);
 		}
 	}
 
-	message_response transaction_context_xmax::exec_one_message(message_context_xmax& context,bool is_notify)
+	message_response transaction_context_xmax::exec_one_message(message_context_xmax& context,bool is_notify,uint64& usedgas, uint64 gas, uint64 gaslimit)
 	{
 		try {
 			const account_object& acc = context.db.get<account_object, by_name>(context.code);
@@ -89,6 +89,9 @@ namespace Chain {
 				}
 				else
 				{
+					uint64 gas_step = chain.get_native_handler_gasstep(scope, context.msg.type);
+					usedgas += gas_step*gas;
+					XMAX_ASSERT(usedgas<= gaslimit, transaction_exception, "transaction out of gas");
 					XMAX_ASSERT(handler, transaction_exception, "There is not function '${name}' in account '${acc_name}'.", ("name", context.msg.type)("acc_name", acc.name.to_string()));
 					handler(context);
 				}
