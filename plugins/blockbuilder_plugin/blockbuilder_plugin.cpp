@@ -34,13 +34,11 @@ public:
 	void recieve_block(signed_block_ptr block);
 private: 
 
-	void start_check();
     void next_block();
 
 	void confirm_block(Chain::chain_xmax& chain, signed_block_ptr block);
 	void fork_block(Chain::chain_xmax& chain, signed_block_ptr block);
 
-	void genesis_block_build();
 	void confirmation_block_self();
     block_build_condition next_block_impl();
     block_build_condition build_block(fc::mutable_variant_object& capture);
@@ -99,7 +97,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 		int64_t start_delay = 1000000;
 
 		_timer.expires_from_now(boost::posix_time::microseconds(start_delay));
-		_timer.async_wait(boost::bind(&blockbuilder_plugin_impl::start_check, this));
+		_timer.async_wait(boost::bind(&blockbuilder_plugin_impl::next_block, this));
 	}
 	bool blockbuilder_plugin_impl::import_key(const account_name& builder, const Basetypes::string& private_key)
 	{
@@ -139,22 +137,6 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
 		return true;
 	}
-	void blockbuilder_plugin_impl::start_check()
-	{
-		const Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
-		const Chain::dynamic_states_object& states = chain.get_dynamic_states();
-		if (0 == chain.head_block_num()) // start genesis.
-		{
-			ilog("build loop with genesis block.");
-			genesis_block_build();
-		}
-		else// continue work.
-		{
-			ilog("build loop.");
-			next_block();
-		}
-	}
-
 
 
     void blockbuilder_plugin_impl::next_block() {
@@ -236,39 +218,6 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
         return result;
     }
 
-	void blockbuilder_plugin_impl::genesis_block_build()
-	{
-
-		// init first block properties.
-		Chain::chain_xmax& chain = app().get_plugin<blockchain_plugin>().getchain();
-
-		const Chain::dynamic_states_object& states = chain.get_dynamic_states();
-
-		Chain::chain_timestamp now_timestamp = Chain::chain_timestamp::from(states.state_time) + Chain::chain_timestamp::create(1);
-
-		const account_name current_builder = Config::xmax_contract_name;
-		const fc::optional<fc::ecc::private_key> current_key = Config::xmax_build_private_key;
-
-		try
-		{
-			// build the first block.
-			chain.build_block(
-				now_timestamp,
-				*(current_key)
-			);
-		}
-		catch (const fc::canceled_exception&)
-		{
-			//We're trying to exit. Go ahead and let this one out.
-			throw;
-		}
-		catch (const fc::exception& e)
-		{
-			elog("Got exception while generating genesis block:\n${e}", ("e", e.to_detail_string()));	
-		}
-
-		next_block();
-	}
     block_build_condition blockbuilder_plugin_impl::build_block(
             fc::mutable_variant_object &capture) {
 
