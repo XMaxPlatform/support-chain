@@ -63,7 +63,7 @@ if(WIN32)
 		set(MASM_FOUND true)
 	endif(CMAKE_ASM_MASM_COMPILER)
 
-	set(USE_V8_VM false CACHE BOOL "vmtype")
+	
 	if(USE_V8_VM)
 		message(STATUS "use v8 vm")
 		add_definitions(-DUSE_V8)

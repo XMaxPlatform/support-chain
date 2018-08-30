@@ -183,6 +183,8 @@ namespace Xmaxplatform { namespace Chain {
 
 	   void select_transactions_by_gas();
 
+	   void transfer_gas(Basechain::database& db, transaction_request_ptr trx_ptr,uint64 gas_used);
+
    public:
 
 	   void flushdb();

@@ -529,6 +529,10 @@ namespace Xmaxplatform { namespace Chain {
 
 				Impl.exec();
 
+				uint64 gas_used = Impl.get_gas_used();
+
+				transfer_gas(_context->block_db, request, gas_used);
+
 				record_transaction(request->signed_trx);
 
 				response = Impl.get_response();
@@ -1406,6 +1410,24 @@ namespace Xmaxplatform { namespace Chain {
 				_context->pending_transactions.pop();
 
 			}
+		}
+
+		void chain_xmax::transfer_gas( Basechain::database& db,transaction_request_ptr trx_ptr,uint64 gas_used)
+		{
+			if (gas_used ==0 )
+			{
+				return;
+			}
+			const auto& from = db.get<xmx_token_object, by_owner_name>(trx_ptr->signed_trx.gas_payer);
+			const auto& to = db.get<xmx_token_object, by_owner_name>(_context->building_block->pack->block->builder);
+			
+			db.modify(from, [&](xmx_token_object& a) {
+				a.main_token -= share_type(gas_used);
+			});
+			db.modify(to, [&](xmx_token_object& a) {
+				a.main_token += share_type(gas_used);
+			});
+
 		}
 
 		chain_init::~chain_init() {}

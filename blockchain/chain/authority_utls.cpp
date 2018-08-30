@@ -159,6 +159,10 @@ namespace Chain {
 
 		void check_gaspayer(const Basechain::database& db, transaction_request_ptr transaction)
 		{
+			if (transaction->signed_trx.gaslimit==0)
+			{
+				return;
+			}
 			const auto& token_obj = db.get<xmx_token_object, by_owner_name>(transaction->signed_trx.gas_payer);
 			XMAX_ASSERT(token_obj.main_token>=transaction->signed_trx.gaslimit, transaction_exception,
 				"account must have more balance than gaslimit");

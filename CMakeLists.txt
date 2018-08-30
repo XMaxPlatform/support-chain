@@ -1,5 +1,5 @@
 # Defines XMAX library target.
-set(USE_V8_VM true)
+set(USE_V8_VM true CACHE BOOL "vmtype")
 
 project( Xmax )
 IF( WIN32 )
