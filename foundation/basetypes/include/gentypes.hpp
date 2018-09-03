@@ -914,6 +914,86 @@ namespace Xmaxplatform { namespace Basetypes {
          }
     };
 
+    struct cash_input { 
+        cash_input() = default;
+        cash_input(const uint32& num, const uint16& slot)
+           : num(num), slot(slot) {}
+
+        uint32                           num;
+        uint16                           slot;
+    };
+
+    template<> struct get_struct<cash_input> { 
+        static const struct_t& type() { 
+           static struct_t result = { "cash_input", "", {
+                {"num", "uint32"},
+                {"slot", "uint16"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct cash_output { 
+        cash_output() = default;
+        cash_output(const uint64& amount, const address& to)
+           : amount(amount), to(to) {}
+
+        uint64                           amount;
+        address                          to;
+    };
+
+    template<> struct get_struct<cash_output> { 
+        static const struct_t& type() { 
+           static struct_t result = { "cash_output", "", {
+                {"amount", "uint64"},
+                {"to", "address"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct cash_detail { 
+        cash_detail() = default;
+        cash_detail(const vector<cash_input>& input, const vector<cash_output>& output, const signature& sig)
+           : input(input), output(output), sig(sig) {}
+
+        vector<cash_input>               input;
+        vector<cash_output>              output;
+        signature                        sig;
+    };
+
+    template<> struct get_struct<cash_detail> { 
+        static const struct_t& type() { 
+           static struct_t result = { "cash_detail", "", {
+                {"input", "cash_input[]"},
+                {"output", "cash_output[]"},
+                {"sig", "signature"},
+              }
+           };
+           return result;
+         }
+    };
+
+    struct transfercash { 
+        transfercash() = default;
+        transfercash(const cash_detail& detail)
+           : detail(detail) {}
+
+        cash_detail                      detail;
+    };
+
+    template<> struct get_struct<transfercash> { 
+        static const struct_t& type() { 
+           static struct_t result = { "transfercash", "", {
+                {"detail", "cash_detail"},
+              }
+           };
+           return result;
+         }
+    };
+
 }} // namespace Xmaxplatform::Basetypes
 FC_REFLECT( Xmaxplatform::Basetypes::account_auth                     , (account)(authority) )
 FC_REFLECT( Xmaxplatform::Basetypes::message                          , (code)(type)(authorization)(data) )
@@ -956,3 +1036,7 @@ FC_REFLECT( Xmaxplatform::Basetypes::minterc721                       , (token_n
 FC_REFLECT( Xmaxplatform::Basetypes::stopminterc721                   , (token_name) )
 FC_REFLECT( Xmaxplatform::Basetypes::transferfromerc721               , (token_name)(token_id)(from)(to) )
 FC_REFLECT( Xmaxplatform::Basetypes::revokeerc721                     , (token_name) )
+FC_REFLECT( Xmaxplatform::Basetypes::cash_input                       , (num)(slot) )
+FC_REFLECT( Xmaxplatform::Basetypes::cash_output                      , (amount)(to) )
+FC_REFLECT( Xmaxplatform::Basetypes::cash_detail                      , (input)(output)(sig) )
+FC_REFLECT( Xmaxplatform::Basetypes::transfercash                     , (detail) )

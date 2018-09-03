@@ -3,6 +3,7 @@
 *  @copyright defined in xmax/LICENSE
 */
 #pragma once
+#include <fc/io/raw.hpp>
 #include <fc/reflect/reflect.hpp>
 #include <fc/reflect/variant.hpp>
 #include <fc/array.hpp>
@@ -14,15 +15,16 @@ namespace Basetypes {
 
 	struct address
 	{
-		struct binary_key
+		struct binary_addr
 		{
-			binary_key() {}
+			binary_addr();
 			uint32_t                 check = 0;
 			address_data data;
 		};
 
 		address_data data;
-		address();
+		address();  
+		address(const address& addr);
 		address(const address_data& d);
 		address(const std::string& base58);
 
@@ -37,6 +39,14 @@ namespace Basetypes {
 }
 }
 
+namespace fc {
+	inline void to_variant(const Xmaxplatform::Basetypes::address& var, fc::variant& vo) { vo = var.to_string(); }
+	inline void from_variant(const fc::variant& var, Xmaxplatform::Basetypes::address& vo) {
+		vo = Xmaxplatform::Basetypes::address(var.get_string());
+	}
+
+} // namespace fc
+
 
 FC_REFLECT(Xmaxplatform::Basetypes::address, (data))
-FC_REFLECT(Xmaxplatform::Basetypes::address::binary_key, (data)(check))
+FC_REFLECT(Xmaxplatform::Basetypes::address::binary_addr, (data)(check))

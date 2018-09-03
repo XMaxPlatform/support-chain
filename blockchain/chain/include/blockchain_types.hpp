@@ -138,7 +138,7 @@ namespace Xmaxplatform { namespace Chain {
 
    using xmax_type_signature = fc::ecc::compact_signature;
 
-   using xmax_type_address = fc::array<char, 33>;
+   using xmax_type_address = Xmaxplatform::Basetypes::address;
 
    using xmax_type_block_num = uint32_t;
    using xmax_type_weight = uint16_t;

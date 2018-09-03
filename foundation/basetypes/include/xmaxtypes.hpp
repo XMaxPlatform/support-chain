@@ -3,6 +3,7 @@
 #include <basetypes.hpp>
 #include <publickey.hpp>
 #include <asset.hpp>
+#include <address.hpp>
 #include <gentypes.hpp>
 
 
