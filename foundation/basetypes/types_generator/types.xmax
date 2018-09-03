@@ -4,7 +4,6 @@ typedef name           func_name
 typedef name           event_name
 typedef fixed_string32 message_name
 typedef fixed_string32 type_name
-typedef xmax_type_address cash_address
 
 # import account type as localtype
 
@@ -222,11 +221,10 @@ struct revokeerc721
 struct cash_input
 	num			uint32
 	slot		uint16
-	sig			signature
 
 struct cash_output
 	amount		uint64
-	to			cash_address
+	to			address
 
 struct cash_detail
 	input		cash_input[]
