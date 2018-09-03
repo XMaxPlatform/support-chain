@@ -4,7 +4,7 @@
 */
 #include <blockchain_exceptions.hpp>
 #include <chain_xmax.hpp>
-#include <vm_xmax.hpp>
+#include <jsvm_xmax.hpp>
 #include <transaction_context_xmax.hpp>
 #include <objects/global_status_objects.hpp>
 
@@ -72,10 +72,11 @@ namespace Chain {
 	{
 		try {
 			const account_object& acc = context.db.get<account_object, by_name>(context.code);
+			native_scope scope = get_native_scope(acc.type);
+			uint64 gas_step = chain.get_native_handler_gasstep(scope, context.msg.type);
 
 			if (acc.type != acc_contract)
 			{
-				native_scope scope = get_native_scope(acc.type);
 				XMAX_ASSERT(scope != native_scope::native_invalid, transaction_exception,
 					"Unknown native scope type '${type}' of account '${acc_name}'.", ("type", (int)scope)("acc_name", acc.name.to_string()));
 
@@ -89,7 +90,7 @@ namespace Chain {
 				}
 				else
 				{
-					uint64 gas_step = chain.get_native_handler_gasstep(scope, context.msg.type);
+					
 					usedgas += gas_step*gas;
 					XMAX_ASSERT(usedgas<= gaslimit, transaction_exception, "transaction out of gas");
 					XMAX_ASSERT(handler, transaction_exception, "There is not function '${name}' in account '${acc_name}'.", ("name", context.msg.type)("acc_name", acc.name.to_string()));
@@ -103,7 +104,9 @@ namespace Chain {
 				idump((context.code)(context.msg.type));
 				const uint32_t execution_time = 10000;//TODO
 				try {
-					vm_xmax::get().apply(context, execution_time, true);
+					jsvm_xmax::get().SetInstructionLimit((uint32_t)gas_step);
+					jsvm_xmax::get().apply(context, execution_time, true);
+					usedgas += jsvm_xmax::get().GetExecutedInsCount();
 				}
 				FC_CAPTURE_AND_LOG((context.msg))		
 			}

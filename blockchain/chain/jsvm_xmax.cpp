@@ -26,9 +26,10 @@ namespace Xmaxplatform {
 
 	namespace Chain {
 
-		jsvm_xmax::jsvm_xmax() 
+		jsvm_xmax::jsvm_xmax()
 			:current_validate_context(nullptr)
-			,m_instructionLimit(1000)
+			, m_instructionLimit(1000)
+			, m_instructionStep(1)
 			,m_instructionCount(0)
 			,m_pBind(nullptr)
 		{
@@ -85,7 +86,7 @@ namespace Xmaxplatform {
 
 		bool jsvm_xmax::StoreInstruction(int ins)
 		{
-			m_instructionCount++;
+			m_instructionCount += m_instructionStep*GetInstructionCost(ins);
 			m_Intrunctions.push_back(ins);
 			if (m_instructionCount > m_instructionLimit)
 			{
@@ -93,10 +94,32 @@ namespace Xmaxplatform {
 			}
 		}
 
+		int jsvm_xmax::GetInstructionCost(int ins)
+		{
+			return 1;
+		}
+
 		void jsvm_xmax::CleanInstruction()
 		{
 			m_instructionCount = 0;
 			m_Intrunctions.clear();
+		}
+
+
+		void jsvm_xmax::apply(message_context_xmax& c, uint32_t execution_time, bool received_block) {
+			try {
+				current_validate_context = &c;
+				current_precondition_context = &c;
+				current_message_context = &c;
+				checktime_limit = execution_time;
+
+				load(c.code, c.db);
+				// if this is a received_block, then ignore the table_key_types
+				if (received_block)
+					table_key_types = nullptr;
+
+				vm_apply();
+			} FC_CAPTURE_AND_RETHROW()
 		}
 
 		void jsvm_xmax::init(message_context_xmax& c)
