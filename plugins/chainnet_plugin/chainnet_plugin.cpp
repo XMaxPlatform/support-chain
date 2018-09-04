@@ -956,7 +956,7 @@ namespace Xmaxplatform {
    void chainnet_plugin_impl::broadcast_block_impl( const Chain::signed_block &sb) {
 	   for (auto con : connections)
 	   {
-		   if (con->sent_handshake_count > 0)
+		   if (con->sent_handshake_count > 0 && con->connected())
 		   {
 			   con->send_signedblock(sb);
 		   }		   
@@ -967,7 +967,11 @@ namespace Xmaxplatform {
    {
 	   for (auto con : connections)
 	   {
-		   con->send_blockconfirm(confirm);
+		   if (con->connected())
+		   {
+			   con->send_blockconfirm(confirm);
+		   }
+		   
 	   }
    }
 
