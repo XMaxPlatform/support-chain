@@ -883,7 +883,7 @@ namespace Xmaxplatform {
                wlog ("Peer keepalive ticked sooner than expected: ${m}", ("m", ec.message()));
             }
             for (auto &c : connections ) {
-               if (c->socket->is_open()) {
+               if (c->connected()) {
                   c->send_time();
                }
             }
