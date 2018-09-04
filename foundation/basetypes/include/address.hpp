@@ -34,6 +34,10 @@ namespace Basetypes {
 		friend bool operator != (const address& p1, const address& p2);
 		friend bool operator < (const address& p1, const address& p2);
 		friend std::ostream& operator<< (std::ostream& s, const address& k);
+
+
+		static const address addr_zero;
+		static const address addr_one;
 	};
 
 }

@@ -157,6 +157,7 @@ namespace Xmaxplatform { namespace Chain {
             dynamic_states_object_type,  
 			resource_token_object_type,
             xmx_token_object_type,
+			xmx_cash_object_type,
 
             key_value_object_type,
             keystr_value_object_type,

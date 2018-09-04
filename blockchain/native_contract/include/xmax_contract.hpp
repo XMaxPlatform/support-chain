@@ -56,7 +56,9 @@ void xmax_erc721_transferfrom(Chain::message_context_xmax& context);
 void xmax_erc721_revoke(Chain::message_context_xmax& context);
 
 
-
+//cash interfaces
+void xmax_cash_mint();
+void xmax_cash_transfer(Chain::message_context_xmax& context);
 
 
 } // namespace Native_contract

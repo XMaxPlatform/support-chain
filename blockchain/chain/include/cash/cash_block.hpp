@@ -16,7 +16,7 @@ namespace Chain {
 
 		xmax_type_block_id		previous;
 		chain_timestamp			timestamp;   
-		account_address			builder;
+		cash_address			builder;
 	};
 
 }

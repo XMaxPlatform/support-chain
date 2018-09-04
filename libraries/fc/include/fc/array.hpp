@@ -67,6 +67,7 @@ namespace fc {
   {
     public:
     typedef char T;
+	typedef array<T, N> self;
     array(){ memset( data, 0, sizeof(data) ); }
     /**
      *  Checked indexing (when in debug build) that also simplifies dereferencing
@@ -82,6 +83,12 @@ namespace fc {
     const T*     end()const    {  return &data[N]; }
 
     size_t       size()const { return N; }
+
+	self& set(size_t pos, T v)
+	{
+		at(pos) = v;
+		return *this;
+	}
     
     T data[N];
   };

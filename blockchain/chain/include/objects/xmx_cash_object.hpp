@@ -4,12 +4,10 @@
 */
 #pragma once
 #include <blockchain_types.hpp>
-
+#include "multi_index_includes.hpp"
 
 namespace Xmaxplatform {
 namespace Chain {
 
-	using cash_address = xmax_type_address;
-	using cash_signature = xmax_type_signature;
 }
 }

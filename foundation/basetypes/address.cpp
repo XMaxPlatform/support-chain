@@ -14,6 +14,9 @@ namespace Xmaxplatform {
 namespace Basetypes {
 
 
+	const address address::addr_zero = address(address_data());
+	const address address::addr_one = address(address_data().set(0, 1));
+
 	address::binary_addr::binary_addr()
 	{
 
