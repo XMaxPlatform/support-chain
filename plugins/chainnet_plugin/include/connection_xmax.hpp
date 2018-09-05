@@ -148,7 +148,7 @@ namespace Xmaxplatform {
 
 		message_buffer<1024 * 1024>    pending_message_buffer;
 		Chain::vector<char>            blk_buffer;
-
+		Chain::deque<signed_block>	   pending_block_list;
 		
 		
 
@@ -209,9 +209,10 @@ namespace Xmaxplatform {
 		void send_handshake();
 		void send_signedblock(const Chain::signed_block &sb);
 		void send_blockconfirm(const Chain::block_confirmation& confirm);
-		void send_signedblocklist(const Chain::signed_block_list& blockList);
+		void send_signedblocklist(const Chain::vector<Chain::signed_block>& blockList);
 		void send_connection_iplist(const connecting_nodes_message& msg);
 		std::string get_connecting_endpoint();
+		void send_pending_block();
 
 		/** \name Peer Timestamps
 		*  Time message handling

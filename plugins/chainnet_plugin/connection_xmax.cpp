@@ -131,8 +131,7 @@ namespace Xmaxplatform {
 
 	void connection_xmax::send_signedblock(const Chain::signed_block &sb)
 	{
-		fc_dlog(logger, "send signedblock to ${ep}\n", ("ep", peer_addr));
-		msg_enqueue(sb);
+		pending_block_list.push_back(sb);
 	}
 
 	void connection_xmax::send_blockconfirm(const Chain::block_confirmation& confirm)
@@ -140,10 +139,23 @@ namespace Xmaxplatform {
 		msg_enqueue(confirm);
 	}
 
-	void connection_xmax::send_signedblocklist(const Chain::signed_block_list& blockList)
+	void connection_xmax::send_signedblocklist(const Chain::vector<Chain::signed_block>& blockList)
 	{
-		fc_dlog(logger, "send signedblocklist to ${ep}\n", ("ep", peer_addr));
-		msg_enqueue(blockList);
+
+		pending_block_list.assign(blockList.begin(), blockList.end());
+	}
+
+	void connection_xmax::send_pending_block()
+	{
+		size_t max_sending_num = 10;
+		size_t sending_num = std::min(max_sending_num, pending_block_list.size());
+		fc_dlog(logger, "sending ${num} signed blocks to ${ep},\n", ("num", sending_num) ("ep", peer_addr));
+		for (size_t i = 0; i < sending_num; ++i)
+		{
+			const Chain::signed_block &sb = pending_block_list.front();
+			msg_enqueue(sb);
+			pending_block_list.pop_front();
+		}
 	}
 
 	char* connection_xmax::convert_tstamp(const tstamp& t)

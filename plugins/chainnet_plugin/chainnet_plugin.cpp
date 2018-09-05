@@ -142,10 +142,12 @@ namespace Xmaxplatform {
       unique_ptr<boost::asio::steady_timer> connector_check;
       unique_ptr<boost::asio::steady_timer> transaction_check;
       unique_ptr<boost::asio::steady_timer> keepalive_timer;
+	  unique_ptr<boost::asio::steady_timer> pending_blocks_timer;
       boost::asio::steady_timer::duration   connector_period;
       boost::asio::steady_timer::duration   txn_exp_period;
       boost::asio::steady_timer::duration   resp_expected_period;
       boost::asio::steady_timer::duration   keepalive_interval{std::chrono::seconds{32}};
+	  boost::asio::steady_timer::duration   send_pengding_blocks_period;
 
       const std::chrono::system_clock::duration peer_authentication_interval{std::chrono::seconds{1}}; ///< Peer clock may be no more than 1 second skewed from our clock, including network latency.
 
@@ -216,6 +218,7 @@ namespace Xmaxplatform {
       void start_conn_timer( );
       void start_txn_timer( );
       void start_monitors( );
+	  void start_pending_blocks_timer();
 
 	  void start_net();
 	  void start_up();
@@ -275,6 +278,7 @@ namespace Xmaxplatform {
    constexpr auto     def_sync_fetch_span = 100;
    constexpr auto     def_max_just_send = 1500 * 3; // "mtu" * 3
    constexpr auto     def_send_whole_blocks = true;
+   constexpr auto     def_send_pending_blocks_interval = std::chrono::seconds(1);
 
    constexpr auto     message_header_size = 4;
 
@@ -844,9 +848,7 @@ namespace Xmaxplatform {
    void chainnet_plugin_impl::_send_blocklist_impl(connection_ptr c, const request_block_message &msg)
    {
 	   Chain::vector<Chain::signed_block> blockList = app().get_plugin<blockbuilder_plugin>().get_sync_blocklist(msg.last_irreversible_block_num);
-	   signed_block_list sblist;
-	   sblist.blockList = std::move(blockList);
-	   c->send_signedblocklist(sblist);
+	   c->send_signedblocklist(blockList);
    }
 
    void chainnet_plugin_impl::start_conn_timer( ) {
@@ -875,6 +877,26 @@ namespace Xmaxplatform {
          });
    }
 
+   void chainnet_plugin_impl::start_pending_blocks_timer()
+   {
+	   pending_blocks_timer->expires_from_now(send_pengding_blocks_period);
+	   transaction_check->async_wait([&, this](boost::system::error_code ec)
+	   {
+		   start_pending_blocks_timer();
+		   if (!ec)
+		   {
+			   for (auto c :connections)
+			   {
+				   c->send_pending_block();
+			   }
+		   }
+		   else
+		   {
+			   elog("Error from start_pending_blocks_timer: ${m}", ("m", ec.message()));
+		   }
+	   });
+   }
+
    void chainnet_plugin_impl::ticker() {
       keepalive_timer->expires_from_now (keepalive_interval);
       keepalive_timer->async_wait ([&](boost::system::error_code ec) {
@@ -893,8 +915,10 @@ namespace Xmaxplatform {
    void chainnet_plugin_impl::start_monitors() {
       connector_check.reset(new boost::asio::steady_timer( app().get_io_service()));
       transaction_check.reset(new boost::asio::steady_timer( app().get_io_service()));
+	  pending_blocks_timer.reset(new boost::asio::steady_timer(app().get_io_service()));
       start_conn_timer();
       start_txn_timer();
+	  start_pending_blocks_timer();
    }
 
    void chainnet_plugin_impl::expire_txns() {
@@ -956,10 +980,7 @@ namespace Xmaxplatform {
    void chainnet_plugin_impl::broadcast_block_impl( const Chain::signed_block &sb) {
 	   for (auto con : connections)
 	   {
-		   if (con->sent_handshake_count > 0 && con->connected())
-		   {
-			   con->send_signedblock(sb);
-		   }		   
+		   con->send_signedblock(sb);
 	   }
    }
 
@@ -1081,6 +1102,7 @@ namespace Xmaxplatform {
       my->txn_exp_period = def_txn_expire_wait;
       my->resp_expected_period = def_resp_expected_wait;
       my->max_client_count = options.at("max-clients").as<int>();
+	  my->send_pengding_blocks_period = def_send_pending_blocks_interval;
 
       my->num_clients = 0;
       my->started_sessions = 0;
