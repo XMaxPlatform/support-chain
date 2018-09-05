@@ -147,6 +147,11 @@ namespace Xmaxplatform {
 
 	void connection_xmax::send_pending_block()
 	{
+		if (pending_block_list.empty())
+		{
+			return;
+		}
+
 		size_t max_sending_num = 10;
 		size_t sending_num = std::min(max_sending_num, pending_block_list.size());
 		fc_dlog(logger, "sending ${num} signed blocks to ${ep},\n", ("num", sending_num) ("ep", peer_addr));
