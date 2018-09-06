@@ -1000,12 +1000,12 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct mint_cash { 
         mint_cash() = default;
-        mint_cash(const address& owner, const uint64& amount, const uint64& sequence, const signature& sig)
+        mint_cash(const address& owner, const uint64& amount, const int64& sequence, const signature& sig)
            : owner(owner), amount(amount), sequence(sequence), sig(sig) {}
 
         address                          owner;
         uint64                           amount;
-        uint64                           sequence;
+        int64                            sequence;
         signature                        sig;
     };
 
@@ -1014,7 +1014,7 @@ namespace Xmaxplatform { namespace Basetypes {
            static struct_t result = { "mint_cash", "", {
                 {"owner", "address"},
                 {"amount", "uint64"},
-                {"sequence", "uint64"},
+                {"sequence", "int64"},
                 {"sig", "signature"},
               }
            };

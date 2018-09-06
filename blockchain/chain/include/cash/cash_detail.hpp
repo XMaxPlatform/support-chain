@@ -59,19 +59,19 @@ namespace Chain {
 		cash_signature sig;
 	};
 
-	template<typename Stream>
-	inline void pack_cash(stream& s, const cash_detail& cash)
-	{
-		switch (cash.pay)
-		{
-		case paytype::mint_to_addr:
-		{
+	//template<typename Stream>
+	//inline void pack_cash(stream& s, const cash_detail& cash)
+	//{
+	//	switch (cash.pay)
+	//	{
+	//	case paytype::mint_to_addr:
+	//	{
 
-		}
-		default:
-			break;
-		}
-	}
+	//	}
+	//	default:
+	//		break;
+	//	}
+	//}
 
 }
 }

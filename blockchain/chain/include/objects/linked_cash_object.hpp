@@ -30,7 +30,7 @@ namespace Chain {
 	using linked_cash_index = Basechain::shared_multi_index_container<
 		linked_cash_object,
 		indexed_by<
-		ordered_unique<tag<by_id>, member<linked_cash_object, linked_cash_object::id_type, &linked_cash_object::id>>,
+		ordered_unique<tag<by_id>, member<linked_cash_object, linked_cash_object::id_type, &linked_cash_object::id>>
 		>
 	>;
 

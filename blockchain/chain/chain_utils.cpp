@@ -6,6 +6,7 @@
 #include <chain_utils.hpp>
 #include <fc/io/raw.hpp>
 #include <fc/bitutil.hpp>
+#include <fc/crypto/ripemd160.hpp>
 #include <algorithm>
 
 namespace Xmaxplatform {
@@ -64,6 +65,31 @@ namespace Chain {
 			fc::ecc::public_key pk(sig, digest, true/*enforce canonical*/);
 
 			return pk == signer_key;
+		}
+
+		bool is_sign_of_addr(const xmax_type_signature& sig, const xmax_type_summary& digest, const address& addr)
+		{
+			address addr2 = to_address(sig, digest);
+
+			return addr2 == addr;
+		}
+
+
+		address to_address(const fc::ecc::public_key& pkey)
+		{
+			xmax_type_summary hash = xmax_type_summary::hash(pkey);
+
+			Basetypes::address_data addr_data;
+
+			memcpy(addr_data.data, hash.data(), 20);
+
+			return address(addr_data);
+		}
+
+		address to_address(const xmax_type_signature& sig, const xmax_type_summary& digest)
+		{
+			fc::ecc::public_key pk(sig, digest, true/*enforce canonical*/);
+			return to_address(pk);
 		}
 
 	}

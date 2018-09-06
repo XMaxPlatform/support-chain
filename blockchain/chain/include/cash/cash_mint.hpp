@@ -13,7 +13,7 @@ namespace Chain {
 	{
 		cash_mint() = default;
 
-		cash_mint(uint64_t seq, const address& ow, cash_token tk)
+		cash_mint(int64_t seq, const address& ow, cash_token tk)
 			: sequence(seq)
 			, owner(ow)
 			, token(tk)
@@ -21,7 +21,12 @@ namespace Chain {
 
 		}
 
-		uint64_t sequence = 0; // sequence for owner.
+		bool operator == (const cash_mint& rh) const
+		{
+			return (sequence == rh.sequence) && (owner == rh.owner) && (token == rh.token);
+		}
+
+		int64_t sequence = 0; // sequence for owner.
 		address owner;
 		cash_token token;
 		cash_digest digest() const;

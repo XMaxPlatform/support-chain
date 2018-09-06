@@ -33,7 +33,7 @@ namespace Chain {
 	using xmx_cash_index = Basechain::shared_multi_index_container<
 		xmx_cash_object,
 		indexed_by<
-		ordered_unique<tag<by_id>, member<xmx_cash_object, xmx_cash_object::id_type, &xmx_cash_object::id>>,
+		ordered_unique<tag<by_id>, member<xmx_cash_object, xmx_cash_object::id_type, &xmx_cash_object::id>>
 		>
 	>;
 
