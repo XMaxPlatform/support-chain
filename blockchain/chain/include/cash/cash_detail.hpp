@@ -18,7 +18,7 @@ namespace Chain {
 
 	struct cash_input {
 		cash_input() = default;
-		cash_input(const cash_digest& h, const uint16_t& slot)
+		cash_input(const cash_digest& h, const uint8_t& slot)
 			: prevout(h), slot(slot) {}
 
 		cash_digest	prevout;
@@ -57,6 +57,8 @@ namespace Chain {
 		cash_outputs outputs;
 		cash_attachment attachment;
 		cash_signature sig;
+
+		cash_detail(paytype pt, const  Basetypes::pay_cash&  cash);
 	};
 
 	//template<typename Stream>

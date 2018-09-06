@@ -4,16 +4,15 @@
 */
 #pragma once
 #include <blockchain_types.hpp>
-#include <builder_rule.hpp>
-#include <blockchain_config.hpp>
+#include <cash/cash_detail.hpp>
+#include <cash/cash_mint.hpp>
 
 namespace Xmaxplatform {
 namespace Chain {
 
 	namespace utils
 	{
-		
-
+		void check_mint(const cash_mint& mint, const Basetypes::cash_detail&);
 	}
 }
 }

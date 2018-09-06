@@ -232,8 +232,8 @@ struct pay_attachment
 	locktime	chain_time
 
 struct pay_cash
-	input		cash_input[]
-	output		cash_output[]
+	inputs		cash_input[]
+	outputs		cash_output[]
 	attachment	pay_attachment
 
 	sig			signature

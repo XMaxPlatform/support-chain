@@ -976,11 +976,11 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct pay_cash { 
         pay_cash() = default;
-        pay_cash(const vector<cash_input>& input, const vector<cash_output>& output, const pay_attachment& attachment, const signature& sig)
-           : input(input), output(output), attachment(attachment), sig(sig) {}
+        pay_cash(const vector<cash_input>& inputs, const vector<cash_output>& outputs, const pay_attachment& attachment, const signature& sig)
+           : inputs(inputs), outputs(outputs), attachment(attachment), sig(sig) {}
 
-        vector<cash_input>               input;
-        vector<cash_output>              output;
+        vector<cash_input>               inputs;
+        vector<cash_output>              outputs;
         pay_attachment                   attachment;
         signature                        sig;
     };
@@ -988,8 +988,8 @@ namespace Xmaxplatform { namespace Basetypes {
     template<> struct get_struct<pay_cash> { 
         static const struct_t& type() { 
            static struct_t result = { "pay_cash", "", {
-                {"input", "cash_input[]"},
-                {"output", "cash_output[]"},
+                {"inputs", "cash_input[]"},
+                {"outputs", "cash_output[]"},
                 {"attachment", "pay_attachment"},
                 {"sig", "signature"},
               }
@@ -1105,7 +1105,7 @@ FC_REFLECT( Xmaxplatform::Basetypes::revokeerc721                     , (token_n
 FC_REFLECT( Xmaxplatform::Basetypes::cash_input                       , (prevout)(slot) )
 FC_REFLECT( Xmaxplatform::Basetypes::cash_output                      , (amount)(to) )
 FC_REFLECT( Xmaxplatform::Basetypes::pay_attachment                   , (locktime) )
-FC_REFLECT( Xmaxplatform::Basetypes::pay_cash                         , (input)(output)(attachment)(sig) )
+FC_REFLECT( Xmaxplatform::Basetypes::pay_cash                         , (inputs)(outputs)(attachment)(sig) )
 FC_REFLECT( Xmaxplatform::Basetypes::mint_cash                        , (owner)(amount)(sequence)(sig) )
 FC_REFLECT( Xmaxplatform::Basetypes::transfercash                     , (cashdetail) )
 FC_REFLECT( Xmaxplatform::Basetypes::mintcash                         , (cashdetail)(mintdetail) )
