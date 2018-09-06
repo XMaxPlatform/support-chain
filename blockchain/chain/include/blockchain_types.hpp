@@ -130,6 +130,7 @@ namespace Xmaxplatform { namespace Chain {
    using Xmaxplatform::Basetypes::uint128_t;
 
    using address = Xmaxplatform::Basetypes::address;
+   using xmax_type_signature = Xmaxplatform::Basetypes::signature;
 
    using xmax_type_summary = fc::sha256;
    using xmax_type_block_id = xmax_type_summary;
@@ -137,7 +138,7 @@ namespace Xmaxplatform { namespace Chain {
    using xmax_type_transaction_id = xmax_type_summary;
    using xmax_type_message_id = xmax_type_summary;
 
-   using xmax_type_signature = fc::ecc::compact_signature;
+
 
    using xmax_type_block_num = uint32_t;
    using xmax_type_weight = uint16_t;
@@ -157,6 +158,7 @@ namespace Xmaxplatform { namespace Chain {
 			resource_token_object_type,
             xmx_token_object_type,
 			xmx_cash_object_type,
+			linked_cash_object_type,
 
             key_value_object_type,
             keystr_value_object_type,

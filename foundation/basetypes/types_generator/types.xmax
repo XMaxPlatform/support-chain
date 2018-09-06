@@ -241,6 +241,7 @@ struct pay_cash
 struct mint_cash
 	owner		address
 	amount		uint64
+	sequence    uint64		
 	sig	  signature
 
 struct transfercash

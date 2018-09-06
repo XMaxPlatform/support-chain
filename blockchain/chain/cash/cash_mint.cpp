@@ -12,7 +12,7 @@ namespace Chain {
 	{
 		fc::sha256::encoder e;
 		fc::raw::pack(e, sequence);
-		fc::raw::pack(e, minter);
+		fc::raw::pack(e, owner);
 		fc::raw::pack(e, token);
 		return e.result();
 	}

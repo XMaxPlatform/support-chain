@@ -11,8 +11,18 @@ namespace Chain {
 
 	struct cash_mint
 	{
-		uint32_t sequence = 0; // sequence for owner.
-		address minter;
+		cash_mint() = default;
+
+		cash_mint(uint64_t seq, const address& ow, cash_token tk)
+			: sequence(seq)
+			, owner(ow)
+			, token(tk)
+		{
+
+		}
+
+		uint64_t sequence = 0; // sequence for owner.
+		address owner;
 		cash_token token;
 		cash_digest digest() const;
 

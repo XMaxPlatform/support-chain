@@ -16,6 +16,6 @@ namespace Chain {
 
 	void setup_system_indexes(Basechain::database& db);
 	void setup_erc_indexes(Basechain::database& db);
-	void setup_coin_indexes(Basechain::database& db);
+	void setup_cash_indexes(Basechain::database& db);
 }
 }

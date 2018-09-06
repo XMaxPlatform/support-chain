@@ -49,7 +49,7 @@ namespace Chain {
 
 		xmax_type_summary cal_merkle(vector<xmax_type_summary> digests);
 
-		bool is_sign_valid(const signature& sig, const xmax_type_summary& digest, const fc::ecc::public_key &signer_key);
+		bool is_sign_valid(const xmax_type_signature& sig, const xmax_type_summary& digest, const fc::ecc::public_key &signer_key);
 
 	}
 }

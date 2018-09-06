@@ -1000,11 +1000,12 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct mint_cash { 
         mint_cash() = default;
-        mint_cash(const address& owner, const uint64& amount, const signature& sig)
-           : owner(owner), amount(amount), sig(sig) {}
+        mint_cash(const address& owner, const uint64& amount, const uint64& sequence, const signature& sig)
+           : owner(owner), amount(amount), sequence(sequence), sig(sig) {}
 
         address                          owner;
         uint64                           amount;
+        uint64                           sequence;
         signature                        sig;
     };
 
@@ -1013,6 +1014,7 @@ namespace Xmaxplatform { namespace Basetypes {
            static struct_t result = { "mint_cash", "", {
                 {"owner", "address"},
                 {"amount", "uint64"},
+                {"sequence", "uint64"},
                 {"sig", "signature"},
               }
            };
@@ -1104,6 +1106,6 @@ FC_REFLECT( Xmaxplatform::Basetypes::cash_input                       , (prevout
 FC_REFLECT( Xmaxplatform::Basetypes::cash_output                      , (amount)(to) )
 FC_REFLECT( Xmaxplatform::Basetypes::pay_attachment                   , (locktime) )
 FC_REFLECT( Xmaxplatform::Basetypes::pay_cash                         , (input)(output)(attachment)(sig) )
-FC_REFLECT( Xmaxplatform::Basetypes::mint_cash                        , (owner)(amount)(sig) )
+FC_REFLECT( Xmaxplatform::Basetypes::mint_cash                        , (owner)(amount)(sequence)(sig) )
 FC_REFLECT( Xmaxplatform::Basetypes::transfercash                     , (cashdetail) )
 FC_REFLECT( Xmaxplatform::Basetypes::mintcash                         , (cashdetail)(mintdetail) )

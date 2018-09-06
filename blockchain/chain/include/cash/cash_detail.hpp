@@ -25,6 +25,8 @@ namespace Chain {
 		uint8_t		slot = 0;
 	};
 
+	using cash_inputs = std::vector<cash_input>;
+
 	struct cash_output {
 		cash_output()
 			: to(address::addr_zero)
@@ -37,6 +39,9 @@ namespace Chain {
 		cash_token	amount = 0;
 		address		to;
 	};
+	using cash_outputs = std::vector<cash_output>;
+
+
 	struct cash_attachment {
 		cash_attachment() = default;
 		cash_attachment(const chain_timestamp& locktime)
@@ -48,8 +53,8 @@ namespace Chain {
 	struct cash_detail 
 	{
 		paytype pay;
-		std::vector<cash_input> inputs;
-		std::vector<cash_output> outputs;
+		cash_inputs inputs;
+		cash_outputs outputs;
 		cash_attachment attachment;
 		cash_signature sig;
 	};

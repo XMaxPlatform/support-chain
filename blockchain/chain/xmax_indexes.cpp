@@ -17,7 +17,7 @@ namespace Chain {
 
 		setup_system_indexes(db);
 		setup_erc_indexes(db);
-		setup_coin_indexes(db);
+		setup_cash_indexes(db);
 	}
 }
 }
