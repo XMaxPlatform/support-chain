@@ -58,6 +58,14 @@ namespace Chain {
 
 			return digests.front();
 		}
+
+		bool is_sign_valid(const xmax_type_signature& sig, const xmax_type_summary& digest, const fc::ecc::public_key &signer_key)
+		{
+			fc::ecc::public_key pk(sig, digest, true/*enforce canonical*/);
+
+			return pk == signer_key;
+		}
+
 	}
 }
 }

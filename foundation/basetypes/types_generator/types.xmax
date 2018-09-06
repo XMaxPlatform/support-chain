@@ -4,6 +4,8 @@ typedef name           func_name
 typedef name           event_name
 typedef fixed_string32 message_name
 typedef fixed_string32 type_name
+typedef fixed_string32 hash
+typedef uint32		   chain_time
 
 # import account type as localtype
 
@@ -219,17 +221,32 @@ struct revokeerc721
 	token_name asset_symbol
 
 struct cash_input
-	num			uint32
-	slot		uint16
+	prevout		hash
+	slot		uint8
 
 struct cash_output
 	amount		uint64
 	to			address
 
-struct cash_detail
+struct pay_attachment
+	locktime	chain_time
+
+struct pay_cash
 	input		cash_input[]
 	output		cash_output[]
+	attachment	pay_attachment
+
 	sig			signature
 
+struct mint_cash
+	owner		address
+	amount		uint64
+	sig	  signature
+
 struct transfercash
-	detail		cash_detail
+	cashdetail	pay_cash
+
+
+struct mintcash
+	cashdetail	pay_cash
+	mintdetail	mint_cash
