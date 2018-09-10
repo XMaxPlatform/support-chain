@@ -220,11 +220,11 @@ struct transferfromerc721
 struct revokeerc721
 	token_name asset_symbol
 
-struct cash_input
+struct pay_input
 	prevout		hash
 	slot		uint8
 
-struct cash_output
+struct pay_output
 	amount		uint64
 	to			address
 
@@ -232,8 +232,8 @@ struct pay_attachment
 	locktime	chain_time
 
 struct pay_cash
-	inputs		cash_input[]
-	outputs		cash_output[]
+	inputs		pay_input[]
+	outputs		pay_output[]
 	attachment	pay_attachment
 
 	sig			signature
@@ -245,9 +245,9 @@ struct mint_cash
 	sig	  signature
 
 struct transfercash
-	cashdetail	pay_cash
+	paydetail	pay_cash
 
 
 struct mintcash
-	cashdetail	pay_cash
+	paydetail	pay_cash
 	mintdetail	mint_cash

@@ -5,6 +5,8 @@
 #pragma once
 #include <blockchain_types.hpp>
 
+#define MAX_CASHINPUT_SIZE (30) 
+#define MAX_CASHOUTINPUT_SIZE (30) 
 
 namespace Xmaxplatform {
 namespace Chain {

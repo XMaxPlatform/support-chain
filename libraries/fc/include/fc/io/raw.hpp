@@ -32,6 +32,192 @@ namespace fc {
     using UInt = number<cpp_int_backend<Size, Size, unsigned_magnitude, unchecked, void> >;
     template<size_t Size>
     using Int = number<cpp_int_backend<Size, Size, signed_magnitude, unchecked, void> >;
+
+
+
+	template<typename Stream, typename Data>
+	void xpack(Stream& s, unsigned size, const Data data[])
+	{
+		switch (size)
+		{
+		case 1:
+		{
+			pack(s, data[0]);
+			break;
+		}
+		case 2:
+		{
+			pack(s, data[0]);
+			pack(s, data[1]);
+			break;
+		}
+		case 3:
+		{
+			pack(s, data[0]);
+			pack(s, data[1]);
+			pack(s, data[2]);
+			break;
+		}
+		case 4:
+		{
+			pack(s, data[0]);
+			pack(s, data[1]);
+			pack(s, data[2]);
+			pack(s, data[3]);
+			break;
+		}
+		case 5:
+		{
+			pack(s, data[0]);
+			pack(s, data[1]);
+			pack(s, data[2]);
+			pack(s, data[3]);
+			pack(s, data[4]);
+			break;
+		}
+		case 6:
+		{
+			pack(s, data[0]);
+			pack(s, data[1]);
+			pack(s, data[2]);
+			pack(s, data[3]);
+			pack(s, data[4]);
+			pack(s, data[5]);
+			break;
+		}
+		case 7:
+		{
+			pack(s, data[0]);
+			pack(s, data[1]);
+			pack(s, data[2]);
+			pack(s, data[3]);
+			pack(s, data[4]);
+			pack(s, data[5]);
+			pack(s, data[6]);
+			break;
+		}
+		case 8:
+		{
+			pack(s, data[0]);
+			pack(s, data[1]);
+			pack(s, data[2]);
+			pack(s, data[3]);
+			pack(s, data[4]);
+			pack(s, data[5]);
+			pack(s, data[6]);
+			pack(s, data[7]);
+			break;
+		}
+		default:
+		{
+			for (int i = 0; i < size; ++i)
+			{
+				pack(s, data[i]);
+			}
+			break;
+		}
+
+		}
+	}
+	template<typename Stream, typename Data>
+	void xunpack(Stream& s, unsigned size, Data data[])
+	{
+		switch (size)
+		{
+		case 1:
+		{
+			unpack(s, data[0]);
+			break;
+		}
+		case 2:
+		{
+			unpack(s, data[0]);
+			unpack(s, data[1]);
+			break;
+		}
+		case 3:
+		{
+			unpack(s, data[0]);
+			unpack(s, data[1]);
+			unpack(s, data[2]);
+			break;
+		}
+		case 4:
+		{
+			unpack(s, data[0]);
+			unpack(s, data[1]);
+			unpack(s, data[2]);
+			unpack(s, data[3]);
+			break;
+		}
+		case 5:
+		{
+			unpack(s, data[0]);
+			unpack(s, data[1]);
+			unpack(s, data[2]);
+			unpack(s, data[3]);
+			unpack(s, data[4]);
+			break;
+		}
+		case 6:
+		{
+			unpack(s, data[0]);
+			unpack(s, data[1]);
+			unpack(s, data[2]);
+			unpack(s, data[3]);
+			unpack(s, data[4]);
+			unpack(s, data[5]);
+			break;
+		}
+		case 7:
+		{
+			unpack(s, data[0]);
+			unpack(s, data[1]);
+			unpack(s, data[2]);
+			unpack(s, data[3]);
+			unpack(s, data[4]);
+			unpack(s, data[5]);
+			unpack(s, data[6]);
+			break;
+		}
+		case 8:
+		{
+			unpack(s, data[0]);
+			unpack(s, data[1]);
+			unpack(s, data[2]);
+			unpack(s, data[3]);
+			unpack(s, data[4]);
+			unpack(s, data[5]);
+			unpack(s, data[6]);
+			unpack(s, data[7]);
+			break;
+		}
+		default:
+		{
+			for (int i = 0; i < size; ++i)
+			{
+				unpack(s, data[i]);
+			}
+			break;
+		}
+
+		}
+	}
+
+	template<typename Stream, typename Any>
+	void xpackanyvalue(Stream& s, const Any& any)
+	{
+		unsigned size = sizeof(Any);
+		xpack(s, size, reinterpret_cast<const uint8*>(&any));
+	}
+
+	template<typename Stream, typename Any>
+	void xunpackanyvalue(Stream& s, Any& any)
+	{
+		unsigned size = sizeof(Any);
+		xunpack(s, size, reinterpret_cast<uint8*>(&any));
+	}
+
     template<typename Stream> void pack( Stream& s, const UInt<256>& n );
     template<typename Stream> void unpack( Stream& s,  UInt<256>& n );
     template<typename Stream> void pack( Stream& s, const Int<256>& n );
@@ -762,91 +948,6 @@ namespace fc {
 		using size_type = unsigned;
 		using limb_type = uint32_t;//boost::multiprecision::limb_type;
 	};
-
-	template<typename Stream, typename Data>
-	void xpack(Stream& s, unsigned size, const Data data[])
-	{
-		switch (size)
-		{
-		case 1:
-		{
-			pack(s, data[0]);
-			break;
-		}
-		case 2:
-		{
-			pack(s, data[0]);
-			pack(s, data[1]);
-			break;
-		}
-		case 3:
-		{
-			pack(s, data[0]);
-			pack(s, data[1]);
-			pack(s, data[2]);
-			break;
-		}
-		case 4:
-		{
-			pack(s, data[0]);
-			pack(s, data[1]);
-			pack(s, data[2]);
-			pack(s, data[3]);
-			break;
-		}
-		default:
-		{
-			for (int i = 0; i < size; ++i)
-			{
-				pack(s, data[i]);
-			}
-			break;
-		}
-
-		}
-	}
-	template<typename Stream, typename Data>
-	void xunpack(Stream& s, unsigned size, Data data[])
-	{
-		switch (size)
-		{
-		case 1:
-		{
-			unpack(s, data[0]);
-			break;
-		}
-		case 2:
-		{
-			unpack(s, data[0]);
-			unpack(s, data[1]);
-			break;
-		}
-		case 3:
-		{
-			unpack(s, data[0]);
-			unpack(s, data[1]);
-			unpack(s, data[2]);
-			break;
-		}
-		case 4:
-		{
-			unpack(s, data[0]);
-			unpack(s, data[1]);
-			unpack(s, data[2]);
-			unpack(s, data[3]);
-			break;
-		}
-		default:
-		{
-			for (int i = 0; i < size; ++i)
-			{
-				unpack(s, data[i]);
-			}
-			break;
-		}
-
-		}
-	}
 
 	template<typename Stream> void pack(Stream& s, const boost::multiprecision::uint128_t& n) {
 

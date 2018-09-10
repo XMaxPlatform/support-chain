@@ -10,9 +10,9 @@ namespace Chain {
 
 	namespace utils
 	{
-		void check_cash_from_mint(const cash_mint& mint, const Basetypes::cash_detail& cash)
+		void check_cash_from_mint(const cash_mint& mint, const Basetypes::pay_cash& cash)
 		{
-
+			cash_detail detail(paytype::mint_to_addr, cash);
 		}
 
 	}
