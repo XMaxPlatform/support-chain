@@ -1213,7 +1213,8 @@ namespace Xmaxplatform { namespace Chain {
 		{
 			XMAX_ASSERT(trx.scope.size() + trx.read_scope.size() > 0, transaction_exception, "No scope specified by transaction");
 			for (uint32_t i = 1; i < trx.scope.size(); ++i)
-				XMAX_ASSERT(trx.scope[i - 1] < trx.scope[i], transaction_exception, "Scopes must be sorted and unique");
+				XMAX_ASSERT(trx.scope[i - 1] < trx.scope[i], transaction_exception, 
+					"Scopes must be sorted and unique: ${s1}, ${s2}", ("s1", trx.scope[i - 1].to_string())("s2", trx.scope[i].to_string()) );
 			for (uint32_t i = 1; i < trx.read_scope.size(); ++i)
 				XMAX_ASSERT(trx.read_scope[i - 1] < trx.read_scope[i], transaction_exception, "Scopes must be sorted and unique");
 

@@ -4,6 +4,7 @@
 */
 #include <blockchain_exceptions.hpp>
 #include <cash/cash_utils.hpp>
+#include <chain_utils.hpp>
 #include <objects/mint_cash_object.hpp>
 #include <message_context_xmax.hpp>
 #include <message_xmax.hpp>
