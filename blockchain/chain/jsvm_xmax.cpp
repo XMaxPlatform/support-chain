@@ -111,14 +111,16 @@ namespace Xmaxplatform {
 				current_validate_context = &c;
 				current_precondition_context = &c;
 				current_message_context = &c;
-				checktime_limit = execution_time;
-
-				load(c.code, c.db);
+				//checktime_limit = execution_time;
+				
 				// if this is a received_block, then ignore the table_key_types
 				if (received_block)
 					table_key_types = nullptr;
 
-				vm_apply();
+				std::function<void(Local<Context>&)> calljs = std::bind(&jsvm_xmax::vm_apply, this,std::placeholders::_1);
+
+				load(c.code, c.db, calljs);
+				
 			} FC_CAPTURE_AND_RETHROW()
 		}
 
@@ -130,10 +132,9 @@ namespace Xmaxplatform {
 				current_message_context = &c;
 				checktime_limit = CHECKTIME_LIMIT;
 
-				load(c.code, c.db);
-				const auto& recipient = c.db.get<account_object, by_name>(c.code);
-				
-				vm_onInit();
+
+				std::function<void(Local<Context>&)> calljs = std::bind(&jsvm_xmax::vm_onInit, this,std::placeholders::_1);
+				load(c.code, c.db, calljs);
 
 			} FC_CAPTURE_AND_RETHROW()
 		}
@@ -146,11 +147,6 @@ namespace Xmaxplatform {
 				return V8_ThrowException(isolate, "ScriptRunout");
 
 			return args_object[0];
-		}
-
-		void jsvm_xmax::V8SetInstructionCallBack(const char* name, void* foo)
-		{
-			V8_AddIntrinsicFoo(name, foo, 2, 1);
 		}
 
 		void jsvm_xmax::V8SetupGlobalObjTemplate(v8::Local<v8::ObjectTemplate>* pGlobalTemp)
@@ -188,10 +184,12 @@ namespace Xmaxplatform {
 
 		void jsvm_xmax::V8ExitContext()
 		{
+			/*
 			if (current_state != NULL && !current_state->current_context.IsEmpty())
 			{
 				current_state->current_context.Get(m_pIsolate)->Exit();
 			}
+			*/
 		}
 
 		void jsvm_xmax::V8SetBind(V8Bind* bind)
@@ -199,7 +197,7 @@ namespace Xmaxplatform {
 			m_pBind = bind;
 		}
 
-		void  jsvm_xmax::vm_apply() {
+		void  jsvm_xmax::vm_apply(v8::Local<v8::Context>& context) {
 			message_context_xmax* p_validate_context = jsvm_xmax::get().current_validate_context;
 
 			uint128 code = 0;
@@ -209,10 +207,10 @@ namespace Xmaxplatform {
 				code = uint128(p_validate_context->msg.code);
 				type = uint128(p_validate_context->msg.type);
 			}
-			vm_calli64param2("apply", code, type);
+			vm_calli64param2(context,"apply", code, type);
 		}
 
-		void  jsvm_xmax::vm_onInit()
+		void  jsvm_xmax::vm_onInit(v8::Local<v8::Context>& context)
 		{
 			message_context_xmax* p_validate_context = jsvm_xmax::get().current_validate_context;
 			
@@ -223,14 +221,12 @@ namespace Xmaxplatform {
 				code = uint128(p_validate_context->msg.code);
 				type = uint128(p_validate_context->msg.type);
 			}
-			vm_calli64param2("init", code, type);
+			vm_calli64param2(context,"init", code, type);
 		}
 
-		void jsvm_xmax::vm_calli64param2(const char* foo, uint128 code, uint128 type)
+		void jsvm_xmax::vm_calli64param2(v8::Local<v8::Context>& context,const char* foo, uint128 code, uint128 type)
 		{
 			try {
-				CleanInstruction();
-				Local<Context> context = current_state->current_context.Get(m_pIsolate);
 				Handle<v8::Value> params[2];
 				V8u128 v8code(code);
 				V8u128 v8type(type);
@@ -243,7 +239,7 @@ namespace Xmaxplatform {
 				edump((e.callStack));
 				throw;
 			}
-			catch (...)
+			catch (const script_runout& e)
 			{
 				edump((std::string("js code run out")));
 				throw;
@@ -254,14 +250,75 @@ namespace Xmaxplatform {
 		{
 			const auto& obj = db.get<account_object, by_name>(name);
 
-
+			V8_ParseWithOutPlugin();
+			
 			LoadScript(name, obj.contract->code.data(), obj.contract->abi, obj.contract->code_version);
 		}
 
-		void jsvm_xmax::LoadScript(account_name name, const char* code,const mapped_vector<char>& abi,const fc::sha256& code_version)
+		void jsvm_xmax::load(const account_name& name, const Basechain::database& db, std::function<void(Local<Context>&)> foo)
+		{
+			//-----find object-----
+			const auto& obj = db.get<account_object, by_name>(name);
+			char* code = (char*)obj.contract->code.data();
+
+			//----load abi if its first time
+			auto& state = instances[name];
+			if (state.code_version != obj.contract->code_version)
+			{
+				state.code_version = obj.contract->code_version;
+				state.table_key_types.clear();
+				try
+				{
+					const auto init_time = fc::time_point::now();
+
+					//init abi
+					Basetypes::abi byteabi;
+					if (Basetypes::abi_serializer::to_abi(obj.contract->abi, byteabi))
+					{
+						state.tables_fixed = true;
+						for (auto& table : byteabi.tables)
+						{
+							const auto key_type = to_key_type(table.index_type);
+							if (key_type == invalid_key_type)
+								throw Serialization::FatalSerializationException("For code \"" + (std::string)name + "\" index_type of \"" +
+									table.index_type + "\" referenced but not supported");
+
+							state.table_key_types.emplace(std::make_pair(table.table_name, key_type));
+						}
+					}
+				}
+				catch (Serialization::FatalSerializationException exception)
+				{
+					std::cerr << "Error:" << std::endl;
+					std::cerr << exception.message << std::endl;
+					throw;
+				}
+
+				table_key_types = &state.table_key_types;
+				tables_fixed = state.tables_fixed;
+				table_storage = 0;
+
+			}
+
+
+
+			//--------run code in a new context----------------
+			CleanInstruction();
+			V8_ParseWithOutPlugin();
+			Local<Context> context = Context::New(m_pIsolate, NULL, *m_pGlobalObjectTemplate);
+			Context::Scope context_scope(context);
+			V8_ParseWithPlugin();
+			Local<Script> script = CompileJsCode(m_pIsolate, context, (char*)code);
+		
+			foo(context);
+			V8_ParseWithOutPlugin();
+			ilog("js foo load and called: instruction count:${icount}", ("icount", GetExecutedInsCount()));
+		}
+
+		void jsvm_xmax::LoadScript(account_name name, const char* code, const mapped_vector<char>& abi, const fc::sha256& code_version)
 		{
 			auto& state = instances[name];
-
+			/*
 			if (state.code_version != code_version) {
 
 				state.code_version = code_version;
@@ -318,13 +375,13 @@ namespace Xmaxplatform {
 
 				EnterJsContext(m_pIsolate, state.current_context);
 				current_state = &state;
-			}
+			}*/
 		}
 
 		void jsvm_xmax::LoadScriptTest(account_name name, const char* code, const std::vector<char>& abi, const fc::sha256& code_version, bool sciptTest /*= false*/)
 		{
 			auto& state = instances[name];
-
+			/*
 			if (state.code_version != code_version) {
 
 				state.code_version = fc::sha256();
@@ -389,6 +446,7 @@ namespace Xmaxplatform {
 				EnterJsContext(m_pIsolate, state.current_context);
 				current_state = &state;
 			}
+			*/
 		}
 
 	}

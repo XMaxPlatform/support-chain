@@ -26,11 +26,11 @@ namespace Xmaxplatform {
 
 			//V8 bind
 			static constexpr inline const char* TypeName() {
-				return "V8u128";
+				return "vuill";
 			}
 
 			static _CONST_EXPR_ inline Basetypes::name TypeID() {
-				return Basetypes::name("V8u128");
+				return Basetypes::name("vuill");
 			}
 
 			static V8u128* NewV8CppObj(const v8::FunctionCallbackInfo<v8::Value>& args);
