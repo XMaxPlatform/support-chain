@@ -36,6 +36,8 @@ namespace Chain {
 
 		void add_confirmation(const block_confirmation& conf, uint32_t skip);
 
+		void force_confirm(const xmax_type_block_id& last_confirmed_id, uint32_t last_confirmed_num);
+
 		block_pack_ptr get_block(xmax_type_block_id block_id) const;
 
 		block_pack_ptr get_main_block_by_num(uint32_t num) const;

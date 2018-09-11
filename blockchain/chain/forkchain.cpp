@@ -101,7 +101,7 @@ namespace Chain {
 
 		void add_block(block_pack_ptr block_pack)
 		{
-			FC_ASSERT(block_pack->block_id == block_pack->new_header.id());
+			FC_ASSERT(block_pack->block_id == block_pack->block->id());
 
 			auto result = packs.insert(block_pack);
 			FC_ASSERT(result.second, "unable to insert block state, duplicate state detected");
@@ -132,7 +132,9 @@ namespace Chain {
 		{
 			auto preblock = packs.find(block->previous);
 
-			FC_ASSERT(preblock != packs.end(), "previous block not found.(id=${0}, preid=${1})", ("1", block->previous));
+			bool found = preblock != packs.end();
+
+			FC_ASSERT(found, "previous block not found.(num=${0}, preid=${1})", ("0", block->block_num())("1", block->previous));
 
 			block_pack_ptr pack = std::make_shared<block_pack>();
 
@@ -179,6 +181,12 @@ namespace Chain {
 		void update_head()
 		{
 			head = *packs.get<by_longest_num>().begin();
+		}
+
+		void force_confirm(const xmax_type_block_id& last_confirmed_id, uint32_t last_confirmed_num)
+		{
+			set_last_confirmed(last_confirmed_id); // force confirm by dpos irreversible.
+			on_last_confirmed_grow(last_confirmed_id, last_confirmed_num);
 		}
 
 		void set_last_confirmed(xmax_type_block_id last_id)
@@ -387,6 +395,11 @@ namespace Chain {
 				}
 			}
 		}
+	}
+
+	void forkdatabase::force_confirm(const xmax_type_block_id& last_confirmed_id, uint32_t last_confirmed_num)
+	{
+		_context->force_confirm(last_confirmed_id, last_confirmed_num);
 	}
 
 	block_pack_ptr forkdatabase::get_block(xmax_type_block_id block_id) const

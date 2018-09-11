@@ -215,8 +215,17 @@ namespace Xmaxplatform { namespace Chain {
 				_sign_block(Config::xmax_build_private_key);
 				_final_block();
 
+				
+				block_pack_ptr& pack = _context->building_block->pack;
+
 				Chain::xmax_type_block_num block_num = _context->block_head->block_num;
-				_context->chain_log.append_block(_context->block_head->block);				
+				pack->irreversible_confirmed = true;
+
+				_context->fork_db.add_block(pack);
+				_context->fork_db.force_confirm(pack->block_id, block_num);
+				 
+				_context->chain_log.append_block(_context->block_head->block);
+
 				_context->building_block->push_db();
 				_context->building_block.reset();
 				_context->block_db.commit(block_num);
@@ -327,6 +336,9 @@ namespace Xmaxplatform { namespace Chain {
 					return pack->block;
 				}
 				signed_block_ptr block = _context->chain_log.read_by_num(num);
+
+				FC_ASSERT(block, "Wrong block was read from block log.");
+
 				uint32_t blockNum = block->block_num();
 				FC_ASSERT(blockNum == num, "Wrong block was read from block log.");
 
@@ -897,12 +909,15 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::_sign_block(const private_key_type& sign_private_key)
 		{
+			block_pack_ptr& pack = _context->building_block->pack;
 			try {
-				signed_block_header& building_header = _context->building_block->pack->new_header;
+	
+				signed_block_header& building_header = pack->new_header;
 				building_header.sign(sign_private_key);
-				_context->building_block->pack->block_id = building_header.id();
-				_context->building_block->pack->validated = true;
-			} FC_CAPTURE_AND_RETHROW((_context->building_block->pack->new_header.builder))
+				pack->block_id = building_header.id();
+				pack->validated = true;
+
+			} FC_CAPTURE_AND_RETHROW((pack->new_header.builder))
 		}
 
 		void chain_xmax::_validate_block_desc(signed_block_ptr block)
@@ -967,6 +982,10 @@ namespace Xmaxplatform { namespace Chain {
 			FC_ASSERT(_context->building_block);
 			const auto pack = _context->building_block->pack;
 			try {
+
+				FC_ASSERT(_context->block_head->block_id == pack->block->previous, 
+					"previous block not found.(num=${0}, preid=${1})", 
+					("0", pack->block->block_num())("1", pack->block->previous));
 
 				_context->fork_db.add_block(pack);
 				_context->block_head = _context->fork_db.get_head();
