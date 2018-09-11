@@ -654,7 +654,7 @@ namespace Xmaxplatform { namespace Chain {
 				("msgs", _context->building_status.msg_counter)
 			);
 
-			_push_fork();
+			_push_block();
 			_commit_block();
 
 			return pack;
@@ -732,7 +732,7 @@ namespace Xmaxplatform { namespace Chain {
 
 			if (fork)
 			{
-				_push_fork();
+				_push_block();
 			}
 
 			block_pack_ptr ptr = _context->building_block->pack;
@@ -962,7 +962,7 @@ namespace Xmaxplatform { namespace Chain {
 			block_summary(*_context->building_block->pack->block);
 		}
 
-		void chain_xmax::_push_fork()
+		void chain_xmax::_push_block()
 		{
 			FC_ASSERT(_context->building_block);
 			const auto pack = _context->building_block->pack;
