@@ -980,7 +980,10 @@ namespace Xmaxplatform {
    void chainnet_plugin_impl::broadcast_block_impl( const Chain::signed_block &sb) {
 	   for (auto con : connections)
 	   {
-		   con->send_signedblock(sb);
+		   if (con->connected())
+		   {
+			   con->send_signedblock(sb);
+		   }		   
 	   }
    }
 
