@@ -159,7 +159,7 @@ namespace Xmaxplatform {
 			Chain::signed_transaction trx;
 			trx.scope = sort_names({ Config::xmax_contract_name, callername });
 			transaction_emplace_message(trx, Config::xmax_contract_name, Basetypes::vector<Basetypes::account_auth>{ {callername, Config::xmax_active_name}},
-				"setjscode", handler);
+				"setcode", handler);
 
 			std::cout << "Publishing contract..." << std::endl;
 			Chain::chain_xmax& cc = app().get_plugin<blockchain_plugin>().getchain();

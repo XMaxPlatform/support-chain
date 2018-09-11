@@ -22,8 +22,8 @@ namespace Xmaxplatform {
 			typedef map<name, key_type> TableMap;
 			struct ModuleState {
 				//one contract one context map.
-				v8::Local<v8::Script>			 current_script;		
-				PersistentCpyableContext           current_context;
+				//v8::Local<v8::Script>			 current_script;		
+				//PersistentCpyableContext           current_context;
 			
 				fc::sha256               code_version;
 				TableMap                 table_key_types;
@@ -32,7 +32,6 @@ namespace Xmaxplatform {
 
 			static jsvm_xmax& get();
 
-			void V8SetInstructionCallBack(const char* name,void* foo);
 			void V8SetupGlobalObjTemplate(v8::Local<v8::ObjectTemplate>* pGlobalTemp);
 			void V8EnvInit();
 			void V8EnvDiscard();
@@ -55,10 +54,10 @@ namespace Xmaxplatform {
 			void SetInstructionLimit(uint32_t instructionLimit);
 			void SetInstructionStep(uint32_t step);
 
-			void  vm_apply();
-			void  vm_onInit();
+			void  vm_apply(v8::Local<v8::Context>& context);
+			void  vm_onInit(v8::Local<v8::Context>& context);
 
-			void vm_calli64param2(const char* foo,uint128 code, uint128 type);
+			void vm_calli64param2(v8::Local<v8::Context>& context,const char* foo,uint128 code, uint128 type);
 
 			int64_t current_execution_time();
 
@@ -84,6 +83,7 @@ namespace Xmaxplatform {
 		private:
 			
 			void load(const account_name& name, const Basechain::database& db);
+			void load(const account_name& name, const Basechain::database& db,std::function<void(v8::Local<v8::Context>&)> foo);
 			void  vm_validate();
 			void  vm_precondition();
 
