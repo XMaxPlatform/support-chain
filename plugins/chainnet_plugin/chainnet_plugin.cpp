@@ -880,7 +880,7 @@ namespace Xmaxplatform {
    void chainnet_plugin_impl::start_pending_blocks_timer()
    {
 	   pending_blocks_timer->expires_from_now(send_pengding_blocks_period);
-	   transaction_check->async_wait([&, this](boost::system::error_code ec)
+	   pending_blocks_timer->async_wait([&, this](boost::system::error_code ec)
 	   {
 		   start_pending_blocks_timer();
 		   if (!ec)
