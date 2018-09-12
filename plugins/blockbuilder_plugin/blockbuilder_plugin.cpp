@@ -265,7 +265,7 @@ bool blockbuilder_plugin::import_key(const account_name& builder, const Basetype
 
 		auto num = block->block_num();
 
-		if (chain.head_block_num() == num - 1)
+		if (chain.head_block_num() == num - 1 && chain.head_block_id() == block->previous)
 		{
 			confirm_block(chain, block);
 		}

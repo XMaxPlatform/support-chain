@@ -128,7 +128,7 @@ namespace Chain {
 
 		}
 
-		void add_block(signed_block_ptr block)
+		block_pack_ptr add_block(signed_block_ptr block)
 		{
 			auto preblock = packs.find(block->previous);
 
@@ -140,15 +140,16 @@ namespace Chain {
 
 			pack->init_by_pre_pack(*(*preblock), block->timestamp, false);
 
-			XMAX_ASSERT(pack->new_header.builder != block->builder, block_attack_exception, "error builder", ("builder", block->builder));
+			XMAX_ASSERT(pack->new_header.builder == block->builder, block_attack_exception, "error builder", ("builder", block->builder));
 
 			bool bsign = block->is_signer_valid(pack->bld_info.block_signing_key);
 
 			XMAX_ASSERT(bsign, block_attack_exception, "error sign of block.", ("builder", block->builder)("builder", block->builder));
 
-			pack->generate_by_block(block);
+			pack->generate_by_block(block, false, false, false);
 
 			add_block(pack);
+			return pack;
 		}
 
 		void remove_chain(const xmax_type_block_id& begin_id)
@@ -375,9 +376,9 @@ namespace Chain {
 		_context->add_block(block_pack);
 	}
 
-	void forkdatabase::add_block(signed_block_ptr block)
+	block_pack_ptr forkdatabase::add_block(signed_block_ptr block)
 	{
-		_context->add_block(block);
+		return _context->add_block(block);
 	}
 
 	void forkdatabase::add_confirmation(const block_confirmation& conf, uint32_t skip)

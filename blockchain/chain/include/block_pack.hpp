@@ -78,7 +78,7 @@ namespace Chain {
 
 		void refresh(signed_block_ptr b, const builder_rule& cur_blders, const builder_rule& new_blders, uint16_t roundslot, bool confirmed, bool mainchain, bool irr_confirmed);
 
-		void generate_by_block(signed_block_ptr b);
+		void generate_by_block(signed_block_ptr b, bool confirmed, bool mainchain, bool irr_confirmed);
 
 		void set_next_builders(const builder_rule& next);
 

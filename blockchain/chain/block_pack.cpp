@@ -76,6 +76,8 @@ namespace Chain {
 
 		const builder_info& current_builder = utils::select_builder(pre_pack.current_builders, pre_pack.new_builders, new_slot);
 
+		bld_info = current_builder;
+
 		new_header.previous = pre_pack.block_id;
 		new_header.timestamp = when;
 		new_header.builder = current_builder.builder_name;
@@ -110,6 +112,23 @@ namespace Chain {
 
 	void block_pack::refresh(signed_block_ptr b, const builder_rule& cur_blders, const builder_rule& new_blders, uint16_t roundslot, bool confirmed, bool mainchain, bool irr_confirmed)
 	{		
+		current_builders = cur_blders;
+		new_builders = new_blders;
+		round_slot = roundslot;
+
+		const builder_info& current_builder = utils::select_builder(current_builders, new_builders, round_slot);
+		bld_info = current_builder;
+
+		generate_by_block(b, confirmed, mainchain, irr_confirmed);
+	}
+
+	void block_pack::generate_by_block(signed_block_ptr b, bool confirmed, bool mainchain, bool irr_confirmed)
+	{
+		//FC_ASSERT(b->builder == new_header.builder, "wrong builder number.");
+		//FC_ASSERT(b->previous == new_header.previous, "wrong previous id.");
+		//FC_ASSERT(b->timestamp == new_header.timestamp, "wrong time stamp.");
+
+
 		// generate block info.
 		block = b;
 
@@ -118,13 +137,11 @@ namespace Chain {
 
 		last_block_num = block_num;
 
-
 		// generate confirm
 		if (confirmed)
 		{
 			last_confirmed_num = block_num;
 			last_confirmed_id = block_id;
-	
 		}
 		else
 		{
@@ -133,29 +150,12 @@ namespace Chain {
 		}
 		irreversible_confirmed = irr_confirmed;
 
-		current_builders = cur_blders;
-		new_builders = new_blders;
-		round_slot = roundslot;
-
-		main_chain = mainchain;
-
-		generate_by_block(b);
-	}
-
-	void block_pack::generate_by_block(signed_block_ptr b)
-	{
-		//FC_ASSERT(b->builder == new_header.builder, "wrong builder number.");
-		//FC_ASSERT(b->previous == new_header.previous, "wrong previous id.");
-		//FC_ASSERT(b->timestamp == new_header.timestamp, "wrong time stamp.");
-
 		if (b->next_builders)
 		{
 			new_builders = *b->next_builders;
 		}
 
 		new_header = static_cast<signed_block_header&>(*b);
-
-		block = b;
 	}
 
 	void block_pack::set_next_builders(const builder_rule& next)

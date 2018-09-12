@@ -26,6 +26,7 @@
 #include <chain_init.hpp>
 #include <xmax_voting.hpp>
 #include <authoritys_utils.hpp>
+#include <key_conversion.hpp>
 
 #include <rand.hpp>
 
@@ -141,6 +142,11 @@ namespace Xmaxplatform { namespace Chain {
 			if (bfirst_init) 
 			{
 				first_initialize(initer);
+
+				// for test..
+				chain_timestamp time = chain_timestamp::create(576579600 + 10000);
+				fc::optional<private_key_type> optional_private_key = Utilities::wif_to_key("5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN");
+				build_block(time, *optional_private_key);
 			}
 			else
 			{
@@ -626,7 +632,7 @@ namespace Xmaxplatform { namespace Chain {
 			auto exec_start = std::chrono::high_resolution_clock::now();
 
 			_abort_build();
-
+			//when = chain_timestamp::create(576579600);
 			_start_build(when);
 
 // 			for (auto request : _context->pending_transactions)
@@ -679,17 +685,16 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::push_fork(const signed_block_ptr block)
 		{
-			auto num = block->block_num();
 			try {
-				_context->fork_db.add_block(block);
+				auto pack = _context->fork_db.add_block(block);
 
 
 				ilog("get a fork block, num=${num}, id=${id},",
-					("num", num)
+					("num", pack->block_num)("id", pack->block_id)
 				);
 				_check_fork();
 
-			}FC_CAPTURE_AND_LOG((num))
+			}FC_CAPTURE_AND_LOG((block))
 			
 		}
 
@@ -922,7 +927,9 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::_validate_block_desc(signed_block_ptr block)
 		{
-			FC_ASSERT(_context->block_head->block_id == block->previous, "head block id != previous id of next mblock");
+			FC_ASSERT(_context->block_head->block_id == block->previous,
+				"head block id != previous id of next block. head block num=${num1}, new block num=${num2}", 
+				("num1", _context->block_head->block_num)("num2", block->block_num()));
 
 			FC_ASSERT(_context->block_head->block_num + 1 == block->block_num(), "head block number + 1 != next block number");
 

@@ -32,7 +32,7 @@ namespace Chain {
 
 		void add_block(block_pack_ptr block_pack);
 
-		void add_block(signed_block_ptr block);
+		block_pack_ptr add_block(signed_block_ptr block);
 
 		void add_confirmation(const block_confirmation& conf, uint32_t skip);
 
