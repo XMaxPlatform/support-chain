@@ -120,21 +120,8 @@ namespace Chain {
 		bld_info = current_builder;
 
 		generate_by_block(b, confirmed, mainchain, irr_confirmed);
-	}
 
-	void block_pack::generate_by_block(signed_block_ptr b, bool confirmed, bool mainchain, bool irr_confirmed)
-	{
-		//FC_ASSERT(b->builder == new_header.builder, "wrong builder number.");
-		//FC_ASSERT(b->previous == new_header.previous, "wrong previous id.");
-		//FC_ASSERT(b->timestamp == new_header.timestamp, "wrong time stamp.");
-
-
-		// generate block info.
-		block = b;
-
-		block_id = b->id();
-		block_num = b->block_num();
-
+		// must be after generate_by_block();
 		last_block_num = block_num;
 
 		// generate confirm
@@ -149,6 +136,20 @@ namespace Chain {
 			last_confirmed_id = empty_chain_id;
 		}
 		irreversible_confirmed = irr_confirmed;
+	}
+
+	void block_pack::generate_by_block(signed_block_ptr b, bool confirmed, bool mainchain, bool irr_confirmed)
+	{
+		//FC_ASSERT(b->builder == new_header.builder, "wrong builder number.");
+		//FC_ASSERT(b->previous == new_header.previous, "wrong previous id.");
+		//FC_ASSERT(b->timestamp == new_header.timestamp, "wrong time stamp.");
+
+
+		// generate block info.
+		block = b;
+
+		block_id = b->id();
+		block_num = b->block_num();
 
 		if (b->next_builders)
 		{

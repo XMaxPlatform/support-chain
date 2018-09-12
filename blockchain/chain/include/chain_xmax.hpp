@@ -139,13 +139,13 @@ namespace Xmaxplatform { namespace Chain {
 	   void _make_final_block();
 	   void _validate_block(const signed_block_ptr next_block);
 	   void _final_block();
-	   void _push_block();
+	   void _push_block(bool updatefork);
 	   void _commit_block();
 
 	   void _pop_block();
 	   void _check_fork();
 
-	   block_pack_ptr _apply_block(signed_block_ptr block, bool fork);
+	   block_pack_ptr _apply_block(signed_block_ptr block, bool updatefork);
 
 	   void _validate_block_desc(signed_block_ptr block);
 	   void _update_final_state(const block_pack_ptr& pack);

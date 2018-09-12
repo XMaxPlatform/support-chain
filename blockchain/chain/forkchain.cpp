@@ -78,7 +78,7 @@ namespace Chain {
 		fc::path				datadir;
 		irreversible_block_handle irreversible;
 
-		//std::vector<block_pack_ptr> allblocks; // for test..
+		std::vector<block_pack_ptr> allblocks; // for test..
 
 		block_pack_ptr get_block(xmax_type_block_id block_id) const
 		{
@@ -107,7 +107,7 @@ namespace Chain {
 			FC_ASSERT(result.second, "unable to insert block state, duplicate state detected");
 
 
-			//allblocks.push_back(block_pack);
+			allblocks.push_back(block_pack);
 
 			update_head();
 
@@ -449,35 +449,33 @@ namespace Chain {
 		FC_ASSERT(branch1, "Unknown block id ${id}", ("id", firstid));
 		FC_ASSERT(branch2, "Unknown block id ${id}", ("id", secondid));
 
-		branches.first.push_back(branch1);
-		branches.second.push_back(branch2);
-
 		while (branch1->block_num > branch2->block_num)
 		{
-			branch1 = _context->get_block(branch1->block_id);
-			FC_ASSERT(branch1);
 			branches.first.push_back(branch1);
+			branch1 = _context->get_block(branch1->prev_id());
+			FC_ASSERT(branch1);
 		}
 
 		while (branch1->block_num < branch2->block_num)
 		{
-			branch2 = _context->get_block(branch2->block_id);
-			FC_ASSERT(branch2);
 			branches.second.push_back(branch2);
+			branch2 = _context->get_block(branch2->prev_id());
+			FC_ASSERT(branch2);
 		}
 
-		while (branch1->prev_id() != branch2->prev_id())
+		FC_ASSERT(branch1->block_num == branch2->block_num);
+
+		while (branch1->block_id != branch2->block_id)
 		{
-			branch1 = _context->get_block(branch1->block_id);
-			branch2 = _context->get_block(branch2->block_id);
-
-			FC_ASSERT(branch1);
-			FC_ASSERT(branch2);
-
 			branches.first.push_back(branch1);
 			branches.second.push_back(branch2);		
+
+			branch1 = _context->get_block(branch1->prev_id());
+			branch2 = _context->get_block(branch2->prev_id());
+			FC_ASSERT(branch1);
+			FC_ASSERT(branch2);
 		}
-		branches.fork_node = get_block(branch1->prev_id());
+		branches.fork_node = get_block(branch1->block_id);
 		FC_ASSERT(branches.fork_node);
 		return branches;
 	}

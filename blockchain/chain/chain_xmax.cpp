@@ -143,10 +143,10 @@ namespace Xmaxplatform { namespace Chain {
 			{
 				first_initialize(initer);
 
-				// for test..
-				chain_timestamp time = chain_timestamp::create(576579600 + 10000);
-				fc::optional<private_key_type> optional_private_key = Utilities::wif_to_key("5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN");
-				build_block(time, *optional_private_key);
+				//// for test..
+				//chain_timestamp time = chain_timestamp::create(576579600 + 10000);
+				//fc::optional<private_key_type> optional_private_key = Utilities::wif_to_key("5JRDMrnGMerHx2wfYo5CftGEjpfqa618eUbDzN9ro9yke4QFKqN");
+				//build_block(time, *optional_private_key);
 			}
 			else
 			{
@@ -672,7 +672,7 @@ namespace Xmaxplatform { namespace Chain {
 				("msgs", _context->building_status.msg_counter)
 			);
 
-			_push_block();
+			_push_block(true);
 			_commit_block();
 
 			return pack;
@@ -698,7 +698,7 @@ namespace Xmaxplatform { namespace Chain {
 			
 		}
 
-		block_pack_ptr chain_xmax::_apply_block(signed_block_ptr block, bool fork)
+		block_pack_ptr chain_xmax::_apply_block(signed_block_ptr block, bool updatefork)
 		{
 			_validate_block_desc(block);
 
@@ -747,10 +747,9 @@ namespace Xmaxplatform { namespace Chain {
 				("msgs", _context->building_status.msg_counter)
 			);
 
-			if (fork)
-			{
-				_push_block();
-			}
+
+			_push_block(updatefork);
+			
 
 			block_pack_ptr ptr = _context->building_block->pack;
 
@@ -761,11 +760,16 @@ namespace Xmaxplatform { namespace Chain {
 
 		void chain_xmax::_pop_block()
 		{
-			auto previous = _context->fork_db.get_block(_context->block_head->prev_id());
+			block_pack_ptr pop_pack = _context->block_head;
+			auto previous = _context->fork_db.get_block(pop_pack->prev_id());
 
-			_context->fork_db.change_main_chain_flag(_context->block_head->block_id, false);
+			_context->fork_db.change_main_chain_flag(pop_pack->block_id, false);
 
 			_context->block_head = previous;
+			_context->block_db.undo();
+
+			ilog("pop block. num=${num}, id=${id}", ("num", pop_pack->block_num)("id", pop_pack->block_id));
+
 		}
 
 		void chain_xmax::_check_fork()
@@ -774,42 +778,45 @@ namespace Xmaxplatform { namespace Chain {
 
 			while (!new_head->main_chain)
 			{
+				ilog("find new fork, undo old blocks.");
 				fetch_branch branches = _context->fork_db.fetch_branch_from_fork(_context->block_head->block_id, new_head->block_id);
-				try
+
+				// undo old blocks.
 				{
 					branch_blocks& origin_branch = branches.first;
 
-					branch_blocks::const_reverse_iterator it = origin_branch.rbegin();
-					while (it != origin_branch.rend())
+					branch_blocks::const_iterator it = origin_branch.begin();
+
+					FC_ASSERT((*it)->block_id == _context->block_head->block_id);
+					while (it != origin_branch.end())
 					{
-						FC_ASSERT((*it)->block_id == _context->block_head->block_id);
 						_pop_block();
 						++it;
 					}
-				}
-				catch (const fc::exception& e)
-				{
-					_context->fork_db.remove_chain(new_head->block_id);
-					new_head = _context->fork_db.get_head();
-					continue;
-				}
 
+				}
+				ilog("try to switch to new fork.");
+				// apply new forks.
 				branch_blocks& new_branch = branches.second;
 				for ( auto rit = new_branch.rbegin(); rit != new_branch.rend(); ++rit)
 				{
 					try
 					{
-						_apply_block((*rit)->block, false);
+						block_pack_ptr pack = *rit;
+						_apply_block(pack->block, false);
+						_context->block_head = pack;
 						_context->fork_db.change_main_chain_flag((*rit)->block_id, true);
 					}
 					catch (const fc::exception& e)
 					{
 						_context->fork_db.remove_chain((*rit)->block_id);
 						ilog("bad forks ${e}", ("e", e.to_detail_string()));
+					
 						break;
 					}
 				}
 
+				new_head = _context->fork_db.get_head();
 			}
 		}
 
@@ -984,7 +991,7 @@ namespace Xmaxplatform { namespace Chain {
 			block_summary(*_context->building_block->pack->block);
 		}
 
-		void chain_xmax::_push_block()
+		void chain_xmax::_push_block(bool updatefork)
 		{
 			FC_ASSERT(_context->building_block);
 			const auto pack = _context->building_block->pack;
@@ -994,9 +1001,13 @@ namespace Xmaxplatform { namespace Chain {
 					"previous block not found.(num=${0}, preid=${1})", 
 					("0", pack->block->block_num())("1", pack->block->previous));
 
-				_context->fork_db.add_block(pack);
-				_context->block_head = _context->fork_db.get_head();
-				FC_ASSERT(pack == _context->block_head, "error new head in fork database");
+				if (updatefork)
+				{
+					_context->fork_db.add_block(pack);
+					_context->block_head = _context->fork_db.get_head();
+					FC_ASSERT(pack == _context->block_head, "error new head in fork database");
+				}
+
 			} FC_CAPTURE_AND_RETHROW((pack->block_num))
 		}
 
