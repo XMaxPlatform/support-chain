@@ -12,7 +12,6 @@ namespace Chain {
 	cash_detail::cash_detail(paytype pt, const Basetypes::pay_cash& cash)
 		: pay(pt)
 		, attachment(chain_timestamp::create(chain_timestamp::stamp_type(cash.attachment.locktime)))
-		, sig(cash.sig)
 	{
 		for (const auto& elem : cash.inputs)
 		{
@@ -22,9 +21,14 @@ namespace Chain {
 		}
 		for (const auto& elem : cash.outputs)
 		{
-			cash_output o(share_type(elem.amount), elem.to);
+			cash_output o(elem.to, Basetypes::share_type(elem.amount));
 			outputs.emplace_back(std::move(o));
 		}
+	}
+
+	cash_digest cash_detail::digest() const
+	{
+		return cash_digest::hash(*this);
 	}
 }
 }

@@ -208,14 +208,14 @@ namespace fc {
 	void xpackanyvalue(Stream& s, const Any& any)
 	{
 		unsigned size = sizeof(Any);
-		xpack(s, size, reinterpret_cast<const uint8*>(&any));
+		xpack(s, size, reinterpret_cast<const uint8_t*>(&any));
 	}
 
 	template<typename Stream, typename Any>
 	void xunpackanyvalue(Stream& s, Any& any)
 	{
 		unsigned size = sizeof(Any);
-		xunpack(s, size, reinterpret_cast<uint8*>(&any));
+		xunpack(s, size, reinterpret_cast<uint8_t*>(&any));
 	}
 
     template<typename Stream> void pack( Stream& s, const UInt<256>& n );

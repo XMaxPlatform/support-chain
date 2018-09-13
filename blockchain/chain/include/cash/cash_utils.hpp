@@ -15,7 +15,7 @@ namespace Xmaxplatform {
 
 		namespace utils
 		{
-			void check_cash_from_mint(const cash_mint& mint, const Basetypes::pay_cash& cash);
+			void check_cash_from_mint(const cash_digest& predigest, const address& owner, const Basetypes::pay_cash& cash);
 		}
 	}
 }

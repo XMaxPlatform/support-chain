@@ -14,7 +14,7 @@ namespace Chain {
 	{
 		pay_none = 0,
 		pay_to_addr = 1,
-		mint_to_addr = 1,
+		mint_to_addr = 2,
 	};
 
 	using fpaytypevalue = paytype_enum;
@@ -67,13 +67,14 @@ namespace Chain {
 		}
 
 		cash_detail(paytype pt, const  Basetypes::pay_cash& cash);
+		cash_digest             digest() const;
 	};
 
 	struct signed_cash_detail
 	{
 		cash_detail detail;
 		cash_signature sig;
-	}
+	};
 }
 }
 
@@ -83,7 +84,7 @@ FC_REFLECT(Xmaxplatform::Chain::cash_output, (to)(amount))
 namespace fc {
 namespace raw {
 	template<typename Stream>
-	inline void pack(Stream& s, const cash_inputs& value)
+	inline void pack(Stream& s, const Xmaxplatform::Chain::cash_inputs& value)
 	{
 		uint8_t size = value.size();
 		FC_ASSERT(size <= MAX_CASHINPUT_SIZE);
@@ -98,7 +99,7 @@ namespace raw {
 		}
 	}
 	template<typename Stream>
-	inline void unpack(Stream& s, cash_inputs& value)
+	inline void unpack(Stream& s, Xmaxplatform::Chain::cash_inputs& value)
 	{
 		uint8_t size;
 		fc::raw::unpack(s, size);
@@ -113,7 +114,7 @@ namespace raw {
 	}
 
 	template<typename Stream>
-	inline void pack(Stream& s, const cash_outputs& value)
+	inline void pack(Stream& s, const Xmaxplatform::Chain::cash_outputs& value)
 	{
 		uint8_t size = value.size();
 		FC_ASSERT(size <= MAX_CASHOUTINPUT_SIZE);
@@ -127,7 +128,7 @@ namespace raw {
 		}
 	}
 	template<typename Stream>
-	inline void unpack(Stream& s, cash_outputs& value)
+	inline void unpack(Stream& s, Xmaxplatform::Chain::cash_outputs& value)
 	{
 		uint8_t size;
 		fc::raw::unpack(s, size);
@@ -143,26 +144,55 @@ namespace raw {
 }
 }
 
-namespace Xmaxplatform {
-namespace Chain {
+namespace fc {
+namespace raw {
 	template<typename Stream>
-	inline void pack(stream& s, const cash_detail& cash)
+	inline void pack(Stream& s, const Xmaxplatform::Chain::cash_detail& cash)
 	{
-		fc::raw::xpackanyvalue(s, (fpaytypevalue)cash.pay);			
+		fc::raw::xpackanyvalue(s, cash.pay);			
 		fc::raw::pack(cash.attachment);
 
 		switch (cash.pay)
 		{
-		case paytype::mint_to_addr:
+		case Xmaxplatform::Chain::paytype::mint_to_addr:
 		{
 			fc::raw::pack(cash.inputs[0]);
 			fc::raw::pack(cash.outputs[0]);
 
+		}
+		case Xmaxplatform::Chain::paytype::pay_to_addr:
+		{
+			fc::raw::pack(cash.inputs);
+			fc::raw::pack(cash.outputs);
 		}
 		default:
 			break;
 		}
 
 	}
+	template<typename Stream>
+	inline void unpack(Stream& s, Xmaxplatform::Chain::cash_detail& cash)
+	{
+		fc::raw::xunpackanyvalue(s, cash.pay);
+		fc::raw::unpack(cash.attachment);
 
+		switch (cash.pay)
+		{
+		case Xmaxplatform::Chain::paytype::mint_to_addr:
+		{
+			cash.inputs.resize(1);
+			cash.outputs.resize(1);
+			fc::raw::unpack(cash.inputs[0]);
+			fc::raw::unpack(cash.outputs[0]);
+
+		}
+		case Xmaxplatform::Chain::paytype::pay_to_addr:
+		{
+			fc::raw::unpack(cash.inputs);
+			fc::raw::unpack(cash.outputs);
+		}
+		default:
+			break;
+		}
+	}
 }}
