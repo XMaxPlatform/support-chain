@@ -92,6 +92,7 @@ namespace Xmaxplatform {
 			{
 				return false;
 			}
+			return true;
 		}
 
 		int jsvm_xmax::GetInstructionCost(int ins)

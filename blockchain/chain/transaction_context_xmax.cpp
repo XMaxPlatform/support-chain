@@ -105,13 +105,13 @@ namespace Chain {
 				const uint32_t execution_time = 10000;//TODO
 				try {
 					uint64 instructionlimit = 1000;
-					if (gas_step!=0)
+					if (gas !=0)
 					{
-						instructionlimit = gaslimit / gas_step;
+						instructionlimit = gaslimit / gas;
 					}
 					jsvm_xmax::get().SetInstructionLimit((uint32_t)instructionlimit);
 					jsvm_xmax::get().apply(context, execution_time, true);
-					usedgas += jsvm_xmax::get().GetExecutedInsCount()*gas_step;
+					usedgas += jsvm_xmax::get().GetExecutedInsCount()*gas;
 				}
 				FC_CAPTURE_AND_LOG((context.msg))		
 			}

@@ -1454,10 +1454,14 @@ namespace Xmaxplatform { namespace Chain {
 		{
 			if (gas_used ==0 )
 			{
+				ilog("this transaction cost 0 gas");
 				return;
 			}
+
+			ilog("transfer ${gas} gas from ${from} to ${to}",("gas",gas_used)("from", trx_ptr->signed_trx.gas_payer) ("to", _context->building_block->pack->bld_info.builder_name));
+
 			const auto& from = db.get<xmx_token_object, by_owner_name>(trx_ptr->signed_trx.gas_payer);
-			const auto& to = db.get<xmx_token_object, by_owner_name>(_context->building_block->pack->block->builder);
+			const auto& to = db.get<xmx_token_object, by_owner_name>(_context->building_block->pack->bld_info.builder_name);
 			
 			db.modify(from, [&](xmx_token_object& a) {
 				a.main_token -= share_type(gas_used);

@@ -207,6 +207,9 @@ namespace Xmaxplatform {
 			app().get_plugin<blockchain_plugin>().get_chain_id(chainid);
 			name creator(callername);
 			Chain::signed_transaction trx;
+			trx.gas_payer = creator;
+			trx.gas = 1;
+			trx.gaslimit = 7000;
 
 #define GET_FIELD( VO, FIELD, RESULT ) \
        if( VO.contains(#FIELD) ) fc::from_variant( VO[#FIELD], RESULT.FIELD )
