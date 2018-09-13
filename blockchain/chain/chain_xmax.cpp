@@ -1463,6 +1463,9 @@ namespace Xmaxplatform { namespace Chain {
 			const auto& from = db.get<xmx_token_object, by_owner_name>(trx_ptr->signed_trx.gas_payer);
 			const auto& to = db.get<xmx_token_object, by_owner_name>(_context->building_block->pack->bld_info.builder_name);
 			
+			XMAX_ASSERT(from.main_token >= gas_used, transaction_exception,
+				"account must have more balance than gas used");
+
 			db.modify(from, [&](xmx_token_object& a) {
 				a.main_token -= share_type(gas_used);
 			});
