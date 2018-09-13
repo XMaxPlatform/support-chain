@@ -6,6 +6,7 @@
 #include <boost/interprocess/containers/flat_map.hpp>
 #include <boost/interprocess/containers/deque.hpp>
 #include <boost/interprocess/containers/string.hpp>
+#include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/sync/interprocess_sharable_mutex.hpp>
 #include <boost/interprocess/sync/sharable_lock.hpp>
@@ -53,7 +54,7 @@ namespace  Basechain {
    typedef bip::basic_string< char, std::char_traits< char >, allocator< char > > mapped_string;
 
    template<typename T>
-   using mapped_vector = std::vector<T, allocator<T> >;
+   using mapped_vector = bip::vector<T, allocator<T> >;
 
    struct strcmp_less
    {
