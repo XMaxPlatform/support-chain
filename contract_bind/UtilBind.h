@@ -11,5 +11,7 @@ namespace Xmaxplatform {
 		 
 		void StrToName(const v8::FunctionCallbackInfo<v8::Value>& args);
 
+		void StrIsName(const v8::FunctionCallbackInfo<v8::Value>& args);
+
 	}
 }

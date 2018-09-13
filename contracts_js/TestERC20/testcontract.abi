@@ -7,7 +7,7 @@
     ],
     "structs": [
         {
-            "name": "testaction",
+            "name": "transfer",
             "base": "",
             "fields": {
                 "account": "account_name",
@@ -25,8 +25,8 @@
     ],
     "actions": [
         {
-            "action_name": "testaction",
-            "type": "testaction"
+            "action_name": "transfer",
+            "type": "transfer"
         }
     ],
     "tables": [

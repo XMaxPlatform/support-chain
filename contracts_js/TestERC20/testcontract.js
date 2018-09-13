@@ -8,18 +8,18 @@ function init(code,type)
 
 function apply(code ,type)
 {
-	if(code == StrToName("testcontract"))
+	if(StrIsName("ercc",code))
 	{
-		if(type == StrToName("transfer"))
+		if(StrIsName("transfer",type))
 		{
 			transfer(code,type);
 		}
 	}
 }
 
-function transfer()
+function transfer(code,type)
 {
-	var amount = GetMsgData(code,type,"account","i64")
+	var amount = GetMsgData(code,type,"quantity","int")
 	
 	StoreRecord(StrToName("xmax"),StrToName("testdata"),StrToName("testdata"),amount);
 }

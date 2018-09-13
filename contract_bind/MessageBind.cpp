@@ -55,21 +55,18 @@ namespace Xmaxplatform {
 					}
 				}
 
-				{
-					v8::String::Utf8Value str(args[2]);
-					key = StringJS2CPP(str);
-				}
+				v8::String::Utf8Value str0(args[2]);
+				key = StringJS2CPP(str0);
 				
-				{
-					v8::String::Utf8Value str(args[3]);
-					totype = StringJS2CPP(str);
-				}
+				v8::String::Utf8Value str1(args[3]);
+				totype = StringJS2CPP(str1);
+				
 
 				if (strcmp(totype,"int")==0)
 				{
 					int ret;
 					MsgGet(code, type, jsvm_xmax::get().current_validate_context->msg.data, key, ret);
-					args.GetReturnValue().Set(Int32::New(args.GetIsolate(), ret));
+					args.GetReturnValue().Set(v8::Integer::New(args.GetIsolate(), ret));
 					return;
 				}
 				else if (strcmp(totype, "i64") == 0)

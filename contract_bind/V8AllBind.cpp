@@ -28,6 +28,8 @@ namespace Xmaxplatform {
 			bindfoo(LoadRecord);
 			bindfoo(StoreRecord);
 			bindfoo(StrToName);
+			bindfoo(StrIsName);
+			
 			return std::move(ret);
 		}
 

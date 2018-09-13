@@ -104,9 +104,14 @@ namespace Chain {
 				idump((context.code)(context.msg.type));
 				const uint32_t execution_time = 10000;//TODO
 				try {
-					jsvm_xmax::get().SetInstructionLimit((uint32_t)gas_step);
+					uint64 instructionlimit = 1000;
+					if (gas_step!=0)
+					{
+						instructionlimit = gaslimit / gas_step;
+					}
+					jsvm_xmax::get().SetInstructionLimit((uint32_t)instructionlimit);
 					jsvm_xmax::get().apply(context, execution_time, true);
-					usedgas += jsvm_xmax::get().GetExecutedInsCount();
+					usedgas += jsvm_xmax::get().GetExecutedInsCount()*gas_step;
 				}
 				FC_CAPTURE_AND_LOG((context.msg))		
 			}
