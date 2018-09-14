@@ -19,14 +19,18 @@ namespace Chain {
 
 	using fpaytypevalue = paytype_enum;
 
+	const uint8_t mint_slot_flag = 0xff;
 
 	struct cash_input {
 		cash_input() = default;
-		cash_input(const cash_digest& _prevout, const uint8_t& _slot)
-			: prevout(_prevout), slot(_slot) {}
+		cash_input(uint32_t _num, uint16_t _idx, uint8_t _slot)
+			: block_num(_num), trx_idx(_idx), slot(_slot)
+		{
 
-		cash_digest	prevout;
-		uint8_t		slot = 0;
+		}
+		uint32_t block_num;
+		uint16_t trx_idx;
+		uint8_t slot;
 	};
 
 	using cash_inputs = std::vector<cash_input>;
@@ -78,7 +82,7 @@ namespace Chain {
 }
 }
 
-FC_REFLECT(Xmaxplatform::Chain::cash_input, (prevout)(slot))
+FC_REFLECT(Xmaxplatform::Chain::cash_input, (block_num)(trx_idx)(slot))
 FC_REFLECT(Xmaxplatform::Chain::cash_output, (to)(amount))
 
 namespace fc {

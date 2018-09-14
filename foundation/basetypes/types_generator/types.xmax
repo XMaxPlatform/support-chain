@@ -221,7 +221,8 @@ struct revokeerc721
 	token_name asset_symbol
 
 struct pay_input
-	prevout		hash
+	num			uint32
+	idx			uint16
 	slot		uint8
 
 struct pay_output

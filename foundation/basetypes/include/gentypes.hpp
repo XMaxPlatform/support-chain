@@ -918,17 +918,19 @@ namespace Xmaxplatform { namespace Basetypes {
 
     struct pay_input { 
         pay_input() = default;
-        pay_input(const hash& prevout, const uint8& slot)
-           : prevout(prevout), slot(slot) {}
+        pay_input(const uint32& num, const uint16& idx, const uint8& slot)
+           : num(num), idx(idx), slot(slot) {}
 
-        hash                             prevout;
+        uint32                           num;
+        uint16                           idx;
         uint8                            slot;
     };
 
     template<> struct get_struct<pay_input> { 
         static const struct_t& type() { 
            static struct_t result = { "pay_input", "", {
-                {"prevout", "hash"},
+                {"num", "uint32"},
+                {"idx", "uint16"},
                 {"slot", "uint8"},
               }
            };
@@ -1102,7 +1104,7 @@ FC_REFLECT( Xmaxplatform::Basetypes::minterc721                       , (token_n
 FC_REFLECT( Xmaxplatform::Basetypes::stopminterc721                   , (token_name) )
 FC_REFLECT( Xmaxplatform::Basetypes::transferfromerc721               , (token_name)(token_id)(from)(to) )
 FC_REFLECT( Xmaxplatform::Basetypes::revokeerc721                     , (token_name) )
-FC_REFLECT( Xmaxplatform::Basetypes::pay_input                        , (prevout)(slot) )
+FC_REFLECT( Xmaxplatform::Basetypes::pay_input                        , (num)(idx)(slot) )
 FC_REFLECT( Xmaxplatform::Basetypes::pay_output                       , (amount)(to) )
 FC_REFLECT( Xmaxplatform::Basetypes::pay_attachment                   , (locktime) )
 FC_REFLECT( Xmaxplatform::Basetypes::pay_cash                         , (inputs)(outputs)(attachment)(sig) )

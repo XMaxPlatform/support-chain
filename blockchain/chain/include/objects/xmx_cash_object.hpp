@@ -10,12 +10,21 @@
 namespace Xmaxplatform {
 namespace Chain {
 
-	using mcash_inputs = mapped_vector<cash_input>;
-	using mcash_outputs = mapped_vector<cash_output>;
+
+	struct output_detail : public cash_output
+	{
+		int64_t toid = 0;
+		uint8_t	toslot = 0xff;
+	};
+
 
 	class xmx_cash_object : public Basechain::object<xmx_cash_object_type, xmx_cash_object> {
 		OBJECT_CCTOR(xmx_cash_object, (inputs)(outputs))
 	public:
+
+		using mcash_inputs = mapped_vector<cash_input>;
+		using mcash_outputs = mapped_vector<output_detail>;
+
 		id_type             id;
 
 		cash_id				cashid;

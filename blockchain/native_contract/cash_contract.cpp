@@ -59,7 +59,28 @@ namespace Native_contract {
 		const mint_cash_object& mintobj = get_mint_object(mint, context.mutable_db);
 
 
+		// cash must be 1 input, and 1 output.
+		// input's prevout is mint digest.
 
+		XMAX_ASSERT(msg.paydetail.inputs.size() == 1, message_precondition_exception, "cash.inputs.size() must be 1.");
+		XMAX_ASSERT(msg.paydetail.outputs.size() == 1, message_precondition_exception, "cash.outputs.size() must be 1.");
+		XMAX_ASSERT(msg.paydetail.outputs[0].to != address::addr_zero, message_precondition_exception, "error output address.");
+
+		XMAX_ASSERT(msg.paydetail.outputs[0].amount == mintobj.mint.token, message_validate_exception, "input amount must be equal to output amount.");
+
+		cash_digest prevout(msg.paydetail.inputs[0].prevout);
+
+		XMAX_ASSERT(prevout == mintdigest, message_validate_exception, "input's prevout must be equal to mint digest.");
+
+		cash_detail detail(paytype::mint_to_addr, msg.paydetail);
+
+		cash_digest digest = detail.digest();
+
+		// check mint sign.
+
+		cash_address addr = utils::to_address(msg.paydetail.sig, digest);
+
+		XMAX_ASSERT(addr == mintobj.mint.owner, message_validate_exception, "bad sig for cash owner.");
 
 
 
