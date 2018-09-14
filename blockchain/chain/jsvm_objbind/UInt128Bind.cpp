@@ -46,6 +46,7 @@ namespace Xmaxplatform {
 		{
 			if (V8u128* cpp_object = data.GetParameter())
 			{
+				cpp_object->weakExternalHandle.Reset();
 				delete cpp_object;
 			}
 		}

@@ -1,5 +1,4 @@
 #ifdef USE_V8
-
 #include "jsvm_xmax.hpp"
 /**
 *  @file
@@ -305,14 +304,17 @@ namespace Xmaxplatform {
 
 			//--------run code in a new context----------------
 			CleanInstruction();
-			V8_ParseWithOutPlugin();
-			Local<Context> context = Context::New(m_pIsolate, NULL, *m_pGlobalObjectTemplate);
-			Context::Scope context_scope(context);
-			V8_ParseWithPlugin();
-			Local<Script> script = CompileJsCode(m_pIsolate, context, (char*)code);
-		
-			foo(context);
-			V8_ParseWithOutPlugin();
+			{
+				V8_ParseWithOutPlugin();
+				Local<Context> context = Context::New(m_pIsolate, NULL, *m_pGlobalObjectTemplate);
+				Context::Scope context_scope(context);
+				V8_ParseWithPlugin();
+				Local<Script> script = CompileJsCode(m_pIsolate, context, (char*)code);
+
+				foo(context);
+				V8_ParseWithOutPlugin();
+			}
+			m_pIsolate->RequestGarbageCollectionForTesting(Isolate::kFullGarbageCollection);
 			ilog("js foo load and called: instruction count:${icount}", ("icount", GetExecutedInsCount()));
 		}
 
