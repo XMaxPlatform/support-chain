@@ -55,6 +55,7 @@ namespace Xmaxplatform {
 			bool is_sign_of_addr(const xmax_type_signature& sig, const xmax_type_summary& digest, const address& addr);
 
 			address to_address(const fc::ecc::public_key& pkey);
+			bool is_sign_valid(const xmax_type_signature& sig, const xmax_type_summary& digest, const fc::ecc::public_key &signer_key);
 
 			address to_address(const xmax_type_signature& sig, const xmax_type_summary& digest);
 
