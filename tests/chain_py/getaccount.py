@@ -25,8 +25,8 @@ def rpcCall(rpc, trxData, bprint):
 
     return
 
-
-accname = sys.argv[1]
+# read account name.
+accname = sys.argv[1] 
 
 getjson = account.getAccountJson(accname)
 rpcCall(GET_ACC_RPC, getjson, True)
