@@ -4,3 +4,5 @@
 /build
 /libraries/OpenSSL-Win64
 /tools/binaryen/build
+/tests/chain_py/.vscode/*.json
+/tests/chain_py/xmax/__pycache__/*.pyc

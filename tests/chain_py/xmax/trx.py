@@ -26,8 +26,10 @@ TRX_JSON = '\
 def formatTrxJson(msgs, scopes):
 
     msgbuff = utils.jsonArray(msgs)
+
     scopebuff = utils.jsonValArray(scopes)
 
+    # replace keys.
     trx1 = TRX_JSON.replace(TRX_SCOPE_KEY, scopebuff)
     trx2 = trx1.replace(TRX_MSG_KEY, msgbuff)
 
@@ -37,7 +39,7 @@ def formatPostJson(prikeys, trxs):
     
     trxbuff = utils.jsonArray(trxs)
     keybuff = utils.jsonValArray(prikeys)
-
+    # replace keys.
     buff = TRX_POST_JSON.replace(TRX_BODY_KEY, trxbuff)
     buff = buff.replace(TRX_SIGN_KEY, keybuff)
 
