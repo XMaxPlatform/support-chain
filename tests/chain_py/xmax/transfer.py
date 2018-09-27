@@ -23,3 +23,15 @@ SIMPLE_TRANSFER_JSON = '\
 		"memo": @{memo}\
 	}\
 }'\
+
+def transferJson(fromName, toName, ammount, memo):
+
+	stream = SIMPLE_TRANSFER_JSON.replace(TRANSFER_FROM_NAME, utils.quoteValue(fromName))
+
+	stream = stream.replace(TRANSFER_TO_NAME, utils.quoteValue(toName))
+
+	stream = stream.replace(TRANSFER_AMOUNT_NAME, utils.quoteValue(str(ammount)))
+
+	stream = stream.replace(TRANSFER_MEMO_NAME, utils.quoteValue(memo))
+
+	return stream
