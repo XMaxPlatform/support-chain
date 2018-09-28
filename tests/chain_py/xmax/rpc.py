@@ -6,6 +6,7 @@ from urllib import request, parse
 PUSH_TRX_URL_SUFFIX = '/v0/contractutil_plugin/fix_push_trx'
 GET_ACC_URL_SUFFIX = '/v0/xmaxchain/get_account'
 
+# bprint: if true print post data.
 def rpcCall(rpcUrl, trxData, bprint):
 
     req = request.Request(rpcUrl)
