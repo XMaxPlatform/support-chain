@@ -21,3 +21,14 @@ RANCHARS =['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','
 
 NEWACC_PREFIX = 'tn'
 
+def transferToken(fromAcc, toAcc, amount, memo):
+    newjson = transfer.transferJson(fromAcc, toAcc, amount, memo)
+
+    scopes = [fromAcc, toAcc]
+
+    trxjson = trx.formatTrxJson([newjson], scopes)
+
+    postjson = trx.formatPostJson([ACTIVE_KEY_PRIVATE], [trxjson])
+
+    rpc.pushTrxRpc(RPC_SERVER_POINT, postjson, False)
+    return
