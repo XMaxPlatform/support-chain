@@ -944,7 +944,7 @@ namespace Xmaxplatform { namespace Chain {
 
 			const builder_object* builder = find_builder_object(block->builder);
 
-			FC_ASSERT(block->is_signer_valid(builder->signing_key), "bad block.");
+			FC_ASSERT(block->is_signer_valid(builder->signing_key), "bad block, sign data is not  from the key '${key}'", ("key", builder->signing_key.operator fc::string()));
 		}
 
 		void chain_xmax::_validate_block(const signed_block_ptr next_block)
