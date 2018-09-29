@@ -32,3 +32,23 @@ def transferToken(fromAcc, toAcc, amount, memo):
 
     rpc.pushTrxRpc(RPC_SERVER_POINT, postjson, False)
     return
+
+    def transferTest(Acc1, Acc2, amount, count):
+    newjson1 = transfer.transferJson(Acc1, Acc2, amount, "")
+    newjson2 = transfer.transferJson(Acc2, Acc1, amount, "")
+    scopes = [Acc1, Acc2]
+
+    msgs = []
+
+    for idx in range(0, count):
+        if(idx % 2 == 0):
+            msgs.append(newjson1)
+        else:
+            msgs.append(newjson2)
+
+    trxjson = trx.formatTrxJson(msgs, scopes)
+
+    postjson = trx.formatPostJson([ACTIVE_KEY_PRIVATE], [trxjson])
+
+    rpc.pushTrxRpc(RPC_SERVER_POINT, postjson, False)
+    return  
