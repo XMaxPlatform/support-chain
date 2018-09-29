@@ -54,6 +54,15 @@ def transferToken(fromAcc, toAcc, amount, memo):
     return  
 
     def newAccount(accname, amount):
+        newaccjson = account.newAccountJson(CREATOR_NAME, accname, amount, OWNER_KEY, ACTIVE_KEY)
 
+        scopes = [CREATOR_NAME]
 
+        trxjson = trx.formatTrxJson([newaccjson], scopes)
+
+        postjson = trx.formatPostJson([CREATOR_PRI_KEY], [trxjson])
+
+        print('new account: ' + accname)
+
+        rpc.pushTrxRpc(RPC_SERVER_POINT, postjson, False)
     return
