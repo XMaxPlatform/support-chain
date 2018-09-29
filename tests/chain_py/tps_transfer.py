@@ -33,7 +33,7 @@ def transferToken(fromAcc, toAcc, amount, memo):
     rpc.pushTrxRpc(RPC_SERVER_POINT, postjson, False)
     return
 
-    def transferTest(Acc1, Acc2, amount, count):
+def transferTest(Acc1, Acc2, amount, count):
     newjson1 = transfer.transferJson(Acc1, Acc2, amount, "")
     newjson2 = transfer.transferJson(Acc2, Acc1, amount, "")
     scopes = [Acc1, Acc2]
@@ -53,7 +53,7 @@ def transferToken(fromAcc, toAcc, amount, memo):
     rpc.pushTrxRpc(RPC_SERVER_POINT, postjson, False)
     return  
 
-    def newAccount(accname, amount):
+def newAccount(accname, amount):
         newaccjson = account.newAccountJson(CREATOR_NAME, accname, amount, OWNER_KEY, ACTIVE_KEY)
 
         scopes = [CREATOR_NAME]
