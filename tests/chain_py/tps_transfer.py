@@ -52,3 +52,8 @@ def transferToken(fromAcc, toAcc, amount, memo):
 
     rpc.pushTrxRpc(RPC_SERVER_POINT, postjson, False)
     return  
+
+    def newAccount(accname, amount):
+
+
+    return
