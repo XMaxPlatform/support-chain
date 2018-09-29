@@ -66,3 +66,42 @@ def newAccount(accname, amount):
 
         rpc.pushTrxRpc(RPC_SERVER_POINT, postjson, False)
     return
+
+def getAccount(accname):
+    getjson = account.getAccountJson(accname)
+    rpc.getAccountRpc(RPC_SERVER_POINT, getjson, True)
+    return
+
+TEST_TRANSFER_COUNT = 10
+TEST_MEGS_IN_TRX = 300
+
+SLEEP_TIME = 0.7
+
+
+ranchars = random.sample(RANCHARS, 4)
+rstr = ''
+rstr = rstr.join(ranchars)
+
+prefix = NEWACC_PREFIX + rstr + '.'
+
+acca = prefix + 'a'
+accb = prefix + 'b'
+
+newAccount(acca, 100)
+newAccount(accb, 100)
+
+time.sleep(1)
+
+getAccount(acca)
+getAccount(accb)
+
+print('transfer begin...')
+
+for idx in range(0, TEST_TRANSFER_COUNT):
+
+    print('batch num: ' + str(idx))
+
+    transferTest(acca, accb, 1, TEST_MEGS_IN_TRX)
+    time.sleep(SLEEP_TIME)
+        
+print('transfer end...')
