@@ -81,6 +81,23 @@ namespace Chain {
 			}
 		}
 
+		optional<authority_name>  find_linked_permission(const Basechain::database& db, account_name acc, account_name scope, func_name func)
+		{
+			auto key = std::make_tuple(acc, scope, func);
+			const linked_permission_object* linked = db.find<linked_permission_object, by_func>(key);
+
+			if (nullptr == linked)
+			{
+				auto key2 = std::make_tuple(acc, scope, "");
+				linked = db.find<linked_permission_object, by_func>(key2);
+			}
+		}
+
+		optional<authority_name> min_linked_permission(account_name acc, account_name scope, func_name func)
+		{
+
+		}
+
 		void check_updateauth(const Basechain::database& db, const vector<Basetypes::account_auth>& auths, const Basetypes::updateauth& args)
 		{
 			const auto& auth = auths[0];
@@ -160,6 +177,9 @@ namespace Chain {
 						special_flag = false;
 					}
 				}
+
+				std::set<Basetypes::account_auth> satisfys;
+
 				// check custom auth.
 				for (const Basetypes::account_auth& au : msg.authorization)
 				{
