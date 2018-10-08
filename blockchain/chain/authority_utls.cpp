@@ -131,12 +131,14 @@ namespace Chain {
 
 		void check_authorization(const Basechain::database& db, const std::vector<Basetypes::message>& messages, const flat_set<public_key_type>& keys)
 		{
-			return;
+			//return;
 			for (const Basetypes::message& itr : messages)
 			{
 				const message_xmax& msg = message_xmax::cast(itr);
+				bool special_flag = true;
+				// check system auth.
 				if (msg.code == Config::xmax_contract_name)
-				{
+				{		
 					if (updateauth_name == msg.type)
 					{
 						check_updateauth(db, msg.authorization, msg.as<Basetypes::updateauth>());
@@ -153,8 +155,24 @@ namespace Chain {
 					{
 						check_unlinkauth(db, msg.authorization, msg.as<Basetypes::unlinkauth>());
 					}
+					else
+					{
+						special_flag = false;
+					}
+				}
+				// check custom auth.
+				for (const Basetypes::account_auth& au : msg.authorization)
+				{
+					if (!special_flag)
+					{
+
+					}
 				}
 			}
+
+
+
+
 		}
 
 		void check_gaspayer(const Basechain::database& db, transaction_request_ptr transaction)
