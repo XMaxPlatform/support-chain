@@ -22,3 +22,12 @@ ACTIVE_KEY_PRIVATE = '5KDVLHu4YDA6bBnu9GQbr25saJoNZrHRb4mq1WQwDouhGizqQvU'
 RANCHARS =['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4']
 
 NEWACC_PREFIX = 'tn'
+
+def checkConnect():
+    try:
+        rpc.rpcCall(GET_INFO_RPC, "", False)
+    except Exception:
+        print('no connection, sleep...')
+        return False
+    else:
+        return True
