@@ -94,7 +94,8 @@ namespace LongCode{
 						
 
 		static inline constexpr size_type char_bits() {
-			static_assert(false, "Need implemented in the specific class.");
+			assert(false);//, "Need implemented in the specific class."
+			return 0;
 		}
 
 		static inline constexpr size_type type_size() {
@@ -122,11 +123,13 @@ namespace LongCode{
 		}
 
 		static char_code_type char_to_code(char chr) {
-			static_assert(false, "Need implemented in the specific class.");
+			assert(false);//, "Need implemented in the specific class."
+			return 0;
 		}
 
 		static char code_to_char(char_code_type code) {
-			static_assert(false, "Need implemented in the specific class.");
+			assert(false);//, "Need implemented in the specific class."
+			return 0;
 		}
 
 		static inline std::string to_string(NameCodeType name_code) {
@@ -207,13 +210,13 @@ namespace LongCode{
 	}
 
 	template<>
-	static long_name<uint128>::char_code_type long_name<uint128>::char_to_code(char chr) {
+	long_name<uint128>::char_code_type long_name<uint128>::char_to_code(char chr) {
 		static reverse_code_map_type_u128 reverse_code_map = consturct_reverse_code_map_u128();
 		return reverse_code_map.at(chr);
 	}
 
 	template<>
-	static char long_name<uint128>::code_to_char(long_name<uint128>::char_code_type code) {
+	char long_name<uint128>::code_to_char(long_name<uint128>::char_code_type code) {
 		static_assert((1 << char_bits()) > sizeof(CODE_MAP_U128), "The code map for type uint128 is too large to fit all characters in.");
 		assert(code >= 0 && code < sizeof(CODE_MAP_U128));
 		return CODE_MAP_U128[code - 1];
