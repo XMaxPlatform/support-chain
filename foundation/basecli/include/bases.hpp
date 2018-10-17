@@ -19,9 +19,6 @@ namespace Basecli {
 	using dic = std::map<string, T>;
 
 	template<typename T>
-	using dic = std::map<string, T>;
-
-	template<typename T>
 	using dicptr = std::unique_ptr<dic<T>>;
 
 	using callback = std::function<void()>;
