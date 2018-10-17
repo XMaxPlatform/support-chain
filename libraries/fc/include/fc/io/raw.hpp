@@ -860,14 +860,16 @@ namespace fc {
 		xpack(s, size, data);
 
 	}
+
 	template<typename Stream> void unpack(Stream& s, boost::multiprecision::uint128_t& n) {
 
 		using ntype = bnumtype<boost::multiprecision::uint128_t>;
+    constexpr size_t data_size = 128 / 8 / sizeof(ntype::limb_type);
 
 		ntype::size_type size = 0;
-		ntype::limb_type data[ntype::backend_type::base_type::internal_limb_count] { 0 };
+		ntype::limb_type data[data_size] { 0 };
 		unpack(s, size);
-		FC_ASSERT(size <= ntype::backend_type::base_type::internal_limb_count);
+		FC_ASSERT(size <= data_size);
 
 		ntype::backend_type& bk = n.backend();
 		bk.resize(size, 0);
