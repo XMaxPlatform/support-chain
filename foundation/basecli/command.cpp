@@ -2,6 +2,7 @@
 *  @file
 *  @copyright defined in xmax/LICENSE
 */
+#include <bases.hpp>
 #include <command.hpp>
 #include <utils.hpp>
 #include <set>
@@ -21,9 +22,9 @@ namespace Basecli {
 	}
 
 	template<typename TWidget>
-	TWidget* find_widget(const dic<TWidget*>& dc, const string& name)
+	TWidget* find_widget(const dic< TWidget* >& dc, const string& name)
 	{
-		dic<TWidget*>::const_iterator itr = dc.find(name);
+		auto itr = dc.find(name);
 		if (itr != dc.end())
 		{
 			return (*itr).second;
