@@ -573,8 +573,6 @@ namespace Xmaxplatform {
 		_insert_block(block);
 
 
-		auto trans = mongo_client[mongodb_name][col_transactions_name]; // Transactions
-		auto msgs = mongo_client[mongodb_name][col_messages_name]; // Messages
 	}
 
 
