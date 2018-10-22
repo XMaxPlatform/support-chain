@@ -338,6 +338,12 @@ void xmax_system_linkauth(Chain::message_context_xmax& context)
 		account_assert(context.mutable_db, msg.account);
 		account_assert(context.mutable_db, msg.code);
 
+		if (msg.type != Config::xmax_sysany_name) {
+			const auto *permission = context.mutable_db.find<authority_object, by_name>(msg.requirement);
+			XMAX_ASSERT(permission != nullptr, message_validate_exception,
+				"Failed to retrieve authority: ${permission}", ("permission", msg.requirement));
+		}
+
 		{
 			const authority_object* auth = context.db.find<authority_object, by_owner>(msg.requirement);
 			XMAX_ASSERT(auth != nullptr, message_validate_exception, "Auth not found: ${auth}", ("auth", msg.requirement));
