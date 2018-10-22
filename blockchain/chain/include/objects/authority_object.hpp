@@ -24,6 +24,7 @@ namespace Chain {
 	};
 
 	struct by_owner;
+	struct by_name;
 	using authority_index = Basechain::shared_multi_index_container<
 		authority_object,
 		indexed_by<
@@ -32,9 +33,13 @@ namespace Chain {
 			composite_key<authority_object,
 				member<authority_object, account_name, &authority_object::owner_name>,
 				member<authority_object, authority_name, &authority_object::auth_name>
+			>,
+		ordered_unique<tag<by_name>,
+			composite_key<authority_object,
+				member<authority_object, account_name, &authority_object::owner_name>,
+				member<authority_object, authority_name, &authority_object::id>
 			>
-		>
-		>
+		>	
 	>;
 }
 }

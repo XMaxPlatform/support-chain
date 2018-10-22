@@ -88,14 +88,35 @@ namespace Chain {
 
 			if (nullptr == linked)
 			{
+				// find again without func name.
 				auto key2 = std::make_tuple(acc, scope, "");
 				linked = db.find<linked_permission_object, by_func>(key2);
 			}
+
+			if (nullptr == linked)
+			{
+				return optional<authority_name>();
+			}
+			else
+			{
+				return linked->required_auth;
+			}
 		}
 
-		optional<authority_name> min_linked_permission(account_name acc, account_name scope, func_name func)
+		optional<authority_name> min_linked_permission(const Basechain::database& db, account_name acc, account_name scope, func_name func)
 		{
-
+			try {
+			optional<authority_name> linked = find_linked_permission(db, acc, scope, func);
+			if (!linked)
+			{
+				return Config::xmax_active_name;
+			}
+			if (*linked == Config::xmax_sysany_name)
+			{
+				return optional<authority_name>();
+			}
+			return linked;
+			} FC_CAPTURE_AND_RETHROW((acc)(scope)(func))
 		}
 
 		void check_updateauth(const Basechain::database& db, const vector<Basetypes::account_auth>& auths, const Basetypes::updateauth& args)
@@ -185,7 +206,7 @@ namespace Chain {
 				{
 					if (!special_flag)
 					{
-
+						optional<authority_name> auth = min_linked_permission(db, au.account, msg.code, msg.type);
 					}
 				}
 			}

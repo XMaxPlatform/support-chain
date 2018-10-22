@@ -32,6 +32,7 @@ using fc::ecc::private_key;
         const static account_name xmax_contract_name = STN(xmax);
 		const static authority_name xmax_owner_name = STN(owner);
 		const static authority_name xmax_active_name = STN(active);
+		const static authority_name xmax_sysany_name = STN(sys.any);
 
 		const extern public_key xmax_build_public_key;
 		const extern private_key xmax_build_private_key;
