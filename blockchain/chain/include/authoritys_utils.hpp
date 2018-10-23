@@ -17,7 +17,7 @@ namespace Chain {
 
 	namespace utils
 	{
-		void check_authorization(const Basechain::database& db, const std::vector<Basetypes::message>& messages, const flat_set<public_key_type>& keys);
+		void check_authorization(const Basechain::database& db, const std::vector<Basetypes::message>& messages, const flat_set<public_key_type>& keys, const std::function<void()>&  checktime);
 
 		void check_gaspayer(const Basechain::database& db, transaction_request_ptr transaction);
 
