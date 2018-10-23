@@ -25,6 +25,15 @@ namespace Chain {
 
 	namespace utils
 	{
+
+		const authority_object&  get_authority(const Basechain::database& db, const Basetypes::account_auth& auth)
+		{
+			try {
+				XMAX_ASSERT(!auth.account.empty() && !auth.authority.empty(), authorization_exception, "Invalid permission");
+				return db.get<authority_object, by_owner>(boost::make_tuple(auth.account, auth.authority));
+			} FC_CAPTURE_AND_RETHROW(authorization_exception, "Failed to retrieve permission: ${auth}", ("auth", auth))
+		}
+
 		bool parent_permission_valid(const Basechain::database& db, const authority_object& editor, const authority_object& info)
 		{
 			if (editor.owner_name != info.owner_name)
@@ -207,6 +216,8 @@ namespace Chain {
 					if (!special_flag)
 					{
 						optional<authority_name> auth = min_linked_permission(db, au.account, msg.code, msg.type);
+
+						aut
 					}
 				}
 			}
