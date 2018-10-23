@@ -32,7 +32,6 @@
 #endif
 
 
-
 namespace Xmaxplatform {
     namespace Native_contract {
 using namespace Chain;

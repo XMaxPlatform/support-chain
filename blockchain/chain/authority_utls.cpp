@@ -215,10 +215,10 @@ namespace Chain {
 					{
 						optional<authority_name> permission = min_linked_permission(db, au.account, msg.code, msg.type);
 
-						const authority_object& origin_auth = get_authority_object(db, au);
-						const authority_object& sub_auth = get_authority_object(db, { au.account, *permission });
+						//const authority_object& origin_auth = get_authority_object(db, au);
+						//const authority_object& sub_auth = get_authority_object(db, { au.account, *permission });
 
-						XMAX_ASSERT(parent_permission_valid(db, origin_auth, sub_auth), transaction_exception, "error authority");
+						//XMAX_ASSERT(parent_permission_valid(db, origin_auth, sub_auth), transaction_exception, "error authority");
 					}
 					auto res = satisfys.emplace(au);
 				}
@@ -283,7 +283,8 @@ namespace Chain {
 			try {
 				FC_ASSERT(!auth.account.empty() && !auth.authority.empty(), "Invalid authority");
 
-				return db.get<authority_object, by_owner>(std::make_tuple(auth.account, auth.authority));
+				auto key = std::make_tuple(auth.account, auth.authority);
+				return db.get<authority_object, by_owner>(key);
 
 			} FC_CAPTURE_AND_RETHROW(("auth", auth))
 		}
@@ -293,7 +294,8 @@ namespace Chain {
 			try {
 				FC_ASSERT(!auth.account.empty() && !auth.authority.empty(), "Invalid authority");
 
-				return db.find<authority_object, by_owner>(std::make_tuple(auth.account, auth.authority));
+				auto key = std::make_tuple(auth.account, auth.authority);
+				return db.find<authority_object, by_owner>(key);
 
 			} FC_CAPTURE_AND_RETHROW(("auth", auth))
 		}

@@ -7,7 +7,6 @@
 #include <authoritys.hpp>
 
 #include "multi_index_includes.hpp"
-
 namespace Xmaxplatform {
 namespace Chain {
 
@@ -33,14 +32,14 @@ namespace Chain {
 			composite_key<authority_object,
 				member<authority_object, account_name, &authority_object::owner_name>,
 				member<authority_object, authority_name, &authority_object::auth_name>
-			>,
+			>
+		>,
 		ordered_unique<tag<by_name>,
 			composite_key<authority_object,
 				member<authority_object, account_name, &authority_object::owner_name>,
 				member<authority_object, authority_object::id_type, &authority_object::id>
 			>
 		>	
-		>
 		>
 	>;
 }
