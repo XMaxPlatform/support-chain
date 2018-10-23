@@ -26,14 +26,6 @@ namespace Chain {
 	namespace utils
 	{
 
-		const authority_object&  get_authority(const Basechain::database& db, const Basetypes::account_auth& auth)
-		{
-			try {
-				XMAX_ASSERT(!auth.account.empty() && !auth.authority.empty(), authorization_exception, "Invalid permission");
-				return db.get<authority_object, by_owner>(boost::make_tuple(auth.account, auth.authority));
-			} FC_CAPTURE_AND_RETHROW(authorization_exception, "Failed to retrieve permission: ${auth}", ("auth", auth))
-		}
-
 		bool parent_permission_valid(const Basechain::database& db, const authority_object& editor, const authority_object& info)
 		{
 			if (editor.owner_name != info.owner_name)
@@ -176,9 +168,14 @@ namespace Chain {
 
 		}
 
-		void check_authorization(const Basechain::database& db, const std::vector<Basetypes::message>& messages, const flat_set<public_key_type>& keys)
+		void noop_checktime() {}
+
+		static std::function<void()> _noop_checktime{ &noop_checktime };
+
+		void check_authorization(const Basechain::database& db, const std::vector<Basetypes::message>& messages, const flat_set<public_key_type>& keys, const std::function<void()>&  checktime)
 		{
 			//return;
+			const auto& checktimefunc = (static_cast<bool>(checktime) ? checktime : _noop_checktime);
 			for (const Basetypes::message& itr : messages)
 			{
 				const message_xmax& msg = message_xmax::cast(itr);
@@ -213,14 +210,20 @@ namespace Chain {
 				// check custom auth.
 				for (const Basetypes::account_auth& au : msg.authorization)
 				{
+					checktimefunc();
 					if (!special_flag)
 					{
-						optional<authority_name> auth = min_linked_permission(db, au.account, msg.code, msg.type);
+						optional<authority_name> permission = min_linked_permission(db, au.account, msg.code, msg.type);
 
-						aut
+						const authority_object& origin_auth = get_authority_object(db, au);
+						const authority_object& sub_auth = get_authority_object(db, { au.account, *permission });
+
+						XMAX_ASSERT(parent_permission_valid(db, origin_auth, sub_auth), transaction_exception, "error authority");
 					}
+					auto res = satisfys.emplace(au);
 				}
 			}
+
 
 
 

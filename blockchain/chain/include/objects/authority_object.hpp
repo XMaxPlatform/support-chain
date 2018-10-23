@@ -37,9 +37,11 @@ namespace Chain {
 		ordered_unique<tag<by_name>,
 			composite_key<authority_object,
 				member<authority_object, account_name, &authority_object::owner_name>,
-				member<authority_object, authority_name, &authority_object::id>
+				member<authority_object, authority_object::id_type, &authority_object::id>
 			>
 		>	
+		>
+		>
 	>;
 }
 }
