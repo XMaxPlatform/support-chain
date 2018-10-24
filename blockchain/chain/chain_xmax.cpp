@@ -543,7 +543,7 @@ namespace Xmaxplatform { namespace Chain {
 
 				utils::check_gaspayer(_context->block_db, request);
 
-				utils::check_authorization(_context->block_db, request->signed_trx.messages, request->signed_trx.get_signature_keys(_context->config.chain_id));
+				utils::check_authorization(_context->block_db, request->signed_trx.messages, request->signed_trx.get_signature_keys(_context->config.chain_id), nullptr);
 
 				Impl.exec();
 
