@@ -171,11 +171,53 @@ namespace Chain {
 		void noop_checktime() {}
 
 		static std::function<void()> _noop_checktime{ &noop_checktime };
+		static const int max_check_depth = 3;
+		typedef std::set<Basetypes::account_auth> satisfy_dic;
+		typedef flat_set<public_key_type> public_key_dic;
+
+		struct auth_checker
+		{
+			vector<bool>  key_used;
+			const satisfy_dic& sdic;
+			const public_key_dic& pdic;
+			const Basechain::database& db;
+
+			auth_checker(const Basechain::database& _db, const satisfy_dic& _sdic, const public_key_dic& _pdic)
+				: db(_db)
+				, sdic(_sdic)
+				, pdic(_pdic)
+				, key_used(_pdic.size(), false)
+			{
+
+			}
+
+			void check(const Basetypes::account_auth& accauth)
+			{
+				int depth = 0;
+				check_impl(accauth, depth);
+			}
+		private:
+			void check_impl(const Basetypes::account_auth& accauth, int& depth)
+			{
+				const authority_object& authobj = get_authority_object(db, accauth);
+
+				for (const key_permission& keyw : authobj.authoritys.keys)
+				{
+
+				}
+			}
+
+		};
+
+
 
 		void check_authorization(const Basechain::database& db, const std::vector<Basetypes::message>& messages, const flat_set<public_key_type>& keys, const std::function<void()>&  checktime)
 		{
 			//return;
 			const auto& checktimefunc = (static_cast<bool>(checktime) ? checktime : _noop_checktime);
+
+			satisfy_dic satisfys;
+
 			for (const Basetypes::message& itr : messages)
 			{
 				const message_xmax& msg = message_xmax::cast(itr);
@@ -205,8 +247,6 @@ namespace Chain {
 					}
 				}
 
-				std::set<Basetypes::account_auth> satisfys;
-
 				// check custom auth.
 				for (const Basetypes::account_auth& au : msg.authorization)
 				{
@@ -224,9 +264,15 @@ namespace Chain {
 				}
 			}
 
+			// check all satisfys.
 
+			auth_checker checker(db, satisfys, keys);
 
-
+			for (const Basetypes::account_auth& accauth : satisfys)
+			{
+				const authority_object& authobj = get_authority_object(db, accauth);
+				checker.check(accauth);
+			}
 
 
 		}
