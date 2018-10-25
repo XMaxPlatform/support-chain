@@ -153,7 +153,7 @@ namespace Xmaxplatform { namespace Chain {
 
 	   bool check_trx(const transaction_request_ptr& request) const;
 	   transaction_response_ptr apply_transaction(transaction_request_ptr request);
-	   transaction_response_ptr apply_transaction_impl(transaction_request_ptr request);
+	   transaction_response_ptr apply_transaction_impl(transaction_request_ptr request, bool check_auth = true);
 
 	   transaction_response_ptr make_response() const;
 	   transaction_response_ptr make_response(const fc::exception& e) const;
