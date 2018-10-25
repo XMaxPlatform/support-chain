@@ -178,6 +178,7 @@ namespace Chain {
 		struct auth_checker
 		{
 			vector<bool>  key_used;
+			flat_set< std::pair<account_name, authority_name> > aucache;
 			const satisfy_dic& sdic;
 			const public_key_dic& pdic;
 			const Basechain::database& db;
@@ -193,18 +194,48 @@ namespace Chain {
 
 			void check(const Basetypes::account_auth& accauth)
 			{
-				int depth = 0;
+				check_with_depth(accauth, 0);
+			}
+
+		private:
+
+			void check_with_depth(const Basetypes::account_auth& accauth, int depth)
+			{
+				XMAX_ASSERT(depth < max_check_depth, authorization_exception,
+					"depth in check must be less than ${depth}", ("depth", max_check_depth));
+
 				check_impl(accauth, depth);
 			}
-		private:
-			void check_impl(const Basetypes::account_auth& accauth, int& depth)
+
+			void check_impl(const Basetypes::account_auth& accauth, int depth)
 			{
 				const authority_object& authobj = get_authority_object(db, accauth);
+				int current_weight = 0;
+				int threshold = int(authobj.authoritys.threshold);
 
-				for (const key_permission& keyw : authobj.authoritys.keys)
+				// check key permissions.
+				for (const key_permission& wkey : authobj.authoritys.keys)
 				{
-
+					auto itr = pdic.find(wkey.key);
+					if (itr != pdic.end())
+					{
+						current_weight += int(wkey.weight);
+						key_used[itr - pdic.begin()] = true;
+					}
 				}
+				int newdepth = depth + 1;
+				// check account permissions.
+				for (const account_permission& wacc : authobj.authoritys.accounts)
+				{
+					if (aucache.find({ wacc.auth.account, wacc.auth.authority }) == aucache.end())
+					{
+						check_with_depth({ wacc.auth.account, wacc.auth.authority }, newdepth);
+						aucache.insert({ wacc.auth.account, wacc.auth.authority });
+					}
+					current_weight += int(wacc.weight);
+				}
+				XMAX_ASSERT(current_weight >= threshold, authorization_exception,
+					"no enough auth for ${auth}", ("auth", accauth));
 			}
 
 		};
