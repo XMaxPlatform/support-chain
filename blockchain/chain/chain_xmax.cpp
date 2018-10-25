@@ -212,7 +212,7 @@ namespace Xmaxplatform { namespace Chain {
 					signed_trx.scope.assign(scopes.begin(), scopes.end());
 
 					transaction_request_ptr request = std::make_shared<transaction_request>(signed_trx);
-					apply_transaction_impl(request);
+					apply_transaction_impl(request, false);
 				}
 
 				_generate_next_builders();
@@ -535,7 +535,7 @@ namespace Xmaxplatform { namespace Chain {
 			}
 		}
 
-		transaction_response_ptr chain_xmax::apply_transaction_impl(transaction_request_ptr request)
+		transaction_response_ptr chain_xmax::apply_transaction_impl(transaction_request_ptr request, bool check_auth)
 		{
 			try {
 				transaction_response_ptr response;
@@ -543,7 +543,8 @@ namespace Xmaxplatform { namespace Chain {
 
 				utils::check_gaspayer(_context->block_db, request);
 
-				utils::check_authorization(_context->block_db, request->signed_trx.messages, request->signed_trx.get_signature_keys(_context->config.chain_id), nullptr);
+				if (check_auth)
+					utils::check_authorization(_context->block_db, request->signed_trx.messages, request->signed_trx.get_signature_keys(_context->config.chain_id), nullptr);
 
 				Impl.exec();
 
