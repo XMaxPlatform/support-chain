@@ -202,6 +202,14 @@ namespace Chain {
 				check_with_depth(accauth, 0);
 			}
 
+			void check_key_used() const
+			{
+				for (int i = 0; i < key_used.size(); ++i)
+				{
+					XMAX_ASSERT(key_used[i], authorization_exception, "key:'${k}' is not be used.", ("k", (pdic.begin() + i)->operator fc::string()));
+				}
+			}
+
 		private:
 
 			void check_with_depth(const Basetypes::account_auth& accauth, int depth)
