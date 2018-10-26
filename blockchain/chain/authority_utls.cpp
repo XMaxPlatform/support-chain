@@ -284,12 +284,18 @@ namespace Chain {
 					checktimefunc();
 					if (!special_flag)
 					{
+						
 						optional<authority_name> permission = min_linked_permission(db, au.account, msg.code, msg.type);
 
-						const authority_object& origin_auth = get_authority_object(db, au);
-						const authority_object& sub_auth = get_authority_object(db, { au.account, *permission });
+						//wlog("${acc},${per},${per2}", ("acc", au.account.to_string())("per", au.authority.to_string())("per2", permission->to_string()));
 
-						XMAX_ASSERT(parent_permission_valid(db, origin_auth, sub_auth), transaction_exception, "error authority");
+						if (*permission != au.authority)
+						{
+							const authority_object& origin_auth = get_authority_object(db, au);
+							const authority_object& sub_auth = get_authority_object(db, { au.account, *permission });
+
+							XMAX_ASSERT(parent_permission_valid(db, origin_auth, sub_auth), transaction_exception, "error authority");
+						}
 					}
 					auto res = satisfys.emplace(au);
 				}
