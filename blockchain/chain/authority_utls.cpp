@@ -183,13 +183,18 @@ namespace Chain {
 			const public_key_dic& pdic;
 			const Basechain::database& db;
 
+			//vector<string> keystest; // for test.
+
 			auth_checker(const Basechain::database& _db, const satisfy_dic& _sdic, const public_key_dic& _pdic)
 				: db(_db)
 				, sdic(_sdic)
 				, pdic(_pdic)
 				, key_used(_pdic.size(), false)
 			{
-
+				//for (const public_key_type& k : _pdic)
+				//{
+				//	keystest.push_back(k.operator std::string());
+				//}
 			}
 
 			void check(const Basetypes::account_auth& accauth)
@@ -216,6 +221,8 @@ namespace Chain {
 				// check key permissions.
 				for (const key_permission& wkey : authobj.authoritys.keys)
 				{
+
+					//const string ks = wkey.key.operator fc::string(); // for test.. 
 					auto itr = pdic.find(wkey.key);
 					if (itr != pdic.end())
 					{

@@ -162,7 +162,7 @@ void xmax_system_addaccount(message_context_xmax& context) {
 
 		obj.parent = owner_p.id;
 		obj.owner_name = create.name;
-		obj.authoritys = create.owner;
+		obj.authoritys = create.active;
 		obj.last_updated = current_time;
 	});
 
