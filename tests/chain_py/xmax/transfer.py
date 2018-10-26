@@ -14,7 +14,7 @@ SIMPLE_TRANSFER_JSON = '\
 	"type": "transfer",\
 	"authorization": [{\
 		"account": @{from},\
-		"permission": "active"\
+		"authority": "active"\
 	}],\
 	"data": {\
 		"from":@{from},\

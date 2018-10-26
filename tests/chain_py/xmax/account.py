@@ -16,7 +16,7 @@ SIMPLE_NEW_ACCOUNT_JSON = '\
 	"type": "addaccount",\n\
 	"authorization": [{\n\
 		"account": @{trx_acc},\n\
-		"permission": "active"\n\
+		"authority": "active"\n\
 	}],\n\
 	"data": {\n\
 		"creator": @{creator},\n\
