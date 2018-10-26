@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 #! -*- coding:utf-8 -*-
 
 import random
@@ -54,17 +54,17 @@ def transferTest(Acc1, Acc2, amount, count):
     return  
 
 def newAccount(accname, amount):
-        newaccjson = account.newAccountJson(CREATOR_NAME, accname, amount, OWNER_KEY, ACTIVE_KEY)
+    newaccjson = account.newAccountJson(CREATOR_NAME, accname, amount, OWNER_KEY, ACTIVE_KEY)
 
-        scopes = [CREATOR_NAME]
+    scopes = [CREATOR_NAME]
 
-        trxjson = trx.formatTrxJson([newaccjson], scopes)
+    trxjson = trx.formatTrxJson([newaccjson], scopes)
 
-        postjson = trx.formatPostJson([CREATOR_PRI_KEY], [trxjson])
+    postjson = trx.formatPostJson([CREATOR_PRI_KEY], [trxjson])
 
-        print('new account: ' + accname)
+    print('new account: ' + accname)
 
-        rpc.pushTrxRpc(RPC_SERVER_POINT, postjson, False)
+    rpc.pushTrxRpc(RPC_SERVER_POINT, postjson, False)
     return
 
 def getAccount(accname):
